@@ -96,13 +96,13 @@ Follow these steps to set up your development environment to contribute to helpd
 
     make develop
 
- - you can install the requirements for using pinax teams using this commamnd::
-
-    uv  sync  --all-extras --dev --group test --group teams
+ - you can install optional dependencies using the --group option. The `make develop` script installs test dependencies.
+   
+    # This installs pinax teams dependencies for production
+    uv sync --all-extras --group teams
+    # This installs pinax teams dependencies as well as test
+    uv sync --all-extras --dev --group test --group teams
     
- - or teamss without the test files::
-    uv  sync  --all-extras --group teams
-
 
 If you prefer working within an activated virtual environment instead of using the `uv` tool
 then you can use the normal command after the above step for creating the virtualenv to activate it::
