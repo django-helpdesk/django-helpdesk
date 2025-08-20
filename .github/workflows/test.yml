@@ -44,7 +44,7 @@ jobs:
 
       - name: Override Django version with test version ${{ matrix.django-version }}
         run: |
-          uv add --frozen "django~=${{ matrix.django-version }}"
+          uv add "django~=${{ matrix.django-version }}"
           uv run django-admin --version
     
       - name: Install dependencies
