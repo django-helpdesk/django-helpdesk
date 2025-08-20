@@ -51,6 +51,6 @@ jobs:
     
       - name: Run tests
         run: |
-          cd ${GITHUB_WORKSPACE} && uv run --with ${{ matrix.django-version }} python quicktest.py
+          cd ${GITHUB_WORKSPACE} && uv run quicktest.py
         env:
           DJANGO_SETTINGS_MODULE: helpdesk.settings
