@@ -18,7 +18,7 @@ packages = [
     { include="helpdesk", from="." },
 ]
 dependencies = [
-    "django>=3.2",
+    "django>=4.2",
     "django-bootstrap4-form",
     "celery",
     "email-reply-parser",
