@@ -15,10 +15,10 @@ jobs:
         include:
           # Explicitly include Python 3.9 only with Django 4
           - python-version: "3.9"
-            django-version: "4"
+            django-version: "4.2"
             # Define the general matrix for Python with Django 
-        python-version: ["3.10", "3.11", "3.12"]
-        django-version: ["4", "5"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        django-version: ["4.2", "5.0", "5.1", "5.2"]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,14 +39,16 @@ jobs:
           path: ~/.cache/pip
           key: ${{ hashFiles('pyproject.toml') }}-${{ matrix.python-version }}-${{ matrix.django-version }} 
 
+      - name: Override Django version with test version ${{ matrix.django-version }}
+        run: |
+          uv add --frozen "django~=${{ matrix.django-version }}"
+          uv run django-admin --version
+    
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          make develop
-    
-      - name: Cross check Django version with expected version ${{ matrix.django-version }}
-        run: |
-          django-admin --version
+          uv venv
+          make sync
     
       - name: Run Lint and formatting checks
         run: |
