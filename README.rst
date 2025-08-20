@@ -43,7 +43,7 @@ or with docker::
     docker run --rm -v "$PWD:/app" -p 8080:8080 demodesk
 
 then pointing your web browser at http://localhost:8080 (log in as user
-`admin` with password `Pa33w0rd`).
+`admin` with password `Pa33w0rd`, defined in the `demo.json` fixture file).
 
 For more information and options, please read the `demo/README.rst` file.
 
