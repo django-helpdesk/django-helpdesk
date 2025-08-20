@@ -25,10 +25,15 @@ Demo Quickstart
 
 `django-helpdesk` includes a basic demo Django project so that you may easily
 get started with testing or developing `django-helpdesk`. The demo project
-resides in the `demo/` top-level folder.
+resides in the `demodesk/` top-level folder.
 
-It's likely that you can start up a demo project server by running
-only the command (consider creating a virtualenv before):
+You will need to install the `uv` package manager to simplify setting up the demo:
+    https://docs.astral.sh/uv/getting-started/installation/
+
+If you have not already created a virtual environment then run this command:
+    uv venv
+
+To start up a demo project server, run this command:
 
     make rundemo
 
@@ -38,7 +43,7 @@ or with docker::
     docker run --rm -v "$PWD:/app" -p 8080:8080 demodesk
 
 then pointing your web browser at http://localhost:8080 (log in as user
-`admin`` with password `Test1234`).
+`admin` with password `Pa33w0rd`).
 
 For more information and options, please read the `demo/README.rst` file.
 
@@ -71,29 +76,41 @@ Installation
 
 Developer Environment
 ---------------------
+The project uses the modern `uv` package manager: https://docs.astral.sh/uv/
+There are a number of options that make life a lot easier in the Makefile.
+To see option for the Makefile run: `make`
 
 Follow these steps to set up your development environment to contribute to helpdesk:
  - check out the helpdesk app to your local file system::
 
     git clone https://github.com/django-helpdesk/django-helpdesk.git
  
- - install a virtual environment and activate it::
+ - Install the `uv` package manager::
+    https://docs.astral.sh/uv/getting-started/installation/
+
+ - install a virtual environment ::
   
-    python -m venv .venv && source .venv/bin/activate
+    uv venv
 
  - install the requirements for development::
 
-    pip install -r requirements.txt -r requirements-dev.txt
+    make develop
 
- - you can install the requirements for testing as well::
+ - you can install the requirements for using pinax teams using this commamnd::
 
-    pip install -r requirements-testing.txt
+    uv  sync  --all-extras --dev --group test --group teams
+    
+ - or teamss without the test files::
+    uv  sync  --all-extras --group teams
 
-To deactivate the virtual environment, use ``deactivate``. Then to reactivate it, just run::
 
+If you prefer working within an activated virtual environment instead of using the `uv` tool
+then you can use the normal command after the above step for creating the virtualenv to activate it::
+  
     source .venv/bin/activate
 
-To see option for the Makefile run: `make`
+ - or depending on your sheel it might be:
+    . .venv/bin/activate
 
 The project enforces a standardized formatting in the CI/CD pipeline. To ensure you have the correct formatting run::
 
@@ -106,12 +123,20 @@ To auto format any code use this::
 Testing
 -------
 
-From the command line you can run the tests using: `make test`
+From the command line you can run all the tests using: `make test`
+
+To run specific tests then run quicktest.py with arguments in an activated virtualenv or use this:
+    uv run quicktest.py <arg>
 
 See `quicktest.py` for usage details.
 
-If you need to create tests for new features, add your tests in a test file to the `tests` module and call them in the test VENV with::
+If you need to create tests for new features, add your tests in a test file to the `tests` module::
+
+ - from an activated virtualenv use::
     python quicktest.py helpdesk.tests.test_my_new_features -v 2
+
+ - whether a virtualenv is activated or not you can use this command::
+    uv run quicktest.py helpdesk.tests.test_my_new_features -v 2
 
 Upgrading from previous versions
 --------------------------------
@@ -125,9 +150,6 @@ migrations, get an up to date version of the code base (eg by using
 
 Lastly, restart your web server software (eg Apache) or FastCGI instance, to
 ensure the latest changes are in use.
-
-Unfortunately we are unable to assist if you are upgrading from a
-version of `django-helpdesk` prior to migrations (ie pre-2011).
 
 You can continue to the 'Initial Configuration' area, if needed.
 
