@@ -44,6 +44,10 @@ jobs:
           python -m pip install --upgrade pip
           make develop
     
+      - name: Cross check Django version with expected version ${{ matrix.django-version }}
+        run: |
+          django-admin --version
+    
       - name: Run Lint and formatting checks
         run: |
           make checkformat
