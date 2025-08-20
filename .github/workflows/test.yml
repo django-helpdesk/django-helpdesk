@@ -16,8 +16,11 @@ jobs:
           # Explicitly include Python 3.9 only with Django 4
           - python-version: "3.9"
             django-version: "4.2"
-            # Define the general matrix for Python with Django 
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+          # Explicitly include Python 3.13 only with Django 5.2
+          - python-version: "3.13"
+            django-version: "5.2"
+        # Define the general matrix for Python with Django 
+        python-version: ["3.10", "3.11", "3.12"]
         django-version: ["4.2", "5.0", "5.1", "5.2"]
     steps:
       - uses: actions/checkout@v4
