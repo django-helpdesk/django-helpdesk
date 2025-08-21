@@ -13,6 +13,9 @@ jobs:
     strategy:
       matrix:
         include:
+          # Explicitly include Python 3.9 only with Django 4.2
+          - python-version: "3.9"
+            django-version: "4.2"
           # Explicitly include Python 3.13 only with Django 5.2
           - python-version: "3.13"
             django-version: "5.2"
@@ -39,11 +42,6 @@ jobs:
           path: ~/.cache/pip
           key: ${{ hashFiles('pyproject.toml') }}-${{ matrix.python-version }}-${{ matrix.django-version }} 
 
-      - name: Override Django version with test version ${{ matrix.django-version }}
-        run: |
-          uv add "django~=${{ matrix.django-version }}"
-          uv run django-admin --version
-    
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -57,6 +55,6 @@ jobs:
     
       - name: Run tests
         run: |
-          cd ${GITHUB_WORKSPACE} && uv run quicktest.py
+          cd ${GITHUB_WORKSPACE} && uv run --with django~=${{ matrix.django-version }} quicktest.py
         env:
           DJANGO_SETTINGS_MODULE: helpdesk.settings
