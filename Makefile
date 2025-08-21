@@ -26,7 +26,7 @@ develop:
 	$(UV) tool install pre-commit --with pre-commit-uv --force-reinstall
 	pre-commit install
 
-#: sync - Synchronise the envoronment with the project configuration
+#: sync - Synchronize the environment with the project configuration
 .PHONY: sync
 sync:
 	$(UV) sync --all-extras --dev --group test
