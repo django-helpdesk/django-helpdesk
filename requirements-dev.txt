@@ -1,5 +1,0 @@
-tox
-ruff
-pycodestyle
-isort
-freezegun
