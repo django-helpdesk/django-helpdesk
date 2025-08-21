@@ -109,7 +109,7 @@ then you can use the normal command after the above step for creating the virtua
   
     source .venv/bin/activate
 
- - or depending on your sheel it might be:
+ - or depending on your shell it might be:
     . .venv/bin/activate
 
 The project enforces a standardized formatting in the CI/CD pipeline. To ensure you have the correct formatting run::
