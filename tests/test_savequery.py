@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from helpdesk.models import Queue
-from helpdesk.tests.helpers import get_user
+from .helpers import get_user
 
 
 class TestSavingSharedQuery(TestCase):

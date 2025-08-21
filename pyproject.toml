@@ -1,3 +1,108 @@
+[project]
+name = "django-helpdesk"
+version = "2.0.0"
+description = "Django-powered ticket tracker for your helpdesk"
+authors = [
+    {name = "Ross Poulton", email = "ross@rossp.org"},
+]
+requires-python = ">=3.9"
+readme = "README.rst"
+license = {text = "BSD3"}
+keywords = ["django", "helpdesk", "django-helpdesk", "tickets", "incidents", "cases", "bugs", "track", "support"]
+maintainers = [
+    {name = "Christopher Broderick", email = "uhurusurfa@gmail.com"},
+    {name = "David Vadnais - Github@DavidVadnais"},
+    {name = "Ben - Github:@Benbb96"},
+]
+packages = [
+    { include="helpdesk", from="." },
+]
+dependencies = [
+    "django>=5; python_version>='3.10'",
+    "django<5; python_version<'3.10'",
+    "django-bootstrap4-form",
+    "celery",
+    "email-reply-parser",
+    "akismet",
+    "markdown",
+    "beautifulsoup4",
+    "lxml",
+    "pytz",
+    "djangorestframework",
+    "django-model-utils",
+    "django-cleanup",
+    "oauthlib",
+    "requests-oauthlib",
+    "requests",
+    "requests_oauthlib",
+    "setuptools",
+    "numpy>=2.0.2",
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.0",
+    "Framework :: Django :: 5.0",
+    "Intended Audience :: Customer Service",
+    "License :: OSI Approved :: BSD-3 License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Bug Tracking",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.optional-dependencies]
+teams = [
+    "pinax_teams",
+]
+
+[dependency-groups]
+teams = [
+    "pinax-invitations>=8.0.0",
+    "pinax-teams>=3.0.0",
+]
+test = [
+    "argparse>=1.4.0",
+    "coverage>=7.10.4",
+    "factory-boy>=3.3.3",
+    "faker>=37.5.3",
+    "freezegun>=1.5.5",
+    "isort>=6.0.1",
+    "mock>=5.2.0",
+    "pbr>=7.0.0",
+    "pillow>=11.3.0",
+    "pysocks>=1.7.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/django-helpdesk/django-helpdesk"
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.build]
+package-dir = "src"
+includes = ["src", "src/helpdesk"]
+excludes = [
+    ".venv",
+    "tests",
+]
+
 [tool.ruff]
-[tool.ruff.lint]
-ignore = []
+exclude = [".venv", "migrations", "docs", "src/helpdesk/static", "src/helpdesk/template*"]
+
+[project.scripts]
+demodesk = "demodesk.manage:main"
+

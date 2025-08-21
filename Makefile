@@ -5,6 +5,7 @@
 #
 # For details about how to develop django-helpdesk,
 # see CONTRIBUTING.rst.
+UV = uv
 PIP = pip3
 TOX = tox
 
@@ -20,7 +21,15 @@ help:
 #: develop - Install minimal development utilities for Python3.
 .PHONY: develop
 develop:
-	$(PIP) install -e .
+	$(UV) venv
+	$(UV) sync --all-extras --dev --group test
+	$(UV) tool install pre-commit --with pre-commit-uv --force-reinstall
+	pre-commit install
+
+#: sync - Synchronize the environment with the project configuration
+.PHONY: sync
+sync:
+	$(UV) sync --all-extras --dev --group test
 
 
 #: clean - Basic cleanup, mostly temporary files.
@@ -53,25 +62,21 @@ maintainer-clean: distclean
 #: test - Run test suites.
 .PHONY: test
 test:
-	mkdir -p var
-	$(PIP) install -e .[test]
-	$(TOX)
-	rm -rf var
+	$(UV) run quicktest.py
 	
-
 
 #: format - Run the PEP8 formatter.
 .PHONY: format
 format:
-	ruff check --fix # Fix linting errors
-	ruff format # fix formatting errors
+	uv tool run ruff check --fix # Fix linting errors
+	uv tool run ruff format # fix formatting errors
 
 
 #: checkformat - checks formatting against configured format specifications for the project.
 .PHONY: checkformat
 checkformat:
-	ruff check # linting check
-	ruff format --check # format check
+	uv tool run ruff check # linting check
+	uv tool run ruff format --check # format check
 
 
 #: documentation - Build documentation (Sphinx, README, ...).
@@ -91,35 +96,27 @@ readme:
 	$(TOX) -e readme
 
 
-PY ?= from django.contrib.auth import get_user_model;print(1 if get_user_model().objects.filter(username="admin").exists() else 0)
-NO_USER ?= $(shell demodesk shell -c '${PY}' --no-imports)
 #: demo - Setup demo project using Python3.
+# Requires using the PYTHONPATH prefix because the project directory is not set in the path
 .PHONY: demo
 demo:
-	# running it with and without --user flag because it started to be problematic for some setups
-	$(PIP) install -e . --user || $(PIP) install -e .
-	$(PIP) install -e demo --user || $(PIP) install -e demo
-	demodesk migrate --noinput
-	# Create superuser "admin" if it is not already created.
-	# Script will prompt user to manually set a password.
-	# When you get a prompt, enter a password of your choosing.
-	# We suggest a default of 'Test1234' for the demo project.
-	
-	@if [ $(NO_USER) -eq 0 ]; then demodesk createsuperuser --username admin --email helpdesk@example.com; fi
+	uv  sync  --all-extras --dev --group test --group teams
+	uv run demodesk/manage.py migrate --noinput
 	# Install fixtures
-	demodesk loaddata emailtemplate.json
-	demodesk loaddata demo.json
+	uv run demodesk/manage.py loaddata emailtemplate.json
+	# The password for the "admin" user is 'Pa33w0rd' for the demo project.
+	uv run demodesk/manage.py loaddata demo.json
 
 
 #: rundemo - Run demo server using Python3.
 .PHONY: rundemo
 rundemo: demo
-	demodesk runserver 8080
+	uv run demodesk/manage.py runserver 8080
 	
 #: migrations - Create Django migrations for this project.
 .PHONY: migrations
 migrations: demo
-	    demodesk makemigrations
+	uv run demodesk/manage.py makemigrations
 
 
 #: release - Tag and push to PyPI.

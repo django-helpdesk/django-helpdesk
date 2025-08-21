@@ -13,6 +13,8 @@ from django.conf import settings
 import os
 import sys
 
+print(f"Running tests using Django version {django.get_version()}...")
+
 
 class QuickDjangoTest:
     """
@@ -98,7 +100,7 @@ class QuickDjangoTest:
             },
             INSTALLED_APPS=self.INSTALLED_APPS,
             MIDDLEWARE=self.MIDDLEWARE,
-            ROOT_URLCONF="helpdesk.tests.urls",
+            ROOT_URLCONF="tests.urls",
             STATIC_URL="/static/",
             LOGIN_URL="/login/",
             TEMPLATES=self.TEMPLATES,
@@ -138,5 +140,5 @@ if __name__ == "__main__":
     parser.add_argument("--verbosity", "-v", nargs="?", type=int, default=1)
     args = parser.parse_args()
     if not args.tests:
-        args.tests = ["helpdesk"]
+        args.tests = ["."]
     QuickDjangoTest(*args.tests, verbosity=args.verbosity)

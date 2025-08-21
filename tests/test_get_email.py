@@ -22,7 +22,7 @@ from helpdesk.models import (
     Ticket,
     TicketCC,
 )
-from helpdesk.tests import utils
+from . import utils
 import itertools
 import logging
 from mock.mock import patch
