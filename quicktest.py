@@ -13,6 +13,8 @@ from django.conf import settings
 import os
 import sys
 
+print(f"Running tests using Django version {django.get_version()}...")
+
 
 class QuickDjangoTest:
     """
