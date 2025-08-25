@@ -8,7 +8,14 @@ RUN apt-get install -yqq \
    cron \
    git
 
-COPY django-helpdesk/src django-helpdesk/standalone django-helpdesk/pyproject.toml django-helpdesk/README.rst /opt/django-helpdesk
+# Copy directories
+COPY django-helpdesk/src/ /opt/django-helpdesk/src/
+COPY django-helpdesk/standalone/ /opt/django-helpdesk/standalone/
+
+# Copy files
+COPY django-helpdesk/pyproject.toml /opt/django-helpdesk/
+COPY django-helpdesk/README.rst /opt/django-helpdesk/
+
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 RUN pip3 install --upgrade pip
 RUN pip3 install packaging
