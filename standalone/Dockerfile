@@ -21,9 +21,14 @@ RUN pip3 install --upgrade pip
 RUN pip3 install packaging
 WORKDIR /opt/django-helpdesk
 ENV UV_SYSTEM_PYTHON=1
-RUN uv sync 
+RUN uv sync
 RUN uv pip install -r /opt/django-helpdesk/standalone/requirements.txt
-RUN DJANGO_HELPDESK_SECRET_KEY=foo python3 standalone/manage.py collectstatic
+
+WORKDIR /opt/django-helpdesk/standalone
+ENV DJANGO_SETTINGS_MODULE=standalone.config.settings
+ENV PYTHONPATH=/opt/django-helpdesk/src:/opt/django-helpdesk
+
+RUN DJANGO_HELPDESK_SECRET_KEY=foo python3 manage.py collectstatic --noinput
 
 RUN echo "* * * * * root . /etc/env && /usr/local/bin/python3 /opt/django-helpdesk/standalone/manage.py get_email >> /var/log/cron.log 2>&1" > /etc/crontab
 RUN chmod 0644 /etc/crontab
