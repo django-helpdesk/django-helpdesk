@@ -639,7 +639,7 @@ class Ticket(models.Model):
         """
         Send notifications to everyone interested in this ticket.
 
-        The the roles argument is a dictionary mapping from roles to (template, context) pairs.
+        The roles argument is a dictionary mapping from roles to (template, context) pairs.
         If a role is not present in the dictionary, users of that type will not receive the notification.
 
         The following roles exist:
