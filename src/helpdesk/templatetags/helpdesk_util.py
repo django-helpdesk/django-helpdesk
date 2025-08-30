@@ -2,7 +2,7 @@ from datetime import datetime
 from django.conf import settings
 from django.template import Library
 from django.template.defaultfilters import date as date_filter
-from helpdesk.forms import (
+from helpdesk.settings import (
     CUSTOMFIELD_DATE_FORMAT,
     CUSTOMFIELD_DATETIME_FORMAT,
     CUSTOMFIELD_TIME_FORMAT,
