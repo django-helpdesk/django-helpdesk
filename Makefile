@@ -45,10 +45,9 @@ clean:
 distclean: clean
 	rm -rf *.egg
 	rm -rf *.egg-info
-	rm -rf demo/*.egg-info
-	rm -rf helpdesk/attachments/
+	rm -rf helpdesk/attachments
 	# remove the django-created database
-	rm -f demo/demodesk/*.sqlite3
+	rm -f demodesk/*.sqlite3
 
 
 #: maintainer-clean - Remove almost everything that can be re-generated.
@@ -101,22 +100,22 @@ readme:
 .PHONY: demo
 demo:
 	uv  sync  --all-extras --dev --group test --group teams
-	uv run demodesk/manage.py migrate --noinput
+	uv run manage.py migrate --noinput
 	# Install fixtures
-	uv run demodesk/manage.py loaddata emailtemplate.json
+	uv run manage.py loaddata emailtemplate.json
 	# The password for the "admin" user is 'Pa33w0rd' for the demo project.
-	uv run demodesk/manage.py loaddata demo.json
+	uv run manage.py loaddata demo.json
 
 
 #: rundemo - Run demo server using Python3.
 .PHONY: rundemo
 rundemo: demo
-	uv run demodesk/manage.py runserver 8080
+	uv run manage.py runserver 8080
 	
 #: migrations - Create Django migrations for this project.
 .PHONY: migrations
 migrations: demo
-	uv run demodesk/manage.py makemigrations
+	uv run manage.py makemigrations
 
 
 #: release - Tag and push to PyPI.

@@ -60,7 +60,7 @@ before running::
 
 The folder:
 
-    demo/demodesk/media/helpdesk/attachments
+    demodesk/media/helpdesk/attachments
 
 comes pre-populated with a couple of attachments,
 to demo how django-helpdesk deals with attachments.
@@ -76,7 +76,7 @@ The demodesk project
 
 "demodesk" is the name of our demo Django project.
 
-You probably will want to look at demo/demodesk/config/settings.py
+You probably will want to look at demodesk/config/settings.py
 and read the comments, which walk you through a basic
 installation with common configuration options.
 
