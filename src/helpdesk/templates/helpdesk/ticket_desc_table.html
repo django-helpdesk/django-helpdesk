@@ -143,6 +143,7 @@
                         </td>
                         <th class="table-active">{% trans "Copies To" %}</th>
                         <td>
+                          {% if ticket.queue.enable_notifications_on_email_events %}
                             {{ ticketcc_string }}
                             <a class="btn btn-warning btn-sm float-right" data-toggle='tooltip' href='{% url 'helpdesk:ticket_cc' ticket.id %}' title='{% trans "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'>
                                 <i class="fa fa-share"></i>
@@ -152,6 +153,9 @@
                                     <i class="fas fa-rss-square"></i>
                                 </a>
                             {% endif %}
+                          {% else %}
+                            <p class="btn btn-info btn-sm" data-toggle='tooltip' title='{% trans "Assigned queue does not have CC notifications enabled." %}'>{% trans "Disabled" %}</p>
+                          {% endif %}
                         </td>
                     </tr>
 
