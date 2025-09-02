@@ -1,13 +1,13 @@
 [project]
 name = "django-helpdesk"
-version = "2.0.0"
+version = "2.0.1"
 description = "Django-powered ticket tracker for your helpdesk"
 authors = [
     {name = "Ross Poulton", email = "ross@rossp.org"},
 ]
 requires-python = ">=3.9"
 readme = "README.rst"
-license = {text = "BSD3"}
+license = {text = "BSD-3-Clause"}
 keywords = ["django", "helpdesk", "django-helpdesk", "tickets", "incidents", "cases", "bugs", "track", "support"]
 maintainers = [
     {name = "Christopher Broderick", email = "uhurusurfa@gmail.com"},
@@ -46,7 +46,7 @@ classifiers = [
     "Framework :: Django :: 4.0",
     "Framework :: Django :: 5.0",
     "Intended Audience :: Customer Service",
-    "License :: OSI Approved :: BSD-3 License",
+    "License :: OSI Approved :: BSD-3-Clause License",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
