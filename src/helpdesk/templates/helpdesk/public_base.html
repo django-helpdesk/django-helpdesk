@@ -16,7 +16,9 @@
     {% include "helpdesk/navigation-header.html" %}
 
     <div id="wrapper">
-        {% include "helpdesk/navigation-sidebar.html" %}
+        {% if request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'logged_out' and request.resolver_match.url_name != 'logout' %}
+            {% include 'helpdesk/navigation-sidebar.html' %}
+        {% endif %}
 
         <div id="content-wrapper">
 

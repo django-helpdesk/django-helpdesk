@@ -1,0 +1,24 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["Build and Push Docker Image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            echo '${{ secrets.DOCKER_HUB_PASS }}' | docker login -u transvolt1 --password-stdin
+            docker pull transvolt1/django-helpdesk:latest
+            # docker stop helpdesk || true
+            # docker rm helpdesk || true
+            docker run -d --name helpdesk -p 8000:8000 transvolt1/django-helpdesk:latest

@@ -171,6 +171,18 @@ class CreateTicketView(BaseCreateTicketView):
 class Homepage(CreateTicketView):
     template_name = "helpdesk/public_homepage.html"
 
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseRedirect(reverse("helpdesk:login"))
+        # Admins and staff go to My Tickets
+        if request.user.is_staff or request.user.is_superuser:
+            return HttpResponseRedirect(reverse("helpdesk:list"))
+        # Regular active users go to New Ticket
+        if request.user.is_active:
+            return HttpResponseRedirect(reverse("helpdesk:submit"))
+        # Fallback: show homepage
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["kb_categories"] = huser_from_request(
