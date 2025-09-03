@@ -19,6 +19,4 @@ jobs:
           script: |
             echo '${{ secrets.DOCKER_HUB_PASS }}' | docker login -u transvolt1 --password-stdin
             docker pull transvolt1/django-helpdesk:latest
-            # docker stop helpdesk || true
-            # docker rm helpdesk || true
             docker run -d --name helpdesk -p 8000:8000 transvolt1/django-helpdesk:latest
