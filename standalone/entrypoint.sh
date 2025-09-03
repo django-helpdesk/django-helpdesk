@@ -12,7 +12,8 @@ fi
 # Starting cron to check emails
 printenv > /etc/env
 env | awk -F= '{printf "export %s=\"%s\"\n", $1, $2}' > /etc/env
-cron &&
+cron
+
 # Start Gunicorn processes
 echo Starting Gunicorn.
 exec gunicorn standalone.config.wsgi:application \

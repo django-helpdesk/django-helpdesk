@@ -18,7 +18,9 @@ services:
       - "443:443"
 
   django-helpdesk:
-    image: djangohelpdesk/standalone
+    build:
+      context: ..
+      dockerfile: standalone/Dockerfile
     user: root
     volumes:
       - helpdesk_data:/data
