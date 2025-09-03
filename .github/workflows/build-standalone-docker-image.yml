@@ -14,26 +14,26 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Log in to Docker Hub
-      run: echo '${{ secrets.DOCKER_HUB_PASS }}' | docker login -u djangohelpdesk --password-stdin
+      run: echo '${{ secrets.DOCKER_HUB_PASS }}' | docker login -u transvolt1 --password-stdin
 
     - name: Build Docker image
-      run: docker build --file standalone/Dockerfile -t djangohelpdesk/standalone:latest ..
+      run: docker build -f standalone/Dockerfile -t transvolt1/django-helpdesk:latest .
 
-    - name: Build extras Docker image
-      run: docker build --file standalone/Dockerfile.extras -t djangohelpdesk/standalone-extras:latest ..
+    # - name: Build extras Docker image
+    #   run: docker build --file standalone/Dockerfile.extras -t djangohelpdesk/standalone-extras:latest ..
 
     - name: Push Docker image
-      run: docker push djangohelpdesk/standalone:latest
+      run: docker push transvolt1/django-helpdesk:latest
 
-    - name: Push extras Docker image
-      run: docker push djangohelpdesk/standalone-extras:latest
+    # - name: Push extras Docker image
+    #   run: docker push djangohelpdesk/standalone-extras:latest
 
     - name: Tag and push Docker image with year, month and Git SHA
-      run: docker tag djangohelpdesk/standalone:latest djangohelpdesk/standalone:$(date +%Y-%m)-$(git rev-parse --short HEAD) ; docker push djangohelpdesk/standalone:$(date +%Y-%m)-$(git rev-parse --short HEAD)
+      run: docker tag transvolt1/django-helpdesk:latest transvolt1/django-helpdesk:$(date +%Y-%m)-$(git rev-parse --short HEAD) ; docker push transvolt1/django-helpdesk:$(date +%Y-%m)-$(git rev-parse --short HEAD)
 
-    - name: Tag and push extras Docker image with year, month and Git SHA
-      run: docker tag djangohelpdesk/standalone-extras:latest djangohelpdesk/standalone-extras:$(date +%Y-%m)-$(git rev-parse --short HEAD) ; docker push djangohelpdesk/standalone-extras:$(date +%Y-%m)-$(git rev-parse --short HEAD)
+    # - name: Tag and push extras Docker image with year, month and Git SHA
+    #   run: docker tag djangohelpdesk/standalone-extras:latest djangohelpdesk/standalone-extras:$(date +%Y-%m)-$(git rev-parse --short HEAD) ; docker push djangohelpdesk/standalone-extras:$(date +%Y-%m)-$(git rev-parse --short HEAD)
 
-    - name: If we are at a tag, add a tag to the current docker image push the image with the tag
+    - name: If we are at a tag, add a tag to the current docker image and push the image with the tag
       if: startsWith(github.ref, 'refs/tags/')
-      run: docker tag djangohelpdesk/standalone:latest djangohelpdesk/standalone:${{ github.ref }} ; docker push djangohelpdesk/standalone:${{ github.ref }}
+      run: docker tag transvolt1/django-helpdesk:latest transvolt1/django-helpdesk:${GITHUB_REF#refs/tags/} ; docker push transvolt1/django-helpdesk:${GITHUB_REF#refs/tags/}
