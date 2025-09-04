@@ -4,21 +4,36 @@
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="#">{% trans "Tickets" %}</a>
+        <a href="#" class="text-blue-500 hover:underline">{% trans "Tickets" %}</a>
     </li>
     <li class="breadcrumb-item active">{% trans "Create Ticket" %}</li>
 {% endblock %}
 
 {% block helpdesk_head %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .navbar .user-options {
+    margin-left: auto;
+    position: absolute;
+    right: 0;
+  }
+</style>
 {% endblock %}
 
 {% block helpdesk_body %}
-    <div class="container">
-        <div class="card card-register mx-auto mt-5">
-            <div class="card-header">{% trans "Submit a Tickettttt" %}</div>
-            <div class="card-body">
-                <p>
-                    {% trans "Unless otherwiseeee stated, all fields are required." %}
+    <div class="max-w-3xl mx-auto mt-10">
+        <div class="bg-white shadow rounded-lg">
+            <div class="bg-blue-800 text-white text-lg font-bold p-4 rounded-t-lg">
+                {% trans "Submit a Ticket" %}
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700 mb-4">
+                    {% trans "Unless otherwise stated, all fields are required." %}
                     {% trans "Please provide as descriptive a title and description as possible." %}
                 </p>
 
@@ -32,39 +47,35 @@
                         {% if field.is_hidden %}
                             {{ field }}
                         {% else %}
-                            <div class="form-group">
-                                <label for='id_{{ field.name }}'>
+                            <div class="mb-6">
+                                <label for='id_{{ field.name }}' class="block text-sm font-medium text-gray-700">
                                     {{ field.label }}
                                     {% if not field.field.required %}
-                                        ({% trans "Optional" %})
+                                        <span class="text-gray-500">({% trans "Optional" %})</span>
                                     {% endif %}
                                 </label>
                                 {{ field }}
                                 {% if field.errors %}
-                                    <small class='error'>{{ field.errors }}</small>
+                                    <small class='text-red-500'>{{ field.errors }}</small>
                                 {% endif %}
                                 {% if field.help_text %}
-                                    <small class='form_help_text help-block'>{% trans field.help_text %}</small>
+                                    <small class='text-gray-500'>{% trans field.help_text %}</small>
                                 {% endif %}
                             </div>
                         {% endif %}
                     {% endfor %}
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    <button type="submit" class="w-full bg-blue-800 text-white py-2 px-4 rounded-md shadow hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-800 focus:ring-offset-2">
                         <i class="fa fa-send"></i> {% trans "Submit Ticket" %}
                     </button>
                 </form>
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block helpdesk_js %}
     {{ form.media.js }}
     <script>
-        // this function listens for changes on any file input, and
-        // emits the appropriate event to update the input's text.
-        // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
         $(document).on('change', ':file', function () {
             const input = $(this),
                 inputWidgetNum = $(this).attr('id').split("file")[1],
