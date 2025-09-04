@@ -74,6 +74,7 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         transition: border-color 0.2s;
+        height: auto !important;
     }
     
     .form-control:focus {
@@ -88,6 +89,15 @@
         background-repeat: no-repeat;
         background-position: right 0.75rem center;
         background-size: 16px 12px;
+        padding-right: 2rem;
+        text-overflow: ellipsis;
+    }
+    
+    /* Fix for dropdown visibility */
+    select option {
+        background-color: white;
+        color: #333;
+        padding: 6px;
     }
     
     textarea.form-control {
@@ -150,6 +160,29 @@
         margin-right: 8px;
     }
     
+    /* Select and dropdown fixes */
+    .select-wrapper {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+    
+    select.form-control {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Override any conflicting styles */
+    #id_queue, #id_priority {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 0.75rem !important;
+        font-size: 1rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .ticket-form-container {
@@ -175,12 +208,7 @@
                 {% trans "Submit a Ticket" %}
             </div>
             <div class="form-body">
-                <div class="form-intro">
-                    <p>
-                        {% trans "Unless otherwise stated, all fields are required." %}
-                        {% trans "Please provide as descriptive a title and description as possible." %}
-                    </p>
-                </div>
+                
 
                 {% if form.errors %}
                     {% include 'helpdesk/include/alert_form_errors.html' %}
@@ -204,7 +232,13 @@
                                                     <span class="text-muted">({% trans "Optional" %})</span>
                                                 {% endif %}
                                             </label>
-                                            {{ field }}
+                                            <div class="select-wrapper">
+                                                <select name="{{ field.name }}" id="id_{{ field.name }}" class="form-control">
+                                                    {% for choice in field.field.choices %}
+                                                    <option value="{{ choice.0 }}" {% if field.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
                                             {% if field.errors %}
                                                 <div class='form-error'>{{ field.errors }}</div>
                                             {% endif %}
@@ -280,7 +314,29 @@
                                         {% endif %}
                                     </label>
                                     <div class="file-upload">
-                                        {{ field }}
+                                        <input type="file" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control">
+                                    </div>
+                                    {% if field.errors %}
+                                        <div class='form-error'>{{ field.errors }}</div>
+                                    {% endif %}
+                                    {% if field.help_text %}
+                                        <small class='form-help'>{% trans field.help_text %}</small>
+                                    {% endif %}
+                                </div>
+                            {% elif field.name == 'priority' %}
+                                <div class="form-group">
+                                    <label for='id_{{ field.name }}' class="form-label">
+                                        {{ field.label }}
+                                        {% if not field.field.required %}
+                                            <span class="text-muted">({% trans "Optional" %})</span>
+                                        {% endif %}
+                                    </label>
+                                    <div class="select-wrapper">
+                                        <select name="{{ field.name }}" id="id_{{ field.name }}" class="form-control">
+                                            {% for choice in field.field.choices %}
+                                            <option value="{{ choice.0 }}" {% if field.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
                                     {% if field.errors %}
                                         <div class='form-error'>{{ field.errors }}</div>
