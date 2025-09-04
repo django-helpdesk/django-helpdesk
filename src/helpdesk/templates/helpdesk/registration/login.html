@@ -19,18 +19,20 @@
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         background: #f6f8fa;
         z-index: 9999;
+        padding-bottom: 80px; /* Make space for the footer */
       }
       .login-card {
-        width: 100vw;
-        height: 100vh;
-        max-width: 420px;
-        max-height: 420px;
+        width: 120vw;
+        height: 120vh;
+        max-width: 480px;
+        max-height: 480px;
         background: #fff;
-        box-shadow: 0 8px 32px rgba(30,40,80,0.10);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
         padding: 0;
         border-radius: 0;
         display: flex;
@@ -50,27 +52,28 @@
         font-size: 1.7rem;
         vertical-align: middle;
         margin-right: 0.5rem;
-        color: #ffd700;
+        color: #4caf50;
       }
       .login-header h2 {
         font-size: 1.3rem;
         font-weight: 600;
         letter-spacing: 1px;
-        color: #fff;
+        color: #183b6b;
         margin: 0;
       }
       .login-body {
-        padding: 2rem 1.5rem;
+        padding: 2.5rem 2rem;
         flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
       }
       .login-label {
-        font-weight: 500;
+        font-weight: 700; /* Increased from 500 to 700 */
         margin-bottom: 0.3rem;
         display: block;
         color: #183b6b;
+        font-size: 1.05rem; /* Slightly larger */
       }
       .login-input {
         width: 100%;
@@ -115,10 +118,62 @@
         font-size: 0.98rem;
         animation: shakeX 0.5s;
       }
+      .main-title {
+        font-size: 3.5rem; /* Increased from 3rem */
+        font-weight: 700;
+        color: #183b6b;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        letter-spacing: 2px;
+      }
+      .main-title span.volt {
+        color: #4caf50;
+        position: relative;
+      }
+      .support-text {
+        color: #183b6b;
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-top: -1rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      /* Footer styles */
+      footer.sticky-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #183b6b !important;
+        border-top: 2px solid #ffd700;
+        padding: 1rem 0;
+        z-index: 9999;
+      }
+      
+      footer.sticky-footer .copyright {
+        color: #ffffff;
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+      }
+      
+      footer.sticky-footer a {
+        color: #ffd700;
+        text-decoration: none;
+      }
+      
+      footer.sticky-footer a:hover {
+        text-decoration: underline;
+      }
+      
       @keyframes fadeIn {from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
       @keyframes shakeX {10%,90%{transform:translateX(-2px);}20%,80%{transform:translateX(4px);}30%,50%,70%{transform:translateX(-8px);}40%,60%{transform:translateX(8px);}}
     </style>
     <div id="login-fullscreen">
+      <h1 class="main-title">
+        Support<span class="volt">Volt</span>
+      </h1>
+      
       <div class="login-card">
         <div class="login-header">
           <span>&#128274;</span>
@@ -146,5 +201,14 @@
         </div>
       </div>
     </div>
+    
+    <!-- Footer -->
+    <footer class="sticky-footer">
+      <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+          <span>Powered by {% trans "<a href='https://github.com/django-helpdesk/django-helpdesk'>django-helpdesk</a>." %}</span>
+        </div>
+      </div>
+    </footer>
 {% endif %}
 {% endblock %}

@@ -3,7 +3,49 @@
 <footer class="sticky-footer">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-          <span>Powered by {% trans "<a href='https://github.com/django-helpdesk/django-helpdesk'>django-helpdesk</a>." %}</span>
+          <span>Powered by {% trans "<a href='https://transvolt.in/'>Transvolt-helpdesk</a>." %}</span>
         </div>
     </div>
 </footer>
+
+<style>
+  footer.sticky-footer {
+    background-color: #183b6b !important;
+    border-top: 2px solid #ffd700;
+    padding: 1rem 0;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: calc(100% - 75px) !important; /* Adjusted to account for sidebar width */
+    z-index: 999;
+  }
+  
+  body.sidebar-toggled footer.sticky-footer {
+    width: calc(100% - 75px) !important; /* Keep consistent when sidebar is toggled */
+  }
+  
+  footer.sticky-footer .copyright {
+    color: #ffffff;
+    font-family: 'Inter', sans-serif;
+    text-align: center;
+  }
+  
+  footer.sticky-footer a {
+    color: #ffd700;
+    text-decoration: none;
+  }
+  
+  footer.sticky-footer a:hover {
+    text-decoration: underline;
+  }
+  
+  @media (min-width: 768px) {
+    footer.sticky-footer {
+      width: calc(100% - 75px) !important;
+    }
+    
+    .sidebar.toggled:hover ~ #content-wrapper footer.sticky-footer {
+      width: calc(100% - 240px) !important; /* Adjust when sidebar is expanded on hover */
+    }
+  }
+</style>

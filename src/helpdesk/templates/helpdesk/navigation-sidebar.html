@@ -1,7 +1,7 @@
 {% load i18n helpdesk_staff %}
 
     <!-- Sidebar -->
-    <ul class="sidebar navbar-nav">
+    <ul class="sidebar navbar-nav toggled">
     {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
         <li class="nav-item{% if 'dashboard' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:dashboard' %}">
@@ -101,3 +101,135 @@
         {% endif %}
     {% endif %}
     </ul>
+
+<style>
+/* White theme for sidebar */
+.sidebar {
+    background-color: #ffffff !important;
+    border-right: 1px solid #e3e6f0;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    transition: width 0.3s ease;
+}
+
+.sidebar .nav-item .nav-link {
+    color: #3a3b45 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.75rem;
+    font-size: 1.05rem; /* Increased font size */
+}
+
+.sidebar .nav-item .nav-link:active, 
+.sidebar .nav-item .nav-link:focus, 
+.sidebar .nav-item .nav-link:hover {
+    color: #183b6b !important;
+    font-weight: bold;
+}
+
+.sidebar .nav-item.active .nav-link {
+    color: #183b6b !important;
+    font-weight: bold;
+}
+
+.sidebar .nav-item.active .nav-link i {
+    color: #183b6b !important;
+}
+
+.sidebar .nav-item .nav-link i {
+    color: #3a3b45 !important;
+    font-size: 1.25rem; /* Increased icon size */
+    width: 100%;
+    text-align: center;
+    margin-right: 0;
+}
+
+.sidebar .nav-item .nav-link:active i, 
+.sidebar .nav-item .nav-link:focus i, 
+.sidebar .nav-item .nav-link:hover i {
+    color: #183b6b !important;
+}
+
+/* Make sure sidebar is toggled by default */
+.sidebar {
+    width: 0 !important;
+    overflow: hidden;
+}
+
+.sidebar.toggled {
+    width: 75px !important; /* Slightly wider to accommodate larger fonts */
+    overflow: visible;
+}
+
+/* Hide text in collapsed sidebar */
+.sidebar.toggled .nav-item .nav-link span {
+    display: none;
+}
+
+/* Show dropdown caret in collapsed sidebar */
+.sidebar.toggled .nav-item .dropdown-toggle::after {
+    display: none;
+}
+
+/* Hover effect to expand sidebar */
+.sidebar.toggled:hover {
+    width: 240px !important; /* Wider expanded width for larger fonts */
+    z-index: 1000;
+}
+
+.sidebar.toggled:hover .nav-item .nav-link {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    width: 240px;
+    justify-content: flex-start;
+}
+
+.sidebar.toggled:hover .nav-item .nav-link i {
+    width: auto;
+    margin-right: 0.75rem; /* More spacing between icon and text */
+    text-align: left;
+}
+
+.sidebar.toggled:hover .nav-item .nav-link span {
+    display: inline;
+    opacity: 1;
+    font-size: 1.05rem; /* Consistent font size */
+}
+
+.sidebar.toggled:hover .nav-item .dropdown-toggle::after {
+    display: inline-block;
+}
+
+/* Enhanced dropdown behavior when sidebar is expanded on hover */
+.sidebar.toggled:hover .dropdown-menu {
+    position: relative !important;
+    left: 0 !important;
+    width: 100%;
+    margin: 0 1rem;
+    font-size: 1.05rem; /* Match font size in dropdown */
+}
+
+@media (min-width: 768px) {
+    .sidebar.toggled {
+        width: 75px !important;
+    }
+    
+    .sidebar.toggled:hover {
+        width: 240px !important;
+    }
+}
+
+/* Adjust content padding when sidebar is closed */
+body.sidebar-toggled #content-wrapper {
+    padding-left: 0;
+}
+</style>
+
+<script>
+// Set sidebar to closed by default
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('.sidebar').classList.add('toggled');
+    document.body.classList.add('sidebar-toggled');
+});
+</script>

@@ -1,10 +1,11 @@
 {% load i18n helpdesk_staff %}
 
     {% include 'helpdesk/custom_navigation_header.html' %}
+    {% include 'helpdesk/navigation-header-style.html' %}
 
-    <nav class="navbar navbar-expand navbar-dark bg-dark static-top">
+    <nav class="navbar navbar-expand navbar-light bg-white static-top">
 
-      <a class="navbar-brand" href="{% url 'helpdesk:home' %}">{% trans 'Helpdesk' %}</a>
+      <a class="navbar-brand text-primary" href="{% url 'helpdesk:home' %}">{% trans 'Helpdesk' %}</a>
 
       <button class="btn btn-link btn-sm text-white order-1 order-sm-0 mr-auto" id="sidebarToggle" href="#">
         <i class="fas fa-bars"></i>
