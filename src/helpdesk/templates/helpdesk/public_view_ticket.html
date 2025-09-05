@@ -2,186 +2,649 @@
 {% load static %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
+{% block helpdesk_head %}
+<style>
+    /* Enhanced UI for ticket view page */
+    body {
+        background-color: #f6f8fa;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+        color: #333;
+    }
+    
+    /* Main container styling */
+    .ticket-container {
+        max-width: 1800px;
+        margin: 0 auto 40px auto;
+        padding: 0;
+        width: 100%;
+    }
+    
+    /* Ticket header styling */
+    .ticket-header {
+        background: #183b6b;
+        color: white;
+        padding: 25px 30px;
+        border-radius: 8px 8px 0 0;
+        margin-bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .ticket-header h2 {
+        margin: 0;
+        font-size: 1.6rem;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+    
+    .ticket-status {
+        background-color: #2ecc71;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .ticket-status.open {
+        background-color: #3498db;
+    }
+    
+    .ticket-status.resolved {
+        background-color: #2ecc71;
+    }
+    
+    .ticket-status.closed {
+        background-color: #95a5a6;
+    }
+    
+    .ticket-status.hold {
+        background-color: #e67e22;
+    }
+    
+    /* Ticket details table styling */
+    .ticket-details {
+        background: white;
+        border-radius: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        overflow: hidden;
+        width: 100%;
+    }
+    
+    .ticket-details table {
+        table-layout: fixed;
+    }
+    
+    .ticket-details table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+    
+    .ticket-details th {
+        background-color: #f6f8fa;
+        color: #183b6b;
+        text-align: left;
+        padding: 15px 20px;
+        font-weight: 600;
+        border-bottom: 1px solid #e9ecef;
+        width: 200px;
+    }
+    
+    .ticket-details td {
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        line-height: 1.5;
+    }
+    
+    .ticket-details tr:last-child th,
+    .ticket-details tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .ticket-description {
+        background-color: white;
+        padding: 20px;
+        border-radius: 0 0 8px 8px;
+    }
+    
+    .ticket-description h3 {
+        margin-top: 0;
+        color: #183b6b;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+    
+    /* Follow-ups styling */
+    .followups-section {
+        margin-top: 30px;
+        width: 100%;
+        background: transparent;
+        padding: 0;
+        margin-left: 0;
+    }
+    
+    .followups-section h3 {
+        color: #183b6b;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+        font-size: 1.5rem;
+    }
+    
+    .followups-container {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0;
+    }
+    
+    .followup {
+        background: white;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border-left: 4px solid #183b6b;
+        width: 100%;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .followup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 12px;
+    }
+    
+    .followup-title {
+        color: #183b6b;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    .followup-meta {
+        color: #6c757d;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    
+    .followup-content {
+        line-height: 1.6;
+        margin-bottom: 10px;
+        padding: 0;
+    }
+    
+    .changes {
+        background-color: #f8f9fa;
+        padding: 10px 15px;
+        margin-top: 10px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .changes ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+    
+    /* Comment form styling */
+    .comment-form {
+        background: white;
+        border-radius: 8px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .comment-form h3 {
+        color: #183b6b;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .comment-form h3 {
+        color: #183b6b;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #183b6b;
+        font-weight: 600;
+    }
+    
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+    
+    .form-help-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .status-options {
+        margin: 15px 0;
+    }
+    
+    .status-options label {
+        margin-right: 15px;
+        cursor: pointer;
+    }
+    
+    /* Buttons styling */
+    .btn {
+        display: inline-block;
+        font-weight: 500;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
+        border: 1px solid transparent;
+        padding: 8px 16px;
+        font-size: 1rem;
+        line-height: 1.5;
+        border-radius: 4px;
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .btn-primary {
+        color: #fff;
+        background-color: #183b6b;
+        border-color: #183b6b;
+    }
+    
+    .btn-primary:hover {
+        background-color: #122d52;
+        border-color: #0d223f;
+    }
+    
+    .btn-success {
+        color: #fff;
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
+    
+    .btn-warning {
+        color: #212529;
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+    
+    .btn-warning:hover {
+        background-color: #e0a800;
+        border-color: #d39e00;
+    }
+    
+    .btn-lg {
+        padding: 10px 20px;
+        font-size: 1.1rem;
+    }
+    
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.9rem;
+    }
+    
+    /* File upload styling */
+    #FileUpload {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .btn-file {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        cursor: inherit;
+        display: block;
+    }
+    
+    /* Link styling */
+    a {
+        color: #0066cc;
+        text-decoration: underline;
+    }
+    
+    a:hover {
+        color: #004080;
+        text-decoration: underline;
+    }
+    
+    /* Add responsive behavior */
+    @media (max-width: 1200px) {
+        .ticket-container {
+            width: 95%;
+            max-width: 1400px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .ticket-container {
+            width: 100%;
+            padding: 0 10px;
+        }
+        
+        .ticket-header {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 20px;
+        }
+        
+        .ticket-status {
+            margin-top: 10px;
+        }
+        
+        .ticket-details th {
+            width: 120px;
+            padding: 10px 15px;
+        }
+        
+        .ticket-details td {
+            padding: 10px 15px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block helpdesk_body %}
+<div class="ticket-container">
 
-<table class="table table-hover table-bordered table-striped">
-<thead>
-    <tr>
-    <th colspan="2">
-        <capiton>
-            {{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]
-        </capiton>
-    </th>
-    </tr>
-</thead>
-<tbody>
-    <tr><th>{% blocktrans with ticket.queue as queue_name %}Queue</th>
-    <td>{{ queue_name }}{% endblocktrans %}</td></tr>
-<tr>
-    <th>{% trans "Submitted On" %}</th>
-    <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
-</tr>
+<div class="ticket-header">
+    <h2>[#{{ ticket.ticket }}] {{ ticket.title }}</h2>
+    <span class="ticket-status {% if 'Resolved' in ticket.get_status %}resolved{% elif 'Closed' in ticket.get_status %}closed{% elif 'Hold' in ticket.get_status %}hold{% else %}open{% endif %}">
+        {{ ticket.get_status }}
+    </span>
+</div>
 
-{% if ticket.due_date %}
-    <tr>
-        <th>{% trans "Due On" %}</th>
-        <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</td>
-    </tr>
-{% endif %}
-
-<tr>
-    <th>{% trans "Submitter E-Mail" %}</th>
-    <td>{{ ticket.submitter_email }}</td>
-</tr>
-
-<tr>
-    <th>{% trans "Priority" %}</th>
-    <td>{{ ticket.get_priority_display }}</td>
-</tr>
-
-{% for customfield in ticket.ticketcustomfieldvalue_set.all %}
-    <tr>
-        <th>{{ customfield.field.label }}</th>
-        <td>{{ customfield.value|default:"" }}</td>
-    </tr>
-{% endfor %}
-
-{% if tags_enabled %}
-<tr>
-    <th>{% trans "Tags" %}</th>
-    <td>{{ ticket.tags }}</td>
-</tr>
-{% endif %}
-
-<tr>
-    <th colspan='2'>{% trans "Description" %}</th>
-</tr>
-<tr>
-    <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
-</tr>
-
-{% if ticket.resolution %}<tr>
-    <th colspan='2'>{% trans "Resolution" %}{% if ticket.get_status_display == "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><button type="button" class="btn btn-primary btn-xs">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
-</tr>
-<tr>
-    <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
-</tr>{% endif %}
-</tbody>
-</table>
+<div class="ticket-details">
+    <table>
+        <tbody>
+            <tr>
+                <th>{% blocktrans with ticket.queue as queue_name %}Queue{% endblocktrans %}</th>
+                <td>{{ ticket.queue }}</td>
+            </tr>
+            <tr>
+                <th>{% trans "Submitted On" %}</th>
+                <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
+            </tr>
+            
+            {% if ticket.due_date %}
+                <tr>
+                    <th>{% trans "Due On" %}</th>
+                    <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</td>
+                </tr>
+            {% endif %}
+            
+            <tr>
+                <th>{% trans "Submitter E-Mail" %}</th>
+                <td>{{ ticket.submitter_email }}</td>
+            </tr>
+            
+            <tr>
+                <th>{% trans "Priority" %}</th>
+                <td>{{ ticket.get_priority_display }}</td>
+            </tr>
+            
+            {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
+                <tr>
+                    <th>{{ customfield.field.label }}</th>
+                    <td>{{ customfield.value|default:"" }}</td>
+                </tr>
+            {% endfor %}
+            
+            {% if tags_enabled %}
+            <tr>
+                <th>{% trans "Tags" %}</th>
+                <td>{{ ticket.tags }}</td>
+            </tr>
+            {% endif %}
+            
+            <tr>
+                <th>{% trans "Description" %}</th>
+                <td>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
+            </tr>
+            
+            {% if ticket.resolution %}
+            <tr>
+                <th>{% trans "Resolution" %}</th>
+                <td>
+                    {{ ticket.resolution|urlizetrunc:50|linebreaksbr }}
+                    {% if ticket.get_status_display == "Resolved" %}
+                        <div style="margin-top: 10px;">
+                            <a href='{{ ticket.ticket_url }}&close' class="btn btn-primary btn-sm">
+                                {% trans "Accept and Close" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
 
 {% if ticket.followup_set.public_followups %}
-<h3>{% trans "Follow-Ups" %}</h3>
-{% load ticket_to_link %}
-{% for followup in ticket.followup_set.public_followups %}
-<div class='followup well card'>
-    <p><b>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span></span></b></p>
-    {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
-    {% if followup.ticketchange_set.all %}<div class='changes'><ul>
-	    {% for change in followup.ticketchange_set.all %}
-	    <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
-	    {% endfor %}
-    </ul></div>{% endif %}
-
-    {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
-    {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
-	    <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
-	    {% if forloop.last %}</ul></div>{% endif %}
-    {% endfor %}
-    {% endif %}
+<div class="followups-section">
+    <h3>{% trans "Follow-Ups" %}</h3>
+    <div class="followups-container">
+        {% load ticket_to_link %}
+        {% for followup in ticket.followup_set.public_followups %}
+        <div class="followup">
+            <div class="followup-header">
+                <h4 class="followup-title">{{ followup.title }}</h4>
+                <span class="followup-meta">
+                    {% if followup.user %}by {{ followup.user }}{% endif %}
+                    <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span>
+                </span>
+            </div>
+        <div class="followup-content">
+            {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
+        </div>
+        
+        {% if followup.ticketchange_set.all %}
+        <div class="changes">
+            <ul>
+                {% for change in followup.ticketchange_set.all %}
+                <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+        {% for attachment in followup.followupattachment_set.all %}
+            {% if forloop.first %}
+            <div class="attachments" style="margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 4px;">
+                <h5 style="margin-top: 0; font-size: 1rem; color: #183b6b;">Attachments:</h5>
+                <ul>
+            {% endif %}
+                <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+            {% if forloop.last %}
+                </ul>
+            </div>
+            {% endif %}
+        {% endfor %}
+        {% endif %}
+        </div>
+        {% endfor %}
+    </div>
 </div>
-{% endfor %}
 {% endif %}
 
-<form method='post' action="{% url 'helpdesk:update' ticket.id %}" enctype='multipart/form-data'>
+<form method='post' action="{% url 'helpdesk:update' ticket.id %}" enctype='multipart/form-data' class="comment-form">
+    <h3>{% trans "Update Ticket" %}</h3>
     <input type="hidden" name="key" value="{{ key }}" />
     <input type="hidden" name="mail" value="{{ mail }}" />
 
-<fieldset>
-    <dl>
-        {% if preset_replies %}
-        <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-        <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
-        <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
-        {% endif %}
+    {% if preset_replies %}
+    <div class="form-group">
+        <label for='id_preset'>{% trans "Use a Pre-set Reply" %} <span style="color: #6c757d; font-weight: normal;">{% trans "(Optional)" %}</span></label>
+        <select name='preset' id='id_preset' class="form-control">
+            <option value=''>-- {% trans "Select a pre-set reply" %} --</option>
+            {% for preset in preset_replies %}
+            <option value='{{ preset.id }}'>{{ preset.name }}</option>
+            {% endfor %}
+        </select>
+        <p class="form-help-text">{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</p>
+    </div>
+    {% endif %}
 
-        <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
-        <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-	{% url "helpdesk:help_context" as context_help_url %}
-	{% blocktrans %}
-        <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
-	{% endblocktrans %}
+    <div class="form-group">
+        <label for='commentBox'>{% trans "Comment / Resolution" %}</label>
+        <textarea rows='8' name='comment' id='commentBox' class="form-control" placeholder="{% trans 'Enter your comment or resolution here...' %}"></textarea>
+        {% url "helpdesk:help_context" as context_help_url %}
+        <p class="form-help-text">
+            {% blocktrans %}You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.{% endblocktrans %}
+        </p>
+    </div>
 
-        {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
-        {% if ticket.status == 1 %}
-            <input type="hidden" name="new_status" value="{{ ticket.status }}" />
-        {% else %}
-        <dd><div class="form-group">
-        {% for status_choice in ticket.get_allowed_status_flow %}
-            <label for='st_{{ status_choice.1|lower }}' class='{% if ticket.status == status_choice.0 %}active {% endif %}radio-inline'><input type='radio' name='new_status' value='{{ status_choice.0 }}' id='st_{{ status_choice.1|lower }}'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}{% if ticket.status == status_choice.0 %} checked='checked'{% endif %}>{{ status_choice.1 }}{% if forloop.last %}{% else %} &raquo;{% endif %}</label>
-        {% endfor %}
-        </div></dd>
-        {% endif %}
+    {% if not ticket.can_be_resolved %}
+    <div class="form-group">
+        <div class="alert alert-warning">
+            {% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if ticket.status != 1 %}
+    <div class="form-group">
+        <label>{% trans "Status" %}</label>
+        <div class="status-options">
+            {% for status_choice in ticket.get_allowed_status_flow %}
+            <label for='st_{{ status_choice.1|lower }}' class='{% if ticket.status == status_choice.0 %}active{% endif %}'>
+                <input type='radio' name='new_status' value='{{ status_choice.0 }}' id='st_{{ status_choice.1|lower }}'
+                    {% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}
+                    {% if ticket.status == status_choice.0 %} checked='checked'{% endif %}>
+                {{ status_choice.1 }}
+            </label>
+            {% if not forloop.last %} &raquo; {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <input type="hidden" name="new_status" value="{{ ticket.status }}" />
+    {% endif %}
 
-        <input type='hidden' name='public' value='1'>
-
-    </dl>
+    <input type='hidden' name='public' value='1'>
         
 {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
-<p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm"
-    id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block';return false;" >{% trans "Attach File(s) &raquo;" %}</button></p>
-
-<div id='FileUpload' style='display: none;'>
-
-    <dl>
-        <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
-        <dd>
-            <div class="add_file_fields_wrap">
-                <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
-                <div><label class='btn btn-primary btn-sm btn-file'>
-                        Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
-                </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
+    <div class="form-group">
+        <p id='ShowFileUploadPara'>
+            <button class="btn btn-warning" id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block'; $(this).parent().hide(); return false;">
+                <i class="fas fa-paperclip" style="margin-right: 5px;"></i> {% trans "Attach File(s)" %}
+            </button>
+        </p>
+        
+        <div id='FileUpload' style='display: none;'>
+            <div class="form-group">
+                <label for='id_file'>{% trans "Attach a File" %}</label>
+                <div class="add_file_fields_wrap">
+                    <button class="add_file_field_button btn btn-success btn-sm" style="margin-bottom: 10px;">
+                        <i class="fas fa-plus" style="margin-right: 5px;"></i> {% trans "Add Another File" %}
+                    </button>
+                    <div class="file-input-container" style="margin-bottom: 10px;">
+                        <label class='btn btn-primary btn-sm btn-file'>
+                            Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
+                        </label>
+                        <span style="margin-left: 10px; color: #6c757d;" id='selectedfilename0'>{% trans 'No files selected.' %}</span>
+                    </div>
+                </div>
             </div>
-        </dd>
-    </dl>
-
-</div>
+        </div>
+    </div>
 {% endif %}
-</fieldset>
 
-<button class="btn btn-primary btn-lg" style="margin-bottom:10px" type='submit'>{% trans "Update This Ticket" %}</button>
+    <div class="form-group" style="margin-top: 30px;">
+        <button class="btn btn-primary btn-lg" type='submit'>
+            <i class="fas fa-paper-plane" style="margin-right: 5px;"></i> {% trans "Update This Ticket" %}
+        </button>
+    </div>
 
-{% csrf_token %}
+    {% csrf_token %}
 </form>
 
 {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
-<script type='text/javascript' language='javascript'>
+<script type='text/javascript'>
   $(document).ready(function() {
-
+      // File upload show/hide
       $("#ShowFileUpload").click(function() {
           $("#FileUpload").fadeIn();
           $("#ShowFileUploadPara").hide();
       });
 
-      // lists for file input change events, then updates the associated text label
-      // with the file name selected
+      // Handle file selection and update the display text
       $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
           $("#selectedfilename"+browseButtonNum).html(label);
       });
 
+      // Add more file inputs
       var x = 0;
-      var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
-      var add_button      = $(".add_file_field_button"); //Add button ID
+      var wrapper = $(".add_file_fields_wrap");
+      var add_button = $(".add_file_field_button");
 
-      $(add_button).click(function(e){ //on add input button click
-          x++;
+      $(add_button).click(function(e){
           e.preventDefault();
-          $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
+          x++;
+          $(wrapper).append(`
+            <div class="file-input-container" style="margin-bottom: 10px;">
+                <label class='btn btn-primary btn-sm btn-file'>
+                    Browse... <input type='file' name='attachment' id='file${x}' style='display: none;'/>
+                </label>
+                <span style="margin-left: 10px; color: #6c757d;" id='selectedfilename${x}'>{% trans 'No files selected.' %}</span>
+            </div>
+          `);
       });
   });
 
-  // this function listens for changes on any file input, and
-  // emits the appropriate event to update the input's text.
-  // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+  // Update filename display on file selection
   $(document).on('change', ':file', function() {
       var input = $(this),
           inputWidgetNum = $(this).attr('id').split("file")[1],
@@ -189,8 +652,8 @@
           label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
       input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
   });
-
 </script>
 {% endif %}
 
+</div> <!-- End of ticket-container -->
 {% endblock %}

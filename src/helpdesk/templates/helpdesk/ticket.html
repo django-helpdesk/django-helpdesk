@@ -2,6 +2,81 @@
 {% load i18n bootstrap4form humanize %}
 {% load static %}
 
+{% block helpdesk_head %}
+<style>
+    /* Improved styling for ticket sections */
+    .card {
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .card-header {
+        background-color: #183b6b;
+        color: white;
+        font-weight: 600;
+        padding: 12px 20px;
+    }
+    
+    .card-header i {
+        margin-right: 8px;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+    
+    /* Follow-ups styling */
+    .list-group-item {
+        margin-bottom: 8px;
+        border-left: 4px solid #183b6b;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .list-group-item .mb-1 {
+        color: #183b6b;
+    }
+    
+    /* Update section */
+    #commentBox {
+        width: 100%;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 10px;
+    }
+    
+    dl {
+        margin-bottom: 20px;
+    }
+    
+    dt {
+        font-weight: 600;
+        color: #183b6b;
+        margin-bottom: 8px;
+    }
+    
+    dd {
+        margin-bottom: 15px;
+    }
+    
+    /* Button styling */
+    .btn-warning, .btn-primary {
+        background-color: #183b6b;
+        border-color: #183b6b;
+        color: white;
+    }
+    
+    .btn-warning:hover, .btn-primary:hover {
+        background-color: #0e2c57;
+        border-color: #0e2c57;
+        color: white;
+    }
+</style>
+{% endblock %}
 
 
 {% block helpdesk_title %}{{ ticket.queue.slug }}-{{ ticket.id }} : {% trans "View Ticket Details" %}{% endblock %}
@@ -39,9 +114,9 @@
         {% if ticket.followup_set.all %}
         {% load ticket_to_link %}
             <div class="card mb-3">
-                <div class="card-header"><i class="fas fa-clock fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</div>
+                <div class="card-header"><i class="fas fa-clock fa-fw fa-lg"></i>{% trans "Follow-Ups" %}</div>
                 <div class="card-body">
-                    <div class="list-group">
+                    <div class="list-group" style="margin-bottom: 15px;">
                     {% for followup in ticket.followup_set.all %}
                         <div class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
@@ -99,23 +174,23 @@
         {% endif %}
 
         <div class="card mb-3">
-            <div class="card-header">{% trans "Respond to this ticket" %}</div>
+            <div class="card-header"><i class="fas fa-reply fa-fw"></i>{% trans "Update Ticket" %}</div>
             <div class="card-body">
 
-         <form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype="multipart/form-data">
+         <form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype="multipart/form-data" style="width: 100%">
 
-        <fieldset>
-            <dl>
+        <fieldset style="width: 100%;">
+            <dl style="width: 100%;">
                 {% if preset_replies %}
                 <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
-                <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
+                <dd><select name='preset' id='id_preset' class="form-control"><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
                 <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
                 {% endif %}
 
                 <dt>
                     <label for='commentBox'>{% trans "Comment / Resolution" %}</label>
                 </dt>
-                <dd><textarea rows='8' cols='70' name='comment' id='commentBox'>{% if form.errors %}{{ xform.comment }}{% endif %}</textarea></dd>
+                <dd><textarea rows='8' class="form-control" name='comment' id='commentBox' style="width: 100%; max-width: 100%;">{% if form.errors %}{{ xform.comment }}{% endif %}</textarea></dd>
                 {% url "helpdesk:help_context" as context_help_url %}
                 {% blocktrans %}
                 <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>

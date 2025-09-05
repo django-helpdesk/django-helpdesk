@@ -1,0 +1,222 @@
+/* Custom CSS for ticket views */
+
+/* Fix alignment issues */
+.container-fluid {
+    padding: 20px !important;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Improve Follow-Ups section styling */
+h2.follow-ups-title, 
+h3.follow-ups-title, 
+.follow-ups-title,
+.card-header {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+/* Fix the follow-ups cards */
+.follow-up-card,
+.list-group-item {
+    background: white;
+    border-radius: 4px !important;
+    margin-bottom: 15px !important;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid #183b6b !important;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Fix Bootstrap list-group-item styling */
+.list-group-item {
+    border: 1px solid rgba(0,0,0,.125);
+    border-left: 4px solid #183b6b !important;
+}
+
+.list-group-item .mb-1 {
+    margin-bottom: .5rem !important;
+}
+
+.list-group-item p {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Fix ticket follow-ups display */
+.card-header {
+    background-color: #183b6b !important;
+}
+
+.card {
+    margin-bottom: 25px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.follow-up-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.follow-up-title {
+    color: #183b6b;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.follow-up-meta {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.follow-up-content {
+    margin-bottom: 10px;
+}
+
+/* Fix the Update Ticket section */
+.update-ticket-section {
+    background: white;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+}
+
+.update-ticket-header {
+    color: #183b6b;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+/* Fix main ticket details panel */
+.ticket-details-panel {
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+/* Ensure proper width for all sections */
+.follow-ups-container {
+    width: 100%;
+}
+
+/* Fix any table alignment issues */
+table.ticket-info {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.ticket-info th {
+    width: 200px;
+    background-color: #f6f8fa;
+}
+
+/* Fix form elements */
+textarea, 
+select, 
+input[type="text"],
+input[type="email"],
+input[type="date"] {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+/* Make ticket titles in tables more obviously links */
+table a.ticket-title,
+table td a {
+    color: #0275d8;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+table td a:hover {
+    color: #014c8c;
+    text-decoration: underline;
+}
+
+/* Add responsive styling */
+@media (max-width: 768px) {
+    .ticket-info th {
+        width: 120px;
+    }
+    
+    .container-fluid {
+        padding: 15px !important;
+    }
+    
+    .list-group-item {
+        padding: 10px;
+    }
+}
+
+/* Fix table spacing and alignment */
+.table {
+    margin-bottom: 0;
+}
+
+.table td, 
+.table th {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+/* Improve container spacing */
+.container-fluid > .row {
+    margin-left: -5px;
+    margin-right: -5px;
+}
+
+/* Ensure proper content alignment */
+.content {
+    padding: 15px;
+}
+
+/* Improve breadcrumb display */
+.breadcrumb {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+/* Fix pagination styling */
+.pagination {
+    margin-top: 20px;
+}
+
+/* Ensure consistent button styling */
+.btn-primary, 
+.btn-secondary, 
+.btn-success, 
+.btn-info, 
+.btn-warning, 
+.btn-danger {
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+}
+
+/* Fix header styling */
+h1, h2, h3 {
+    color: #183b6b;
+}

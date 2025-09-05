@@ -59,14 +59,31 @@
         background-color: #f3eab9;
         color: #183b6b;
     }
+    
+    tr:hover a {
+        color: #0066cc;
+        text-decoration: underline;
+    }
 
     a {
-        color: #183b6b;
-        text-decoration: none;
+        color: #0066cc;
+        text-decoration: underline;
     }
 
     a:hover {
         text-decoration: underline;
+        color: #004080;
+    }
+    
+    /* Special styling for ticket title links */
+    #ticketsTable tbody a {
+        color: #0066cc;
+        text-decoration: underline;
+        font-weight: 500;
+    }
+    
+    #ticketsTable tbody a:hover {
+        color: #004080;
     }
 
     .pagination {

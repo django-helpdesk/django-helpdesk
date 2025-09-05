@@ -11,6 +11,27 @@
 
 {% block helpdesk_head %}
 <style>
+    /* Reduce the height of the navbar to match public page */
+    .navbar {
+        padding-top: 0.2rem !important;
+        padding-bottom: 0.2rem !important;
+        min-height: 60px !important;
+    }
+    
+    .navbar-brand {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    .form-control, .btn {
+        height: calc(1.5em + 0.5rem + 2px) !important;
+        padding: 0.30rem 1rem !important;
+        font-size: 0.875rem !important;
+    }
+    
     /* Ticket Form Styling */
     .ticket-form-container {
         width: 95%;
@@ -66,6 +87,11 @@
         color: #183b6b;
         font-weight: 600;
         margin-bottom: 0.5rem;
+    }
+    
+    .text-danger {
+        color: #dc3545 !important;
+        font-weight: bold;
     }
     
     .form-control {
@@ -208,7 +234,9 @@
                 {% trans "Submit a Ticket" %}
             </div>
             <div class="form-body">
-                
+                <div class="form-intro" style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #183b6b;">
+                    <p style="margin-bottom: 0;"><i class="fas fa-info-circle" style="margin-right: 5px;"></i>{% trans "Fields marked with" %} <span class="text-danger">*</span> {% trans "are required." %}</p>
+                </div>
 
                 {% if form.errors %}
                     {% include 'helpdesk/include/alert_form_errors.html' %}
@@ -227,7 +255,7 @@
                                     <div class="form-col">
                                         <div class="form-group">
                                             <label for='id_{{ field.name }}' class="form-label">
-                                                {{ field.label }}
+                                                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                                                 {% if not field.field.required %}
                                                     <span class="text-muted">({% trans "Optional" %})</span>
                                                 {% endif %}
@@ -253,7 +281,7 @@
                                     <div class="form-col">
                                         <div class="form-group">
                                             <label for='id_{{ field.name }}' class="form-label">
-                                                {{ field.label }}
+                                                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                                                 {% if not field.field.required %}
                                                     <span class="text-muted">({% trans "Optional" %})</span>
                                                 {% endif %}
@@ -273,7 +301,7 @@
                                     <div class="form-col">
                                         <div class="form-group">
                                             <label for='id_{{ field.name }}' class="form-label">
-                                                {{ field.label }}
+                                                {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                                                 {% if not field.field.required %}
                                                     <span class="text-muted">({% trans "Optional" %})</span>
                                                 {% endif %}
@@ -292,7 +320,7 @@
                             {% elif field.name == 'body' or field.name == 'description' %}
                                 <div class="form-group">
                                     <label for='id_{{ field.name }}' class="form-label">
-                                        {{ field.label }}
+                                        {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                                         {% if not field.field.required %}
                                             <span class="text-muted">({% trans "Optional" %})</span>
                                         {% endif %}
@@ -308,7 +336,7 @@
                             {% elif field.name == 'attachment' %}
                                 <div class="form-group">
                                     <label for='id_{{ field.name }}' class="form-label">
-                                        {{ field.label }}
+                                        {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                                         {% if not field.field.required %}
                                             <span class="text-muted">({% trans "Optional" %})</span>
                                         {% endif %}
@@ -326,7 +354,7 @@
                             {% elif field.name == 'priority' %}
                                 <div class="form-group">
                                     <label for='id_{{ field.name }}' class="form-label">
-                                        {{ field.label }}
+                                        {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                                         {% if not field.field.required %}
                                             <span class="text-muted">({% trans "Optional" %})</span>
                                         {% endif %}
@@ -348,7 +376,7 @@
                             {% else %}
                                 <div class="form-group">
                                     <label for='id_{{ field.name }}' class="form-label">
-                                        {{ field.label }}
+                                        {{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}
                                         {% if not field.field.required %}
                                             <span class="text-muted">({% trans "Optional" %})</span>
                                         {% endif %}
