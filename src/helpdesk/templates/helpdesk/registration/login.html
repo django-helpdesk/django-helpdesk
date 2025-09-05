@@ -6,43 +6,209 @@
 {% if request.user.is_authenticated %}
     <meta http-equiv="REFRESH" content="0;url={% url 'helpdesk:home' %}">
 {% else %}
-
-    <div class="container">
-      <div class="card card-login mx-auto mt-5">
-        <div class="card-header">{% trans 'Please Sign In' %}</div>
-        <div class="card-body">
-          <form role="form" method='post' action='./'>
-                {% if form.errors %}
-                <div class="alert alert-danger">{% trans "Your username and password didn't match. Please try again." %}</div>
-                {% endif %}
-            <div class="form-group">
-              <div class="form-label-group">
-                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="required" autofocus="autofocus">
-                <label for="username">Username</label>
-              </div>
+    <style>
+      body, html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background: #f6f8fa !important;
+        font-family: 'Inter', sans-serif;
+        overflow: hidden !important;
+      }
+      #login-fullscreen {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #f6f8fa;
+        z-index: 9999;
+        padding-bottom: 80px; /* Make space for the footer */
+      }
+      .login-card {
+        width: 120vw;
+        height: 120vh;
+        max-width: 480px;
+        max-height: 480px;
+        background: #fff;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        padding: 0;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        animation: fadeIn 0.7s;
+      }
+      .login-header {
+        background: #183b6b;
+        padding: 2rem 1rem 1.2rem 1rem;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .login-header span {
+        font-size: 1.7rem;
+        vertical-align: middle;
+        margin-right: 0.5rem;
+        color: #4caf50;
+      }
+      .login-header h2 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: #183b6b;
+        margin: 0;
+      }
+      .login-body {
+        padding: 2.5rem 2rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .login-label {
+        font-weight: 700; /* Increased from 500 to 700 */
+        margin-bottom: 0.3rem;
+        display: block;
+        color: #183b6b;
+        font-size: 1.05rem; /* Slightly larger */
+      }
+      .login-input {
+        width: 100%;
+        padding: 0.7rem 1rem;
+        border-radius: 0;
+        border: 1px solid #dbe2ef;
+        font-size: 1rem;
+        transition: box-shadow .3s;
+        outline: none;
+        margin-bottom: 1.2rem;
+      }
+      .login-checkbox {
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+      }
+      .login-checkbox input {
+        margin-right: 0.5rem;
+      }
+      .login-checkbox label {
+        font-size: 0.98rem;
+        color: #555;
+      }
+      .login-btn {
+        width: 100%;
+        background: #183b6b;
+        color: #fff;
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: 0.8rem 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: 0 2px 8px rgba(30,40,80,0.10);
+        transition: background .3s;
+      }
+      .login-error {
+        background: #ffeaea;
+        color: #d32f2f;
+        border-radius: 0;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.98rem;
+        animation: shakeX 0.5s;
+      }
+      .main-title {
+        font-size: 3.5rem; /* Increased from 3rem */
+        font-weight: 700;
+        color: #183b6b;
+        margin-bottom: 1rem;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        letter-spacing: 2px;
+      }
+      .main-title span.volt {
+        color: #4caf50;
+        position: relative;
+      }
+      .support-text {
+        color: #183b6b;
+        font-size: 1.2rem;
+        font-weight: 500;
+        margin-top: -1rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      /* Footer styles */
+      footer.sticky-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: #183b6b !important;
+        border-top: 2px solid #ffd700;
+        padding: 1rem 0;
+        z-index: 9999;
+      }
+      
+      footer.sticky-footer .copyright {
+        color: #ffffff;
+        font-family: 'Inter', sans-serif;
+        text-align: center;
+      }
+      
+      footer.sticky-footer a {
+        color: #ffd700;
+        text-decoration: none;
+      }
+      
+      footer.sticky-footer a:hover {
+        text-decoration: underline;
+      }
+      
+      @keyframes fadeIn {from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+      @keyframes shakeX {10%,90%{transform:translateX(-2px);}20%,80%{transform:translateX(4px);}30%,50%,70%{transform:translateX(-8px);}40%,60%{transform:translateX(8px);}}
+    </style>
+    <div id="login-fullscreen">
+      <h1 class="main-title">
+        Support<span class="volt">Volt</span>
+      </h1>
+      
+      <div class="login-card">
+        <div class="login-header">
+          <span>&#128274;</span>
+          <h2>{% trans 'Please Sign In' %}</h2>
+        </div>
+        <div class="login-body">
+          <form role="form" method="post" action="./">
+            {% if form.errors %}
+              <div class="login-error">{% trans "Your username and password didn't match. Please try again." %}</div>
+            {% endif %}
+            <label for="username" class="login-label">Username</label>
+            <input type="text" id="username" name="username" placeholder="Username" required autofocus class="login-input">
+            <label for="password" class="login-label">Password</label>
+            <input type="password" id="password" name="password" placeholder="Password" required class="login-input">
+            <div class="login-checkbox">
+              <input type="checkbox" value="remember-me" id="rememberMe">
+              <label for="rememberMe">{% trans 'Remember Password' %}</label>
             </div>
-            <div class="form-group">
-              <div class="form-label-group">
-                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="required">
-                <label for="password">Password</label>
-              </div>
-            </div>
-            <div class="form-group">
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" value="remember-me">
-                  {% trans 'Remember Password' %}
-                </label>
-              </div>
-            </div>
-            <input class="btn btn-lg btn-primary btn-block" type='submit' value='{% trans "Login" %}' />
+            <button type="submit" class="login-btn">{% trans "Login" %}</button>
             {% if next %}
               <input type="hidden" name="next" value="{{ next }}" />
             {% endif %}
-          {% csrf_token %}</form>
+            {% csrf_token %}
+          </form>
         </div>
       </div>
     </div>
-
+    
+    <!-- Footer -->
+    <footer class="sticky-footer">
+      <div class="container my-auto">
+        <div class="copyright text-center my-auto">
+          <span>Powered by {% trans "<a href='https://github.com/django-helpdesk/django-helpdesk'>django-helpdesk</a>." %}</span>
+        </div>
+      </div>
+    </footer>
 {% endif %}
 {% endblock %}

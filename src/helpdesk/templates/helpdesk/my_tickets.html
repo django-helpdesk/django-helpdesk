@@ -1,34 +1,143 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
 
 {% block helpdesk_body %}
-<h2>{% trans "My Tickets" %}</h2>
+<style>
+    body {
+        background-color: #f6f8fa;
+        color: #333;
+        font-family: 'Inter', sans-serif;
+    }
 
-<div class="container mt-4">
-    <table class="table table-striped" id="ticketsTable">
-        <thead>
-            <tr>
-                <th>{% trans "Title" %}</th>
-                <th>{% trans "Queue" %}</th>
-                <th>{% trans "Status" %}</th>
-                <th>{% trans "Created" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Rows will be added here dynamically using jQuery -->
-        </tbody>
-    </table>
-    <nav aria-label="{% trans 'Page navigation' %}">
-        <ul class="pagination" id="pagination">
-            <!-- Pagination buttons will be added here dynamically -->
-        </ul>
-    </nav>
+    .content-container {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        margin: 1rem auto;
+        overflow: hidden;
+        max-width: 90%;
+    }
+
+    .content-body {
+        padding: 2rem;
+    }
+
+    h2 {
+        color: #183b6b;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        text-align: left;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+        border: 1px solid #dee2e6;
+    }
+
+    th {
+        background-color: #183b6b;
+        color: #fff;
+        font-weight: 500;
+        text-align: left;
+        padding: 0.75rem 1rem;
+        border: 1px solid #0e2c57;
+    }
+
+    td {
+        padding: 0.75rem 1rem;
+        border: 1px solid #dee2e6;
+        color: #333;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f2f6fc;
+    }
+
+    tr:hover {
+        background-color: #f3eab9;
+        color: #183b6b;
+    }
+
+    a {
+        color: #183b6b;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: center;
+        list-style: none;
+        padding: 0;
+        margin-top: 1rem;
+    }
+
+    .page-item {
+        margin: 0 5px;
+    }
+
+    .page-link {
+        color: #183b6b;
+        background-color: #fff;
+        border: 1px solid #183b6b;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+
+    .page-link:hover {
+        background-color: #ffd700;
+        color: #183b6b;
+    }
+
+    .page-item.active .page-link {
+        background-color: #183b6b;
+        color: #fff;
+        border-color: #183b6b;
+    }
+
+    /* Override breadcrumb styling */
+    .breadcrumb {
+        display: none;
+    }
+
+    /* Remove container-fluid padding */
+    .container-fluid {
+        padding: 0;
+    }
+</style>
+
+<div class="content-container">
+    <div class="content-body">
+        <h2>{% trans "My Tickets" %}</h2>
+        <table class="table" id="ticketsTable">
+            <thead>
+                <tr>
+                    <th>{% trans "Title" %}</th>
+                    <th>{% trans "Queue" %}</th>
+                    <th>{% trans "Status" %}</th>
+                    <th>{% trans "Created" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be added here dynamically using jQuery -->
+            </tbody>
+        </table>
+        <nav aria-label="{% trans 'Page navigation' %}">
+            <ul class="pagination" id="pagination">
+                <!-- Pagination buttons will be added here dynamically -->
+            </ul>
+        </nav>
+    </div>
 </div>
 
 <script>
-// don't use jquery's document ready but rather the more basic window load
-// because we need to wait for the page to load before we can fetch the tickets
-window.addEventListener('load', function()
- {
+window.addEventListener('load', function() {
     function fetchTickets(page = 1) {
         const endpoint = '{% url "helpdesk:user_tickets-list" %}?page=' + page;
 
@@ -56,13 +165,17 @@ window.addEventListener('load', function()
                     </li>
                 `);
             }
-
         });
     }
 
     fetchTickets();
-});
 
+    // Event listener for pagination
+    $(document).on('click', '.page-link', function(e) {
+        e.preventDefault();
+        fetchTickets($(this).data('page'));
+    });
+});
 </script>
 
 {% endblock %}

@@ -4,23 +4,211 @@
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="#">{% trans "Tickets" %}</a>
+        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
     </li>
     <li class="breadcrumb-item active">{% trans "Create Ticket" %}</li>
 {% endblock %}
 
 {% block helpdesk_head %}
+<style>
+    /* Ticket Form Styling */
+    .ticket-form-container {
+        width: 95%;
+        max-width: 1200px;
+        margin: 2rem auto;
+    }
+    
+    .form-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .form-header {
+        background-color: #183b6b;
+        color: white;
+        padding: 1rem 1.5rem;
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+    
+    .form-body {
+        padding: 1.5rem;
+    }
+    
+    .form-intro {
+        background-color: #f8f9fc;
+        border-left: 4px solid #183b6b;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        color: #555;
+    }
+    
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -10px 20px -10px;
+    }
+    
+    .form-col {
+        flex: 1;
+        padding: 0 10px;
+        min-width: 250px;
+    }
+    
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+    
+    .form-label {
+        display: block;
+        color: #183b6b;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        transition: border-color 0.2s;
+        height: auto !important;
+    }
+    
+    .form-control:focus {
+        border-color: #183b6b;
+        box-shadow: 0 0 0 0.2rem rgba(24, 59, 107, 0.25);
+        outline: none;
+    }
+    
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+        padding-right: 2rem;
+        text-overflow: ellipsis;
+    }
+    
+    /* Fix for dropdown visibility */
+    select option {
+        background-color: white;
+        color: #333;
+        padding: 6px;
+    }
+    
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    .form-help {
+        display: block;
+        margin-top: 0.25rem;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    .form-error {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+    
+    .text-muted {
+        color: #6b7280;
+        font-weight: normal;
+    }
+    
+    .file-upload {
+        position: relative;
+        display: block;
+    }
+    
+    .file-upload input[type="file"] {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+    }
+    
+    .submit-btn {
+        background-color: #183b6b;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        width: auto;
+        min-width: 200px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+    
+    .submit-btn:hover {
+        background-color: #0e2c57;
+    }
+    
+    .submit-btn i {
+        margin-right: 8px;
+    }
+    
+    /* Select and dropdown fixes */
+    .select-wrapper {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+    
+    select.form-control {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Override any conflicting styles */
+    #id_queue, #id_priority {
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        padding: 0.75rem !important;
+        font-size: 1rem !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .ticket-form-container {
+            width: 100%;
+            padding: 0 10px;
+        }
+        
+        .form-row {
+            flex-direction: column;
+        }
+        
+        .form-col {
+            padding: 0 5px;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block helpdesk_body %}
-    <div class="container">
-        <div class="card card-register mx-auto mt-5">
-            <div class="card-header">{% trans "Submit a Tickettttt" %}</div>
-            <div class="card-body">
-                <p>
-                    {% trans "Unless otherwiseeee stated, all fields are required." %}
-                    {% trans "Please provide as descriptive a title and description as possible." %}
-                </p>
+    <div class="ticket-form-container">
+        <div class="form-card">
+            <div class="form-header">
+                {% trans "Submit a Ticket" %}
+            </div>
+            <div class="form-body">
+                
 
                 {% if form.errors %}
                     {% include 'helpdesk/include/alert_form_errors.html' %}
@@ -28,43 +216,169 @@
 
                 <form method='post' enctype='multipart/form-data'>
                     {% csrf_token %}
+                    
                     {% for field in form %}
                         {% if field.is_hidden %}
                             {{ field }}
                         {% else %}
-                            <div class="form-group">
-                                <label for='id_{{ field.name }}'>
-                                    {{ field.label }}
-                                    {% if not field.field.required %}
-                                        ({% trans "Optional" %})
+                            {% if field.name == 'queue' or field.name == 'title' or field.name == 'submitter_email' %}
+                                <div class="form-row">
+                                    {% if field.name == 'queue' %}
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for='id_{{ field.name }}' class="form-label">
+                                                {{ field.label }}
+                                                {% if not field.field.required %}
+                                                    <span class="text-muted">({% trans "Optional" %})</span>
+                                                {% endif %}
+                                            </label>
+                                            <div class="select-wrapper">
+                                                <select name="{{ field.name }}" id="id_{{ field.name }}" class="form-control">
+                                                    {% for choice in field.field.choices %}
+                                                    <option value="{{ choice.0 }}" {% if field.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            {% if field.errors %}
+                                                <div class='form-error'>{{ field.errors }}</div>
+                                            {% endif %}
+                                            {% if field.help_text %}
+                                                <small class='form-help'>{% trans field.help_text %}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                     {% endif %}
-                                </label>
-                                {{ field }}
-                                {% if field.errors %}
-                                    <small class='error'>{{ field.errors }}</small>
-                                {% endif %}
-                                {% if field.help_text %}
-                                    <small class='form_help_text help-block'>{% trans field.help_text %}</small>
-                                {% endif %}
-                            </div>
+                                    
+                                    {% if field.name == 'title' %}
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for='id_{{ field.name }}' class="form-label">
+                                                {{ field.label }}
+                                                {% if not field.field.required %}
+                                                    <span class="text-muted">({% trans "Optional" %})</span>
+                                                {% endif %}
+                                            </label>
+                                            <input type="text" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control" value="{{ field.value|default:'' }}">
+                                            {% if field.errors %}
+                                                <div class='form-error'>{{ field.errors }}</div>
+                                            {% endif %}
+                                            {% if field.help_text %}
+                                                <small class='form-help'>{% trans field.help_text %}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if field.name == 'submitter_email' %}
+                                    <div class="form-col">
+                                        <div class="form-group">
+                                            <label for='id_{{ field.name }}' class="form-label">
+                                                {{ field.label }}
+                                                {% if not field.field.required %}
+                                                    <span class="text-muted">({% trans "Optional" %})</span>
+                                                {% endif %}
+                                            </label>
+                                            <input type="email" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control" value="{{ field.value|default:'' }}">
+                                            {% if field.errors %}
+                                                <div class='form-error'>{{ field.errors }}</div>
+                                            {% endif %}
+                                            {% if field.help_text %}
+                                                <small class='form-help'>{% trans field.help_text %}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            {% elif field.name == 'body' or field.name == 'description' %}
+                                <div class="form-group">
+                                    <label for='id_{{ field.name }}' class="form-label">
+                                        {{ field.label }}
+                                        {% if not field.field.required %}
+                                            <span class="text-muted">({% trans "Optional" %})</span>
+                                        {% endif %}
+                                    </label>
+                                    <textarea name="{{ field.name }}" id="id_{{ field.name }}" class="form-control" rows="8">{{ field.value|default:'' }}</textarea>
+                                    {% if field.errors %}
+                                        <div class='form-error'>{{ field.errors }}</div>
+                                    {% endif %}
+                                    {% if field.help_text %}
+                                        <small class='form-help'>{% trans field.help_text %}</small>
+                                    {% endif %}
+                                </div>
+                            {% elif field.name == 'attachment' %}
+                                <div class="form-group">
+                                    <label for='id_{{ field.name }}' class="form-label">
+                                        {{ field.label }}
+                                        {% if not field.field.required %}
+                                            <span class="text-muted">({% trans "Optional" %})</span>
+                                        {% endif %}
+                                    </label>
+                                    <div class="file-upload">
+                                        <input type="file" name="{{ field.name }}" id="id_{{ field.name }}" class="form-control">
+                                    </div>
+                                    {% if field.errors %}
+                                        <div class='form-error'>{{ field.errors }}</div>
+                                    {% endif %}
+                                    {% if field.help_text %}
+                                        <small class='form-help'>{% trans field.help_text %}</small>
+                                    {% endif %}
+                                </div>
+                            {% elif field.name == 'priority' %}
+                                <div class="form-group">
+                                    <label for='id_{{ field.name }}' class="form-label">
+                                        {{ field.label }}
+                                        {% if not field.field.required %}
+                                            <span class="text-muted">({% trans "Optional" %})</span>
+                                        {% endif %}
+                                    </label>
+                                    <div class="select-wrapper">
+                                        <select name="{{ field.name }}" id="id_{{ field.name }}" class="form-control">
+                                            {% for choice in field.field.choices %}
+                                            <option value="{{ choice.0 }}" {% if field.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    {% if field.errors %}
+                                        <div class='form-error'>{{ field.errors }}</div>
+                                    {% endif %}
+                                    {% if field.help_text %}
+                                        <small class='form-help'>{% trans field.help_text %}</small>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="form-group">
+                                    <label for='id_{{ field.name }}' class="form-label">
+                                        {{ field.label }}
+                                        {% if not field.field.required %}
+                                            <span class="text-muted">({% trans "Optional" %})</span>
+                                        {% endif %}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class='form-error'>{{ field.errors }}</div>
+                                    {% endif %}
+                                    {% if field.help_text %}
+                                        <small class='form-help'>{% trans field.help_text %}</small>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
                         {% endif %}
                     {% endfor %}
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">
-                        <i class="fa fa-send"></i> {% trans "Submit Ticket" %}
-                    </button>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> {% trans "Submit Ticket" %}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block helpdesk_js %}
     {{ form.media.js }}
     <script>
-        // this function listens for changes on any file input, and
-        // emits the appropriate event to update the input's text.
-        // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
         $(document).on('change', ':file', function () {
             const input = $(this),
                 inputWidgetNum = $(this).attr('id').split("file")[1],
