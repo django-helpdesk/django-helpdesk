@@ -214,7 +214,7 @@ urlpatterns += [
 ]
 
 
-if helpdesk_settings.HELP_DESK_API_ENABLED:
+if helpdesk_settings.HELPDESK_API_ENABLED:
     router = DefaultRouter()
     router.register(r"tickets", TicketViewSet, basename="ticket")
     router.register(r"user_tickets", UserTicketViewSet, basename="user_tickets")
