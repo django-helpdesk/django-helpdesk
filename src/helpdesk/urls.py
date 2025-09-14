@@ -220,7 +220,9 @@ if helpdesk_settings.HELP_DESK_API_ENABLED:
     router.register(r"user_tickets", UserTicketViewSet, basename="user_tickets")
     router.register(r"followups", FollowUpViewSet, basename="followups")
     router.register(
-        r"followups-attachments", FollowUpAttachmentViewSet, basename="followupattachments"
+        r"followups-attachments",
+        FollowUpAttachmentViewSet,
+        basename="followupattachments",
     )
     router.register(r"users", CreateUserView, basename="user")
     urlpatterns += [path("api/", include(router.urls))]
