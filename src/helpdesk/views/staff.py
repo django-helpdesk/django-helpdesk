@@ -1322,15 +1322,19 @@ class UpdateTicketView(
         extra = get_form_extra_kwargs(self.request.user)
         kwargs.update(extra)
         # Copy all data submitted that is not in the forms defined fields
-        form_fields = kwargs["form"].base_fields
-        all_fields = kwargs["form"].data
-        self.extra_context = {
-            "xform": {
-                k: v
-                for k, v in all_fields.items()
-                if k != "csrfmiddlewaretoken" and k not in form_fields
+        form = kwargs.get("form")
+        if form is not None and hasattr(form, "data") and form.data:
+            form_fields = form.base_fields
+            all_fields = form.data
+            self.extra_context = {
+                "xform": {
+                    k: v
+                    for k, v in all_fields.items()
+                    if k != "csrfmiddlewaretoken" and k not in form_fields
+                }
             }
-        }
+        else:
+            self.extra_context = {"xform": {}}
         return super().get_context_data(**kwargs)
 
     def get_form_kwargs(self):
