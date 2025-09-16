@@ -65,7 +65,8 @@ window.addEventListener('load', function() {
         let tickets = allTickets.slice();
 
         if ($('#hideClosed').is(':checked')) {
-            tickets = tickets.filter(ticket => ticket.status.toLowerCase() !== 'closed');
+            const hiddenStatuses = ['closed', 'duplicate'];
+            tickets = tickets.filter(ticket => !hiddenStatuses.includes(ticket.status.toLowerCase()));
         }
 
         table.clear().rows.add(tickets).draw();
