@@ -5,7 +5,7 @@
 
 <div class="container mt-4">
     <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" id="hideClosed">
+        <input class="form-check-input" type="checkbox" id="hideClosed" checked>
         <label class="form-check-label" for="hideClosed">
             {% trans "Hide Closed Tickets" %}
         </label>
@@ -33,115 +33,46 @@
 
 <script>
 window.addEventListener('load', function() {
-    let currentSortColumn = null;
-    let currentSortDirection = 'asc';
+    const table = $('#ticketsTable').DataTable({
+        paging: true,
+        searching: true,   // unless you want search
+        ordering: true,
+        columns: [
+            { data: 'title',
+              render: function(data, type, row) {
+                  const safeTitle = $('<div>').html(data).html();
+                  return `<a href='{% url "helpdesk:public_view" %}?ticket=${row.id}&email=${row.submitter}&key=${row.secret_key}'>${safeTitle}</a>`;
+              }
+            },
+            { data: 'queue.title' },
+            { data: 'status' },
+            { data: 'created' }
+        ]
+    });
+
+    let allTickets = [];
 
     function fetchTickets(page = 1) {
         const endpoint = '{% url "helpdesk:user_tickets-list" %}?page=' + page;
 
         $.get(endpoint, function(data) {
-            let tickets = data.results.slice();
-
-            if ($('#hideClosed').is(':checked')) {
-                tickets = tickets.filter(ticket => ticket.status.toLowerCase() !== 'closed');
-            }
-
-            if (currentSortColumn) {
-                tickets.sort((a, b) => {
-                    let valA = a[currentSortColumn];
-                    let valB = b[currentSortColumn];
-
-                    if (currentSortColumn === 'queue') {
-                        valA = a.queue.title;
-                        valB = b.queue.title;
-                    }
-                    if (currentSortColumn === 'created') {
-                        valA = new Date(valA);
-                        valB = new Date(valB);
-                    }
-
-                    if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
-                    if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
-                    return 0;
-                });
-            }
-
-            $('#ticketsTable tbody').empty();
-            tickets.forEach(function(ticket) {
-                ticket.title = $('<div>').html(ticket.title).html();
-                $('#ticketsTable tbody').append(`
-                    <tr>
-                        <td>
-                            <a href='{% url "helpdesk:public_view" %}?ticket=${ticket.id}&email=${ticket.submitter}&key=${ticket.secret_key}'>${ticket.title}</a>
-                        </td>
-                        <td>${ticket.queue.title}</td>
-                        <td>${ticket.status}</td>
-                        <td>${ticket.created}</td>
-                    </tr>
-                `);
-            });
-
-            $('#pagination').on('click', 'a.page-link', function(e) {
-                e.preventDefault();
-                const page = $(this).data('page');
-                fetchTickets(page);
-            });
-
-            $('#hideClosed').change(function() {
-                fetchTickets();
-            });
-
-            updateSortIcons();
+            allTickets = data.results.slice();
+            renderTickets();
         });
     }
 
-    function updateSortIcons() {
-        $('#ticketsTable thead th').each(function(index) {
-            const columnMap = {
-                0: 'title',
-                1: 'queue',
-                2: 'status',
-                3: 'created'
-            };
-            const colName = columnMap[index];
-            let text = $(this).data('label'); // keep original text
-            let icon = '';
+    function renderTickets() {
+        let tickets = allTickets.slice();
 
-            if (colName === currentSortColumn) {
-                icon = currentSortDirection === 'asc' ? ' ▲' : ' ▼';
-            } else {
-                icon = ' ↕'; // indicate sortable but inactive
-            }
-
-            $(this).html(text + icon);
-        });
-    }
-
-    // Save original labels so we can reset them when adding icons
-    $('#ticketsTable thead th').each(function() {
-        $(this).data('label', $(this).text().trim());
-    });
-
-    $('#ticketsTable thead th').click(function() {
-        const columnMap = {
-            0: 'title',
-            1: 'queue',
-            2: 'status',
-            3: 'created'
-        };
-
-        const colIndex = $(this).index();
-        const colName = columnMap[colIndex];
-
-        if (currentSortColumn === colName) {
-            currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            currentSortColumn = colName;
-            currentSortDirection = 'asc';
+        if ($('#hideClosed').is(':checked')) {
+            tickets = tickets.filter(ticket => ticket.status.toLowerCase() !== 'closed');
         }
 
-        fetchTickets();
-    });
+        table.clear().rows.add(tickets).draw();
+    }
+
+    // Re-fetch when checkbox changes
+    $('#hideClosed').change(renderTickets);
 
     fetchTickets();
 });
