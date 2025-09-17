@@ -64,12 +64,12 @@ Installation
 
 * |django_icon| To **integrate** with an existing Django application, follow the guidelines in `installation documentation <./docs/install.rst>`_ and `configuration documentation <./docs/configuration.rst>`_.
 
-.. |standalone_icon| image:: helpdesk/static/helpdesk/img/icon512.png
+.. |standalone_icon| image:: src/helpdesk/static/helpdesk/img/icon512.png
    :height: 24px
    :width: 24px
    :align: middle
 
-.. |django_icon| image:: helpdesk/static/helpdesk/img/django-logo-positive.png
+.. |django_icon| image:: src/helpdesk/static/helpdesk/img/django-logo-positive.png
    :height: 24px
    :width: 60px
    :align: middle
