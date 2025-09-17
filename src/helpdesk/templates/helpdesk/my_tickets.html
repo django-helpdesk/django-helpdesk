@@ -4,6 +4,13 @@
 <h2>{% trans "My Tickets" %}</h2>
 
 <div class="container mt-4">
+    <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="hideClosed" checked>
+        <label class="form-check-label" for="hideClosed">
+            {% trans "Hide Closed Tickets" %}
+        </label>
+    </div>
+
     <table class="table table-striped" id="ticketsTable">
         <thead>
             <tr>
@@ -25,44 +32,51 @@
 </div>
 
 <script>
-// don't use jquery's document ready but rather the more basic window load
-// because we need to wait for the page to load before we can fetch the tickets
-window.addEventListener('load', function()
- {
+window.addEventListener('load', function() {
+    const table = $('#ticketsTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        columns: [
+            { data: 'title',
+              render: function(data, type, row) {
+                  const safeTitle = $('<div>').html(data).html();
+                  return `<a href='{% url "helpdesk:public_view" %}?ticket=${row.id}&email=${row.submitter}&key=${row.secret_key}'>${safeTitle}</a>`;
+              }
+            },
+            { data: 'queue.title' },
+            { data: 'status' },
+            { data: 'created' }
+        ]
+    });
+
+    let allTickets = [];
+
     function fetchTickets(page = 1) {
         const endpoint = '{% url "helpdesk:user_tickets-list" %}?page=' + page;
 
         $.get(endpoint, function(data) {
-            $('#ticketsTable tbody').empty();
-            data.results.forEach(function(ticket) {
-                ticket.title = $('<div>').html(ticket.title).html();
-                $('#ticketsTable tbody').append(`
-                    <tr>
-                        <td>
-                            <a href='{% url "helpdesk:public_view" %}?ticket=${ticket.id}&email=${ticket.submitter}&key=${ticket.secret_key}'>${ticket.title}</a>
-                        </td>
-                        <td>${ticket.queue.title}</td>
-                        <td>${ticket.status}</td>
-                        <td>${ticket.created}</td>
-                    </tr>
-                `);
-            });
-
-            $('#pagination').empty();
-            for (let i = 1; i <= data.total_pages; i++) {
-                $('#pagination').append(`
-                    <li class="page-item ${i === data.page ? 'active' : ''}">
-                        <a class="page-link" href="#" data-page="${i}">${i}</a>
-                    </li>
-                `);
-            }
-
+            allTickets = data.results.slice();
+            renderTickets();
         });
     }
 
+    function renderTickets() {
+        let tickets = allTickets.slice();
+
+        if ($('#hideClosed').is(':checked')) {
+            const hiddenStatuses = ['closed', 'duplicate'];
+            tickets = tickets.filter(ticket => !hiddenStatuses.includes(ticket.status.toLowerCase()));
+        }
+
+        table.clear().rows.add(tickets).draw();
+    }
+
+    // Re-fetch when checkbox changes
+    $('#hideClosed').change(renderTickets);
+
     fetchTickets();
 });
-
 </script>
 
 {% endblock %}
