@@ -40,6 +40,9 @@
                 <dd>{{ form.title }}</dd>
                 <dt><label for="id_comment">{% trans "Comment:" %}</label></dt>
                 <dd>{{ form.comment }}</dd>
+                <style>
+                    #id_comment { width: 100%; min-height: 400px; resize: vertical; box-sizing: border-box; }
+                </style>
                 <dt><label for="id_public">Public:</label></dt>
                 <dd>{{ form.public }}</dd>
                     <p>Public tickets are viewable by the submitter and all staff, but non-public tickets can only be seen by staff.</p>
