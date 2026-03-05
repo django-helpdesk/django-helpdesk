@@ -125,7 +125,7 @@
                 <dt>
                     <label for='commentBox'>{% trans "Comment / Resolution" %}</label>
                 </dt>
-                <dd><textarea rows='8' cols='70' name='comment' id='commentBox'>{% if form.errors %}{{ xform.comment }}{% endif %}</textarea></dd>
+                <dd><textarea rows='8' name='comment' id='commentBox' style='width:100%;min-height:200px;resize:vertical;box-sizing:border-box;'>{% if form.errors %}{{ xform.comment }}{% endif %}</textarea></dd>
                 {% url "helpdesk:help_context" as context_help_url %}
                 {% blocktrans %}
                 <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
