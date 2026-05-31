@@ -63,3 +63,16 @@ demodesk/db.sqlite3
 .vscode/
 .cursor/
 .devcontainer/
+.env
+
+# Environment variables
+.env
+
+# Collected static files
+demodesk/static/
+
+# Database
+*.sqlite3
+
+# Python cache
+__pycache__/
