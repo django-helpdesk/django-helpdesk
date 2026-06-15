@@ -66,8 +66,8 @@ teams = [
 
 [dependency-groups]
 teams = [
-    "pinax-invitations>=8.0.0",
-    "pinax-teams>=3.0.0",
+    "pinax-invitations>=8.0.1",
+    "pinax-teams>=3.0.1",
 ]
 test = [
     "argparse>=1.4.0",
