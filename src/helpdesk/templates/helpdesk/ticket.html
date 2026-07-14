@@ -29,12 +29,12 @@
     {% include "helpdesk/ticket_desc_table.html" %}
 
     {% if ticket.merged_to %}
-        <div class="card card-body bg-light">
-            <h3 class="text-center">
-                {% trans "This ticket has been merged into ticket" %}
-                <a href="{{ ticket.merged_to.get_absolute_url }}">{{ ticket.merged_to }}</a>
-            </h3>
-        </div>
+    <div class="card card-body bg-light">
+        <h3 class="text-center">
+            {% trans "This ticket has been merged into ticket" %}
+            <a href="{{ ticket.merged_to.get_absolute_url }}">{{ ticket.merged_to }}</a>
+        </h3>
+    </div>
     {% else %}
     <ul class="nav nav-underline" id="ticketTab" role="tablist">
       <li class="nav-item" role="presentation">
@@ -194,86 +194,7 @@
                 <input class="form-control" name="time_spent" type="time" value="{% if form.errors %}{{ xform.time_spent }}{% endif %}"/>
               </div>
               {% endif %}
-              <hr>
 
-              {# Extra Ticket Details form #}
-              <p>
-                <a class="btn btn-light" data-bs-toggle="collapse" href="#ticketDetails" role="button" aria-expanded="false" aria-controls="ticketDetails">
-                  {% translate "Edit Ticket Details" %}</a>
-              </p>
-              <div class="row g-3 collapse mb-3" id="ticketDetails">
-                <div class="col-12">
-                  <label class="form-label" for="id_title">{% translate "Title" %}</label>
-                  <input class="form-control" name="title" value="{{ ticket.title|escape }}" />
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label" for="id_owner">{% translate "Owner" %}</label>
-                  <select class="form-select" id="id_owner" name="owner">
-                    <option value="0">{% trans "Unassigned" %}</option>
-                    {% for u in assignable_users %}
-                      <option value="{{ u.id }}"{% if u.id == ticket.assigned_to.id %} selected{% endif %}>{{ u }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label" for="id_priority">{% translate "Priority" %}</label>
-                  <select class="form-select" id="id_priority" name="priority">
-                    {% for p in priorities %}
-                      {% if p.0 == ticket.priority %}
-                        <option value="{{ p.0 }}" selected="selected">{{ p.1 }}</option>
-                      {% else %}
-                        <option value="{{ p.0 }}">{{ p.1 }}</option>
-                      {% endif %}
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label" for="id_queue">{% translate "Queue" %}</label>
-                  <select class="form-select" id="id_queue" name="queue">
-                    {% for queue_id, queue_name in queues %}
-                      <option value="{{ queue_id }}"{% if queue_id == ticket.queue.id %} selected{% endif %}>{{ queue_name }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label" for="id_due_date">{% translate "Due on" %}</label>
-                  {{ form.due_date }}
-                </div>
-                <div class="col-6">
-                  {# ticket merge form #}
-                  {{ customfields_form }}
-                </div>
-              </div>
-
-              {# Checklists #}
-              {% if ticket.checklists.exists %}
-              <p>
-                <a class="btn btn-light" data-bs-toggle="collapse" href="#collapseChecklists" role="button" aria-expanded="false" aria-controls="collapseChecklists">
-                  {% translate "Update checklists" %}
-                </a>
-              </p>
-              <div class="collapse" id="collapseChecklists">
-                <div class="row">
-                  {% for checklist in ticket.checklists.all %}
-                    <div class="col-12 col-md-4">
-                      <div class="card border-0 mb-3">
-                        <h6 class="card-title">{{ checklist }}</h6>
-                        <div class="list-group list-group-flush">
-                          {% for task in checklist.tasks.all %}
-                            <div class="list-group-item"{% if task.completion_date %} title="{% translate "Completed on" %} {{ task.completion_date }}" {% endif %}>
-                              <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="{{ task.id }}" name="checklist-{{ checklist.id }}" value="{{ task.id }}" {% if task.completion_date %} checked{% endif %}>
-                                <label class="form-check-label" for="{{ task.id }}">{{ task }}</label>
-                              </div>
-                            </div>
-                          {% endfor %}
-                        </div>
-                      </div>
-                    </div>
-                  {% endfor %}
-                </div>
-              </div>
-              {% endif %}
 
               {# Attachments #}
               {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
@@ -300,35 +221,121 @@
         </div>
         </div>
       </div>
-      <div class="tab-pane fade" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">Extra Details</div>
-      <div class="tab-pane fade" id="checklist-tab-pane" role="tabpanel" aria-labelledby="checklist-tab" tabindex="0">Checklist</div>
-    </div>
-
-
-        <div class="modal fade" id="createChecklistModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="modal-header">
-                            <h5 class="modal-title">{% trans "Add a new checklist" %}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>{% trans "You can select a template to generate a checklist with a predefined set of tasks." %}</p>
-                            <p>{% trans "Ignore it and only give a name to create an empty checklist." %}</p>
-                            {{ checklist_form.as_p }}
-                        </div>
-                        <div class="modal-footer">
-                            <a class="btn btn-secondary" href="{% url 'helpdesk:checklist_templates' %}">
-                                {% trans "Manage templates" %}
-                            </a>
-                            <button type="submit" class="btn btn-primary">{% trans "Add" %}</button>
-                        </div>
-                    </form>
+      <div class="tab-pane fade" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+        <div class="card my-3 border-0">
+          <div class="card-body">
+            <form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype="multipart/form-data">
+              {% csrf_token %}
+              {# Extra Ticket Details form #}
+              <div class="row">
+                <div class="col-12 col-lg-8">
+                  <div class="row g-3 mb-3">
+                    <div class="col-12">
+                      <label class="form-label" for="id_title">{% translate "Title" %}</label>
+                      <input class="form-control" name="title" value="{{ ticket.title|escape }}" />
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="id_owner">{% translate "Owner" %}</label>
+                      <select class="form-select" id="id_owner" name="owner">
+                        <option value="0">{% trans "Unassigned" %}</option>
+                        {% for u in assignable_users %}
+                          <option value="{{ u.id }}"{% if u.id == ticket.assigned_to.id %} selected{% endif %}>{{ u }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="id_priority">{% translate "Priority" %}</label>
+                      <select class="form-select" id="id_priority" name="priority">
+                        {% for p in priorities %}
+                          {% if p.0 == ticket.priority %}
+                            <option value="{{ p.0 }}" selected="selected">{{ p.1 }}</option>
+                          {% else %}
+                            <option value="{{ p.0 }}">{{ p.1 }}</option>
+                          {% endif %}
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="id_queue">{% translate "Queue" %}</label>
+                      <select class="form-select" id="id_queue" name="queue">
+                        {% for queue_id, queue_name in queues %}
+                          <option value="{{ queue_id }}"{% if queue_id == ticket.queue.id %} selected{% endif %}>{{ queue_name }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label class="form-label" for="id_due_date">{% translate "Due on" %}</label>
+                      {{ form.due_date }}
+                    </div>
+                    <div class="col-6">
+                      {# ticket merge form #}
+                      {{ customfields_form }}
+                    </div>
+                  </div>
+                  <div class="d-flex justify-content-end">
+                    <button class="btn btn-primary" type="submit">{% translate "Save Changes" %}</button>
+                  </div>
                 </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="checklist-tab-pane" role="tabpanel" aria-labelledby="checklist-tab" tabindex="0">
+        {# Checklists #}
+        {% if ticket.checklists.exists %}
+        <div class="card my-3 border-0">
+          <div class="card-body">
+            <form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype="multipart/form-data">
+                <div class="row">
+                  {% for checklist in ticket.checklists.all %}
+                    <div class="col-12 col-md-4">
+                      <div class="card border-0 mb-3">
+                        <h6 class="card-title">{{ checklist }}</h6>
+                        <div class="list-group list-group-flush">
+                          {% for task in checklist.tasks.all %}
+                            <div class="list-group-item"{% if task.completion_date %} title="{% translate "Completed on" %} {{ task.completion_date }}" {% endif %}>
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="{{ task.id }}" name="checklist-{{ checklist.id }}" value="{{ task.id }}" {% if task.completion_date %} checked{% endif %}>
+                                <label class="form-check-label" for="{{ task.id }}">{{ task }}</label>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="modal fade" id="createChecklistModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title">{% trans "Add a new checklist" %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{% trans "You can select a template to generate a checklist with a predefined set of tasks." %}</p>
+                        <p>{% trans "Ignore it and only give a name to create an empty checklist." %}</p>
+                        {{ checklist_form.as_p }}
+                    </div>
+                    <div class="modal-footer">
+                        <a class="btn btn-secondary" href="{% url 'helpdesk:checklist_templates' %}">
+                            {% trans "Manage templates" %}
+                        </a>
+                        <button type="submit" class="btn btn-primary">{% trans "Add" %}</button>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
     {% endif %}
 {% endblock %}
 
