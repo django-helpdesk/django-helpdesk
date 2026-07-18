@@ -2,20 +2,20 @@
 {% load static i18n bootstrap4form humanize %}
 
 {% block helpdesk_title %}
-  {{ ticket.queue.slug }}-{{ ticket.id }} : {% translate "View Ticket Details" %}
+  {{ ticket.queue.slug }}-{{ ticket.id }}: {% translate "View Ticket Details" %}
 {% endblock helpdesk_title %}
 
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock h1_title %}
 
 {% block helpdesk_breadcrumb %}
-  <li class="breadcrumb-item"><a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a> </li>
+  <li class="breadcrumb-item"><a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a></li>
   <li class="breadcrumb-item active" aria-current="page">{{ ticket.queue.slug }}-{{ ticket.id }}</li>
 {% endblock helpdesk_breadcrumb %}
 
 {% block helpdesk_body %}
   {% if form.errors %}
     {{ form.errors }}
-    {% include 'helpdesk/include/alert_form_errors.html' %}
+    {% include "helpdesk/include/alert_form_errors.html" %}
   {% endif %}
   {% if helpdesk_settings.HELPDESK_TRANSLATE_TICKET_COMMENTS %}
     <div id="google_translate_element"></div>
@@ -50,7 +50,7 @@
                 type="button"
                 role="tab"
                 aria-controls="respond-tab-pane"
-                aria-selected="false">Respond</button>
+                aria-selected="false">{% translate "Respond" %}</button>
       </li>
     </ul>
     <div class="tab-content" id="myTabContent">
@@ -165,14 +165,18 @@
                   enctype="multipart/form-data">
               {% csrf_token %}
               {% if preset_replies %}
-                <dt>
-                  <label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label>
-                  <span class='form_optional'>{% trans "(Optional)" %}</span>
-                </dt>
-                <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
-                <dd class='form_help_text'>
-                  {% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}
-                </dd>
+              <div class="mb-3">
+                <label class="form-label" for="id_preset">{% translate "Use a Pre-set Reply (Optional)" %}</label>
+                <select class="form-select" name="preset" id="id_preset">
+                  <option value=''>------</option>
+                  {% for preset in preset_replies %}
+                  <option value="{{ preset.id }}">{{ preset.name }}</option>
+                  {% endfor %}
+                </select>
+                <span class="form-text">
+                  {% translate "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}
+                </span>
+              </div>
               {% endif %}
               {# Comment text box #}
               <div class="mb-3">
@@ -215,6 +219,7 @@
                          type="checkbox"
                          name="public"
                          value="1"
+                         id="id_public"
                          checked="checked" />
                   <label class="form-label" for="id_public">{% translate "Is this update public? (Optional)" %}</label>
                   <div class="form-text">{% translate "If this is public, the submitter will be e-mailed your comment or resolution." %}</div>
