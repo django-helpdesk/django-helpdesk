@@ -6,7 +6,6 @@ from django.urls import resolve, reverse
 
 from helpdesk.forms import CreateChecklistForm, EditTicketCustomFieldForm, TicketForm
 from helpdesk.models import Queue, Ticket
-from helpdesk.views.staff import view_ticket
 
 
 User = get_user_model()
