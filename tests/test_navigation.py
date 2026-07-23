@@ -1,14 +1,14 @@
-# -*- coding: utf-8 -*-
-
+import sys
+from importlib import reload
 
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.urls import reverse
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
-from .helpers import create_ticket, get_staff_user, reload_urlconf, User
-from importlib import reload
-import sys
+
+from .helpers import User, create_ticket, get_staff_user, reload_urlconf
 
 
 class KBDisabledTestCase(TestCase):
@@ -42,7 +42,7 @@ class KBDisabledTestCase(TestCase):
             self.assertEqual(response.status_code, 200)
 
 
-class StaffUserTestCaseMixin(object):
+class StaffUserTestCaseMixin:
     HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE = False
 
     def setUp(self):

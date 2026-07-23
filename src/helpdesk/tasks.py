@@ -1,5 +1,6 @@
-from .email import process_email
 from celery import shared_task
+
+from .email import process_email
 
 
 @shared_task

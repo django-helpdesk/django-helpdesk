@@ -1,24 +1,24 @@
-# vim: set fileencoding=utf-8 :
-
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings, TestCase
-from django.urls import reverse
-from django.utils.encoding import smart_str
-from helpdesk import lib, models
 import os
 import shutil
 from tempfile import gettempdir
+from typing import ClassVar
 from unittest import mock
 from unittest.case import skip
-from django.contrib.auth import get_user_model
 
+from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import TestCase, override_settings
+from django.urls import reverse
+from django.utils.encoding import smart_str
+
+from helpdesk import lib, models
 
 MEDIA_DIR = os.path.join(gettempdir(), "helpdesk_test_media")
 
 
 @override_settings(MEDIA_ROOT=MEDIA_DIR)
 class AttachmentIntegrationTests(TestCase):
-    fixtures = ["emailtemplate.json"]
+    fixtures: ClassVar[list] = ["emailtemplate.json"]
 
     def setUp(self):
         self.queue_public = models.Queue.objects.create(
@@ -69,7 +69,7 @@ class AttachmentIntegrationTests(TestCase):
         self.assertEqual(disk_content, "attached file content")
 
     def test_create_pub_ticket_with_attachment_utf8(self):
-        test_file = SimpleUploadedFile("ß°äöü.txt", "โจ".encode("utf-8"), "text/utf-8")
+        test_file = SimpleUploadedFile("ß°äöü.txt", "โจ".encode(), "text/utf-8")
         post_data = self.ticket_data.copy()
         post_data.update(
             {
@@ -184,7 +184,7 @@ class AttachmentUnitTests(TestCase):
     def setUp(self):
         self.file_attrs = {
             "filename": "°ßäöü.txt",
-            "content": "โจ".encode("utf-8"),
+            "content": "โจ".encode(),
             "content-type": "text/utf8",
         }
         self.test_file = SimpleUploadedFile.from_dict(self.file_attrs)
@@ -197,7 +197,9 @@ class AttachmentUnitTests(TestCase):
         self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save
     ):
         """check utf-8 data is parsed correctly"""
-        filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
+        filename, _fileobj = lib.process_attachments(self.follow_up, [self.test_file])[
+            0
+        ]
         mock_att_save.assert_called_with(
             file=self.test_file,
             filename=self.file_attrs["filename"],
@@ -243,7 +245,9 @@ class AttachmentUnitTests(TestCase):
         self, mock_att_save, mock_queue_save, mock_ticket_save, mock_follow_up_save
     ):
         """don't mock saving to filesystem to test file renames caused by storage layer"""
-        filename, fileobj = lib.process_attachments(self.follow_up, [self.test_file])[0]
+        _filename, _fileobj = lib.process_attachments(self.follow_up, [self.test_file])[
+            0
+        ]
         # Attachment object was zeroth positional arg (i.e. self) of att.save
         # call
         attachment_obj = mock_att_save.return_value

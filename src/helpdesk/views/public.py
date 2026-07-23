@@ -7,6 +7,10 @@ views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
 
+import logging
+from importlib import import_module
+from urllib.parse import quote
+
 from django.conf import settings
 from django.core.exceptions import (
     ImproperlyConfigured,
@@ -21,17 +25,13 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff, protect_view
 from helpdesk.lib import text_is_spam
 from helpdesk.models import Queue, Ticket, UserSettings
 from helpdesk.user import huser_from_request
-import helpdesk.views.abstract_views as abstract_views
-import helpdesk.views.staff as staff
-from importlib import import_module
-import logging
-from urllib.parse import quote
-
+from helpdesk.views import abstract_views, staff
 
 logger = logging.getLogger(__name__)
 
@@ -123,8 +123,7 @@ class BaseCreateTicketView(abstract_views.AbstractCreateTicketMixin, FormView):
             )
             try:
                 return HttpResponseRedirect(
-                    "%s?ticket=%s&email=%s&key=%s"
-                    % (
+                    "{}?ticket={}&email={}&key={}".format(
                         reverse("helpdesk:public_view"),
                         ticket.ticket_for_url,
                         quote(ticket.submitter_email),
@@ -228,12 +227,14 @@ class ViewTicket(TemplateView):
                 )
 
         try:
-            queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
-            if request.user.is_authenticated and request.user.email == email:
-                ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
-            elif (
-                hasattr(settings, "HELPDESK_VIEW_A_TICKET_PUBLIC")
-                and settings.HELPDESK_VIEW_A_TICKET_PUBLIC
+            _queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
+            if (
+                request.user.is_authenticated
+                and request.user.email == email
+                or (
+                    hasattr(settings, "HELPDESK_VIEW_A_TICKET_PUBLIC")
+                    and settings.HELPDESK_VIEW_A_TICKET_PUBLIC
+                )
             ):
                 ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
             else:

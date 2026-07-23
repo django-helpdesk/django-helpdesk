@@ -1,7 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib.auth import get_user_model
-from helpdesk.models import Queue, Ticket, CustomField
+
+from helpdesk.models import CustomField, Queue, Ticket
 
 User = get_user_model()
 

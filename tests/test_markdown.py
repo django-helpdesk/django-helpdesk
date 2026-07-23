@@ -1,4 +1,5 @@
 from django.test import SimpleTestCase
+
 from helpdesk.models import get_markdown
 
 
