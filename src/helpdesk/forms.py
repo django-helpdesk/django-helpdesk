@@ -705,7 +705,7 @@ class TicketResolvesForm(forms.ModelForm):
 
         # Only open tickets except myself, existing dependencies and parents
         self.fields["ticket"].queryset = (
-            Ticket.objects.exclude(status__in=Ticket.OPEN_STATUSES)
+            Ticket.objects.filter(status__in=Ticket.OPEN_STATUSES)
             .exclude(id=ticket.id)
             .exclude(depends_on__ticket=ticket)
             .exclude(ticketdependency__depends_on=ticket)

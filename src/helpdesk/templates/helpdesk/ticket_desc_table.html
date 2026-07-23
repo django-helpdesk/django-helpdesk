@@ -337,10 +337,10 @@
                         <div class="form-check">
                           <input class="form-check-input"
                                  type="checkbox"
+                                 id="task-view-{{ task.id }}"
                                  disabled{% if task.completion_date %}
                                  checked{% endif %}>
-                          {{ task }}
-                          <label class="form-check-label"></label>
+                          <label class="form-check-label" for="task-view-{{ task.id }}">{{ task }}</label>
                         </div>
                       </li>
                     {% endfor %}
@@ -348,7 +348,7 @@
                 </div>
                 {% if checklist.tasks.completed.count %}
                   <div class="px-0">
-                    <div class="progress" style="height: 3px;"">
+                    <div class="progress" style="height: 3px;">
                       {% widthratio checklist.tasks.completed.count checklist.tasks.count 100 as width %}
                       <div class="progress-bar progress-bar-striped progress-bar-animated"
                            role="progressbar"

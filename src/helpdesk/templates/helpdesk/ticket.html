@@ -181,16 +181,15 @@
               {# Comment text box #}
               <div class="mb-3">
                 <label class="form-label" for="commentBox">{% translate "Comment / Resolution" %}</label>
-                <textarea class="form-control" rows="3" name="comment" id="commentBox"></textarea>
-                {% if form.errors %}<div class="form-text">{{ xform.comment }}</div>{% endif %}
+                <textarea class="form-control" rows="3" name="comment" id="commentBox">{{ xform.comment }}</textarea>
                 {% url "helpdesk:help_context" as context_help_url %}
                 {% blocktranslate %}
                 <p class="form-text">You can insert ticket and queue details in your message. For more information, see the <a href="{{ context_help_url }}" target="_blank">context help page.</a></p>
                 {% endblocktranslate %}
               </div>
               {# Status radio buttons #}
-              <div class="mb-3">
-                <label class="form-label" for="">{% translate "New Status" %}</label>
+              <fieldset class="mb-3">
+                <legend class="form-label">{% translate "New Status" %}</legend>
                 {% for status_choice in ticket.get_allowed_status_flow %}
                   <div class="form-check">
                     <input class="form-check-input"
@@ -209,7 +208,7 @@
                 {% if not ticket.can_be_resolved %}
                   <div class="form-text">{% translate "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</div>
                 {% endif %}
-              </div>
+              </fieldset>
               {# Public update checkbox #}
               {% if helpdesk_settings.HELPDESK_UPDATE_PUBLIC_DEFAULT %}
                 <input type="hidden" name="public" value="1">
@@ -319,11 +318,11 @@
                                 <div class="form-check">
                                   <input class="form-check-input"
                                          type="checkbox"
-                                         id="{{ task.id }}"
+                                         id="task-{{ task.id }}"
                                          name="checklist-{{ checklist.id }}"
                                          value="{{ task.id }}"
                                          {% if task.completion_date %} checked{% endif %}>
-                                  <label class="form-check-label" for="{{ task.id }}">{{ task }}</label>
+                                  <label class="form-check-label" for="task-{{ task.id }}">{{ task }}</label>
                                 </div>
                               </div>
                             {% endfor %}
@@ -438,7 +437,6 @@ $( function() {
       // lists for file input change events, then updates the associated text label
       // with the file name selected
       $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
-          $("#selectedfilename"+browseButtonNum).html(label);
       });
 
       var x = 0;
