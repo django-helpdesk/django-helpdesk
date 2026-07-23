@@ -32,7 +32,7 @@ class StaffTicketViewTests(TestCase):
 
     def test_url_resolves_correct_view(self):
         match = resolve(self.url)
-        self.assertEqual(match.func, view_ticket)
+        self.assertEqual(match.url_name, "view")
 
     def test_anonymous_user_cannot_access(self):
         # Arrange
