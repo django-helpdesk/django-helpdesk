@@ -2,63 +2,59 @@
 
 {% load i18n humanize static in_list %}
 
-{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Tickets" %}{% endblock helpdesk_title %}
 
 {% block helpdesk_head %}
-    <!-- Timeline 3 CSS -->
+    {# Timeline 3 CSS #}
     {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
     {% else %}
     <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}">
     {% endif %}
-{% endblock %}
+{% endblock helpdesk_head %}
 
 {% block h1_title %}Tickets
     {% if from_saved_query %} [{{ saved_query.title }}]{% endif %}
-{% endblock %}
+{% endblock h1_title %}
 
 
 {% block helpdesk_breadcrumb %}
+    {# Add dashboard or home here #}
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+        <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
     </li>
     {% if from_saved_query and saved_query.user == user %}
-        <li class="breadcrumb-item">{% trans "Saved Query" %}</li>
+        <li class="breadcrumb-item">{% translate "Saved Query" %}</li>
         <li class="breadcrumb-item active">{{ saved_query.title }}</li>
     {% else %}
-        <li class="breadcrumb-item active">{% trans "Overview" %}</li>
+        <li class="breadcrumb-item active">{% translate "Overview" %}</li>
     {% endif %}
 {% endblock %}
 
 
 {% block helpdesk_body %}
-    <div class="card">
+    <div class="card border-0 mb-3">
         {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
-        <div class="card-header">
-            <ul class="nav nav-tabs">
-                <li class="nav-item" style="width: 200px;">
-                    {% trans "Query Results" %}:
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
-                       data-bs-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
-                        <i class="fas fa-th-list"></i>
-                        {% trans "Table" %}
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-bs-toggle="tab"
-                       role="tab" aria-controls="timelinetabcontents" aria-selected=false>
-                        <i class="fas fa-history"></i>
-                        {% trans "Timeline" %}
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <ul class="nav nav-underline justify-content-end">
+            <li class="nav-item">
+                <a class="nav-link active" href="#datatabletabcontents" id="datatabletabcontents-tab"
+                   data-bs-toggle="tab" role="tab" aria-controls="datatabletabcontents" aria-selected=true>
+                    <i class="fas fa-th-list"></i>
+                    {% translate "Table" %}
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#timelinetabcontents" id="timelinetabcontents-tab" data-bs-toggle="tab"
+                   role="tab" aria-controls="timelinetabcontents" aria-selected=false>
+                    <i class="fas fa-history"></i>
+                    {% translate "Timeline" %}
+                </a>
+            </li>
+        </ul>
         {% endif %}
         <div class="card-body">
             {{ search_message|safe }}
-            <div class="tab-content" id="myTabContent">
+            <div class="tab-content" id="filtersTabContent">
                 <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel"
                      aria-labelledby="datatabletabcontents-tab">
                     <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
@@ -137,197 +133,169 @@
         </div>
         <!-- /.panel-body -->
     </div>
-    <!-- /.panel -->
 
-    <div class="card mb-3">
-        <div class="card-header">
-            <i class="fas fa-hand-pointer"></i>
-            {% trans "Query Selection" %}
-        </div>
-        <div class="card-body">
-            <!-- start accordion -->
-            <div class="accordion" id="queryAccordion">
-                <div class="card">
-                    <div class="card-header" id="headingOne">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link btn-sm" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                <i class="fas fa-filter"></i>
-                                {% trans "Filters" %}
-                            </button>
-                        </h5>
+    <div class="card border-0 mb-3">
+      <h5 class="card-title">{% translate "Query Selection" %}</h5>
+        <ul class="nav nav-underline" id="filtersTab" role="tablist">
+          <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="filters-tab" data-bs-toggle="tab" data-bs-target="#filters-tab-pane" type="button" role="tab" aria-controls="filters-tab-pane" aria-selected="true"><i class="fa fa-sliders me-2"></i>{% translate "Filters" %}</button>
+          </li>
+          <li class="nav-item" role="presentation">
+              <button class="nav-link" id="save-query-tab" data-bs-toggle="tab" data-bs-target="#save-query-tab-pane" type="button" role="tab" aria-controls="save-query-tab-pane" aria-selected="false"><i class="fa fa-floppy-disk me-2"></i>{% translate "Save Query" %}</button>
+          </li>
+          {% if user_saved_queries %}
+          <li class="nav-item" role="presentation">
+              <button class="nav-link" id="use-saved-queries-tab" data-bs-toggle="tab" data-bs-target="#use-saved-queries-tab-pane" type="button" role="tab" aria-controls="use-saved-queries-tab-pane" aria-selected="false">
+                <i class="fas fa-clipboard-check me-2"></i>{% translate "Use Saved Query" %}
+              </button>
+          </li>
+          {% endif %}
+        </ul>
+
+        <div class="tab-content" id="filtersTabContent">
+          {# Filters pane #}
+          <div class="tab-pane fade show active" id="filters-tab-pane" role="tabpanel" aria-labelledby="filters-tab" tabindex="0">
+            <div class="row my-3">
+              <div class="col-12 col-lg-6">
+                <form method="get">
+                    <div class="mb-3">
+                      <label class="form-label" for="filterBuilderSelect">{% translate "Add filter" %}</label>
+                      <select class="form-select" aria-describedby="select-description" name="select" id="filterBuilderSelect" onChange="onFilterChange(this.value)">
+                        <option value="">--</option>
+                        <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
+                            {% translate "Sorting" %}
+                        </option>
+                        <option id="filterBuilderSelect-Priority" value="Priority"{% if query_params.filtering.priority__in %} disabled{% endif %}>
+                            {% translate "Priority" %}
+                        </option>
+                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} disabled{% endif %}>
+                            {% translate "Owner" %}
+                        </option>
+                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %} disabled{% endif %}>
+                            {% translate "Queue" %}
+                        </option>
+                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
+                            {% translate "Status" %}
+                        </option>
+                        <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
+                            {% translate "Keywords" %}
+                        </option>
+                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
+                            {% translate "Date Range" %}
+                        </option>
+                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} disabled{% endif %}>
+                            {% translate "Knowledge base items" %}
+                        </option>
+                      </select>
                     </div>
-
-                    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
-                         data-bs-parent="#queryAccordion">
-                        <div class="card-body">
-                            <form method="get">
-                                <div class="mb-3 float-end">
-                                    <label for="filterBuilderSelect">{% trans "Add filter" %}:</label>
-                                    <select class="form-select form-select-sm mb-0"
-                                            aria-describedby="select-description" name="select" id="filterBuilderSelect"
-                                            onChange="onFilterChange(this.value)">
-                                        <option value="">--</option>
-                                        <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
-                                            {% trans "Sorting" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Priority" value="Priority"{% if query_params.filtering.priority__in %} disabled{% endif %}>
-                                            {% trans "Priority" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Owner" value="Owner"{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} disabled{% endif %}>
-                                            {% trans "Owner" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Queue" value="Queue"{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %} disabled{% endif %}>
-                                            {% trans "Queue" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
-                                            {% trans "Status" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
-                                            {% trans "Keywords" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-Dates" value="Dates"{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} disabled{% endif %}>
-                                            {% trans "Date Range" %}
-                                        </option>
-                                        <option id="filterBuilderSelect-KBItems" value="KBItems"{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} disabled{% endif %}>
-                                            {% trans "Knowledge base items" %}
-                                        </option>
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-
-                        <form method="get">
-                            <ul class="list-group list-group-flush">
-                                <li id="filterBoxSort"
-                                    class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item"
-                                    id="filterBoxSort">
-                                    {% include 'helpdesk/filters/sorting.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.priority__in %} filterBoxShow{% endif %}"
-                                    id="filterBoxPriority">
-                                    {% include 'helpdesk/filters/priority.html' %}
-                                </li>
-                                <li class="filterBox{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} filterBoxShow{% endif %} list-group-item"
-                                    id=filterBoxOwner>
-                                    {% include 'helpdesk/filters/owner.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %} filterBoxShow{% endif %}"
-                                    id="filterBoxQueue">
-                                    {% include 'helpdesk/filters/queue.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
-                                    id="filterBoxStatus">
-                                    {% include 'helpdesk/filters/status.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}"
-                                    id='filterBoxDates'>
-                                    {% include 'helpdesk/filters/date.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}"
-                                    id="filterBoxKeywords">
-                                    {% include 'helpdesk/filters/keywords.html' %}
-                                </li>
-                                <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} filterBoxShow{% endif %}"
-                                    id="filterBoxKBItems">
-                                    {% include 'helpdesk/filters/kbitems.html' %}
-                                </li>
-                                <li class="list-group-item">
-                                    <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
-                                </li>
-                                {% if from_saved_query and saved_query.user == user %}
-                                    <li class="list-group-item">
-                                        {% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %}
-                                        <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>
-                                            {% trans "Delete Saved Query" %}
-                                        </a>
-                                    </li>
-                                {% endif %}
-                                {% if from_saved_query %}
-                                    <li class="list-group-item">
-                                        {% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </form>
-                    </div>
-                </div> <!-- end card -->
-
-                <div class="card">
-                    <div class="card-header" id="headingTwo">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link collapsed btn-sm" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                <i class="fas fa-save"></i>
-                                {% trans "Save Query" %}
-                            </button>
-                        </h5>
-                    </div>
-                    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-bs-parent="#queryAccordion">
-                        <div class="card-body">
-                            <form method='post' action='{% url 'helpdesk:savequery' %}'>
-                                {% csrf_token %}
-                                <input type='hidden' name='query_encoded' value='{{ urlsafe_query }}'/>
-                                <dl>
-                                    <dt><label for='id_title'>{% trans "Query Name" %}</label></dt>
-                                    <dd><input type='text' name='title' id='id_title'/></dd>
-                                    <dd class='form_help_text'>{% trans "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</dd>
-
-                                    <dt><label for='id_shared'>{% trans "Shared?" %}</label></dt>
-                                    <dd><input type='checkbox' name='shared'
-                                               id='id_shared'/> {% trans "Yes, share this query with other users." %}
-                                    </dd>
-                                    <dd class='form_help_text'>{% trans "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</dd>
-
-                                </dl>
-                                <div class='buttons'>
-                                    <input class="btn btn-primary" type='submit' value='{% trans "Save Query" %}'>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div> <!-- end card -->
-
-                {% if user_saved_queries %}
-                    <div class="card">
-                        <div class="card-header" id="headingThree">
-                            <h5 class="mb-0">
-                                <button class="btn btn-link collapsed btn-sm" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    <i class="fas fa-clipboard-check"></i>
-                                    {% trans "Use Saved Query" %}
-                                </button>
-                            </h5>
-                        </div>
-                        <div id="collapseThree" class="collapse" aria-labelledby="headingThree"
-                             data-bs-parent="#queryAccordion">
-                            <div class="card-body">
-                                <form action='{% url 'helpdesk:list' %}'>
-                                    <p>
-                                        <label for='id_query_selector'>{% trans "Query" %}</label>
-                                        <select name='saved_query' id='id_query_selector'>
-                                        {% for q in user_saved_queries %}
-                                            <option value='{{ q.id }}'>
-                                                {{ q.title }}{% if q.shared %}
-                                                    (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
-                                                {% endif %}
-                                            </option>
-                                        {% endfor %}
-                                    </select></p>
-                                    <input class="btn btn-primary" type='submit' value='{% trans "Run Query" %}'>
-                                </form>
-                            </div>
-                        </div>
-                    </div> <!-- end card -->
-                {% endif %}
+                </form>
+                <form method="get">
+                  <ul class="list-group list-group-flush">
+                        <li id="filterBoxSort"
+                            class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %} list-group-item"
+                            id="filterBoxSort">
+                            {% include 'helpdesk/filters/sorting.html' %}
+                        </li>
+                        <li class="list-group-item filterBox{% if query_params.filtering.priority__in %} filterBoxShow{% endif %}"
+                            id="filterBoxPriority">
+                            {% include 'helpdesk/filters/priority.html' %}
+                        </li>
+                        <li class="filterBox{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %} filterBoxShow{% endif %} list-group-item"
+                            id=filterBoxOwner>
+                            {% include 'helpdesk/filters/owner.html' %}
+                        </li>
+                        <li class="list-group-item filterBox{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %} filterBoxShow{% endif %}"
+                            id="filterBoxQueue">
+                            {% include 'helpdesk/filters/queue.html' %}
+                        </li>
+                        <li class="list-group-item filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}"
+                            id="filterBoxStatus">
+                            {% include 'helpdesk/filters/status.html' %}
+                        </li>
+                        <li class="list-group-item filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %} filterBoxShow{% endif %}"
+                            id='filterBoxDates'>
+                            {% include 'helpdesk/filters/date.html' %}
+                        </li>
+                        <li class="list-group-item filterBox{% if query_params.search_string %} filterBoxShow{% endif %}"
+                            id="filterBoxKeywords">
+                            {% include 'helpdesk/filters/keywords.html' %}
+                        </li>
+                        <li class="list-group-item filterBox{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %} filterBoxShow{% endif %}"
+                            id="filterBoxKBItems">
+                            {% include 'helpdesk/filters/kbitems.html' %}
+                        </li>
+                        <li class="list-group-item">
+                            <input class="btn btn-primary btn-sm" type='submit' value='{% trans "Apply Filters" %}'/>
+                        </li>
+                  </ul>
+                </form>
+                <ul class="list-group list-group-flush">
+                        {% if from_saved_query and saved_query.user == user %}
+                        <li class="list-group-item">
+                            {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
+                            <a href="{% url 'helpdesk:delete_query' saved_query.id %}"> {% translate "Delete Saved Query" %} </a>
+                        </li>
+                        {% endif %}
+                        {% if from_saved_query %}
+                        <li class="list-group-item">
+                            {% blocktranslate with saved_query.id as query_id %}<a href="../reports/?saved_query={{ query_id }}">Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktranslate %}
+                        </li>
+                        {% endif %}
+                </ul>
+              </div>
             </div>
-            <!-- end accordion -->
+          </div>
+          {# Save Query pane #}
+          <div class="tab-pane fade" id="save-query-tab-pane" role="tabpanel" aria-labelledby="save-query-tab" tabindex="0">
+              <div class="row my-3">
+                  <div class="col-12 col-lg-6">
+                    <form method="post" action="{% url 'helpdesk:savequery' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="query_encoded" value="{{ urlsafe_query }}"/>
+                        <div class="mb-3">
+                            <label class="form-label" for="id_title">{% translate "Query Name" %}</label>
+                            <input class="form-control" type="text" name="title" id="id_title"/>
+                            <div class="form-text">{% translate "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</div>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                          <input class="form-check-input" type="checkbox" name="shared" id="id_shared">
+                          <label class="form-label mb-0" for="id_shared">{% translate "Share this query with other users." %}</label>
+                          <div class="form-text">{% translate "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                          <button type="submit" class="btn btn-outline-secondary">{% translate "Save Query" %}</button>
+                        </div>
+                    </form>
+                  </div>
+              </div>
+          </div>
+          {# Use Saved query pane #}
+          {% if user_saved_queries %}
+          <div class="tab-pane fade" id="use-saved-queries-tab-pane" role="tabpanel" aria-labelledby="use-saved-queries-tab" tabindex="0">
+            <div class="row col-12 col-md-8 col-lg-6 my-3">
+              <div class="col">
+                <form method="get" action="{% url 'helpdesk:list' %}">
+                    <label class="form-label" for="id_query_selector">{% translate "Select a query" %}</label>
+                    <div class="input-group mb-3">
+                        <select class="form-select" name="saved_query" id="id_query_selector">
+                        {% for q in user_saved_queries %}
+                        <option value="{{ q.id }}">
+                            {{ q.title }}{% if q.shared %}
+                                (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
+                            {% endif %}
+                        </option>
+                        {% endfor %}
+                        </select>
+                        <button class="btn btn-outline-secondary" type="submit">{% translate "Run Query" %}</button>
+                    </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endif %}
         </div>
-        <!-- end card-body -->
     </div>
-    <!-- end top card -->
-
-{% endblock %}
+{% endblock helpdesk_body %}
 
 
 {% block helpdesk_js %}
@@ -511,4 +479,3 @@
         })
     </script>
 {% endblock %}
-
