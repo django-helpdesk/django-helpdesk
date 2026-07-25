@@ -1,12 +1,14 @@
 import logging
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
+
 from helpdesk import settings as helpdesk_settings
-from helpdesk.models import Queue, Ticket
 from helpdesk.forms import TicketForm
-from helpdesk.views.staff import get_user_queues
+from helpdesk.models import Queue, Ticket
 from helpdesk.update_ticket import update_ticket
+from helpdesk.views.staff import get_user_queues
 
 User = get_user_model()
 
@@ -140,9 +142,7 @@ class TicketEmailNotificationTests(TestCase):
         Change various data points checking where submitter should get emailed.
         """
         # Ensure the attribute is correct since it is not reset on each test
-        setattr(
-            helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", False
-        )
+        helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = False
         update_ticket(
             self.update_user,
             self.existing_ticket,
@@ -231,9 +231,7 @@ class TicketEmailNotificationTests(TestCase):
         Check submitter should always get emailed.
         """
         # Ensure the attribute is correct since it is not reset on each test
-        setattr(
-            helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", True
-        )
+        helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = True
         update_ticket(
             self.update_user,
             self.existing_ticket,
@@ -331,9 +329,7 @@ class TicketEmailNotificationTests(TestCase):
         NOTE: Oddly the CC user for updates is also sent an email on create
         """
         # Ensure the attribute is correct since it is not reset on each test
-        setattr(
-            helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", False
-        )
+        helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = False
         queue_id = self.queue_public_2.id
         queue = Queue.objects.get(id=queue_id)
         queue.enable_notifications_on_email_events = True
@@ -417,10 +413,8 @@ class TicketEmailNotificationTests(TestCase):
         original_notify_all = getattr(
             helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", False
         )
-        setattr(helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", False)
-        setattr(
-            helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", False
-        )
+        helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = False
+        helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = False
 
         try:
             self.outbox.clear()  # Clear any existing emails
@@ -441,15 +435,11 @@ class TicketEmailNotificationTests(TestCase):
             )
         finally:
             # Restore original settings
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS",
-                original_setting,
+            helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = (
+                original_setting
             )
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES",
-                original_notify_all,
+            helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = (
+                original_notify_all
             )
 
     def test_private_followup_no_emails_setting_enabled(self):
@@ -458,7 +448,7 @@ class TicketEmailNotificationTests(TestCase):
         original_setting = getattr(
             helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", False
         )
-        setattr(helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", True)
+        helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = True
 
         try:
             self.outbox.clear()  # Clear any existing emails
@@ -477,10 +467,8 @@ class TicketEmailNotificationTests(TestCase):
             )
         finally:
             # Restore original setting
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS",
-                original_setting,
+            helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = (
+                original_setting
             )
 
     def test_private_followup_setting_does_not_affect_public_followups(self):
@@ -489,7 +477,7 @@ class TicketEmailNotificationTests(TestCase):
         original_setting = getattr(
             helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", False
         )
-        setattr(helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", True)
+        helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = True
 
         try:
             self.outbox.clear()  # Clear any existing emails
@@ -516,10 +504,8 @@ class TicketEmailNotificationTests(TestCase):
             )
         finally:
             # Restore original setting
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS",
-                original_setting,
+            helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = (
+                original_setting
             )
 
     def test_private_followup_setting_blocks_assigned_user_emails(self):
@@ -528,7 +514,7 @@ class TicketEmailNotificationTests(TestCase):
         original_setting = getattr(
             helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", False
         )
-        setattr(helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", True)
+        helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = True
 
         try:
             # Assign ticket to a user first
@@ -556,10 +542,8 @@ class TicketEmailNotificationTests(TestCase):
             )
         finally:
             # Restore original setting
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS",
-                original_setting,
+            helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = (
+                original_setting
             )
 
     def test_private_followup_setting_blocks_notify_all_submitter_emails(self):
@@ -571,10 +555,8 @@ class TicketEmailNotificationTests(TestCase):
         original_notify_all = getattr(
             helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", False
         )
-        setattr(helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", True)
-        setattr(
-            helpdesk_settings, "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES", True
-        )
+        helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = True
+        helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = True
 
         try:
             self.outbox.clear()  # Clear any existing emails
@@ -595,15 +577,11 @@ class TicketEmailNotificationTests(TestCase):
             )
         finally:
             # Restore original settings
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS",
-                original_setting,
+            helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = (
+                original_setting
             )
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES",
-                original_notify_all,
+            helpdesk_settings.HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES = (
+                original_notify_all
             )
 
     def test_private_followup_setting_blocks_cc_user_emails(self):
@@ -614,7 +592,7 @@ class TicketEmailNotificationTests(TestCase):
         original_setting = getattr(
             helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", False
         )
-        setattr(helpdesk_settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", True)
+        helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = True
 
         try:
             # Add a CC user to the ticket
@@ -644,8 +622,6 @@ class TicketEmailNotificationTests(TestCase):
             )
         finally:
             # Restore original setting
-            setattr(
-                helpdesk_settings,
-                "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS",
-                original_setting,
+            helpdesk_settings.HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = (
+                original_setting
             )

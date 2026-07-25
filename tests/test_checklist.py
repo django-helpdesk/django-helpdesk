@@ -1,9 +1,11 @@
+from _datetime import timedelta
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from helpdesk.models import Checklist, ChecklistTask, ChecklistTemplate, Queue, Ticket
-from _datetime import timedelta
 from django.utils import timezone
+
+from helpdesk.models import Checklist, ChecklistTask, ChecklistTemplate, Queue, Ticket
 
 
 class TicketChecklistTestCase(TestCase):

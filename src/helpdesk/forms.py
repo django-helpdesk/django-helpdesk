@@ -7,19 +7,23 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
 
+import logging
 from datetime import datetime
+from typing import ClassVar
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.lib import (
     convert_value,
+    get_assignable_users,
     process_attachments,
     safe_template_context,
-    get_assignable_users,
 )
 from helpdesk.models import (
     Checklist,
@@ -41,10 +45,8 @@ from helpdesk.settings import (
     CUSTOMFIELD_TO_FIELD_DICT,
     HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST,
 )
-from helpdesk.validators import validate_file_extension
 from helpdesk.signals import new_ticket_done
-import logging
-
+from helpdesk.validators import validate_file_extension
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBItem
@@ -53,7 +55,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-class CustomFieldMixin(object):
+class CustomFieldMixin:
     """
     Mixin that provides a method to turn CustomFields into an actual field
     """
@@ -105,9 +107,9 @@ class CustomFieldMixin(object):
 
             except KeyError:
                 # The data_type was not found anywhere
-                raise NameError("Unrecognized data_type %s" % field.data_type)
+                raise NameError(f"Unrecognized data_type {field.data_type}")
 
-        self.fields["custom_%s" % field.name] = fieldclass(**instanceargs)
+        self.fields[f"custom_{field.name}"] = fieldclass(**instanceargs)
 
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
@@ -130,7 +132,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         """
         Add any custom fields that are defined to the form
         """
-        super(EditTicketForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Since title is max 100 characters limit it in editing
         if "title" in self.fields:
@@ -157,15 +159,15 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 if "datetime" == current_value.field.data_type:
                     initial_value = datetime.strptime(
                         initial_value, CUSTOMFIELD_DATETIME_FORMAT
-                    )
+                    ).replace(tzinfo=timezone.get_current_timezone())
                 elif "date" == current_value.field.data_type:
                     initial_value = datetime.strptime(
                         initial_value, CUSTOMFIELD_DATE_FORMAT
-                    )
+                    ).replace(tzinfo=timezone.get_current_timezone())
                 elif "time" == current_value.field.data_type:
                     initial_value = datetime.strptime(
                         initial_value, CUSTOMFIELD_TIME_FORMAT
-                    )
+                    ).replace(tzinfo=timezone.get_current_timezone())
                 # If it is boolean field, transform the value to a real boolean
                 # instead of a string
                 elif "boolean" == current_value.field.data_type:
@@ -200,7 +202,7 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
                 cfv.value = convert_value(value)
                 cfv.save()
 
-        return super(EditTicketForm, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 class EditTicketCustomFieldForm(EditTicketForm):
@@ -212,7 +214,7 @@ class EditTicketCustomFieldForm(EditTicketForm):
         """
         Add any custom fields that are defined to the form
         """
-        super(EditTicketCustomFieldForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST:
             fields = list(self.fields)
@@ -231,15 +233,14 @@ class EditTicketCustomFieldForm(EditTicketForm):
             followup = kwargs.pop("followup", None)
 
             for field, value in self.cleaned_data.items():
-                if field.startswith("custom_"):
-                    if value != self.fields[field].initial:
-                        followup.ticketchange_set.create(
-                            field=field.replace("custom_", "", 1),
-                            old_value=self.fields[field].initial,
-                            new_value=value,
-                        )
+                if field.startswith("custom_") and value != self.fields[field].initial:
+                    followup.ticketchange_set.create(
+                        field=field.replace("custom_", "", 1),
+                        old_value=self.fields[field].initial,
+                        new_value=value,
+                    )
 
-        super(EditTicketCustomFieldForm, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     class Meta:
         model = Ticket
@@ -259,7 +260,7 @@ class EditFollowUpForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """Filter not opened tickets here."""
-        super(EditFollowUpForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["ticket"].queryset = Ticket.objects.filter(
             status__in=Ticket.OPEN_STATUSES
         )
@@ -333,19 +334,18 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
     def __init__(self, kbcategory=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if helpdesk_settings.HELPDESK_KB_ENABLED:
-            if kbcategory:
-                self.fields["kbitem"] = forms.ChoiceField(
-                    widget=forms.Select(attrs={"class": "form-control"}),
-                    required=False,
-                    label=_("Knowledge Base Item"),
-                    choices=[
-                        (kbi.pk, kbi.title)
-                        for kbi in KBItem.objects.filter(
-                            category=kbcategory.pk, enabled=True
-                        )
-                    ],
-                )
+        if helpdesk_settings.HELPDESK_KB_ENABLED and kbcategory:
+            self.fields["kbitem"] = forms.ChoiceField(
+                widget=forms.Select(attrs={"class": "form-control"}),
+                required=False,
+                label=_("Knowledge Base Item"),
+                choices=[
+                    (kbi.pk, kbi.title)
+                    for kbi in KBItem.objects.filter(
+                        category=kbcategory.pk, enabled=True
+                    )
+                ],
+            )
 
     def _add_form_custom_fields(self, staff_only_filter=None):
         if staff_only_filter is None:
@@ -540,10 +540,10 @@ class PublicTicketForm(AbstractTicketForm):
         """
         Add any (non-staff) custom fields that are defined to the form
         """
-        super(PublicTicketForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._add_form_custom_fields(False)
 
-        for field in self.fields.keys():
+        for field in self.fields:
             if field in hidden_fields:
                 self.fields[field].widget = forms.HiddenInput()
             if field in readonly_fields:
@@ -620,13 +620,13 @@ class PublicTicketForm(AbstractTicketForm):
 class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = UserSettings
-        exclude = ["user", "settings_pickled"]
+        exclude: ClassVar[list] = ["user", "settings_pickled"]
 
 
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail
-        exclude = []
+        exclude: ClassVar[list] = []
 
 
 class TicketCCForm(forms.ModelForm):
@@ -637,7 +637,7 @@ class TicketCCForm(forms.ModelForm):
         exclude = ("ticket",)
 
     def __init__(self, *args, **kwargs):
-        super(TicketCCForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["user"].queryset = get_assignable_users(
             helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC
         )
@@ -647,7 +647,7 @@ class TicketCCUserForm(forms.ModelForm):
     """Adds a helpdesk user as a CC on a Ticket"""
 
     def __init__(self, *args, **kwargs):
-        super(TicketCCUserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields["user"].queryset = get_assignable_users(
             helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_CC
         )
@@ -664,7 +664,7 @@ class TicketCCEmailForm(forms.ModelForm):
     """Adds an email address as a CC on a Ticket"""
 
     def __init__(self, *args, **kwargs):
-        super(TicketCCEmailForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = TicketCC
@@ -682,7 +682,7 @@ class TicketDependencyForm(forms.ModelForm):
         fields = ("depends_on",)
 
     def __init__(self, ticket, *args, **kwargs):
-        super(TicketDependencyForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Only open tickets except myself, existing dependencies and parents
         self.fields["depends_on"].queryset = (
@@ -701,7 +701,7 @@ class TicketResolvesForm(forms.ModelForm):
         fields = ("ticket",)
 
     def __init__(self, ticket, *args, **kwargs):
-        super(TicketResolvesForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # Only open tickets except myself, existing dependencies and parents
         self.fields["ticket"].queryset = (
@@ -748,7 +748,7 @@ class ChecklistTemplateForm(forms.ModelForm):
 
     def clean_task_list(self):
         task_list = self.cleaned_data["task_list"]
-        return list(map(lambda task: task.strip(), task_list))
+        return [task.strip() for task in task_list]
 
 
 class ChecklistForm(forms.ModelForm):

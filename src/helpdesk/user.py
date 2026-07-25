@@ -1,7 +1,6 @@
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue, Ticket
 
-
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBCategory, KBItem
 
@@ -81,14 +80,12 @@ class HelpdeskUser:
         """Check to see if the user has permission to access
         a ticket. If not then deny access."""
         user = self.user
-        if self.can_access_queue(ticket.queue):
-            return True
-        elif self.has_full_access() or (
-            ticket.assigned_to and user.id == ticket.assigned_to.id
-        ):
-            return True
-        else:
-            return False
+        return bool(
+            self.can_access_queue(ticket.queue)
+            or self.has_full_access()
+            or ticket.assigned_to
+            and user.id == ticket.assigned_to.id
+        )
 
     def can_access_kbcategory(self, category):
         if category.public:

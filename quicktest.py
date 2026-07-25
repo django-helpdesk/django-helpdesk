@@ -8,10 +8,12 @@ $ python ./quicktest.py
 """
 
 import argparse
-import django
-from django.conf import settings
 import os
 import sys
+from typing import ClassVar
+
+import django
+from django.conf import settings
 
 print(f"Running tests using Django version {django.get_version()}...")
 
@@ -48,7 +50,7 @@ class QuickDjangoTest:
         "helpdesk",
         # 'reversion',
     )
-    MIDDLEWARE = [
+    MIDDLEWARE: ClassVar[list] = [
         "django.middleware.security.SecurityMiddleware",
         "django.contrib.sessions.middleware.SessionMiddleware",
         "django.middleware.common.CommonMiddleware",
@@ -58,7 +60,7 @@ class QuickDjangoTest:
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
     ]
 
-    TEMPLATES = [
+    TEMPLATES: ClassVar[list] = [
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
             "APP_DIRS": True,

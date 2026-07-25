@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 scripts/create_queue_permissions.py -
     Create automatically permissions for all Queues.
@@ -18,6 +17,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext_lazy as _
+
 from helpdesk.models import Queue
 
 

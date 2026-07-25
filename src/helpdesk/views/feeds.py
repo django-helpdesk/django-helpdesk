@@ -14,9 +14,9 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.translation import gettext as _
+
 from helpdesk.models import FollowUp, Queue, Ticket
 from helpdesk.user import HelpdeskUser
-
 
 User = get_user_model()
 
@@ -65,13 +65,13 @@ class OpenTicketsByUser(Feed):
 
     def link(self, obj):
         if obj["queue"]:
-            return "%s?assigned_to=%s&queue=%s" % (
+            return "{}?assigned_to={}&queue={}".format(
                 reverse("helpdesk:list"),
                 obj["user"].id,
                 obj["queue"].id,
             )
         else:
-            return "%s?assigned_to=%s" % (
+            return "{}?assigned_to={}".format(
                 reverse("helpdesk:list"),
                 obj["user"].id,
             )
@@ -154,7 +154,7 @@ class OpenTicketsByQueue(Feed):
         }
 
     def link(self, obj):
-        return "%s?queue=%s" % (
+        return "{}?queue={}".format(
             reverse("helpdesk:list"),
             obj.id,
         )

@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
+
 from helpdesk.models import Queue, Ticket
 
 
@@ -35,8 +36,7 @@ class PublicActionsTestCase(TestCase):
     def test_public_view_ticket(self):
         # Without key, we get 403
         response = self.client.get(
-            "%s?ticket=%s&email=%s"
-            % (
+            "{}?ticket={}&email={}".format(
                 reverse("helpdesk:public_view"),
                 self.ticket.ticket_for_url,
                 "test.submitter@example.com",
@@ -46,8 +46,7 @@ class PublicActionsTestCase(TestCase):
         self.assertTemplateNotUsed(response, "helpdesk/public_view_form.html")
         # With a key it works
         response = self.client.get(
-            "%s?ticket=%s&email=%s&key=%s"
-            % (
+            "{}?ticket={}&email={}&key={}".format(
                 reverse("helpdesk:public_view"),
                 self.ticket.ticket_for_url,
                 "test.submitter@example.com",
@@ -71,8 +70,7 @@ class PublicActionsTestCase(TestCase):
         current_followups = ticket.followup_set.all().count()
 
         response = self.client.get(
-            "%s?ticket=%s&email=%s&close&key=%s"
-            % (
+            "{}?ticket={}&email={}&close&key={}".format(
                 reverse("helpdesk:public_view"),
                 ticket.ticket_for_url,
                 "test.submitter@example.com",

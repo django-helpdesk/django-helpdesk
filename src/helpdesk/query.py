@@ -1,13 +1,15 @@
+import json
 from base64 import b64decode, b64encode
-from django.db.models import Q, Max
-from django.db.models import F, Window, Subquery, OuterRef
-from .models import FollowUp
+
+from django.db.models import F, Max, OuterRef, Q, Subquery, Window
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.translation import gettext as _
-from helpdesk.serializers import DatatablesTicketSerializer
-import json
 from model_utils import Choices
+
+from helpdesk.serializers import DatatablesTicketSerializer
+
+from .models import FollowUp
 
 
 def query_to_base64(query):
@@ -112,31 +114,30 @@ class __Query__:
         q_args = []
         value_filters = self.params.get("filtering", {})
         null_filters = self.params.get("filtering_null", {})
-        if null_filters:
-            if value_filters:
-                # Check if any of the value value_filters are for the same field as the
-                # ISNULL filter so that an OR filter can be set up
-                matched_null_keys = []
-                for null_key in null_filters:
-                    field_path = null_key[:-8]  # Chop off the "__isnull"
-                    matched_key = None
-                    for val_key in value_filters:
-                        if val_key.startswith(field_path):
-                            matched_key = val_key
-                            break
-                    if matched_key:
-                        # Remove the matching filters into a Q param
-                        matched_null_keys.append(null_key)
-                        # Create an OR query for the selected value(s) OR if the field is NULL
-                        v = {}
-                        v[val_key] = value_filters[val_key]
-                        n = {}
-                        n[null_key] = null_filters[null_key]
-                        q_args.append((Q(**v) | Q(**n)))
-                        del value_filters[matched_key]
-                # Now remove the matched null keys
-                for null_key in matched_null_keys:
-                    del null_filters[null_key]
+        if null_filters and value_filters:
+            # Check if any of the value value_filters are for the same field as the
+            # ISNULL filter so that an OR filter can be set up
+            matched_null_keys = []
+            for null_key in null_filters:
+                field_path = null_key[:-8]  # Chop off the "__isnull"
+                matched_key = None
+                for val_key in value_filters:
+                    if val_key.startswith(field_path):
+                        matched_key = val_key
+                        break
+                if matched_key:
+                    # Remove the matching filters into a Q param
+                    matched_null_keys.append(null_key)
+                    # Create an OR query for the selected value(s) OR if the field is NULL
+                    v = {}
+                    v[val_key] = value_filters[val_key]
+                    n = {}
+                    n[null_key] = null_filters[null_key]
+                    q_args.append(Q(**v) | Q(**n))
+                    del value_filters[matched_key]
+            # Now remove the matched null keys
+            for null_key in matched_null_keys:
+                del null_filters[null_key]
         queryset = queryset.filter(
             *q_args,
             (Q(**value_filters) & Q(**null_filters)) & self.get_search_filter_args(),
@@ -145,7 +146,7 @@ class __Query__:
         if sorting:
             sortreverse = self.params.get("sortreverse", None)
             if sortreverse:
-                sorting = "-%s" % sorting
+                sorting = f"-{sorting}"
             queryset = queryset.order_by(sorting)
         # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
         return queryset.distinct()
@@ -237,8 +238,7 @@ class __Query__:
                                 if followup.comment
                                 else _("No text")
                             )
-                            + '<br/> <a href="%s" class="btn" role="button">%s</a>'
-                            % (
+                            + '<br/> <a href="{}" class="btn" role="button">{}</a>'.format(
                                 reverse(
                                     "helpdesk:view", kwargs={"ticket_id": ticket.pk}
                                 ),

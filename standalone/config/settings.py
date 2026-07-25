@@ -9,8 +9,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-from django.core.exceptions import ImproperlyConfigured
 
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 try:
     SECRET_KEY = os.environ["DJANGO_HELPDESK_SECRET_KEY"]
 except KeyError:
-    raise Exception("DJANGO_HELPDESK_SECRET_KEY environment variable is not set")
+    raise ImproperlyConfigured(
+        "DJANGO_HELPDESK_SECRET_KEY environment variable is not set"
+    ) from None
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
