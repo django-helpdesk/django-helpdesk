@@ -6,8 +6,29 @@ See LICENSE for details.
 """
 
 # import base64
-from bs4 import BeautifulSoup
+from __future__ import annotations
+
+import email
+import imaplib
+import logging
+import mimetypes
+import os
+import poplib
+import re
+import socket
+import ssl
+import sys
+import traceback
 from datetime import timedelta
+from email import policy
+from email.message import EmailMessage, MIMEPart
+from email.utils import getaddresses
+from os.path import isfile, join
+from time import ctime
+
+import oauthlib.oauth2 as oauth2lib
+import requests_oauthlib
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
@@ -15,33 +36,13 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db.models import Q
 from django.utils import encoding, timezone
 from django.utils.translation import gettext as _
-import email
-from email import policy
-from email.message import EmailMessage, MIMEPart
-from email.utils import getaddresses
 from email_reply_parser import EmailReplyParser
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 from helpdesk.signals import new_ticket_done, update_ticket_done
-import imaplib
-import logging
-import mimetypes
-import oauthlib.oauth2 as oauth2lib
-import os
-from os.path import isfile, join
-import poplib
-import re
-import requests_oauthlib
-import socket
-import ssl
-import sys
-from time import ctime
-import traceback
-import typing
-from typing import List
-
 
 # import User model, which may be a custom model
 User = get_user_model()
@@ -72,7 +73,7 @@ def process_email(quiet: bool = False, debug_to_stdout: bool = False):
         logger = logging.getLogger("django.helpdesk.queue." + q.slug)
         logging_types = {
             "info": logging.INFO,
-            "warn": logging.WARN,
+            "warn": logging.WARNING,
             "error": logging.ERROR,
             "crit": logging.CRITICAL,
             "debug": logging.DEBUG,
@@ -109,8 +110,8 @@ def process_email(quiet: bool = False, debug_to_stdout: bool = False):
                 logger.info(log_msg)
                 if debug_to_stdout:
                     print(log_msg)
-        except Exception as e:
-            logger.error(f"Queue processing failed: {q.slug} -- {e}", exc_info=True)
+        except Exception:
+            logger.exception(f"Queue processing failed: {q.slug}")
             if debug_to_stdout:
                 print(f"Queue processing failed: {q.slug}")
                 print("-" * 60)
@@ -120,13 +121,13 @@ def process_email(quiet: bool = False, debug_to_stdout: bool = False):
             try:
                 if log_file_handler:
                     log_file_handler.close()
-            except Exception as e:
-                logging.exception(e)
+            except Exception:
+                logger.exception("Failed to close log file handler")
             try:
                 if log_file_handler:
                     logger.removeHandler(log_file_handler)
-            except Exception as e:
-                logging.exception(e)
+            except Exception:
+                logger.exception("Failed to remove log file handler")
     if debug_to_stdout:
         print("Email extraction into queues completed.")
 
@@ -135,7 +136,7 @@ def pop3_sync(q, logger, server):
     server.getwelcome()
     try:
         server.stls()
-    except Exception:
+    except Exception:  # noqa: BLE001 - StartTLS support/failure varies by server; fall back to unencrypted
         logger.warning(
             "POP3 StartTLS failed or unsupported. Connection will be unencrypted."
         )
@@ -143,7 +144,7 @@ def pop3_sync(q, logger, server):
     server.pass_(q.email_box_pass or helpdesk_settings.QUEUE_EMAIL_BOX_PASSWORD)
 
     messagesInfo = server.list()[1]
-    logger.info("Received %d messages from POP3 server" % len(messagesInfo))
+    logger.info(f"Received {len(messagesInfo)} messages from POP3 server")
 
     for msgRaw in messagesInfo:
         if type(msgRaw) is bytes:
@@ -156,7 +157,7 @@ def pop3_sync(q, logger, server):
             # already a str
             msg = msgRaw
         msgNum = msg.split(" ")[0]
-        logger.info("Processing message %s" % msgNum)
+        logger.info(f"Processing message {msgNum}")
 
         raw_content = server.retr(msgNum)[1]
         if type(raw_content[0]) is bytes:
@@ -169,24 +170,20 @@ def pop3_sync(q, logger, server):
             )
         except IgnoreTicketException:
             logger.warning(
-                "Message %s was ignored and will be left on POP3 server" % msgNum
+                f"Message {msgNum} was ignored and will be left on POP3 server"
             )
         except DeleteIgnoredTicketException:
-            logger.warning(
-                "Message %s was ignored and deleted from POP3 server" % msgNum
-            )
+            logger.warning(f"Message {msgNum} was ignored and deleted from POP3 server")
             server.dele(msgNum)
         else:
             if ticket:
                 server.dele(msgNum)
                 logger.info(
-                    "Successfully processed message %s, deleted from POP3 server"
-                    % msgNum
+                    f"Successfully processed message {msgNum}, deleted from POP3 server"
                 )
             else:
                 logger.warning(
-                    "Message %s was not successfully processed, and will be left on POP3 server"
-                    % msgNum
+                    f"Message {msgNum} was not successfully processed, and will be left on POP3 server"
                 )
 
     server.quit()
@@ -196,7 +193,7 @@ def imap_sync(q, logger, server):
     try:
         try:
             server.starttls()
-        except Exception:
+        except Exception:  # noqa: BLE001 - StartTLS support/failure varies by server; fall back to unencrypted
             logger.warning(
                 "IMAP4 StartTLS unsupported or failed. Connection will be unencrypted."
             )
@@ -224,9 +221,9 @@ def imap_sync(q, logger, server):
         data = server.search(None, "NOT", "DELETED")[1]
         if data:
             msgnums = data[0].split()
-            logger.info("Received %d messages from IMAP server" % len(msgnums))
+            logger.info(f"Received {len(msgnums)} messages from IMAP server")
             for num in msgnums:
-                logger.info("Processing message %s" % num)
+                logger.info(f"Processing message {num}")
                 data = server.fetch(num, "(RFC822)")[1]
                 full_message = encoding.force_str(data[0][1], errors="replace")
                 try:
@@ -235,29 +232,25 @@ def imap_sync(q, logger, server):
                     )
                 except IgnoreTicketException:
                     logger.warning(
-                        "Message %s was ignored and will be left on IMAP server" % num
+                        f"Message {num} was ignored and will be left on IMAP server"
                     )
                 except DeleteIgnoredTicketException:
                     server.store(num, "+FLAGS", "\\Deleted")
                     logger.warning(
-                        "Message %s was ignored and deleted from IMAP server" % num
+                        f"Message {num} was ignored and deleted from IMAP server"
                     )
-                except TypeError as te:
+                except TypeError:
                     # Log the error with stacktrace to help identify what went wrong
-                    logger.error(
-                        f"Unexpected error processing message: {te}", exc_info=True
-                    )
+                    logger.exception(f"Unexpected error processing message {num}")
                 else:
                     if ticket:
                         server.store(num, "+FLAGS", "\\Deleted")
                         logger.info(
-                            "Successfully processed message %s, deleted from IMAP server"
-                            % num
+                            f"Successfully processed message {num}, deleted from IMAP server"
                         )
                     else:
                         logger.warning(
-                            "Message %s was not successfully processed, and will be left on IMAP server"
-                            % num
+                            f"Message {num} was not successfully processed, and will be left on IMAP server"
                         )
     except imaplib.IMAP4.error:
         logger.error(
@@ -306,15 +299,14 @@ def imap_oauth_sync(q, logger, server):
         # Select the Inbound Mailbox folder
         server.select(q.email_box_imap_folder)
 
-    except imaplib.IMAP4.abort as e1:
-        logger.error(f"IMAP authentication failed in OAUTH: {e1}", exc_info=True)
+    except imaplib.IMAP4.abort:
+        logger.exception("IMAP authentication failed in OAUTH")
         server.logout()
         sys.exit()
 
-    except ssl.SSLError as e2:
-        logger.error(
-            f"IMAP login failed due to SSL error. (This is often due to a timeout): {e2}",
-            exc_info=True,
+    except ssl.SSLError:
+        logger.exception(
+            "IMAP login failed due to SSL error. (This is often due to a timeout)"
         )
         server.logout()
         sys.exit()
@@ -341,27 +333,23 @@ def imap_oauth_sync(q, logger, server):
                     server.store(num, "+FLAGS", "\\Deleted")
                     server.expunge()
                     logger.warning(
-                        "Message %s was ignored and deleted from IMAP server" % num
+                        f"Message {num} was ignored and deleted from IMAP server"
                     )
 
-                except TypeError as te:
+                except TypeError:
                     # Log the error with stacktrace to help identify what went wrong
-                    logger.error(
-                        f"Unexpected error processing message: {te}", exc_info=True
-                    )
+                    logger.exception(f"Unexpected error processing message {num}")
 
                 else:
                     if ticket:
                         server.store(num, "+FLAGS", "\\Deleted")
                         server.expunge()
                         logger.info(
-                            "Successfully processed message %s, deleted from IMAP server"
-                            % num
+                            f"Successfully processed message {num}, deleted from IMAP server"
                         )
                     else:
                         logger.warning(
-                            "Message %s was not successfully processed, and will be left on IMAP server"
-                            % num
+                            f"Message {num} was not successfully processed, and will be left on IMAP server"
                         )
 
     except imaplib.IMAP4.error:
@@ -450,7 +438,7 @@ def process_queue(q, logger):
             q.email_box_host or helpdesk_settings.QUEUE_EMAIL_BOX_HOST,
             int(q.email_box_port),
         )
-        logger.info("Attempting %s server login" % email_box_type.upper())
+        logger.info(f"Attempting {email_box_type.upper()} server login")
         mail_defaults[email_box_type]["sync"](q, logger, server)
 
     elif email_box_type == "local":
@@ -458,11 +446,11 @@ def process_queue(q, logger):
         mail = [
             join(mail_dir, f) for f in os.listdir(mail_dir) if isfile(join(mail_dir, f))
         ]
-        logger.info("Found %d messages in local mailbox directory" % len(mail))
+        logger.info(f"Found {len(mail)} messages in local mailbox directory")
 
-        logger.info("Found %d messages in local mailbox directory" % len(mail))
+        logger.info(f"Found {len(mail)} messages in local mailbox directory")
         for i, m in enumerate(mail, 1):
-            logger.info("Processing message %d" % i)
+            logger.info(f"Processing message {i}")
             with open(m, "r") as f:
                 full_message = encoding.force_str(f.read(), errors="replace")
                 try:
@@ -529,9 +517,7 @@ def is_autoreply(message):
         False
         if not message.get("Auto-Submitted")
         else message.get("Auto-Submitted").lower() != "no",
-        True
-        if message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All")
-        else False,
+        message.get("X-Auto-Response-Suppress") in ("DR", "AutoReply", "All"),
         message.get("List-Id"),
         message.get("List-Unsubscribe"),
     ]
@@ -544,7 +530,7 @@ def create_ticket_cc(ticket, cc_list, logger):
     # Local import to deal with non-defined / circular reference problem
 
     new_ticket_ccs = []
-    from helpdesk.views.staff import subscribe_to_ticket_updates, User
+    from helpdesk.views.staff import User, subscribe_to_ticket_updates
 
     for __, cced_email in cc_list:
         cced_email = cced_email.strip()
@@ -622,7 +608,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             new = False
             # Check if the ticket has been merged to another ticket
             if ticket.merged_to:
-                logger.info("Ticket has been merged to %s" % ticket.merged_to.ticket)
+                logger.info(f"Ticket has been merged to {ticket.merged_to.ticket}")
                 # Use the ticket in which it was merged to for next operations
                 ticket = ticket.merged_to
     # New issue, create a new <Ticket> instance
@@ -637,7 +623,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 priority=payload["priority"],
             )
             ticket.save()
-            logger.debug("Created new ticket %s-%s" % (ticket.queue.slug, ticket.id))
+            logger.debug(f"Created new ticket {ticket.queue.slug}-{ticket.id}")
             new = True
         else:
             # Possibly an email with no body but has an attachment
@@ -652,8 +638,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     f = FollowUp(
         ticket=ticket,
-        title=_(
-            "E-Mail Received from %(sender_email)s" % {"sender_email": sender_email}
+        title=_("E-Mail Received from {sender_email}").format(
+            sender_email=sender_email
         ),
         date=now,
         public=True,
@@ -663,22 +649,14 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
 
     if ticket.status == Ticket.REOPENED_STATUS:
         f.new_status = Ticket.REOPENED_STATUS
-        f.title = _(
-            "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
-            % {"sender_email": sender_email}
+        f.title = _("Ticket Re-Opened by E-Mail Received from {sender_email}").format(
+            sender_email=sender_email
         )
 
     f.save()
     logger.debug("Created new FollowUp for Ticket")
 
-    logger.info(
-        "[%s-%s] %s"
-        % (
-            ticket.queue.slug,
-            ticket.id,
-            ticket.title,
-        )
-    )
+    logger.info(f"[{ticket.queue.slug}-{ticket.id}] {ticket.title}")
 
     if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
         try:
@@ -756,7 +734,7 @@ def send_info_email(
 
 def get_ticket_id_from_subject_slug(
     queue_slug: str, subject: str, logger: logging.Logger
-) -> typing.Optional[int]:
+) -> int | None:
     """Get a ticket id from the subject string
 
     Performs a match on the subject using the queue_slug as reference,
@@ -767,7 +745,7 @@ def get_ticket_id_from_subject_slug(
     if matchobj:
         # This is a reply or forward.
         ticket_id = matchobj.group("id")
-        logger.info("Matched tracking ID %s-%s" % (queue_slug, ticket_id))
+        logger.info(f"Matched tracking ID {queue_slug}-{ticket_id}")
     else:
         logger.info("No tracking ID matched.")
     return ticket_id
@@ -857,7 +835,7 @@ def parse_email_content(mime_content: str, is_extract_full_email_msg: bool) -> s
 
 def extract_email_message_content(
     part: MIMEPart,
-    files: List,
+    files: list,
     include_chained_msgs: bool,
 ) -> (str, str):
     """
@@ -944,7 +922,7 @@ def extract_email_message_content(
 
 
 def process_as_attachment(
-    part: MIMEPart, counter: int, files: List, logger: logging.Logger
+    part: MIMEPart, counter: int, files: list, logger: logging.Logger
 ):
     name = part.get_filename()
     if name:
@@ -959,7 +937,6 @@ def process_as_attachment(
     files.append(SimpleUploadedFile(name, payload_bytes, mimetypes.guess_type(name)[0]))
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug("Processed MIME as attachment: %s", name)
-    return
 
 
 def extract_email_subject(
@@ -974,7 +951,7 @@ def extract_email_subject(
 
 def extract_attachments(
     target_part: MIMEPart,
-    files: List,
+    files: list,
     logger: logging.Logger,
     counter: int = 1,
     content_parts_excluded: bool = False,
@@ -1093,9 +1070,7 @@ def extract_email_metadata(
             )
 
     # First try to get ticket ID from the current queue's slug
-    ticket_id: typing.Optional[int] = get_ticket_id_from_subject_slug(
-        queue.slug, subject, logger
-    )
+    ticket_id: int | None = get_ticket_id_from_subject_slug(queue.slug, subject, logger)
 
     # If no ticket ID found in the current queue, check all other queues
     original_queue = queue  # Store the original queue in case we need to revert
@@ -1127,11 +1102,9 @@ def extract_email_metadata(
 
     files = []
     # first message in thread, we save full body to avoid losing forwards and things like that
-    include_chained_msgs = (
-        True
-        if ticket_id is None
+    include_chained_msgs = bool(
+        ticket_id is None
         and getattr(settings, "HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL", False)
-        else False
     )
     filtered_body, full_body = extract_email_message_content(
         message_obj, files, include_chained_msgs

@@ -6,8 +6,8 @@ from rest_framework.exceptions import ValidationError
 from .forms import TicketForm
 from .lib import format_time_spent
 from .models import CustomField, FollowUp, FollowUpAttachment, Ticket
-from .user import HelpdeskUser
 from .update_ticket import update_ticket
+from .user import HelpdeskUser
 
 
 class DatatablesTicketSerializer(serializers.ModelSerializer):
@@ -145,7 +145,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("first_name", "last_name", "username", "email", "password")
 
     def create(self, validated_data):
-        user = super(UserSerializer, self).create(validated_data)
+        user = super().create(validated_data)
         user.is_active = True
         user.set_password(validated_data["password"])
         user.save()
@@ -158,7 +158,7 @@ class BaseTicketSerializer(serializers.ModelSerializer):
 
         # Add custom fields
         for field in CustomField.objects.all():
-            self.fields["custom_%s" % field.name] = field.build_api_field()
+            self.fields[f"custom_{field.name}"] = field.build_api_field()
 
 
 class PublicTicketListingSerializer(BaseTicketSerializer):

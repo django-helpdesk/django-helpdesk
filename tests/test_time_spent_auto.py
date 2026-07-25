@@ -1,14 +1,16 @@
+import uuid
 from datetime import datetime, timedelta
+
+from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
-from helpdesk.models import FollowUp, Queue, Ticket
-from helpdesk import settings as helpdesk_settings
-import uuid
 from django.utils import timezone
+
+from helpdesk import settings as helpdesk_settings
+from helpdesk.models import FollowUp, Queue, Ticket
 
 
 @override_settings(USE_TZ=True)
@@ -22,11 +24,11 @@ class TimeSpentAutoTestCase(TestCase):
             dedicated_time=timedelta(minutes=60),
         )
 
-        self.ticket_data = dict(
-            queue=self.queue_public,
-            title="test ticket",
-            description="test ticket description",
-        )
+        self.ticket_data = {
+            "queue": self.queue_public,
+            "title": "test ticket",
+            "description": "test ticket description",
+        }
 
         self.user = User.objects.create(
             username="staff",
@@ -401,7 +403,7 @@ class TimeSpentAutoTestCase(TestCase):
 
         # create queues
         queues_sequence = ("new", "stop1", "resume1", "stop2", "resume2", "end")
-        queues = dict()
+        queues = {}
         for slug in queues_sequence:
             queues[slug] = Queue.objects.create(
                 title=slug,
@@ -425,7 +427,7 @@ class TimeSpentAutoTestCase(TestCase):
         for i, queue in enumerate(queues_sequence):
             # create follow-up
             post_data = {
-                "comment": "ticket in queue {}".format(queue),
+                "comment": f"ticket in queue {queue}",
                 "queue": queues[queue].id,
                 "title": ticket.title,
                 "priority": ticket.priority,

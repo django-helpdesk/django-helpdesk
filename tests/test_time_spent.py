@@ -1,10 +1,13 @@
 import datetime
+import uuid
+
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.client import Client
+from django.utils import timezone
+
 from helpdesk.models import FollowUp, Queue, Ticket
-import uuid
 
 
 class TimeSpentTestCase(TestCase):
@@ -42,7 +45,7 @@ class TimeSpentTestCase(TestCase):
         message_id = uuid.uuid4().hex
         followup = FollowUp.objects.create(
             ticket=self.ticket,
-            date=datetime.datetime.now(),
+            date=timezone.now(),
             title="Testing followup",
             comment="Testing followup time spent",
             public=True,

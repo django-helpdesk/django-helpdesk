@@ -1,8 +1,10 @@
+from functools import wraps
+
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
 from django.shortcuts import redirect
-from functools import wraps
+
 from helpdesk import settings as helpdesk_settings
 
 

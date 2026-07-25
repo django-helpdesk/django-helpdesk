@@ -9,13 +9,14 @@ lib.py - Common functions (eg multipart e-mail)
 import logging
 import mimetypes
 from datetime import date, datetime, time
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError, ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models.query import QuerySet
 from django.utils.encoding import smart_str
-from helpdesk import settings as helpdesk_settings
 
+from helpdesk import settings as helpdesk_settings
 
 logger = logging.getLogger("helpdesk")
 
@@ -48,7 +49,7 @@ def ticket_template_context(ticket):
     ):
         attr = getattr(ticket, field, None)
         if callable(attr):
-            context[field] = "%s" % attr()
+            context[field] = f"{attr()}"
         else:
             context[field] = attr
     context["assigned_to"] = context["_get_assigned_to"]
@@ -127,7 +128,7 @@ def text_is_spam(text, request):
         return False
 
     ak = Akismet(
-        blog_url="http://%s/" % site.domain,
+        blog_url=f"http://{site.domain}/",
         key=apikey,
     )
 
@@ -193,10 +194,7 @@ def format_time_spent(time_spent):
     all graphical outputs
     """
     if time_spent:
-        time_spent = "{0:02d}h:{1:02d}m".format(
-            int(time_spent.total_seconds()) // 3600,
-            int(time_spent.total_seconds()) % 3600 // 60,
-        )
+        time_spent = f"{int(time_spent.total_seconds()) // 3600:02d}h:{int(time_spent.total_seconds()) % 3600 // 60:02d}m"
     else:
         time_spent = ""
     return time_spent

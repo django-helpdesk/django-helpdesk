@@ -1,10 +1,12 @@
+from typing import ClassVar
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
 
 class TicketActionsTestCase(TestCase):
-    fixtures = ["emailtemplate.json"]
+    fixtures: ClassVar[list] = ["emailtemplate.json"]
 
     def setUp(self):
         User = get_user_model()

@@ -1,17 +1,18 @@
-from django.contrib.auth.models import User
-from helpdesk.models import Queue, CustomField, TicketCustomFieldValue, Ticket
-from helpdesk.serializers import TicketSerializer
-from rest_framework.status import HTTP_201_CREATED
-from rest_framework.test import APITestCase
-import json
-import os
-import requests
-import logging
-
 # Set up a test weberver listeining on localhost:8123 for webhooks
 import http.server
+import json
+import logging
+import os
 import threading
 from http import HTTPStatus
+
+import requests
+from django.contrib.auth.models import User
+from rest_framework.status import HTTP_201_CREATED
+from rest_framework.test import APITestCase
+
+from helpdesk.models import CustomField, Queue, Ticket, TicketCustomFieldValue
+from helpdesk.serializers import TicketSerializer
 
 
 class WebhookRequestHandler(http.server.BaseHTTPRequestHandler):
@@ -43,7 +44,7 @@ class WebhookRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if not self.path == "/get-past-requests":
+        if self.path != "/get-past-requests":
             self.send_response(HTTPStatus.NOT_FOUND)
             self.end_headers()
             return
@@ -167,7 +168,7 @@ class WebhookTest(APITestCase):
         ticket.set_custom_field_values()
         serializer = TicketSerializer(ticket)
         self.assertEqual(
-            list(sorted(serializer.fields.keys())),
+            sorted(serializer.fields.keys()),
             [
                 "assigned_to",
                 "attachment",

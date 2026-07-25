@@ -7,10 +7,13 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
-from .lib import format_time_spent, convert_value, daily_time_spent_calculation
-from .templated_email import send_templated_mail
-from .validators import validate_file_extension
 import datetime
+import mimetypes
+import os
+import re
+import uuid
+from io import StringIO
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
@@ -19,16 +22,17 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.safestring import mark_safe
-from django.utils.translation import gettext, gettext_lazy as _
-from helpdesk import settings as helpdesk_settings
-from io import StringIO
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from markdown import markdown
 from markdown.extensions import Extension
-import mimetypes
-import os
-import re
 from rest_framework import serializers
-import uuid
+
+from helpdesk import settings as helpdesk_settings
+
+from .lib import convert_value, daily_time_spent_calculation, format_time_spent
+from .templated_email import send_templated_mail
+from .validators import validate_file_extension
 
 User = get_user_model()
 
@@ -370,7 +374,7 @@ class Queue(models.Model):
     )
 
     def __str__(self):
-        return "%s" % self.title
+        return f"{self.title}"
 
     class Meta:
         ordering = ("title",)
@@ -390,13 +394,11 @@ class Queue(models.Model):
             )
             if default_email is not None:
                 # already in the right format, so just include it here
-                return "NO QUEUE EMAIL ADDRESS DEFINED %s" % settings.DEFAULT_FROM_EMAIL
+                return f"NO QUEUE EMAIL ADDRESS DEFINED {settings.DEFAULT_FROM_EMAIL}"
             else:
-                return (
-                    "NO QUEUE EMAIL ADDRESS DEFINED <%s>" % settings.DEFAULT_FROM_EMAIL
-                )
+                return f"NO QUEUE EMAIL ADDRESS DEFINED <{settings.DEFAULT_FROM_EMAIL}>"
         else:
-            return "%s <%s>" % (self.title, self.email_address)
+            return f"{self.title} <{self.email_address}>"
 
     from_address = property(_from_address)
 
@@ -419,8 +421,8 @@ class Queue(models.Model):
         :return: The codename that can be used to create a new Permission object.
         """
         # Prepare the permission associated to this Queue
-        basename = "queue_access_%s" % self.slug
-        self.permission_name = "helpdesk.%s" % basename
+        basename = f"queue_access_{self.slug}"
+        self.permission_name = f"helpdesk.{basename}"
         return basename
 
     def save(self, *args, **kwargs):
@@ -457,11 +459,11 @@ class Queue(models.Model):
                 codename=basename,
             )
 
-        super(Queue, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         permission_name = self.permission_name
-        super(Queue, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
         # once the Queue is safely deleted, remove the permission (if exists)
         if permission_name:
@@ -711,13 +713,13 @@ class Ticket(models.Model):
         """A user-friendly ticket ID, which is a combination of ticket ID
         and queue slug. This is generally used in e-mail subjects."""
 
-        return "[%s]" % self.ticket_for_url
+        return f"[{self.ticket_for_url}]"
 
     ticket = property(_get_ticket)
 
     def _get_ticket_for_url(self):
         """A URL-friendly ticket ID, used in links."""
-        return "%s-%s" % (self.queue.slug, self.id)
+        return f"{self.queue.slug}-{self.id}"
 
     ticket_for_url = property(_get_ticket_for_url)
 
@@ -746,7 +748,7 @@ class Ticket(models.Model):
         dep_msg = ""
         if not self.can_be_resolved:
             dep_msg = _(" - Open dependencies")
-        return "%s%s%s" % (self.get_status_display(), held_msg, dep_msg)
+        return f"{self.get_status_display()}{held_msg}{dep_msg}"
 
     get_status = property(_get_status)
 
@@ -786,7 +788,7 @@ class Ticket(models.Model):
             protocol = "https"
         else:
             protocol = "http"
-        return "%s://%s%s?ticket=%s&email=%s&key=%s" % (
+        return "{}://{}{}?ticket={}&email={}&key={}".format(
             protocol,
             site.domain,
             reverse("helpdesk:public_view"),
@@ -814,7 +816,7 @@ class Ticket(models.Model):
             protocol = "https"
         else:
             protocol = "http"
-        return "%s://%s%s" % (
+        return "{}://{}{}".format(
             protocol,
             site.domain,
             reverse("helpdesk:view", args=[self.id]),
@@ -850,7 +852,7 @@ class Ticket(models.Model):
         verbose_name_plural = _("Tickets")
 
     def __str__(self):
-        return "%s %s" % (self.id, self.title)
+        return f"{self.id} {self.title}"
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -870,7 +872,7 @@ class Ticket(models.Model):
         if len(self.title) > 200:
             self.title = self.title[:197] + "..."
 
-        super(Ticket, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     @staticmethod
     def queue_and_id_from_query(query):
@@ -935,7 +937,7 @@ class Ticket(models.Model):
                 value = self.ticketcustomfieldvalue_set.get(field=field).value
             except TicketCustomFieldValue.DoesNotExist:
                 value = None
-            setattr(self, "custom_%s" % field.name, value)
+            setattr(self, f"custom_{field.name}", value)
 
     def save_custom_field_values(self, data):
         for field, value in data.items():
@@ -1039,10 +1041,10 @@ class FollowUp(models.Model):
         verbose_name_plural = _("Follow-ups")
 
     def __str__(self):
-        return "%s" % self.title
+        return f"{self.title}"
 
     def get_absolute_url(self):
-        return "%s#followup%s" % (self.ticket.get_absolute_url(), self.id)
+        return f"{self.ticket.get_absolute_url()}#followup{self.id}"
 
     def save(self, *args, **kwargs):
         self.ticket.modified = timezone.now()
@@ -1051,7 +1053,7 @@ class FollowUp(models.Model):
         if helpdesk_settings.FOLLOWUP_TIME_SPENT_AUTO and not self.time_spent:
             self.time_spent = self.time_spent_calculation()
 
-        super(FollowUp, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def get_markdown(self):
         return get_markdown(self.comment)
@@ -1178,7 +1180,7 @@ class TicketChange(models.Model):
     )
 
     def __str__(self):
-        out = "%s " % self.field
+        out = f"{self.field} "
         if not self.new_value:
             out += gettext("removed")
         elif not self.old_value:
@@ -1232,7 +1234,7 @@ class Attachment(models.Model):
     )
 
     def __str__(self):
-        return "%s" % self.filename
+        return f"{self.filename}"
 
     def save(self, *args, **kwargs):
         if not self.size:
@@ -1247,7 +1249,7 @@ class Attachment(models.Model):
                 or "application/octet-stream"
             )
 
-        return super(Attachment, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def get_filename(self):
         return str(self.file)
@@ -1278,15 +1280,13 @@ class FollowUpAttachment(Attachment):
     )
 
     def attachment_path(self, filename):
-        path = "helpdesk/attachments/{ticket_for_url}-{secret_key}/{id_}".format(
-            ticket_for_url=self.followup.ticket.ticket_for_url,
-            secret_key=self.followup.ticket.secret_key,
-            id_=self.followup.id,
-        )
+        path = f"helpdesk/attachments/{self.followup.ticket.ticket_for_url}-{self.followup.ticket.secret_key}/{self.followup.id}"
         att_path = os.path.join(settings.MEDIA_ROOT, path)
-        if settings.STORAGES == "django.core.files.storage.FileSystemStorage":
-            if not os.path.exists(att_path):
-                os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
+        if (
+            settings.STORAGES == "django.core.files.storage.FileSystemStorage"
+            and not os.path.exists(att_path)
+        ):
+            os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
 
 
@@ -1298,13 +1298,13 @@ class KBIAttachment(Attachment):
     )
 
     def attachment_path(self, filename):
-        path = "helpdesk/attachments/kb/{category}/{kbi}".format(
-            category=self.kbitem.category, kbi=self.kbitem.id
-        )
+        path = f"helpdesk/attachments/kb/{self.kbitem.category}/{self.kbitem.id}"
         att_path = os.path.join(settings.MEDIA_ROOT, path)
-        if settings.STORAGES == "django.core.files.storage.FileSystemStorage":
-            if not os.path.exists(att_path):
-                os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
+        if (
+            settings.STORAGES == "django.core.files.storage.FileSystemStorage"
+            and not os.path.exists(att_path)
+        ):
+            os.makedirs(att_path, helpdesk_settings.HELPDESK_ATTACHMENT_DIR_PERMS)
         return os.path.join(path, filename)
 
 
@@ -1352,7 +1352,7 @@ class PreSetReply(models.Model):
     )
 
     def __str__(self):
-        return "%s" % self.name
+        return f"{self.name}"
 
 
 class EscalationExclusion(models.Model):
@@ -1386,7 +1386,7 @@ class EscalationExclusion(models.Model):
     )
 
     def __str__(self):
-        return "%s" % self.name
+        return f"{self.name}"
 
     class Meta:
         verbose_name = _("Escalation exclusion")
@@ -1450,7 +1450,7 @@ class EmailTemplate(models.Model):
     )
 
     def __str__(self):
-        return "%s" % self.template_name
+        return f"{self.template_name}"
 
     class Meta:
         ordering = ("template_name", "locale")
@@ -1497,7 +1497,7 @@ class KBCategory(models.Model):
     )
 
     def __str__(self):
-        return "%s" % self.name
+        return f"{self.name}"
 
     class Meta:
         ordering = ("title",)
@@ -1583,7 +1583,7 @@ class KBItem(models.Model):
     def save(self, *args, **kwargs):
         if not self.last_updated:
             self.last_updated = timezone.now()
-        return super(KBItem, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def get_team(self):
         return helpdesk_settings.HELPDESK_KBITEM_TEAM_GETTER(self)
@@ -1598,7 +1598,7 @@ class KBItem(models.Model):
     score = property(_score)
 
     def __str__(self):
-        return "%s: %s" % (self.category.title, self.title)
+        return f"{self.category.title}: {self.title}"
 
     class Meta:
         ordering = (
@@ -1672,9 +1672,9 @@ class SavedSearch(models.Model):
 
     def __str__(self):
         if self.shared:
-            return "%s (*)" % self.title
+            return f"{self.title} (*)"
         else:
-            return "%s" % self.title
+            return f"{self.title}"
 
     class Meta:
         verbose_name = _("Saved search")
@@ -1776,7 +1776,7 @@ class UserSettings(models.Model):
     )
 
     def __str__(self):
-        return "Preferences for %s" % self.user
+        return f"Preferences for {self.user}"
 
     class Meta:
         verbose_name = _("User Setting")
@@ -1851,12 +1851,12 @@ class IgnoreEmail(models.Model):
     )
 
     def __str__(self):
-        return "%s" % self.name
+        return f"{self.name}"
 
     def save(self, *args, **kwargs):
         if not self.date:
             self.date = timezone.now()
-        return super(IgnoreEmail, self).save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def queue_list(self):
         """Return a list of the queues this IgnoreEmail applies to.
@@ -1883,7 +1883,7 @@ class IgnoreEmail(models.Model):
         own_parts = self.email_address.split("@")
         email_parts = email.split("@")
 
-        if (
+        return bool(
             self.email_address == email
             or own_parts[0] == "*"
             and own_parts[1] == email_parts[1]
@@ -1891,10 +1891,7 @@ class IgnoreEmail(models.Model):
             and own_parts[0] == email_parts[0]
             or own_parts[0] == "*"
             and own_parts[1] == "*"
-        ):
-            return True
-        else:
-            return False
+        )
 
 
 class TicketCC(models.Model):
@@ -1960,7 +1957,7 @@ class TicketCC(models.Model):
     display = property(_display)
 
     def __str__(self):
-        return "%s for %s" % (self.display, self.ticket.title)
+        return f"{self.display} for {self.ticket.title}"
 
     def clean(self):
         if self.user and not self.user.email:
@@ -1969,7 +1966,7 @@ class TicketCC(models.Model):
 
 class CustomFieldManager(models.Manager):
     def get_queryset(self):
-        return super(CustomFieldManager, self).get_queryset().order_by("ordering")
+        return super().get_queryset().order_by("ordering")
 
 
 class CustomField(models.Model):
@@ -2086,14 +2083,14 @@ class CustomField(models.Model):
     objects = CustomFieldManager()
 
     def __str__(self):
-        return "%s" % self.name
+        return f"{self.name}"
 
     class Meta:
         verbose_name = _("Custom field")
         verbose_name_plural = _("Custom fields")
 
     def get_choices(self):
-        if not self.data_type == "list":
+        if self.data_type != "list":
             return None
         choices = self.choices_as_array
         if self.empty_selection_list:
@@ -2136,7 +2133,7 @@ class CustomField(models.Model):
         try:
             return customfield_to_api_field_dict[self.data_type](**attributes)
         except KeyError:
-            raise NameError("Unrecognized data_type %s" % self.data_type)
+            raise NameError(f"Unrecognized data_type {self.data_type}")
 
 
 class TicketCustomFieldValue(models.Model):
@@ -2155,7 +2152,7 @@ class TicketCustomFieldValue(models.Model):
     value = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return "%s / %s" % (self.ticket, self.field)
+        return f"{self.ticket} / {self.field}"
 
     @property
     def default_value(self) -> str:
@@ -2194,7 +2191,7 @@ class TicketDependency(models.Model):
     )
 
     def __str__(self):
-        return "%s / %s" % (self.ticket, self.depends_on)
+        return f"{self.ticket} / {self.depends_on}"
 
 
 def is_a_list_without_empty_element(task_list):

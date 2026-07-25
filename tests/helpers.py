@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from django.contrib.auth import get_user_model
-from helpdesk.models import Queue, Ticket
 import sys
 
+from django.contrib.auth import get_user_model
+
+from helpdesk.models import Queue, Ticket
 
 User = get_user_model()
 
@@ -15,7 +14,7 @@ def get_user(
         user = User.objects.get(username=username)
     except User.DoesNotExist:
         user = User.objects.create_user(
-            username=username, password=password, email="%s@example.com" % username
+            username=username, password=password, email=f"{username}@example.com"
         )
         user.is_staff = is_staff
         user.is_superuser = is_superuser

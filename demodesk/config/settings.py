@@ -5,7 +5,6 @@ Django settings for django-helpdesk demodesk project.
 
 import os
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -241,6 +240,6 @@ FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 try:
-    from .local_settings import *  # noqa
+    from .local_settings import *
 except ImportError:
     pass
