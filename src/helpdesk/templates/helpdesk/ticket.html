@@ -31,39 +31,56 @@
     </div>
   {% else %}
     {# Nav Tabs #}
-    <ul class="nav nav-underline ms-3" id="ticketTab" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active"
-                id="followup-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#followup-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="followup-tab-pane"
-                aria-selected="true">{% translate "Follow ups" %}</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link"
-                id="respond-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#respond-tab-pane"
-                type="button"
-                role="tab"
-                aria-controls="respond-tab-pane"
-                aria-selected="false">{% translate "Respond" %}</button>
-      </li>
-    </ul>
+    <div class="d-flex justify-content-between align-items-center me-3">
+      <ul class="nav nav-underline ms-3" id="ticketTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active"
+                  id="followup-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#followup-tab-pane"
+                  type="button"
+                  role="tab"
+                  aria-controls="followup-tab-pane"
+                  aria-selected="true">{% translate "Follow ups" %}</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link"
+                  id="respond-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#respond-tab-pane"
+                  type="button"
+                  role="tab"
+                  aria-controls="respond-tab-pane"
+                  aria-selected="false">{% translate "Respond" %}</button>
+        </li>
+      </ul>
+      {% if followups %}
+        <button type="button"
+                id="followup-sort-toggle"
+                class="btn btn-light btn-sm"
+                data-order="{% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}newest_first{% else %}oldest_first{% endif %}">
+          <i class="fa-solid fa-arrow-down-short-wide me-1"></i>
+          <span id="followup-sort-toggle-label">
+            {% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}
+              {% translate "Newest first" %}
+            {% else %}
+              {% translate "Oldest first" %}
+            {% endif %}
+          </span>
+        </button>
+      {% endif %}
+    </div>
     <div class="tab-content" id="myTabContent">
       {# Followup Pane #}
-      {% if ticket.followup_set.all %}
+      {% if followups %}
         {% load ticket_to_link %}
         <div class="tab-pane fade show active"
              id="followup-tab-pane"
              role="tabpanel"
              aria-labelledby="followup-tab"
              tabindex="0">
-          <div class="list-group list-group-flush my-3">
-            {% for followup in ticket.followup_set.all %}
+          <div class="list-group list-group-flush my-3" id="followup-list">
+            {% for followup in followups %}
               <div class="list-group-item list-group-item-action">
                 <div class="d-flex align-items-center">
                   <h6 class="mb-0">{{ followup.title|escape|num_to_link }}</h6>
@@ -431,6 +448,20 @@ $( function() {
 
       document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
           new bootstrap.Tooltip(el);
+      });
+
+      // Toggle follow ups between oldest-first and newest-first order.
+      $('#followup-sort-toggle').on('click', function() {
+          var $button = $(this);
+          var $list = $('#followup-list');
+          $list.children().get().reverse().forEach(function(item) {
+              $list.append(item);
+          });
+
+          var newOrder = $button.data('order') === 'newest_first' ? 'oldest_first' : 'newest_first';
+          var label = newOrder === 'newest_first' ? '{% translate "Newest first" %}' : '{% translate "Oldest first" %}';
+          $button.data('order', newOrder);
+          $('#followup-sort-toggle-label').text(label);
       });
 
       {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}

@@ -443,6 +443,12 @@ def followup_delete(request, ticket_id, followup_id):
 followup_delete = staff_member_required(followup_delete)
 
 
+def get_followups_for_ticket(ticket):
+    """Returns the ticket's follow ups, ordered per HELPDESK_FOLLOWUP_NEWEST_FIRST."""
+    order = "-date" if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST else "date"
+    return ticket.followup_set.order_by(order)
+
+
 @helpdesk_staff_member_required
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -522,6 +528,7 @@ def view_ticket(request, ticket_id):
         "helpdesk/ticket.html",
         {
             "ticket": ticket,
+            "followups": get_followups_for_ticket(ticket),
             "dependencies": dependencies,
             "submitter_userprofile_url": submitter_userprofile_url,
             "form": form,
@@ -1388,6 +1395,7 @@ class UpdateTicketView(
         context["customfields_form"] = EditTicketCustomFieldForm(
             self.request.POST or None, instance=ticket
         )
+        context["followups"] = get_followups_for_ticket(ticket)
         return context
 
     def get_form_kwargs(self):
