@@ -19,7 +19,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-
 # The following uses the static() helper function,
 # which only works when in development mode (using DEBUG).
 # For a real deployment, you'd have to properly configure a media server.

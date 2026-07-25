@@ -11,6 +11,8 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
+from rest_framework.routers import DefaultRouter
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
 from helpdesk.views import feeds, login, public, staff
@@ -21,8 +23,6 @@ from helpdesk.views.api import (
     TicketViewSet,
     UserTicketViewSet,
 )
-from rest_framework.routers import DefaultRouter
-
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.views import kb
@@ -140,12 +140,12 @@ if helpdesk_settings.HELPDESK_UI_ENABLED:
             name="delete_checklist_template",
         ),
         re_path(
-            r"^datatables_ticket_list/(?P<query>{})$".format(base64_pattern),
+            rf"^datatables_ticket_list/(?P<query>{base64_pattern})$",
             staff.datatables_ticket_list,
             name="datatables_ticket_list",
         ),
         re_path(
-            r"^timeline_ticket_list/(?P<query>{})$".format(base64_pattern),
+            rf"^timeline_ticket_list/(?P<query>{base64_pattern})$",
             staff.timeline_ticket_list,
             name="timeline_ticket_list",
         ),

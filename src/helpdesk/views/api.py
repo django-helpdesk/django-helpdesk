@@ -1,19 +1,21 @@
+from typing import ClassVar
+
 from django.contrib.auth import get_user_model
+from rest_framework import viewsets
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.viewsets import GenericViewSet
+
+from helpdesk import settings as helpdesk_settings
 from helpdesk.models import FollowUp, FollowUpAttachment, Ticket
 from helpdesk.serializers import (
     FollowUpAttachmentSerializer,
     FollowUpSerializer,
+    PublicTicketListingSerializer,
     TicketSerializer,
     UserSerializer,
-    PublicTicketListingSerializer,
 )
-from rest_framework import viewsets
-from rest_framework.mixins import CreateModelMixin
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.pagination import PageNumberPagination
-
-from helpdesk import settings as helpdesk_settings
 
 
 class ConservativePagination(PageNumberPagination):
@@ -30,7 +32,7 @@ class UserTicketViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = PublicTicketListingSerializer
     pagination_class = ConservativePagination
-    permission_classes = [IsAuthenticated]
+    permission_classes: ClassVar[list] = [IsAuthenticated]
 
     def get_queryset(self):
         tickets = Ticket.objects.filter(
@@ -53,7 +55,7 @@ class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
     serializer_class = TicketSerializer
     pagination_class = ConservativePagination
-    permission_classes = [IsAdminUser]
+    permission_classes: ClassVar[list] = [IsAdminUser]
 
     def get_queryset(self):
         tickets = Ticket.objects.all()
@@ -85,7 +87,7 @@ class FollowUpViewSet(viewsets.ModelViewSet):
     queryset = FollowUp.objects.all()
     serializer_class = FollowUpSerializer
     pagination_class = ConservativePagination
-    permission_classes = [IsAdminUser]
+    permission_classes: ClassVar[list] = [IsAdminUser]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -95,10 +97,10 @@ class FollowUpAttachmentViewSet(viewsets.ModelViewSet):
     queryset = FollowUpAttachment.objects.all()
     serializer_class = FollowUpAttachmentSerializer
     pagination_class = ConservativePagination
-    permission_classes = [IsAdminUser]
+    permission_classes: ClassVar[list] = [IsAdminUser]
 
 
 class CreateUserView(CreateModelMixin, GenericViewSet):
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes: ClassVar[list] = [IsAdminUser]

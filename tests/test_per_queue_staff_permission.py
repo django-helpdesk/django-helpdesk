@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
+
 from helpdesk import settings
 from helpdesk.models import (
     FollowUp,
@@ -45,15 +46,15 @@ class PerQueueStaffMembershipTestCase(TestCase):
         self.identifier_users = {}
 
         for identifier in self.IDENTIFIERS:
-            queue = self.__dict__["queue_%d" % identifier] = Queue.objects.create(
-                title="Queue %d" % identifier,
-                slug="q%d" % identifier,
+            queue = self.__dict__[f"queue_{identifier}"] = Queue.objects.create(
+                title=f"Queue {identifier}",
+                slug=f"q{identifier}",
             )
 
-            user = self.__dict__["user_%d" % identifier] = User.objects.create(
-                username="User_%d" % identifier,
+            user = self.__dict__[f"user_{identifier}"] = User.objects.create(
+                username=f"User_{identifier}",
                 is_staff=True,
-                email="foo%s@example.com" % identifier,
+                email=f"foo{identifier}@example.com",
             )
             user.set_password(str(identifier))
             user.save()
@@ -65,13 +66,11 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
             for ticket_number in range(1, identifier + 1):
                 Ticket.objects.create(
-                    title="Unassigned Ticket %d in Queue %d"
-                    % (ticket_number, identifier),
+                    title=f"Unassigned Ticket {ticket_number} in Queue {identifier}",
                     queue=queue,
                 )
                 Ticket.objects.create(
-                    title="Ticket %d in Queue %d Assigned to User_%d"
-                    % (ticket_number, identifier, identifier),
+                    title=f"Ticket {ticket_number} in Queue {identifier} Assigned to User_{identifier}",
                     queue=queue,
                     assigned_to=user,
                 )
@@ -93,7 +92,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username="User_%d" % identifier, password=str(identifier))
+            self.client.login(username=f"User_{identifier}", password=str(identifier))
             response = self.client.get(reverse("helpdesk:dashboard"))
             self.assertEqual(
                 len(response.context["unassigned_tickets"]),
@@ -130,7 +129,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
 
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username="User_%d" % identifier, password=str(identifier))
+            self.client.login(username=f"User_{identifier}", password=str(identifier))
             response = self.client.get(reverse("helpdesk:report_index"))
             self.assertEqual(
                 len(response.context["dash_tickets"]),
@@ -177,7 +176,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         """
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username="User_%d" % identifier, password=str(identifier))
+            self.client.login(username=f"User_{identifier}", password=str(identifier))
             response = self.client.get(reverse("helpdesk:list"))
             tickets = __Query__(
                 HelpdeskUser(self.identifier_users[identifier]),
@@ -195,7 +194,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
             )
             self.assertEqual(
                 response.context["queue_choices"][0],
-                Queue.objects.get(title="Queue %d" % identifier),
+                Queue.objects.get(title=f"Queue {identifier}"),
                 "Queue choices were not properly limited by queue membership",
             )
 
@@ -219,7 +218,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
         """
         # Regular users
         for identifier in self.IDENTIFIERS:
-            self.client.login(username="User_%d" % identifier, password=str(identifier))
+            self.client.login(username=f"User_{identifier}", password=str(identifier))
             response = self.client.get(
                 reverse("helpdesk:run_report", kwargs={"report": "userqueue"})
             )
@@ -249,7 +248,7 @@ class PerQueueStaffMembershipTestCase(TestCase):
             # their ID
             self.assertEqual(
                 response.context["headings"][1],
-                "Queue %d" % identifier,
+                f"Queue {identifier}",
                 "Queue choices were not properly limited by queue membership",
             )
 
@@ -385,9 +384,9 @@ class PerQueuePermissionSecurityTestCase(TestCase):
     def test_merge_tickets_blocked_for_inaccessible_queue(self):
         """user_1 cannot merge tickets when one belongs to queue_2."""
         self._login_user_1()
-        url = reverse("helpdesk:merge_tickets") + "?tickets=%d&tickets=%d" % (
-            self.ticket_2.id,
-            self.ticket_2b.id,
+        url = (
+            reverse("helpdesk:merge_tickets")
+            + f"?tickets={self.ticket_2.id}&tickets={self.ticket_2b.id}"
         )
         response = self.client.post(url, {"chosen_ticket": self.ticket_2.id})
         self.assertEqual(response.status_code, 403)

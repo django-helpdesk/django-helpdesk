@@ -1,4 +1,4 @@
-from django.test import override_settings, TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 
@@ -11,7 +11,7 @@ class TestLoginRedirect(TestCase):
         # the redirect url, so that the custom login can redirect the browser
         # back to helpdesk after the login.
         home_url = reverse("helpdesk:home")
-        expected = "/custom/login/?next={}".format(home_url)
+        expected = f"/custom/login/?next={home_url}"
         self.assertRedirects(response, expected, fetch_redirect_response=False)
 
     @override_settings(LOGIN_URL="/custom/login/")
@@ -20,7 +20,7 @@ class TestLoginRedirect(TestCase):
         next_param = "/redirect/back"
         url = reverse("helpdesk:login") + "?next=" + next_param
         response = self.client.get(url)
-        expected = "/custom/login/?next={}".format(next_param)
+        expected = f"/custom/login/?next={next_param}"
         self.assertRedirects(response, expected, fetch_redirect_response=False)
 
     @override_settings(LOGIN_URL="helpdesk:login", SITE_ID=1)

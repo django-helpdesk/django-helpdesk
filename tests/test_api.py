@@ -1,9 +1,10 @@
 import base64
-import datetime
+from _datetime import timedelta
+
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.utils import timezone
 from freezegun import freeze_time
-from helpdesk.models import CustomField, Queue, Ticket
 from rest_framework import HTTP_HEADER_ENCODING
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.status import (
@@ -14,11 +15,13 @@ from rest_framework.status import (
     HTTP_403_FORBIDDEN,
 )
 from rest_framework.test import APITestCase
-from _datetime import timedelta
-from helpdesk.lib import convert_value
-from django.utils import timezone
 
-frozen_date_time_str = (datetime.datetime.now() - timedelta(days=100)).isoformat()
+from helpdesk.lib import convert_value
+from helpdesk.models import CustomField, Queue, Ticket
+
+frozen_date_time_str = (
+    (timezone.now() - timedelta(days=100)).replace(tzinfo=None).isoformat()
+)
 
 
 class TicketTest(APITestCase):
@@ -163,7 +166,7 @@ class TicketTest(APITestCase):
 
         self.client.force_authenticate(staff_user)
         response = self.client.put(
-            "/api/tickets/%d/" % test_ticket.id,
+            f"/api/tickets/{test_ticket.id}/",
             {
                 "queue": self.queue.id,
                 "title": "Title",
@@ -198,7 +201,7 @@ class TicketTest(APITestCase):
 
         self.client.force_authenticate(staff_user)
         response = self.client.patch(
-            "/api/tickets/%d/" % test_ticket.id,
+            f"/api/tickets/{test_ticket.id}/",
             {
                 "description": "New description",
             },
@@ -212,7 +215,7 @@ class TicketTest(APITestCase):
         staff_user = User.objects.create_user(username="admin", is_staff=True)
         test_ticket = Ticket.objects.create(queue=self.queue, title="Test ticket")
         self.client.force_authenticate(staff_user)
-        response = self.client.delete("/api/tickets/%d/" % test_ticket.id)
+        response = self.client.delete(f"/api/tickets/{test_ticket.id}/")
         self.assertEqual(response.status_code, HTTP_204_NO_CONTENT)
         self.assertFalse(Ticket.objects.exists())
 
@@ -220,7 +223,7 @@ class TicketTest(APITestCase):
     def test_create_api_ticket_with_custom_fields(self):
         custom_date = "2022-04-11"
         custom_time = "23:59:59"
-        custom_datetime = convert_value(datetime.datetime.now() - timedelta(days=30))
+        custom_datetime = convert_value(timezone.now() - timedelta(days=30))
 
         # Create custom fields
         for field_type, field_display in CustomField.DATA_TYPE_CHOICES:

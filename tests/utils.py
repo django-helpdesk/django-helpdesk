@@ -1,23 +1,25 @@
 """UItility functions facilitate making unit testing easier and less brittle."""
 
-from PIL import Image
+from __future__ import annotations
+
 import email
+import random
+import re
+import string
+import unicodedata
 from email import encoders
 from email.message import Message
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from io import BytesIO
+from typing import Any
+
 import factory
 import faker
-from io import BytesIO
 from numpy.random import randint
-import random
-import re
-import string
-import typing
-from typing import Any, Optional, Tuple
-import unicodedata
+from PIL import Image
 
 
 def strip_accents(text):
@@ -125,7 +127,7 @@ def get_fake_html(locale: str = "en_US", wrap_in_body_tag=True) -> Any:
             "locale": locale,
         },
     )
-    for _ in range(0, 4):
+    for _ in range(4):
         html += (
             "<li>"
             + factory.Faker("sentence").evaluate(
@@ -137,7 +139,7 @@ def get_fake_html(locale: str = "en_US", wrap_in_body_tag=True) -> Any:
             )
             + "</li>"
         )
-    for _ in range(0, 4):
+    for _ in range(4):
         html += "<p>" + factory.Faker("text").evaluate(
             {},
             None,
@@ -151,9 +153,9 @@ def get_fake_html(locale: str = "en_US", wrap_in_body_tag=True) -> Any:
 def generate_email_address(
     locale: str = "en_US",
     use_short_email: bool = False,
-    real_name_format: Optional[str] = "{last_name}, {first_name}",
-    last_name_override: Optional[str] = None,
-) -> Tuple[str, str, str, str]:
+    real_name_format: str | None = "{last_name}, {first_name}",
+    last_name_override: str | None = None,
+) -> tuple[str, str, str, str]:
     """
     Generate an RFC 2822 email address
 
@@ -187,7 +189,7 @@ def generate_email_address(
 
 
 def generate_file_mime_part(
-    locale: str = "en_US", filename: str = None, content: str = None
+    locale: str = "en_US", filename: str | None = None, content: str | None = None
 ) -> Message:
     """
 
@@ -202,12 +204,12 @@ def generate_file_mime_part(
     encoders.encode_base64(part)
     if not filename:
         filename = get_fake("word", locale=locale, min_length=8) + ".txt"
-    part.add_header("Content-Disposition", "attachment; filename=%s" % filename)
+    part.add_header("Content-Disposition", f"attachment; filename={filename}")
     return part
 
 
 def generate_executable_mime_part(
-    locale: str = "en_US", filename: str = None, content: str = None
+    locale: str = "en_US", filename: str | None = None, content: str | None = None
 ) -> Message:
     """
 
@@ -222,13 +224,13 @@ def generate_executable_mime_part(
     encoders.encode_base64(part)
     if not filename:
         filename = get_fake("word", locale=locale, min_length=8) + ".exe"
-    part.add_header("Content-Disposition", "attachment; filename=%s" % filename)
+    part.add_header("Content-Disposition", f"attachment; filename={filename}")
     return part
 
 
 def generate_image_mime_part(
     locale: str = "en_US",
-    imagename: str = None,
+    imagename: str | None = None,
     disposition_primary_type: str = "attachment",
 ) -> Message:
     """
@@ -242,7 +244,7 @@ def generate_image_mime_part(
     if not imagename:
         imagename = get_fake("word", locale=locale, min_length=8) + ".jpg"
     part.add_header(
-        "Content-Disposition", disposition_primary_type + "; filename= %s" % imagename
+        "Content-Disposition", disposition_primary_type + f"; filename= {imagename}"
     )
     return part
 
@@ -260,14 +262,14 @@ def generate_email_list(
     """
     email_address_list = [
         generate_email_address(locale, use_short_email=use_short_email)[0]
-        for _ in range(0, address_cnt)
+        for _ in range(address_cnt)
     ]
     return ",".join(email_address_list)
 
 
 def add_simple_email_headers(
     message: Message, locale: str = "en_US", use_short_email: bool = False
-) -> typing.Tuple[typing.Tuple[str, str], typing.Tuple[str, str]]:
+) -> tuple[tuple[str, str], tuple[str, str]]:
     """
     Adds the key email headers to a Mime part
 
@@ -288,8 +290,8 @@ def add_simple_email_headers(
 def generate_mime_part(
     locale: str = "en_US",
     part_type: str = "plain",
-    body: str = None,
-) -> typing.Optional[Message]:
+    body: str | None = None,
+) -> Message | None:
     """
     Generates a mime part of the specified type
 
@@ -311,17 +313,17 @@ def generate_mime_part(
     elif "image" == part_type:
         msg = generate_image_mime_part(locale=locale)
     else:
-        raise Exception("Mime part not implemented: " + part_type)
+        raise NotImplementedError("Mime part not implemented: " + part_type)
     return msg
 
 
 def generate_multipart_email(
     locale: str = "en_US",
-    type_list: typing.List[str] = ["plain", "html", "image"],
-    sub_type: str = None,
+    type_list: list[str] | None = None,
+    sub_type: str | None = None,
     use_short_email: bool = False,
-    body: str = None,
-) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+    body: str | None = None,
+) -> tuple[Message, tuple[str, str], tuple[str, str]]:
     """
     Generates an email including headers with the defined multiparts
 
@@ -331,6 +333,8 @@ def generate_multipart_email(
     :param use_short_email: produces a "To" or "From" that is only the email address if True
     :param body: if provided then will be added to the plain mime part only
     """
+    if type_list is None:
+        type_list = ["plain", "html", "image"]
     msg = MIMEMultipart(sub_type) if sub_type else MIMEMultipart()
     for part_type in type_list:
         msg.attach(generate_mime_part(locale=locale, part_type=part_type, body=body))
@@ -343,8 +347,8 @@ def generate_multipart_email(
 def generate_text_email(
     locale: str = "en_US",
     use_short_email: bool = False,
-    body: str = None,
-) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+    body: str | None = None,
+) -> tuple[Message, tuple[str, str], tuple[str, str]]:
     """
     Generates an email including headers
     """
@@ -359,7 +363,7 @@ def generate_text_email(
 
 def generate_html_email(
     locale: str = "en_US", use_short_email: bool = False
-) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+) -> tuple[Message, tuple[str, str], tuple[str, str]]:
     """
     Generates an email including headers
     """
@@ -375,9 +379,9 @@ def generate_email_with_subject(
     subject: str,
     locale: str = "en_US",
     use_short_email: bool = False,
-    body: str = None,
-    html_body: str = None,
-) -> typing.Tuple[Message, typing.Tuple[str, str], typing.Tuple[str, str]]:
+    body: str | None = None,
+    html_body: str | None = None,
+) -> tuple[Message, tuple[str, str], tuple[str, str]]:
     """
     Generates an email with a specified subject, and optional plain and HTML bodies.
 

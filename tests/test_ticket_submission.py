@@ -1,10 +1,16 @@
+import email
+import logging
+import uuid
+from typing import ClassVar
+from urllib.parse import urlparse
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
-import email
-from helpdesk.email import extract_email_metadata, MULTIPLE_USERS_SAME_EMAIL_MSG
+
+from helpdesk.email import MULTIPLE_USERS_SAME_EMAIL_MSG, extract_email_metadata
 from helpdesk.models import (
     CustomField,
     FollowUp,
@@ -14,10 +20,8 @@ from helpdesk.models import (
     Ticket,
     TicketCC,
 )
+
 from . import utils
-import logging
-from urllib.parse import urlparse
-import uuid
 
 User = get_user_model()
 
@@ -25,7 +29,7 @@ logger = logging.getLogger("helpdesk")
 
 
 class TicketBasicsTestCase(TestCase):
-    fixtures = ["emailtemplate.json"]
+    fixtures: ClassVar[list] = ["emailtemplate.json"]
 
     def setUp(self):
         self.queue_public = Queue.objects.create(
@@ -62,7 +66,7 @@ class TicketBasicsTestCase(TestCase):
         email_count = len(mail.outbox)
         ticket_data = dict(queue=self.queue_public, **self.ticket_data)
         ticket = Ticket.objects.create(**ticket_data)
-        self.assertEqual(ticket.ticket_for_url, "q1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"q1-{ticket.id}")
         self.assertEqual(email_count, len(mail.outbox))
 
     def test_create_ticket_public(self):
@@ -240,7 +244,7 @@ class TicketBasicsTestCase(TestCase):
 
 
 class EmailInteractionsTestCase(TestCase):
-    fixtures = ["emailtemplate.json"]
+    fixtures: ClassVar[list] = ["emailtemplate.json"]
 
     def setUp(self):
         self.queue_public = Queue.objects.create(
@@ -294,7 +298,7 @@ class EmailInteractionsTestCase(TestCase):
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
 
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify the sender (+1)
         # and the new and update queues (+2)
@@ -329,7 +333,7 @@ class EmailInteractionsTestCase(TestCase):
             submitter_email=submitter_email,
         )
 
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify the sender (+1)
         # and the new and update queues (+2)
@@ -364,7 +368,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify:
         # the sender (+1),
@@ -410,7 +414,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify:
         # the sender (+1),
@@ -462,7 +466,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify:
         # the submitter (+1)
@@ -575,7 +579,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
@@ -675,7 +679,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As an update was made, we increase the expected_email_count with:
         # public_update_queue: +1
@@ -783,7 +787,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:
@@ -825,7 +829,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify:
         # the sender (+1),
@@ -877,7 +881,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq2-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq2-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify:
         # the sender (+1),
@@ -922,7 +926,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify:
         # the sender (+1),
@@ -959,7 +963,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # As an update was made, we increase the expected_email_count with:
         # submitter: +1
@@ -1007,7 +1011,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq2-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq2-{ticket.id}")
 
         # As we have created an Ticket from an email, we notify:
         # the sender (+1),
@@ -1047,7 +1051,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq2-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq2-{ticket.id}")
 
         # As an update was made, we increase the expected_email_count with:
         # public_update_queue: +1
@@ -1100,7 +1104,7 @@ class EmailInteractionsTestCase(TestCase):
 
         followup = FollowUp.objects.get(message_id=message_id)
         ticket = Ticket.objects.get(id=followup.ticket.id)
-        self.assertEqual(ticket.ticket_for_url, "mq1-%s" % ticket.id)
+        self.assertEqual(ticket.ticket_for_url, f"mq1-{ticket.id}")
 
         # Ensure that <TicketCC> is created
         for cc_email in cc_list:

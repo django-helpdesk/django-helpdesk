@@ -1,14 +1,16 @@
+from typing import ClassVar
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import CustomField, Queue, Ticket
 from helpdesk.templatetags.ticket_to_link import num_to_link
 from helpdesk.user import HelpdeskUser
-from django.utils.translation import gettext_lazy as _
-
 
 try:  # python 3
     from urllib.parse import urlparse
@@ -17,7 +19,7 @@ except ImportError:  # python 2
 
 
 class TicketActionsTestCase(TestCase):
-    fixtures = ["emailtemplate.json"]
+    fixtures: ClassVar[list] = ["emailtemplate.json"]
 
     def setUp(self):
         self.queue_public = Queue.objects.create(
@@ -216,18 +218,16 @@ class TicketActionsTestCase(TestCase):
         ticket_id = ticket.id
 
         # generate the URL text
-        result = num_to_link("this is ticket#%s" % ticket_id)
+        result = num_to_link(f"this is ticket#{ticket_id}")
         self.assertEqual(
             result,
-            "this is ticket <a href='/tickets/%s/' class='ticket_link_status ticket_link_status_Open'>#%s</a>"
-            % (ticket_id, ticket_id),
+            f"this is ticket <a href='/tickets/{ticket_id}/' class='ticket_link_status ticket_link_status_Open'>#{ticket_id}</a>",
         )
 
-        result2 = num_to_link("whoa another ticket is here #%s huh" % ticket_id)
+        result2 = num_to_link(f"whoa another ticket is here #{ticket_id} huh")
         self.assertEqual(
             result2,
-            "whoa another ticket is here  <a href='/tickets/%s/' class='ticket_link_status ticket_link_status_Open'>#%s</a> huh"
-            % (ticket_id, ticket_id),
+            f"whoa another ticket is here  <a href='/tickets/{ticket_id}/' class='ticket_link_status ticket_link_status_Open'>#{ticket_id}</a> huh",
         )
 
     def test_create_ticket_getform(self):
@@ -294,7 +294,7 @@ class TicketActionsTestCase(TestCase):
             data={"ticket_id": [str(ticket_1.id), str(ticket_2.id)], "action": "merge"},
             follow=True,
         )
-        redirect_url = "%s?tickets=%s&tickets=%s" % (
+        redirect_url = "{}?tickets={}&tickets={}".format(
             reverse("helpdesk:merge_tickets"),
             ticket_1.id,
             ticket_2.id,

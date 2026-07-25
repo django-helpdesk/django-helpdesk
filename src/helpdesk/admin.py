@@ -1,5 +1,8 @@
+from typing import ClassVar
+
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import (
     Checklist,
@@ -18,7 +21,6 @@ from helpdesk.models import (
     TicketChange,
 )
 
-
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBCategory, KBItem
 
@@ -26,11 +28,11 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
 @admin.register(Queue)
 class QueueAdmin(admin.ModelAdmin):
     list_display = ("title", "slug", "email_address", "locale", "time_spent")
-    prepopulated_fields = {"slug": ("title",)}
+    prepopulated_fields: ClassVar[dict] = {"slug": ("title",)}
 
     def time_spent(self, q):
         if q.dedicated_time:
-            return "{} / {}".format(q.time_spent, q.dedicated_time)
+            return f"{q.time_spent} / {q.dedicated_time}"
         elif q.time_spent:
             return q.time_spent
         else:
@@ -61,7 +63,7 @@ class TicketAdmin(admin.ModelAdmin):
             username, domain = ticket.submitter_email.split("@")
             username = username[:2] + "*" * (len(username) - 2)
             domain = domain[:1] + "*" * (len(domain) - 2) + domain[-1:]
-            return "%s@%s" % (username, domain)
+            return f"{username}@{domain}"
         else:
             return ticket.submitter_email
 
@@ -86,7 +88,7 @@ class KBIAttachmentInline(admin.StackedInline):
 
 @admin.register(FollowUp)
 class FollowUpAdmin(admin.ModelAdmin):
-    inlines = [TicketChangeInline, FollowUpAttachmentInline]
+    inlines: ClassVar[list] = [TicketChangeInline, FollowUpAttachmentInline]
     list_display = (
         "ticket_get_ticket_for_url",
         "title",
@@ -108,7 +110,7 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
     @admin.register(KBItem)
     class KBItemAdmin(admin.ModelAdmin):
         list_display = ("category", "title", "last_updated", "team", "order", "enabled")
-        inlines = [KBIAttachmentInline]
+        inlines: ClassVar[list] = [KBIAttachmentInline]
         readonly_fields = ("voted_by", "downvoted_by")
 
         list_display_links = ("title",)

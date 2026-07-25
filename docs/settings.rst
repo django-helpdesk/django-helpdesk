@@ -418,16 +418,26 @@ Default E-Mail Settings
 
 The following settings default to ``None`` but can be set as defaults, rather than setting them per-queue.
 
-- ``QUEUE_EMAIL_BOX_TYPE``
-- ``QUEUE_EMAIL_BOX_SSL``
-- ``QUEUE_EMAIL_BOX_HOST````
-- ``QUEUE_EMAIL_BOX_USER``
-- ``QUEUE_EMAIL_BOX_PASSWORD``
+- **QUEUE_EMAIL_BOX_TYPE** Protocol used: ``pop3``, ``imap`` or ``oauth``.
+- **QUEUE_EMAIL_BOX_SSL** Set to ``True`` to use SSL, otherwise ``False``.
+- **QUEUE_EMAIL_BOX_HOST** The URL of the mail server.
+- **QUEUE_EMAIL_BOX_USER** The ``username`` of the email account.
+- **QUEUE_EMAIL_BOX_PASSWORD** The ``password`` of the email account.
+
+  If ``oauth`` is used, configure ``HELPDESK_OAUTH``::
+
+    HELPDESK_OAUTH = {
+        "token_url": "",
+        "client_id": "",
+        "secret": "",
+        "scope": [""],
+    }
+
+- **HELPDESK_IMAP_DEBUG_LEVEL** If using ``imap`` or ``oauth``, set the IMAP debug logging level. Default: ``0`` (no debugging).
 
 
 Discontinued Settings
 ---------------------
-
 The following settings were defined in previous versions and are no longer supported.
 
 - **HELPDESK_CUSTOM_WELCOME**

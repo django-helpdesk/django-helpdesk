@@ -1,11 +1,13 @@
-# -*- coding: utf-8 -*-
 from datetime import timedelta
 from unittest import mock
+
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue, Ticket
+
 from .helpers import get_staff_user
 
 
