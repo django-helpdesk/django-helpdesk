@@ -5,6 +5,7 @@
 {% block helpdesk_title %}
   {% translate "Tickets" %}
 {% endblock helpdesk_title %}
+
 {% block helpdesk_head %}
   {# Timeline 3 CSS #}
   {% if helpdesk_settings.HELPDESK_USE_CDN %}
@@ -13,9 +14,11 @@
     <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}" />
   {% endif %}
 {% endblock helpdesk_head %}
+
 {% block h1_title %}Tickets
   {% if from_saved_query %}[{{ saved_query.title }}]{% endif %}
 {% endblock h1_title %}
+
 {% block helpdesk_breadcrumb %}
   {# Add dashboard or home here #}
   <li class="breadcrumb-item">
@@ -27,7 +30,8 @@
   {% else %}
     <li class="breadcrumb-item active">{% translate "Overview" %}</li>
   {% endif %}
-{% endblock %}
+{% endblock helpdesk_breadcrumb %}
+
 {% block helpdesk_body %}
   <div class="card border-0 mb-3">
     {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
@@ -62,28 +66,26 @@
       {{ search_message|safe }}
       <div class="tab-content" id="filtersTabContent">
         <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel" aria-labelledby="datatabletabcontents-tab">
-          <form method='post' action='{% url 'helpdesk:mass_update' %}' id="ticket_mass_update">
+          <form method="post" action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
             {% csrf_token %}
-            <table class="table table-sm table-striped table-bordered table-hover"
-                   id="ticketTable"
-                   data-page-length='{{ default_tickets_per_page }}'>
-              <thead class="thead-light">
+            <table class="table table-hover" id="ticketTable" data-page-length='{{ default_tickets_per_page }}'>
+              <thead class="table-light text-uppercase small">
                 <tr>
                   <th></th>
-                  <th>{% trans "Ticket" %}</th>
-                  <th>{% trans "Priority" %}</th>
-                  <th>{% trans "Queue" %}</th>
-                  <th>{% trans "Status" %}</th>
-                  <th>{% trans "Created" %}</th>
-                  <th>{% trans "Due Date" %}</th>
-                  <th>{% trans "Owner" %}</th>
-                  <th>{% trans "Submitter" %}</th>
-                  <th>{% trans "Last Followup" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Ticket" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Priority" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Queue" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Status" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Created" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Due Date" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Owner" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Submitter" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% trans "Last Followup" %}</th>
                   {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
-                    <th>{% trans "Time Spent" %}</th>
+                    <th class="text-body-tertiary fw-medium">{% trans "Time Spent" %}</th>
                   {% endif %}
                   {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-                    <th>{% trans "KB item" %}</th>
+                    <th class="text-body-tertiary fw-medium">{% trans "KB item" %}</th>
                   {% endif %}
                 </tr>
               </thead>
@@ -325,9 +327,10 @@
   </div>
 </div>
 {% endblock helpdesk_body %}
+
 {% block helpdesk_js %}
   <script src='{% static "helpdesk/filter.js" %}'></script>
-  <!-- Timeline 3 JavaScript -->
+  {# Timeline 3 JavaScript #}
   {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
   {% else %}
@@ -366,10 +369,10 @@
                       $(row).addClass(data.row_class);
                  },
                  layout: {
-                      topStart: ['pageLength', 'buttons'],
-                      topEnd: 'search',
-                      bottomStart: 'paging',
-                      bottomEnd: 'info'
+                      topStart: [''],
+                      topEnd: ['search', 'buttons'],
+                      bottomStart: ['info', 'pageLength'],
+                      bottomEnd: 'paging'
                  },
                  buttons: ["colvis"],
                  columns: [{
@@ -378,7 +381,7 @@
                            render: function(data, type, row, meta) {
                                 const pk = data;
                                 if (type === 'display') {
-                                     data = "<input type='checkbox' name='ticket_id' value='" + pk + "' class='ticket_multi_select' />"
+                                     data = "<div class='form-check'><input type='checkbox' name='ticket_id' value='" + pk + "' class='ticket_multi_select form-check-input' /></div>"
                                 }
                                 return data
                            }
