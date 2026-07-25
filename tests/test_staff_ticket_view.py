@@ -7,7 +7,6 @@ from django.urls import resolve, reverse
 from helpdesk.forms import CreateChecklistForm, EditTicketCustomFieldForm, TicketForm
 from helpdesk.models import Queue, Ticket
 
-
 User = get_user_model()
 
 
@@ -35,7 +34,7 @@ class StaffTicketViewTests(TestCase):
 
     def test_anonymous_user_cannot_access(self):
         # Arrange
-        login_url = "%s?next=%s" % (reverse("helpdesk:login"), self.url)
+        login_url = "{}?next={}".format(reverse("helpdesk:login"), self.url)
 
         # Act
         # Make an anonymous user directly access the ticket detail url
