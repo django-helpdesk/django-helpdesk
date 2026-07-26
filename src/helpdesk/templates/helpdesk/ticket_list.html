@@ -64,7 +64,7 @@
     {% endif %}
     <div class="card-body">
       {{ search_message|safe }}
-      <div class="tab-content" id="filtersTabContent">
+      <div class="tab-content" id="tableTabContent">
         <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel" aria-labelledby="datatabletabcontents-tab">
           <form method="post" action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
             {% csrf_token %}
@@ -92,7 +92,7 @@
               </thead>
             </table>
             {# Actions dropdown #}
-            <div class="dropdown" id="actions-dropdown">
+            <div class="dropdown dropend" id="actions-dropdown">
               <button class="btn btn-light dropdown-toggle"
                       type="button"
                       data-bs-toggle="dropdown"
@@ -163,26 +163,118 @@
   <div class="card border-0 mb-3">
     <div class="card-body">
       <h5 class="card-title">{% translate "Query Selection" %}</h5>
-      <ul class="nav nav-underline" id="filtersTab" role="tablist">
+      <a class="btn btn-light"
+         id="advanced-filters"
+         data-bs-toggle="offcanvas"
+         href="#offcanvasFilters"
+         role="button"
+         aria-controls="offcanvasFilters">
+        <i class="fa fa-sliders me-2"></i>{% translate "Filters" %}
+      </a>
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvasFiltersLabel">
+            <i class="fa fa-sliders me-2"></i>{% translate "Filters" %}
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <form method="get">
+            <div class="mb-3">
+              <label class="form-label" for="filterBuilderSelect">{% translate "Add filter" %}</label>
+              <select class="form-select"
+                      aria-describedby="select-description"
+                      name="select"
+                      id="filterBuilderSelect"
+                      onChange="onFilterChange(this.value)">
+                <option value="">--</option>
+                <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
+                  {% translate "Sorting" %}
+                </option>
+                <option id="filterBuilderSelect-Priority" value="Priority"{% if query_params.filtering.priority__in %} disabled{% endif %}>
+                  {% translate "Priority" %}
+                </option>
+                <option id="filterBuilderSelect-Owner"
+                        value="Owner"
+                        {% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %}
+                          disabled{% endif %}>{% translate "Owner" %}</option>
+                <option id="filterBuilderSelect-Queue"
+                        value="Queue"
+                        {% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %}
+                          disabled{% endif %}>{% translate "Queue" %}</option>
+                <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
+                  {% translate "Status" %}
+                </option>
+                <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
+                  {% translate "Keywords" %}
+                </option>
+                <option id="filterBuilderSelect-Dates"
+                        value="Dates"
+                        {% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
+                          disabled{% endif %}>{% translate "Date Range" %}</option>
+                <option id="filterBuilderSelect-KBItems"
+                        value="KBItems"
+                        {% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %}
+                          disabled{% endif %}>{% translate "Knowledge base items" %}</option>
+              </select>
+            </div>
+          </form>
+          <form method="get">
+            <ul class="list-group list-group-flush gap-3">
+              <li id="filterBoxSort" class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %}" id="filterBoxSort">
+                {% include "helpdesk/filters/sorting.html" %}
+              </li>
+              <li class="filterBox{% if query_params.filtering.priority__in %} filterBoxShow{% endif %}" id="filterBoxPriority">
+                {% include "helpdesk/filters/priority.html" %}
+              </li>
+              <li class="filterBox{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %}
+                           filterBoxShow{% endif %}"
+                  id="filterBoxOwner">{% include "helpdesk/filters/owner.html" %}</li>
+              <li class="filterBox{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %}
+                           filterBoxShow{% endif %}"
+                  id="filterBoxQueue">{% include "helpdesk/filters/queue.html" %}</li>
+              <li class="filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}" id="filterBoxStatus">
+                {% include "helpdesk/filters/status.html" %}
+              </li>
+              <li class="filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
+                           filterBoxShow{% endif %}"
+                  id='filterBoxDates'>{% include "helpdesk/filters/date.html" %}</li>
+              <li class="filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
+                {% include "helpdesk/filters/keywords.html" %}
+              </li>
+              <li class="filterBox{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %}
+                           filterBoxShow{% endif %}"
+                  id="filterBoxKBItems">{% include "helpdesk/filters/kbitems.html" %}</li>
+            </ul>
+            <div class="d-flex justify-content-end my-3">
+              <button class="btn btn-outline-secondary" type="submit">{% translate "Apply Filters" %}</button>
+            </div>
+          </form>
+          <ul class="list-group list-group-flush">
+            {% if from_saved_query and saved_query.user == user %}
+              <li class="list-group-item">
+                {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
+                <a href="{% url 'helpdesk:delete_query' saved_query.id %}">{% translate "Delete Saved Query" %}</a>
+              </li>
+            {% endif %}
+            {% if from_saved_query %}
+              <li class="list-group-item">
+                {% blocktranslate with saved_query.id as query_id %}<a href="../reports/?saved_query={{ query_id }}">Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktranslate %}
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+      <ul class="nav nav-underline" id="queriesTab" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active"
-                  id="filters-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#filters-tab-pane"
-                  type="button"
-                  role="tab"
-                  aria-controls="filters-tab-pane"
-                  aria-selected="true"><i class="fa fa-sliders me-2"></i>{% translate "Filters" %}</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link"
                   id="save-query-tab"
                   data-bs-toggle="tab"
                   data-bs-target="#save-query-tab-pane"
                   type="button"
                   role="tab"
                   aria-controls="save-query-tab-pane"
-                  aria-selected="false"><i class="fa fa-floppy-disk me-2"></i>{% translate "Save Query" %}</button>
+                  aria-selected="true"><i class="fa fa-floppy-disk me-2"></i>{% translate "Save Query" %}</button>
         </li>
         {% if user_saved_queries %}
           <li class="nav-item" role="presentation">
@@ -199,100 +291,13 @@
           </li>
         {% endif %}
       </ul>
-      <div class="tab-content" id="filtersTabContent">
-        {# Filters pane #}
-        <div class="tab-pane fade show active" id="filters-tab-pane" role="tabpanel" aria-labelledby="filters-tab" tabindex="0">
-          <div class="row my-3">
-            <div class="col-12 col-lg-6">
-              <form method="get">
-                <div class="mb-3">
-                  <label class="form-label" for="filterBuilderSelect">{% translate "Add filter" %}</label>
-                  <select class="form-select"
-                          aria-describedby="select-description"
-                          name="select"
-                          id="filterBuilderSelect"
-                          onChange="onFilterChange(this.value)">
-                    <option value="">--</option>
-                    <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
-                      {% translate "Sorting" %}
-                    </option>
-                    <option id="filterBuilderSelect-Priority" value="Priority"{% if query_params.filtering.priority__in %} disabled{% endif %}>
-                      {% translate "Priority" %}
-                    </option>
-                    <option id="filterBuilderSelect-Owner"
-                            value="Owner"
-                            {% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %}
-                              disabled{% endif %}>{% translate "Owner" %}</option>
-                    <option id="filterBuilderSelect-Queue"
-                            value="Queue"
-                            {% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %}
-                              disabled{% endif %}>{% translate "Queue" %}</option>
-                    <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
-                      {% translate "Status" %}
-                    </option>
-                    <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
-                      {% translate "Keywords" %}
-                    </option>
-                    <option id="filterBuilderSelect-Dates"
-                            value="Dates"
-                            {% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
-                              disabled{% endif %}>{% translate "Date Range" %}</option>
-                    <option id="filterBuilderSelect-KBItems"
-                            value="KBItems"
-                            {% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %}
-                              disabled{% endif %}>{% translate "Knowledge base items" %}</option>
-                  </select>
-                </div>
-              </form>
-              <form method="get">
-                <ul class="list-group list-group-flush gap-3">
-                  <li id="filterBoxSort" class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %}" id="filterBoxSort">
-                    {% include "helpdesk/filters/sorting.html" %}
-                  </li>
-                  <li class="filterBox{% if query_params.filtering.priority__in %} filterBoxShow{% endif %}" id="filterBoxPriority">
-                    {% include "helpdesk/filters/priority.html" %}
-                  </li>
-                  <li class="filterBox{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %}
-                               filterBoxShow{% endif %}"
-                      id="filterBoxOwner">{% include "helpdesk/filters/owner.html" %}</li>
-                  <li class="filterBox{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %}
-                               filterBoxShow{% endif %}"
-                      id="filterBoxQueue">{% include "helpdesk/filters/queue.html" %}</li>
-                  <li class="filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}" id="filterBoxStatus">
-                    {% include "helpdesk/filters/status.html" %}
-                  </li>
-                  <li class="filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
-                               filterBoxShow{% endif %}"
-                      id='filterBoxDates'>{% include "helpdesk/filters/date.html" %}</li>
-                  <li class="filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
-                    {% include "helpdesk/filters/keywords.html" %}
-                  </li>
-                  <li class="filterBox{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %}
-                               filterBoxShow{% endif %}"
-                      id="filterBoxKBItems">{% include "helpdesk/filters/kbitems.html" %}</li>
-                </ul>
-                <div class="d-flex justify-content-end my-3">
-                  <button class="btn btn-outline-secondary" type="submit">{% translate "Apply Filters" %}</button>
-                </div>
-              </form>
-              <ul class="list-group list-group-flush">
-                {% if from_saved_query and saved_query.user == user %}
-                  <li class="list-group-item">
-                    {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
-                    <a href="{% url 'helpdesk:delete_query' saved_query.id %}">{% translate "Delete Saved Query" %}</a>
-                  </li>
-                {% endif %}
-                {% if from_saved_query %}
-                  <li class="list-group-item">
-                    {% blocktranslate with saved_query.id as query_id %}<a href="../reports/?saved_query={{ query_id }}">Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktranslate %}
-                  </li>
-                {% endif %}
-              </ul>
-            </div>
-          </div>
-        </div>
+      <div class="tab-content" id="queriesTabContent">
         {# Save Query pane #}
-        <div class="tab-pane fade" id="save-query-tab-pane" role="tabpanel" aria-labelledby="save-query-tab" tabindex="0">
+        <div class="tab-pane fade show active"
+             id="save-query-tab-pane"
+             role="tabpanel"
+             aria-labelledby="save-query-tab"
+             tabindex="0">
           <div class="row my-3">
             <div class="col-12 col-lg-6">
               <form method="post" action="{% url 'helpdesk:savequery' %}">
@@ -322,8 +327,8 @@
                role="tabpanel"
                aria-labelledby="use-saved-queries-tab"
                tabindex="0">
-            <div class="row col-12 col-md-8 col-lg-6 my-3">
-              <div class="col">
+            <div class="row my-3">
+              <div class="col-12 col-md-8 col-lg-6">
                 <form method="get" action="{% url 'helpdesk:list' %}">
                   <label class="form-label" for="id_query_selector">{% translate "Select a query" %}</label>
                   <div class="input-group mb-3">
@@ -371,6 +376,7 @@
        }
 
        const actionsDropdown = document.querySelector("#actions-dropdown")
+       const advancedFilters = document.querySelector("#advanced-filters")
 
        $(document).ready(function() {
             // Ticket DataTable Initialization
@@ -392,7 +398,7 @@
                       $(row).addClass(data.row_class);
                  },
                  layout: {
-                      topStart: actionsDropdown,
+                      topStart: [actionsDropdown, advancedFilters],
                       topEnd: {
                            'search': {
                                 'placeholder': "{% translate 'Search any ticket by id or title...' %}",
@@ -436,36 +442,38 @@
                       }, {
                            data: "priority",
                            render: function(data, type, row, meta) {
-                                console.info(`data:${data}`)
-                                let context = "secondary";
-                                switch (data) {
-                                     case 1:
-                                          context = "danger";
-                                          break;
-                                     case 2:
-                                          context = "warning";
-                                          break;
-                                     case 3:
-                                          context = "success";
-                                          break;
-                                     case 4:
-                                          context = "info";
-                                          break;
-                                     case 5:
-                                          context = "secondary";
-                                          break;
-                                }
+                                const contextMap = {
+                                     1: "danger",
+                                     2: "warning",
+                                     3: "success",
+                                     4: "info",
+                                     5: "secondary"
+                                };
+
+                                const context = contextMap[data] ?? "secondary";
                                 return `<span class="badge text-${context}-emphasis bg-${context}-subtle">${data}</span>`
                            },
                            visible: false,
                       }, {
                            data: "queue",
                            render: function(data, type, row, meta) {
-                                return data.title;
+                                return `<span class="badge text-bg-light text-secondary">${data.title}</span>`
                            },
                            visible: false,
                       }, {
-                           data: "status"
+                           data: "status",
+                           render: function(data, type, row, meta) {
+                                const contextMap = {
+                                     "Open": "danger",
+                                     "Reopened": "warning",
+                                     "Resolved": "success",
+                                     "Closed": "success",
+                                     "Duplicate": "secondary"
+                                };
+
+                                const context = contextMap[data] ?? "secondary";
+                                return `<span class="badge text-${context}-emphasis bg-${context}-subtle text-wrap">${data}</span>`
+                           },
                       }, {
                            data: "created"
                       }, {
