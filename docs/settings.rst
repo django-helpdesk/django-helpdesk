@@ -229,6 +229,10 @@ Options that change ticket updates
 
   **Default:** ``HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST = []``
 
+- **HELPDESK_FOLLOWUP_NEWEST_FIRST** Sets the default order for the follow-up list on the ticket view. If True, the most recent follow up is listed first. If False, the oldest follow up is listed first. Users can still toggle the order from the ticket view using the sort button, regardless of this setting.
+
+  **Default:** ``HELPDESK_FOLLOWUP_NEWEST_FIRST = False``
+
 Options that change ticket properties
 -------------------------------------
 

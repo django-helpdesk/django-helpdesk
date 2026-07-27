@@ -302,6 +302,15 @@ HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST = getattr(
     settings, "HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST", []
 )
 
+# default order in which follow ups are listed on the ticket view.
+# If True, the most recent follow up is listed first (newest first).
+# If False, the oldest follow up is listed first (oldest first).
+# Users can still toggle the order from the ticket view regardless of this
+# setting.
+HELPDESK_FOLLOWUP_NEWEST_FIRST = getattr(
+    settings, "HELPDESK_FOLLOWUP_NEWEST_FIRST", False
+)
+
 # show delete buttons in ticket follow ups if user is 'superuser'
 HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(
     settings, "HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP", False
