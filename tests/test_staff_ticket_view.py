@@ -1,11 +1,12 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import resolve, reverse
 
 from helpdesk.forms import CreateChecklistForm, EditTicketCustomFieldForm, TicketForm
-from helpdesk.models import Queue, Ticket
+from helpdesk.models import FollowUp, FollowUpAttachment, Queue, Ticket
 
 User = get_user_model()
 
@@ -86,3 +87,30 @@ class StaffTicketViewTests(TestCase):
         self.assertEqual(r.status_code, HTTPStatus.OK)
         self.assertRedirects(r, self.url)
         self.assertEqual(self.ticket.assigned_to, self.staff_user)
+
+    def _add_attachments(self, count):
+        followup = FollowUp.objects.create(ticket=self.ticket, title="Followup")
+        for i in range(count):
+            FollowUpAttachment.objects.create(
+                followup=followup,
+                file=SimpleUploadedFile(f"file{i}.txt", b"content"),
+            )
+
+    def test_few_attachments_shown_without_collapse(self):
+        self.client.force_login(self.staff_user)
+        self._add_attachments(3)
+
+        r = self.client.get(self.url)
+
+        self.assertEqual(r.context["ticket_attachments"].count(), 3)
+        self.assertNotContains(r, "older attachment")
+
+    def test_many_attachments_are_collapsed(self):
+        self.client.force_login(self.staff_user)
+        self._add_attachments(8)
+
+        r = self.client.get(self.url)
+
+        self.assertEqual(r.context["ticket_attachments"].count(), 8)
+        self.assertContains(r, "Show 5 older attachments")
+        self.assertContains(r, 'id="olderAttachments"')
