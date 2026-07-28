@@ -1,12 +1,21 @@
 {% load i18n humanize %}
 
-<div class="input-group">
-  <label class="input-group-text" for='id_date_from'>{% translate "Date (From)" %}</label>
-  <input class="form-control" type="text" name="date_from" value="{{ query_params.filtering.created__gte }}" id="id_date_from" />
-  <label class="input-group-text" for='id_date_to'>{% translate "Date (To)" %}</label>
-  <input class="form-control" type="text" name="date_to" value="{{ query_params.filtering.created__lte }}" id="id_date_to" />
-  <button class="filterBuilderRemove btn btn-outline-secondary">
-    <i class="fa fa-trash-can"></i>
-  </button>
+<div class="d-grid">
+  <button class="btn btn-light"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseDates"
+          aria-expanded="false"
+          aria-controls="collapseDates">{% translate "Dates" %}</button>
 </div>
-<div class="form-text">{% translate "Use YYYY-MM-DD date format, eg 2018-01-30" %}</div>
+<div class="collapse row gx-3 my-3" id="collapseDates">
+  <div class="col">
+    <label class="form-label" for="id_date_from">{% translate "Date (From)" %}</label>
+    <input class="form-control" type="text" name="date_from" value="{{ query_params.filtering.created__gte }}" id="id_date_from" />
+  </div>
+  <div class="col">
+    <label class="form-label" for="id_date_to">{% translate "Date (To)" %}</label>
+    <input class="form-control" type="text" name="date_to" value="{{ query_params.filtering.created__lte }}" id="id_date_to" />
+  </div>
+  <div class="form-text">{% translate "Use YYYY-MM-DD date format, eg 2018-01-30" %}</div>
+</div>

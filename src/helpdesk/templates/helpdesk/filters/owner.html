@@ -1,26 +1,34 @@
-{% load i18n humanize %}
-{% load static %}
-{% load in_list %}
-<div class="row">
-    <div class="col col-sm-3">
-        <label for='id_owners' class="col-form-label">{% trans "Owner(s)" %}:</label>
+{% load static i18n humanize in_list %}
+
+<div class="d-grid">
+  <button class="btn btn-light"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseOwner"
+          aria-expanded="false"
+          aria-controls="collapseOwner">{% translate "Owner" %}</button>
+</div>
+<div class="collapse my-3" id="collapseOwner">
+  {% with unassigned=-1 %}
+    <div class="form-check">
+      <input class="form-check-input"
+             type="checkbox"
+             name="assigned_to"
+             value="{{ unassigned }}"
+             id="owner-check-{{ unassigned }}"
+             {% if query_params.filtering_null.assigned_to__id__isnull %}checked{% endif %} />
+      <label class="form-check-label" for="owner-check-{{ unassigned }}">{% translate "Unassigned" %}</label>
     </div>
-    <div class="col col-sm-3">
-        <select id='id_owners' name='assigned_to' multiple='selected' size='5'>
-            {% with magic_number=-1 %}
-            <option value='{{magic_number}}'{% if query_params.filtering_null.assigned_to__id__isnull %} selected='selected'{% endif %}>
-                {% trans "Unassigned" %}
-            </option>
-            {% endwith %}
-            {% for u in assignable_users %}
-            <option value='{{ u.id }}'{% if u.id|in_list:query_params.filtering.assigned_to__id__in %} selected='selected'{% endif %}>
-                {{ u.get_username }}
-            </option>
-            {% endfor %}
-        </select>
+  {% endwith %}
+  {% for u in assignable_users %}
+    <div class="form-check">
+      <input class="form-check-input"
+             type="checkbox"
+             name="assigned_to"
+             value="{{ u.id }}"
+             id="owner-check-{{ u.id }}"
+             {% if u.id|in_list:query_params.filtering.assigned_to__id__in %}checked{% endif %} />
+      <label class="form-check-label" for="owner-check-{{ u.id }}">{{ u.get_username }}</label>
     </div>
-  <div class="col col-sm-6">
-    <button class="filterBuilderRemove btn btn-danger btn-sm float-end"><i class="fas fa-trash-alt"></i></button>
-  </div>
-  <div class='row filterHelp'>{% trans "Ctrl-Click to select multiple options" %}</div>
+  {% endfor %}
 </div>

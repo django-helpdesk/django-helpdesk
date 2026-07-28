@@ -1,15 +1,23 @@
-{% load i18n humanize %}
-{% load static %}
-{% load in_list %}
-<div class="row">
-  <div class="col col-sm-3">
-    <label for='id_priority'>{% trans "Priority" %}:</label>
-  </div>
-  <div class="col col-sm-3">
-    <select id='id_priority' name='priority' multiple='selected' size='5'>{% for p in priority_choices %}<option value='{{ p.0 }}'{% if p.0|in_list:query_params.filtering.priority__in %} selected='selected'{% endif %}>{{ p.1 }}</option>{% endfor %}</select>
-  </div>
-  <div class="col col-sm-6">
-    <button class="filterBuilderRemove btn btn-danger btn-sm float-end"><i class="fas fa-trash-alt"></i></button>
-  </div>
-  <div class='row filterHelp'>{% trans "Ctrl-click to select multiple options" %}</div>
+{% load i18n humanize static in_list %}
+
+<div class="d-grid">
+  <button class="btn btn-light"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapsePriority"
+          aria-expanded="false"
+          aria-controls="collapsePriority">{% translate "Priority" %}</button>
+</div>
+<div class="collapse my-3" id="collapsePriority">
+  {% for p in priority_choices %}
+    <div class="form-check">
+      <input class="form-check-input"
+             type="checkbox"
+             name="priority"
+             value="{{ p.0 }}"
+             id="priority-check-{{ p.0 }}"
+             {% if p.0|in_list:query_params.filtering.priority__in %}checked{% endif %} />
+      <label class="form-check-label" for="priority-check-{{ p.0 }}">{{ p.1 }}</label>
+    </div>
+  {% endfor %}
 </div>

@@ -1,39 +1,43 @@
-{% load i18n humanize %}
-{% load static %}
-  <div class="row">
-    <div class="col col-sm-3">
-      <label for='id_sort' class="col-form-label">{% trans "Sorting" %}:</label>
-    </div>
-    <div class="col col-sm-3 pt-2">
-            <select id='id_sort' name='sort' class="">
-                <option value='created'{% if query_params.sorting == "created"%} selected='selected'{% endif %}>
-                    {% trans "Created" %}
-                </option>
-                <option value='title'{% if query_params.sorting == "title"%} selected='selected'{% endif %}>
-                    {% trans "Title" %}
-                </option>
-                <option value='queue'{% if query_params.sorting == "queue"%} selected='selected'{% endif %}>
-                    {% trans "Queue" %}
-                </option>
-                <option value='status'{% if query_params.sorting == "status"%} selected='selected'{% endif %}>
-                    {% trans "Status" %}
-                </option>
-                <option value='priority'{% if query_params.sorting == "priority"%} selected='selected'{% endif %}>
-                    {% trans "Priority" %}
-                </option>
-                <option value='assigned_to'{% if query_params.sorting == "assigned_to"%} selected='selected'{% endif %}>
-                    {% trans "Owner" %}
-                </option>
-            </select>
+{% load i18n humanize static %}
+
+<div class="d-grid">
+  <button class="btn btn-light"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseSorting"
+          aria-expanded="true"
+          aria-controls="collapseSorting">{% translate "Sorting" %}</button>
+</div>
+<div class="collapse show my-3" id="collapseSorting">
+  <label id="sort-by" class="form-label" for="id_sort">{% translate "Sorting" %}</label>
+  <select class="form-select" id="id_sort" name="sort">
+    <option value='created'{% if query_params.sorting == "created" %} selected='selected'{% endif %}>
+      {% translate "Created" %}
+    </option>
+    <option value='title'{% if query_params.sorting == "title" %} selected='selected'{% endif %}>
+      {% translate "Title" %}
+    </option>
+    <option value='queue'{% if query_params.sorting == "queue" %} selected='selected'{% endif %}>
+      {% translate "Queue" %}
+    </option>
+    <option value='status'{% if query_params.sorting == "status" %} selected='selected'{% endif %}>
+      {% translate "Status" %}
+    </option>
+    <option value='priority'{% if query_params.sorting == "priority" %} selected='selected'{% endif %}>
+      {% translate "Priority" %}
+    </option>
+    <option value='assigned_to'{% if query_params.sorting == "assigned_to" %} selected='selected'{% endif %}>
+      {% translate "Owner" %}
+    </option>
+  </select>
+  <div class="form-check mt-3">
+    <label class="form-check-label" for="id_sortreverse">{% translate "Reverse?" %}</label>
+    <input class="form-check-input"
+           type="checkbox"
+           name="sortreverse"
+           id="id_sortreverse"
+           {% if query_params.sortreverse %}
+             checked='checked'{% endif %} />
   </div>
-  <div class="col col-sm-2">
-    <label for='id_sortreverse' class="col-form-label">{% trans "Reverse" %}</label>
-  </div>
-  <div class="col col-sm-3 pt-2">
-    <input type='checkbox' name='sortreverse' id='id_sortreverse'{% if query_params.sortreverse %} checked='checked'{% endif %} />
-  </div>
-  <div class="col col-sm-1">
-    <button class="filterBuilderRemove btn btn-danger btn-sm float-end"><i class="fas fa-trash-alt"></i></button>
-  </div>
-   <div class="row filterHelp">{% trans "Ordering applied to tickets" %}</div>
+  <div class="form-text">{% translate "Ordering applied to tickets" %}</div>
 </div>
