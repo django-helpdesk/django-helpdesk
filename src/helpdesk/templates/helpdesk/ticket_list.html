@@ -160,111 +160,25 @@
       </div>
     </div>
   </div>
+  {% if from_saved_query %}
+    <div class="alert alert-primary mx-3" role="alert">
+      {% if saved_query.user == user %}
+        <p>
+          {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
+          <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="alert-link text-decoration-underline link-offset-2">{% translate "Delete Saved Query" %}</a>
+        </p>
+      {% endif %}
+      <hr />
+      <p class="mb-0">
+        {% blocktranslate with saved_query.id as query_id %}
+        <a href="../reports/?saved_query={{ query_id }}" class="alert-link text-decoration-underline link-offset-2">Run a report</a> on this query to see stats and charts for the data listed below.
+        {% endblocktranslate %}
+      </p>
+    </div>
+  {% endif %}
   <div class="card border-0 mb-3">
     <div class="card-body">
       <h5 class="card-title">{% translate "Query Selection" %}</h5>
-      <a class="btn btn-light"
-         id="advanced-filters"
-         data-bs-toggle="offcanvas"
-         href="#offcanvasFilters"
-         role="button"
-         aria-controls="offcanvasFilters">
-        <i class="fa fa-sliders me-2"></i>{% translate "Filters" %}
-      </a>
-      <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
-        <div class="offcanvas-header">
-          <h5 class="offcanvas-title" id="offcanvasFiltersLabel">
-            <i class="fa fa-sliders me-2"></i>{% translate "Filters" %}
-          </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body">
-          <form method="get">
-            <div class="mb-3">
-              <label class="form-label" for="filterBuilderSelect">{% translate "Add filter" %}</label>
-              <select class="form-select"
-                      aria-describedby="select-description"
-                      name="select"
-                      id="filterBuilderSelect"
-                      onChange="onFilterChange(this.value)">
-                <option value="">--</option>
-                <option id="filterBuilderSelect-Sort" value="Sort"{% if query_params.sorting %} disabled{% endif %}>
-                  {% translate "Sorting" %}
-                </option>
-                <option id="filterBuilderSelect-Priority" value="Priority"{% if query_params.filtering.priority__in %} disabled{% endif %}>
-                  {% translate "Priority" %}
-                </option>
-                <option id="filterBuilderSelect-Owner"
-                        value="Owner"
-                        {% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %}
-                          disabled{% endif %}>{% translate "Owner" %}</option>
-                <option id="filterBuilderSelect-Queue"
-                        value="Queue"
-                        {% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %}
-                          disabled{% endif %}>{% translate "Queue" %}</option>
-                <option id="filterBuilderSelect-Status" value="Status"{% if query_params.filtering.status__in %} disabled{% endif %}>
-                  {% translate "Status" %}
-                </option>
-                <option id="filterBuilderSelect-Keywords" value="Keywords"{% if query_params.search_string %} disabled{% endif %}>
-                  {% translate "Keywords" %}
-                </option>
-                <option id="filterBuilderSelect-Dates"
-                        value="Dates"
-                        {% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
-                          disabled{% endif %}>{% translate "Date Range" %}</option>
-                <option id="filterBuilderSelect-KBItems"
-                        value="KBItems"
-                        {% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %}
-                          disabled{% endif %}>{% translate "Knowledge base items" %}</option>
-              </select>
-            </div>
-          </form>
-          <form method="get">
-            <ul class="list-group list-group-flush gap-3">
-              <li id="filterBoxSort" class="filterBox{% if query_params.sorting %} filterBoxShow{% endif %}" id="filterBoxSort">
-                {% include "helpdesk/filters/sorting.html" %}
-              </li>
-              <li class="filterBox{% if query_params.filtering.priority__in %} filterBoxShow{% endif %}" id="filterBoxPriority">
-                {% include "helpdesk/filters/priority.html" %}
-              </li>
-              <li class="filterBox{% if query_params.filtering.assigned_to__id__in or query_params.filtering_null.assigned_to__id__isnull %}
-                           filterBoxShow{% endif %}"
-                  id="filterBoxOwner">{% include "helpdesk/filters/owner.html" %}</li>
-              <li class="filterBox{% if query_params.filtering.queue__id__in or query_params.filtering_null.queue__id__isnull %}
-                           filterBoxShow{% endif %}"
-                  id="filterBoxQueue">{% include "helpdesk/filters/queue.html" %}</li>
-              <li class="filterBox{% if query_params.filtering.status__in %} filterBoxShow{% endif %}" id="filterBoxStatus">
-                {% include "helpdesk/filters/status.html" %}
-              </li>
-              <li class="filterBox{% if query_params.filtering.created__gte or query_params.filtering.created__lte %}
-                           filterBoxShow{% endif %}"
-                  id='filterBoxDates'>{% include "helpdesk/filters/date.html" %}</li>
-              <li class="filterBox{% if query_params.search_string %} filterBoxShow{% endif %}" id="filterBoxKeywords">
-                {% include "helpdesk/filters/keywords.html" %}
-              </li>
-              <li class="filterBox{% if query_params.filtering.kbitem__in or query_params.filtering_null.kbitem__isnull %}
-                           filterBoxShow{% endif %}"
-                  id="filterBoxKBItems">{% include "helpdesk/filters/kbitems.html" %}</li>
-            </ul>
-            <div class="d-flex justify-content-end my-3">
-              <button class="btn btn-outline-secondary" type="submit">{% translate "Apply Filters" %}</button>
-            </div>
-          </form>
-          <ul class="list-group list-group-flush">
-            {% if from_saved_query and saved_query.user == user %}
-              <li class="list-group-item">
-                {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
-                <a href="{% url 'helpdesk:delete_query' saved_query.id %}">{% translate "Delete Saved Query" %}</a>
-              </li>
-            {% endif %}
-            {% if from_saved_query %}
-              <li class="list-group-item">
-                {% blocktranslate with saved_query.id as query_id %}<a href="../reports/?saved_query={{ query_id }}">Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktranslate %}
-              </li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
       <ul class="nav nav-underline" id="queriesTab" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active"
@@ -350,11 +264,46 @@
       {% endif %}
     </div>
   </div>
+  {# Filters Offcanvas #}
+  <a class="btn btn-light"
+     id="advanced-filters"
+     data-bs-toggle="offcanvas"
+     href="#offcanvasFilters"
+     role="button"
+     aria-controls="offcanvasFilters">
+    <i class="fa fa-sliders me-2"></i>{% translate "Filters" %}
+  </a>
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasFiltersLabel">
+        <i class="fa fa-sliders me-2"></i>{% translate "Filters" %}
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <form method="get" id="filtersForm">
+        <ul class="list-unstyled vstack gap-3">
+          <li>{% include "helpdesk/filters/sorting.html" %}</li>
+          <li>{% include "helpdesk/filters/status.html" %}</li>
+          <li>{% include "helpdesk/filters/priority.html" %}</li>
+          <li>{% include "helpdesk/filters/owner.html" %}</li>
+          <li>{% include "helpdesk/filters/queue.html" %}</li>
+          <li>{% include "helpdesk/filters/date.html" %}</li>
+          <li>{% include "helpdesk/filters/keywords.html" %}</li>
+          <li>{% include "helpdesk/filters/kbitems.html" %}</li>
+        </ul>
+      </form>
+    </div>
+    <div class="offcanvas-footer">
+      <div class="d-grid m-3">
+        <button class="btn btn-outline-primary" type="submit" form="filtersForm">{% translate "Apply Filters" %}</button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock helpdesk_body %}
 
 {% block helpdesk_js %}
-  <script src='{% static "helpdesk/filter.js" %}'></script>
   {# Timeline 3 JavaScript #}
   {% if helpdesk_settings.HELPDESK_USE_CDN %}
     <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
@@ -375,8 +324,7 @@
             return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
        }
 
-       const actionsDropdown = document.querySelector("#actions-dropdown")
-       const advancedFilters = document.querySelector("#advanced-filters")
+       const renderDateTime = (data, type, row, meta) => `<span class="small text-secondary">${data}</span>`
 
        $(document).ready(function() {
             // Ticket DataTable Initialization
@@ -398,7 +346,10 @@
                       $(row).addClass(data.row_class);
                  },
                  layout: {
-                      topStart: [actionsDropdown, advancedFilters],
+                      topStart: [
+                           $("#actions-dropdown"),
+                           $("#advanced-filters"),
+                      ],
                       topEnd: {
                            'search': {
                                 'placeholder': "{% translate 'Search any ticket by id or title...' %}",
@@ -475,9 +426,11 @@
                                 return `<span class="badge text-${context}-emphasis bg-${context}-subtle text-wrap">${data}</span>`
                            },
                       }, {
-                           data: "created"
+                           data: "created",
+                           render: renderDateTime
                       }, {
                            data: "due_date",
+                           render: renderDateTime,
                            "visible": false
                       }, {
                            data: "assigned_to",
@@ -495,11 +448,11 @@
                                 let locale = navigator.language || navigator.userLanguage || window.helpdesk_settings.LANGUAGE_CODE;
 
                                 if (isNaN(Date.parse(data))) {
-                                     return window.helpdesk_settings.NO_FOLLOWUP_TEXT;
+                                     return `<span class="small text-secondary">${window.helpdesk_settings.NO_FOLLOWUP_TEXT}</span>`
                                 }
 
                                 let date = new Date(data);
-                                return date.toLocaleString(locale, {
+                                const lastFollowupDate = date.toLocaleString(locale, {
                                      weekday: "short",
                                      year: "numeric",
                                      month: "long",
@@ -508,6 +461,7 @@
                                      minute: "2-digit",
                                      hour12: true
                                 });
+                                return `<span class="small text-secondary">${lastFollowupDate}</span>`
                            }
                       },
                       {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
