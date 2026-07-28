@@ -1407,6 +1407,7 @@ class UpdateTicketView(
             self.request.POST or None, instance=ticket
         )
         context["followups"] = get_followups_for_ticket(ticket)
+        context["ticket_attachments"] = get_attachments_for_ticket(ticket)
         return context
 
     def get_form_kwargs(self):
