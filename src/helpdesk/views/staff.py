@@ -380,6 +380,7 @@ def followup_edit(request, ticket_id, followup_id):
                 "ticket": ticket,
                 "form": form,
                 "ticketcc_string": ticketcc_string,
+                "ticket_attachments": get_attachments_for_ticket(ticket),
             },
         )
     elif request.method == "POST":
@@ -447,6 +448,15 @@ def get_followups_for_ticket(ticket):
     """Returns the ticket's follow ups, ordered per HELPDESK_FOLLOWUP_NEWEST_FIRST."""
     order = "-date" if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST else "date"
     return ticket.followup_set.order_by(order)
+
+
+def get_attachments_for_ticket(ticket):
+    """Returns all of the ticket's attachments across its follow ups, most recent first."""
+    return (
+        FollowUpAttachment.objects.filter(followup__ticket=ticket)
+        .select_related("followup")
+        .order_by("-id")
+    )
 
 
 @helpdesk_staff_member_required
@@ -530,6 +540,7 @@ def view_ticket(request, ticket_id):
             "ticket": ticket,
             "followups": get_followups_for_ticket(ticket),
             "dependencies": dependencies,
+            "ticket_attachments": get_attachments_for_ticket(ticket),
             "submitter_userprofile_url": submitter_userprofile_url,
             "form": form,
             "preset_replies": PreSetReply.objects.filter(
@@ -1396,6 +1407,7 @@ class UpdateTicketView(
             self.request.POST or None, instance=ticket
         )
         context["followups"] = get_followups_for_ticket(ticket)
+        context["ticket_attachments"] = get_attachments_for_ticket(ticket)
         return context
 
     def get_form_kwargs(self):
