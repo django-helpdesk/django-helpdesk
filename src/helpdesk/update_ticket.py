@@ -145,12 +145,10 @@ def process_email_notifications_for_ticket_update(
             or (follow_up.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))
         )
     ):
-        # Use hard coded prefix for submitter updates on  tickets for backwards compatibility
-        # TODO: possibly make the template prefix modification configurable
         messages_sent_to.update(
             ticket.send(
                 {
-                    "submitter": ("updated_submitter", context),
+                    "submitter": (template_prefix + "submitter", context),
                 },
                 dont_send_to=messages_sent_to,
                 fail_silently=True,
