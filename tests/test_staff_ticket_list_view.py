@@ -99,7 +99,7 @@ class StaffTicketListViewTests(TestCase):
         self.client.force_login(self.staff_user)
 
         # Act: Staff user loads a saved query
-        r = self.client.get(self.url, query_params={"saved_query": str(ss.id)})
+        r = self.client.get(self.url, data={"saved_query": str(ss.id)})
 
         # Assert
         self.assertTrue(r.context["from_saved_query"])
