@@ -7,7 +7,6 @@ from django.urls import resolve, reverse
 
 from helpdesk.models import KBCategory, KBItem, Queue, SavedSearch, Ticket
 from helpdesk.query import query_to_base64
-from helpdesk.views.staff import ticket_list
 
 User = get_user_model()
 
@@ -55,7 +54,7 @@ class StaffTicketListViewTests(TestCase):
 
     def test_anonymous_user_cannot_access(self):
         # Arrange
-        login_url = "%s?next=%s" % (reverse("helpdesk:login"), self.url)
+        login_url = "{}?next={}".format(reverse("helpdesk:login"), self.url)
 
         # Act
         # Make an anonymous user directly access the ticket detail url

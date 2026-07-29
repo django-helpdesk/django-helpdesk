@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import json
 import re
-import typing
 from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -44,7 +43,6 @@ from django.views.generic.edit import FormView, UpdateView
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-import helpdesk.views.abstract_views as abstract_views
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
@@ -1151,15 +1149,13 @@ def ticket_list(request: HttpRequest) -> HttpResponse:
         ("kbitem", "kbitem__in"),
     ]
 
-    filter_null_params = dict(
-        [
-            ("queue", "queue__id__isnull"),
-            ("assigned_to", "assigned_to__id__isnull"),
-            ("status", "status__isnull"),
-            ("priority", "priority__isnull"),
-            ("kbitem", "kbitem__isnull"),
-        ]
-    )
+    filter_null_params = {
+        "queue": "queue__id__isnull",
+        "assigned_to": "assigned_to__id__isnull",
+        "status": "status__isnull",
+        "priority": "priority__isnull",
+        "kbitem": "kbitem__isnull",
+    }
 
     ALLOWED_SORTS = {
         "status",
@@ -1282,25 +1278,25 @@ def ticket_list(request: HttpRequest) -> HttpResponse:
         kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
         kbitems = KBItem.objects.all()
 
-    ctx = dict(
-        query=q,
-        query_params=query_params,
-        default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
-        assignable_users=get_assignable_users(
+    ctx = {
+        "query": q,
+        "query_params": query_params,
+        "default_tickets_per_page": request.user.usersettings_helpdesk.tickets_per_page,
+        "assignable_users": get_assignable_users(
             helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
         ),
-        kb_items=kbitems,
-        kbitem_choices=kbitem_choices,
-        queue_choices=huser.get_queues(),
-        status_choices=Ticket.STATUS_CHOICES,
-        priority_choices=Ticket.PRIORITY_CHOICES,
-        urlsafe_query=urlsafe_query,
-        user_saved_queries=user_saved_queries,
-        from_saved_query=saved_query is not None,
-        saved_query=saved_query,
-        search_message=search_message,
-        helpdesk_settings=helpdesk_settings,
-    )
+        "kb_items": kbitems,
+        "kbitem_choices": kbitem_choices,
+        "queue_choices": huser.get_queues(),
+        "status_choices": Ticket.STATUS_CHOICES,
+        "priority_choices": Ticket.PRIORITY_CHOICES,
+        "urlsafe_query": urlsafe_query,
+        "user_saved_queries": user_saved_queries,
+        "from_saved_query": saved_query is not None,
+        "saved_query": saved_query,
+        "search_message": search_message,
+        "helpdesk_settings": helpdesk_settings,
+    }
 
     return render(request, "helpdesk/ticket_list.html", ctx)
 
