@@ -3,15 +3,15 @@ Default settings for django-helpdesk.
 
 """
 
+import os
+import re
+import sys
+import warnings
+
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import gettext_lazy as _
-import os
-import re
-import warnings
-import sys
-
 
 DEFAULT_USER_SETTINGS = {
     "login_view_ticketlist": True,
@@ -51,13 +51,13 @@ HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(
 HELPDESK_PUBLIC_VIEW_PROTECTOR = getattr(
     settings,
     "HELPDESK_PUBLIC_VIEW_PROTECTOR",
-    lambda _: None,  # noqa
+    lambda _: None,
 )
 
 HELPDESK_STAFF_VIEW_PROTECTOR = getattr(
     settings,
     "HELPDESK_STAFF_VIEW_PROTECTOR",
-    lambda _: None,  # noqa
+    lambda _: None,
 )
 
 # Enable ticket and Email attachments
@@ -302,6 +302,15 @@ HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST = getattr(
     settings, "HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST", []
 )
 
+# default order in which follow ups are listed on the ticket view.
+# If True, the most recent follow up is listed first (newest first).
+# If False, the oldest follow up is listed first (oldest first).
+# Users can still toggle the order from the ticket view regardless of this
+# setting.
+HELPDESK_FOLLOWUP_NEWEST_FIRST = getattr(
+    settings, "HELPDESK_FOLLOWUP_NEWEST_FIRST", False
+)
+
 # show delete buttons in ticket follow ups if user is 'superuser'
 HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP = getattr(
     settings, "HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP", False
@@ -405,7 +414,10 @@ if HELPDESK_TEAMS_MODE_ENABLED:
 else:
     HELPDESK_TEAMS_MODEL = settings.AUTH_USER_MODEL
     HELPDESK_TEAMS_MIGRATION_DEPENDENCIES = []
-    HELPDESK_KBITEM_TEAM_GETTER = lambda _: None  # noqa
+
+    def HELPDESK_KBITEM_TEAM_GETTER(_kbitem):
+        return None
+
 
 # show kanban board?
 HELPDESK_KANBAN_ENABLED = getattr(settings, "HELPDESK_KANBAN_ENABLED", True)

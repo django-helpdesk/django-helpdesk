@@ -275,22 +275,34 @@
       {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
         <div class="col">
           <small class="text-uppercase text-secondary">{% translate "Attachments" %}</small>
-          <ul class="list-group list-group-flush">
-            {% for followup in ticket.followup_set.all %}
-              {% for attachment in followup.followupattachment_set.all %}
-                <li class="list-group-item ps-0">
-                  <a class="d-block" href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename|truncatechars:40 }}</a>
-                  <small class="text-secondary">({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</small>
-                  {% if followup.user and request.user == followup.user %}
-                    <a href="{% url 'helpdesk:attachment_del' ticket.id attachment.id %}"
-                       class="text-secondary">
-                      <i class="fa-regular fa-trash-can fa-sm ms-2"></i>
-                    </a>
-                  {% endif %}
-                </li>
+          {% with recent_attachments=ticket_attachments|slice:":3" older_attachments=ticket_attachments|slice:"3:" %}
+            <ul class="list-group list-group-flush">
+              {% for attachment in recent_attachments %}
+                {% include "helpdesk/include/attachment_list_item.html" %}
+              {% empty %}
+                <small>{% translate "No attachments" %}</small>
               {% endfor %}
-            {% endfor %}
-          </ul>
+            </ul>
+            {% if older_attachments %}
+              <a class="link-secondary small"
+                 data-bs-toggle="collapse"
+                 href="#olderAttachments"
+                 role="button"
+                 aria-expanded="false"
+                 aria-controls="olderAttachments"
+                 onclick="$(this).find('i').toggleClass('fa-caret-down fa-caret-up')">
+                {% blocktranslate count counter=older_attachments|length %}Show {{ counter }} older attachment{% plural %}Show {{ counter }} older attachments{% endblocktranslate %}
+                <i class="fas fa-caret-down"></i>
+              </a>
+              <div class="collapse" id="olderAttachments">
+                <ul class="list-group list-group-flush">
+                  {% for attachment in older_attachments %}
+                    {% include "helpdesk/include/attachment_list_item.html" %}
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          {% endwith %}
         </div>
       {% endif %}
       <div class="col">

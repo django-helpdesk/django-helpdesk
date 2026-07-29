@@ -1,4 +1,3 @@
-#!/usr/bin/python
 """
 django-helpdesk - A Django powered ticket tracker for small enterprise.
 
@@ -11,8 +10,8 @@ users who don't yet have them.
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
-from helpdesk.models import UserSettings
 
+from helpdesk.models import UserSettings
 
 User = get_user_model()
 

@@ -7,6 +7,8 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 
+from __future__ import annotations
+
 import json
 import re
 import typing
@@ -99,6 +101,7 @@ from helpdesk.update_ticket import (
     update_ticket,
 )
 from helpdesk.user import HelpdeskUser
+from helpdesk.views import abstract_views
 from helpdesk.views.permissions import MustBeStaffMixin
 
 from ..lib import format_time_spent
@@ -385,6 +388,7 @@ def followup_edit(request, ticket_id, followup_id):
                 "ticket": ticket,
                 "form": form,
                 "ticketcc_string": ticketcc_string,
+                "ticket_attachments": get_attachments_for_ticket(ticket),
             },
         )
     elif request.method == "POST":
@@ -448,6 +452,21 @@ def followup_delete(request, ticket_id, followup_id):
 followup_delete = staff_member_required(followup_delete)
 
 
+def get_followups_for_ticket(ticket):
+    """Returns the ticket's follow ups, ordered per HELPDESK_FOLLOWUP_NEWEST_FIRST."""
+    order = "-date" if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST else "date"
+    return ticket.followup_set.order_by(order)
+
+
+def get_attachments_for_ticket(ticket):
+    """Returns all of the ticket's attachments across its follow ups, most recent first."""
+    return (
+        FollowUpAttachment.objects.filter(followup__ticket=ticket)
+        .select_related("followup")
+        .order_by("-id")
+    )
+
+
 @helpdesk_staff_member_required
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -495,9 +514,7 @@ def view_ticket(request, ticket_id):
     if submitter_userprofile is not None:
         content_type = ContentType.objects.get_for_model(submitter_userprofile)
         submitter_userprofile_url = reverse(
-            "admin:{app}_{model}_change".format(
-                app=content_type.app_label, model=content_type.model
-            ),
+            f"admin:{content_type.app_label}_{content_type.model}_change",
             kwargs={"object_id": submitter_userprofile.id},
         )
     else:
@@ -529,7 +546,9 @@ def view_ticket(request, ticket_id):
         "helpdesk/ticket.html",
         {
             "ticket": ticket,
+            "followups": get_followups_for_ticket(ticket),
             "dependencies": dependencies,
+            "ticket_attachments": get_attachments_for_ticket(ticket),
             "submitter_userprofile_url": submitter_userprofile_url,
             "form": form,
             "preset_replies": PreSetReply.objects.filter(
@@ -637,9 +656,7 @@ def get_ticket_from_request_with_authorisation(
     return get_object_or_404(Ticket, id=ticket_id)
 
 
-def get_due_date_from_form_or_ticket(
-    form, ticket: Ticket
-) -> typing.Optional[datetime.date]:
+def get_due_date_from_form_or_ticket(form, ticket: Ticket) -> datetime.date | None:
     """Tries to locate the due date for a ticket from the form
     'due_date' parameter or the `due_date_*` paramaters.
     """
@@ -662,7 +679,7 @@ def get_due_date_from_form_or_ticket(
     return due_date
 
 
-def get_time_spent_from_form(form: dict) -> typing.Optional[timedelta]:
+def get_time_spent_from_form(form: dict) -> timedelta | None:
     if form.data.get("time_spent"):
         (hours, minutes) = [int(f) for f in form.data.get("time_spent").split(":")]
         return timedelta(hours=hours, minutes=minutes)
@@ -779,7 +796,7 @@ def mass_update(request):
         return redirect(
             reverse("helpdesk:merge_tickets")
             + "?"
-            + "&".join(["tickets=%s" % ticket_id for ticket_id in tickets])
+            + "&".join([f"tickets={ticket_id}" for ticket_id in tickets])
         )
 
     huser = HelpdeskUser(request.user)
@@ -792,9 +809,8 @@ def mass_update(request):
             t.save()
             t.followup_set.create(
                 date=timezone.now(),
-                title=_(
-                    "Assigned to %(username)s in bulk update"
-                    % {"username": user.get_username()}
+                title=_("Assigned to {username} in bulk update").format(
+                    username=user.get_username()
                 ),
                 public=True,
                 user=request.user,
@@ -890,7 +906,7 @@ TICKET_ATTRIBUTES = (
 
 
 def merge_ticket_values(
-    request: WSGIRequest, tickets: typing.List[Ticket], custom_fields
+    request: WSGIRequest, tickets: list[Ticket], custom_fields
 ) -> None:
     for ticket in tickets:
         ticket.values = {}
@@ -1187,6 +1203,20 @@ def ticket_list(request: HttpRequest) -> HttpResponse:
         query_params = deepcopy(default_query_params)
 
     else:
+        filter_in_params = [
+            ("queue", "queue__id__in"),
+            ("assigned_to", "assigned_to__id__in"),
+            ("status", "status__in"),
+            ("priority", "priority__in"),
+            ("kbitem", "kbitem__in"),
+        ]
+        filter_null_params = {
+            "queue": "queue__id__isnull",
+            "assigned_to": "assigned_to__id__isnull",
+            "status": "status__isnull",
+            "priority": "priority__isnull",
+            "kbitem": "kbitem__isnull",
+        }
         for param, filter_command in filter_in_params:
             if request.GET.get(param) is not None:
                 patterns = request.GET.getlist(param)
@@ -1406,6 +1436,8 @@ class UpdateTicketView(
         context["customfields_form"] = EditTicketCustomFieldForm(
             self.request.POST or None, instance=ticket
         )
+        context["followups"] = get_followups_for_ticket(ticket)
+        context["ticket_attachments"] = get_attachments_for_ticket(ticket)
         return context
 
     def get_form_kwargs(self):
@@ -1583,7 +1615,7 @@ def get_report_table_and_totals(header1, summarytable, possible_options):
     for item in header1:
         data = []
         for hdr in possible_options:
-            if hdr not in totals.keys():
+            if hdr not in totals:
                 totals[hdr] = summarytable[item, hdr]
             else:
                 totals[hdr] += summarytable[item, hdr]
@@ -1596,36 +1628,36 @@ def update_summary_tables(report_queryset, report, summarytable, summarytable2):
     metric3 = False
     for ticket in report_queryset:
         if report == "userpriority":
-            metric1 = "%s" % ticket.get_assigned_to
-            metric2 = "%s" % ticket.get_priority_display()
+            metric1 = f"{ticket.get_assigned_to}"
+            metric2 = f"{ticket.get_priority_display()}"
 
         elif report == "userqueue":
-            metric1 = "%s" % ticket.get_assigned_to
-            metric2 = "%s" % ticket.queue.title
+            metric1 = f"{ticket.get_assigned_to}"
+            metric2 = f"{ticket.queue.title}"
 
         elif report == "userstatus":
-            metric1 = "%s" % ticket.get_assigned_to
-            metric2 = "%s" % ticket.get_status_display()
+            metric1 = f"{ticket.get_assigned_to}"
+            metric2 = f"{ticket.get_status_display()}"
 
         elif report == "usermonth":
-            metric1 = "%s" % ticket.get_assigned_to
-            metric2 = "%s-%s" % (ticket.created.year, ticket.created.month)
+            metric1 = f"{ticket.get_assigned_to}"
+            metric2 = f"{ticket.created.year}-{ticket.created.month}"
 
         elif report == "queuepriority":
-            metric1 = "%s" % ticket.queue.title
-            metric2 = "%s" % ticket.get_priority_display()
+            metric1 = f"{ticket.queue.title}"
+            metric2 = f"{ticket.get_priority_display()}"
 
         elif report == "queuestatus":
-            metric1 = "%s" % ticket.queue.title
-            metric2 = "%s" % ticket.get_status_display()
+            metric1 = f"{ticket.queue.title}"
+            metric2 = f"{ticket.get_status_display()}"
 
         elif report == "queuemonth":
-            metric1 = "%s" % ticket.queue.title
-            metric2 = "%s-%s" % (ticket.created.year, ticket.created.month)
+            metric1 = f"{ticket.queue.title}"
+            metric2 = f"{ticket.created.year}-{ticket.created.month}"
 
         elif report == "daysuntilticketclosedbymonth":
-            metric1 = "%s" % ticket.queue.title
-            metric2 = "%s-%s" % (ticket.created.year, ticket.created.month)
+            metric1 = f"{ticket.queue.title}"
+            metric2 = f"{ticket.created.year}-{ticket.created.month}"
             metric3 = ticket.modified - ticket.created
             metric3 = metric3.days
 
@@ -1633,9 +1665,8 @@ def update_summary_tables(report_queryset, report, summarytable, summarytable2):
             raise ValueError(f'report "{report}" is unrecognized.')
 
         summarytable[metric1, metric2] += 1
-        if metric3:
-            if report == "daysuntilticketclosedbymonth":
-                summarytable2[metric1, metric2] += metric3
+        if metric3 and report == "daysuntilticketclosedbymonth":
+            summarytable2[metric1, metric2] += metric3
 
 
 @helpdesk_staff_member_required
@@ -1663,7 +1694,7 @@ def run_report(request, report):
     periods = []
     year, month = first_year, first_month
     working = True
-    periods.append("%s-%s" % (year, month))
+    periods.append(f"{year}-{month}")
 
     while working:
         month += 1
@@ -1672,7 +1703,7 @@ def run_report(request, report):
             month = 1
         if (year > last_year) or (month > last_month and year >= last_year):
             working = False
-        periods.append("%s-%s" % (year, month))
+        periods.append(f"{year}-{month}")
 
     if report == "userpriority":
         title = _("User by Priority")
@@ -1724,10 +1755,10 @@ def run_report(request, report):
         charttype = "date"
     update_summary_tables(report_queryset, report, summarytable, summarytable2)
     if report == "daysuntilticketclosedbymonth":
-        for key in summarytable2.keys():
+        for key in summarytable2:
             summarytable[key] = round(summarytable2[key] / summarytable[key], 2)
 
-    header1 = sorted(set(list(i for i, _ in summarytable.keys())))
+    header1 = sorted({i for i, _ in summarytable})
 
     column_headings = [col1heading] + possible_options
 
@@ -1738,12 +1769,10 @@ def run_report(request, report):
 
     # Zip data and headers together in one list for Morris.js charts
     # will get a list like [(Header1, Data1), (Header2, Data2)...]
-    seriesnum = 0
     morrisjs_data = []
-    for label in column_headings[1:]:
-        seriesnum += 1
+    for seriesnum, label in enumerate(column_headings[1:], start=1):
         datadict = {"x": label}
-        for n in range(0, len(table)):
+        for n in range(len(table)):
             datadict[n] = table[n][seriesnum]
         morrisjs_data.append(datadict)
 
@@ -1813,7 +1842,7 @@ def save_query(request):
     query.save()
 
     return HttpResponseRedirect(
-        "%s?saved_query=%s" % (reverse("helpdesk:list"), query.id)
+        "{}?saved_query={}".format(reverse("helpdesk:list"), query.id)
     )
 
 
@@ -2081,7 +2110,7 @@ def attachment_del(request, ticket_id, attachment_id):
 def calc_average_nbr_days_until_ticket_resolved(Tickets):
     nbr_closed_tickets = len(Tickets)
     days_per_ticket = 0
-    days_each_ticket = list()
+    days_each_ticket = []
 
     for ticket in Tickets:
         time_ticket_open = ticket.modified - ticket.created
@@ -2100,7 +2129,7 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
 def calc_basic_ticket_stats(Tickets):
     # all not closed tickets (open, reopened, resolved,) - independent of user
     all_open_tickets = Tickets.exclude(status=Ticket.CLOSED_STATUS)
-    today = datetime.today()
+    today = timezone.now()
 
     date_30 = date_rel_to_today(today, 30)
     date_60 = date_rel_to_today(today, 60)
@@ -2122,7 +2151,7 @@ def calc_basic_ticket_stats(Tickets):
     N_ota_ge_60 = len(ota_ge_60)
 
     # (O)pen (T)icket (S)tats
-    ots = list()
+    ots = []
     # label, number entries, color, sort_string
     ots.append(
         [
@@ -2190,13 +2219,7 @@ def date_rel_to_today(today, offset):
 
 
 def sort_string(begin, end):
-    return "sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s" % (
-        begin,
-        end,
-        Ticket.OPEN_STATUS,
-        Ticket.REOPENED_STATUS,
-        Ticket.RESOLVED_STATUS,
-    )
+    return f"sort=created&date_from={begin}&date_to={end}&status={Ticket.OPEN_STATUS}&status={Ticket.REOPENED_STATUS}&status={Ticket.RESOLVED_STATUS}"
 
 
 @helpdesk_staff_member_required

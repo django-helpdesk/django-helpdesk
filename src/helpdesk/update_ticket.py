@@ -1,16 +1,13 @@
-import typing
-
-from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from helpdesk.lib import safe_template_context
 from helpdesk import settings as helpdesk_settings
-from helpdesk.lib import process_attachments
 from helpdesk.decorators import (
     is_helpdesk_staff,
 )
+from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import (
     FollowUp,
     Ticket,
@@ -41,7 +38,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
         useremail = user.email.upper()
     except AttributeError:
         useremail = ""
-    strings_to_check = list()
+    strings_to_check = []
     strings_to_check.append(username)
     strings_to_check.append(useremail)
 
@@ -59,7 +56,7 @@ def return_ticketccstring_and_show_subscribe(user, ticket):
 
     # check whether current user is a submitter or assigned to ticket
     assignedto_username = str(ticket.assigned_to).upper()
-    strings_to_check = list()
+    strings_to_check = []
     if ticket.submitter_email is not None:
         submitter_email = ticket.submitter_email.upper()
         strings_to_check.append(submitter_email)
@@ -85,9 +82,8 @@ def subscribe_to_ticket_updates(
         if user_id is None and len(email) < 5:
             raise ValidationError(
                 _(
-                    "When you add somebody on Cc, you must provide either a User or a valid email. Email: %s"
-                    % email
-                )
+                    "When you add somebody on Cc, you must provide either a User or a valid email. Email: {}"
+                ).format(email)
             )
 
         return ticket.ticketcc_set.create(
@@ -97,7 +93,7 @@ def subscribe_to_ticket_updates(
 
 def get_and_set_ticket_status(
     new_status: int, ticket: Ticket, follow_up: FollowUp
-) -> typing.Tuple[str, int]:
+) -> tuple[str, int]:
     """Performs comparision on previous status to new status,
     updating the title as required.
 
@@ -111,9 +107,9 @@ def get_and_set_ticket_status(
         ticket.save()
         follow_up.new_status = new_status
         if follow_up.title:
-            follow_up.title += " and %s" % ticket.get_status_display()
+            follow_up.title += f" and {ticket.get_status_display()}"
         else:
-            follow_up.title = "%s" % ticket.get_status_display()
+            follow_up.title = f"{ticket.get_status_display()}"
 
     if not follow_up.title:
         if follow_up.comment:
@@ -130,8 +126,8 @@ def process_email_notifications_for_ticket_update(
     ticket: Ticket,
     follow_up: FollowUp,
     context: dict,
-    messages_sent_to: typing.Set[str],
-    files: typing.List[typing.Tuple[str, str]],
+    messages_sent_to: set[str],
+    files: list[tuple[str, str]],
     reassigned: bool = False,
 ):
     """
@@ -149,12 +145,11 @@ def process_email_notifications_for_ticket_update(
             or (follow_up.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))
         )
     ):
-        # Use hard coded prefix for submitter updates on  tickets for backwards compatibility
-        # TODO: possibly make the template prefix modification configurable
+        submitter_prefix = "updated_" if reassigned else template_prefix
         messages_sent_to.update(
             ticket.send(
                 {
-                    "submitter": ("updated_submitter", context),
+                    "submitter": (submitter_prefix + "submitter", context),
                 },
                 dont_send_to=messages_sent_to,
                 fail_silently=True,

@@ -1,4 +1,14 @@
-# -*- coding: utf-8 -*-
+import itertools
+import logging
+import os
+import sys
+import time
+from email.mime.message import MIMEMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from shutil import rmtree
+from tempfile import mkdtemp
+from unittest import mock
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
@@ -6,10 +16,10 @@ from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.shortcuts import get_object_or_404
-from django.test import override_settings, TestCase
-from email.mime.message import MIMEMessage
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from django.test import TestCase, override_settings
+from mock.mock import patch
+from oauthlib.oauth2 import BackendApplicationClient
+
 import helpdesk.email
 from helpdesk.email import extract_email_metadata, process_as_attachment
 from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketException
@@ -22,19 +32,8 @@ from helpdesk.models import (
     Ticket,
     TicketCC,
 )
-from . import utils
-import itertools
-import logging
-from mock.mock import patch
-from oauthlib.oauth2 import BackendApplicationClient
-import os
-from shutil import rmtree
-import sys
-from tempfile import mkdtemp
-import time
-import typing
-from unittest import mock
 
+from . import utils
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 # class A addresses can't have first octet of 0
@@ -157,7 +156,7 @@ class GetEmailCommonTests(TestCase):
         self.assertIn(
             "prosazuje lepší",
             ticket.description,
-            'Missing text "prosazuje lepší" in description: %s' % ticket.description,
+            f'Missing text "prosazuje lepší" in description: {ticket.description}',
         )
         followups = FollowUp.objects.filter(ticket=ticket)
         followup = followups[0]
@@ -239,7 +238,7 @@ class GetEmailCommonTests(TestCase):
         """
         filename = "TeléfonoMañana.txt"
         part = utils.generate_file_mime_part(locale="es_ES", filename=filename)
-        files: typing.List[SimpleUploadedFile] = []
+        files: list[SimpleUploadedFile] = []
         process_as_attachment(part, counter=1, files=files, logger=self.logger)
         sent_file: SimpleUploadedFile = files[0]
         # The extractor prepends a part identifier so compare the ending
@@ -341,16 +340,14 @@ class GetEmailCommonTests(TestCase):
                 continue
             self.assertTrue(
                 att_retrieved.filename.endswith(att_filename),
-                "Filename of attached multipart not detected: %s"
-                % (att_retrieved.filename),
+                f"Filename of attached multipart not detected: {att_retrieved.filename}",
             )
             with att_retrieved.file.open("r") as f:
                 retrieved_content = f.read()
                 self.assertEqual(
                     att_content,
                     retrieved_content,
-                    "Retrieved attachment content different to original :\n\n%s\n\n%s"
-                    % (att_content, retrieved_content),
+                    f"Retrieved attachment content different to original :\n\n{att_content}\n\n{retrieved_content}",
                 )
 
     def test_email_with_inline_and_multipart_as_attachments(self):
@@ -427,16 +424,14 @@ class GetEmailCommonTests(TestCase):
             else:
                 self.assertTrue(
                     False,
-                    "Unexpected file in ticket attachments: %s"
-                    % att_retrieved.filename,
+                    f"Unexpected file in ticket attachments: {att_retrieved.filename}",
                 )
         self.assertTrue(
             email_attachment_found,
-            "Email attachment file not found ticket attachments: %s"
-            % (email_att_filename),
+            f"Email attachment file not found ticket attachments: {email_att_filename}",
         )
         self.assertTrue(
-            inline_found, "Inline file not found in email: %s" % (inline_att_filename)
+            inline_found, f"Inline file not found in email: {inline_att_filename}"
         )
 
     def test_email_with_txt_as_attachment_with_simple_alternative_message(self):
@@ -483,13 +478,11 @@ class GetEmailCommonTests(TestCase):
             else:
                 self.assertTrue(
                     False,
-                    "Unexpected file in ticket attachments: %s"
-                    % att_retrieved.filename,
+                    f"Unexpected file in ticket attachments: {att_retrieved.filename}",
                 )
         self.assertTrue(
             email_attachment_found,
-            "Email attachment file not found ticket attachments: %s"
-            % (email_att_filename),
+            f"Email attachment file not found ticket attachments: {email_att_filename}",
         )
 
     @override_settings(QUEUE_EMAIL_BOX_UPDATE_ONLY=False)
@@ -590,7 +583,7 @@ class GetEmailCommonTests(TestCase):
             )
             ticket = extract_email_metadata(
                 message.as_string(), self.queue_public, self.logger
-            )  # noqa
+            )
 
             # Assert get_ticket_id_from_subject_slug was called for current and then other1
             mock_get_ticket_id.assert_has_calls(
@@ -602,7 +595,7 @@ class GetEmailCommonTests(TestCase):
 
             # Assert that create_object_from_email_message was called with the ticket ID and the other queue
             mock_create_object.assert_called_once()
-            args, kwargs = mock_create_object.call_args
+            args, _kwargs = mock_create_object.call_args
             self.assertEqual(args[1], 123)  # ticket_id
             self.assertEqual(args[2]["queue"], queue_other1)  # payload
 
@@ -640,7 +633,7 @@ class GetEmailCommonTests(TestCase):
 
             # Assert that create_object_from_email_message was called with None ticket_id and the original queue
             mock_create_object.assert_called_once()
-            args, kwargs = mock_create_object.call_args
+            args, _kwargs = mock_create_object.call_args
             self.assertIsNone(args[1])
             self.assertEqual(args[2]["queue"], self.queue_public)
 
@@ -700,7 +693,7 @@ class EmailTaskTests(TestCase):
         )
 
 
-class GetEmailParametricTemplate(object):
+class GetEmailParametricTemplate:
     """TestCase that checks basic email functionality across methods and socks configs."""
 
     def setUp(self):
@@ -764,7 +757,7 @@ class GetEmailParametricTemplate(object):
             from socks import ProxyConnectionError
 
             with self.assertRaisesRegex(
-                ProxyConnectionError, "%s:%s" % (unrouted_socks_server, unused_port)
+                ProxyConnectionError, f"{unrouted_socks_server}:{unused_port}"
             ):
                 call_command("get_email")
 
@@ -795,7 +788,7 @@ class GetEmailParametricTemplate(object):
                 }
                 pop3_mail_list = (
                     "+OK 2 messages",
-                    ("1 %d" % test_mail_len, "2 %d" % test_mail_len),
+                    (f"1 {test_mail_len}", f"2 {test_mail_len}"),
                 )
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
@@ -874,12 +867,12 @@ class GetEmailParametricTemplate(object):
                             call_command("get_email")
 
             ticket1 = get_object_or_404(Ticket, pk=1)
-            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            self.assertEqual(ticket1.ticket_for_url, f"QQ-{ticket1.id}")
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
-            self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
+            self.assertEqual(ticket2.ticket_for_url, f"QQ-{ticket2.id}")
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
 
@@ -907,7 +900,7 @@ class GetEmailParametricTemplate(object):
             from socks import ProxyConnectionError
 
             with self.assertRaisesRegex(
-                ProxyConnectionError, "%s:%s" % (unrouted_socks_server, unused_port)
+                ProxyConnectionError, f"{unrouted_socks_server}:{unused_port}"
             ):
                 call_command("get_email")
 
@@ -938,7 +931,7 @@ class GetEmailParametricTemplate(object):
                 }
                 pop3_mail_list = (
                     "+OK 2 messages",
-                    ("1 %d" % test_mail_len, "2 %d" % test_mail_len),
+                    (f"1 {test_mail_len}", f"2 {test_mail_len}"),
                 )
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
@@ -1017,13 +1010,13 @@ class GetEmailParametricTemplate(object):
                             call_command("get_email")
 
             ticket1 = get_object_or_404(Ticket, pk=1)
-            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            self.assertEqual(ticket1.ticket_for_url, f"QQ-{ticket1.id}")
             self.assertEqual(ticket1.submitter_email, test_email_from_meta[1])
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
-            self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
+            self.assertEqual(ticket2.ticket_for_url, f"QQ-{ticket2.id}")
             self.assertEqual(ticket2.submitter_email, test_email_from_meta[1])
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
@@ -1054,7 +1047,7 @@ class GetEmailParametricTemplate(object):
             from socks import ProxyConnectionError
 
             with self.assertRaisesRegex(
-                ProxyConnectionError, "%s:%s" % (unrouted_socks_server, unused_port)
+                ProxyConnectionError, f"{unrouted_socks_server}:{unused_port}"
             ):
                 call_command("get_email")
 
@@ -1085,7 +1078,7 @@ class GetEmailParametricTemplate(object):
                 }
                 pop3_mail_list = (
                     "+OK 2 messages",
-                    ("1 %d" % test_mail_len, "2 %d" % test_mail_len),
+                    (f"1 {test_mail_len}", f"2 {test_mail_len}"),
                 )
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
@@ -1164,12 +1157,12 @@ class GetEmailParametricTemplate(object):
                             call_command("get_email")
 
             ticket1 = get_object_or_404(Ticket, pk=1)
-            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            self.assertEqual(ticket1.ticket_for_url, f"QQ-{ticket1.id}")
             self.assertEqual(ticket1.title, test_email_subject)
             self.assertEqual(ticket1.description, test_email_body)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
-            self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
+            self.assertEqual(ticket2.ticket_for_url, f"QQ-{ticket2.id}")
             self.assertEqual(ticket2.title, test_email_subject)
             self.assertEqual(ticket2.description, test_email_body)
 
@@ -1224,7 +1217,7 @@ class GetEmailParametricTemplate(object):
             from socks import ProxyConnectionError
 
             with self.assertRaisesRegex(
-                ProxyConnectionError, "%s:%s" % (unrouted_socks_server, unused_port)
+                ProxyConnectionError, f"{unrouted_socks_server}:{unused_port}"
             ):
                 call_command("get_email")
 
@@ -1257,7 +1250,7 @@ class GetEmailParametricTemplate(object):
                 }
                 pop3_mail_list = (
                     "+OK 2 messages",
-                    ("1 %d" % test_mail_len, "2 %d" % test_mail_len),
+                    (f"1 {test_mail_len}", f"2 {test_mail_len}"),
                 )
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
@@ -1336,7 +1329,7 @@ class GetEmailParametricTemplate(object):
                             call_command("get_email")
 
             ticket1 = get_object_or_404(Ticket, pk=1)
-            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            self.assertEqual(ticket1.ticket_for_url, f"QQ-{ticket1.id}")
             self.assertEqual(ticket1.title, subject)
             # plain text should become description
             self.assertEqual(ticket1.description, text)
@@ -1355,7 +1348,7 @@ class GetEmailParametricTemplate(object):
             self.assertEqual(len(TicketCC.objects.filter(ticket=1)), 3)
 
             ticket2 = get_object_or_404(Ticket, pk=2)
-            self.assertEqual(ticket2.ticket_for_url, "QQ-%s" % ticket2.id)
+            self.assertEqual(ticket2.ticket_for_url, f"QQ-{ticket2.id}")
             self.assertEqual(ticket2.title, subject)
             # plain text should become description
             self.assertEqual(ticket2.description, text)
@@ -1378,7 +1371,7 @@ class GetEmailParametricTemplate(object):
             from socks import ProxyConnectionError
 
             with self.assertRaisesRegex(
-                ProxyConnectionError, "%s:%s" % (unrouted_socks_server, unused_port)
+                ProxyConnectionError, f"{unrouted_socks_server}:{unused_port}"
             ):
                 call_command("get_email")
 
@@ -1405,7 +1398,7 @@ class GetEmailParametricTemplate(object):
                 pop3_emails = {
                     "1": ("+OK", test_email.split("\n")),
                 }
-                pop3_mail_list = ("+OK 1 message", ("1 %d" % test_mail_len))
+                pop3_mail_list = ("+OK 1 message", (f"1 {test_mail_len}"))
                 mocked_poplib_server = mock.Mock()
                 mocked_poplib_server.list = mock.Mock(return_value=pop3_mail_list)
                 mocked_poplib_server.retr = mock.Mock(
@@ -1481,7 +1474,7 @@ class GetEmailParametricTemplate(object):
                             call_command("get_email")
 
             ticket1 = get_object_or_404(Ticket, pk=1)
-            self.assertEqual(ticket1.ticket_for_url, "QQ-%s" % ticket1.id)
+            self.assertEqual(ticket1.ticket_for_url, f"QQ-{ticket1.id}")
             self.assertEqual(
                 ticket1.title, "example email that crashes django-helpdesk get_email"
             )
@@ -1691,7 +1684,7 @@ for method, socks in case_matrix:
     socks_str = "Nosocks"
     if socks:
         socks_str = socks.capitalize()
-    test_name = str("TestGetEmail%s%s" % (method.capitalize(), socks_str))
+    test_name = str(f"TestGetEmail{method.capitalize()}{socks_str}")
 
     cl = type(
         test_name,

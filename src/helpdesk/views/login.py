@@ -3,7 +3,6 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import resolve_url
 
-
 default_login_view = auth_views.LoginView.as_view(
     template_name="helpdesk/registration/login.html"
 )

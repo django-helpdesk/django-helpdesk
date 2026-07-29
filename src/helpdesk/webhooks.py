@@ -1,6 +1,7 @@
+import logging
+
 import requests
 import requests.exceptions
-import logging
 from django.dispatch import receiver
 
 from . import settings
