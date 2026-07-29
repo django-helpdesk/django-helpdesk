@@ -145,10 +145,11 @@ def process_email_notifications_for_ticket_update(
             or (follow_up.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))
         )
     ):
+        submitter_prefix = "updated_" if reassigned else template_prefix
         messages_sent_to.update(
             ticket.send(
                 {
-                    "submitter": (template_prefix + "submitter", context),
+                    "submitter": (submitter_prefix + "submitter", context),
                 },
                 dont_send_to=messages_sent_to,
                 fail_silently=True,
