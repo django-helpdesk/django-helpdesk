@@ -20,7 +20,6 @@
 {% endblock h1_title %}
 
 {% block helpdesk_breadcrumb %}
-  {# Add dashboard or home here #}
   <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
   </li>
@@ -33,39 +32,38 @@
 {% endblock helpdesk_breadcrumb %}
 
 {% block helpdesk_body %}
-  <div class="card border-0 mb-3">
-    {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
-      <ul class="nav nav-underline justify-content-end">
-        <li class="nav-item">
-          <a class="nav-link active"
-             href="#datatabletabcontents"
-             id="datatabletabcontents-tab"
-             data-bs-toggle="tab"
-             role="tab"
-             aria-controls="datatabletabcontents"
-             aria-selected="true">
-            <i class="fas fa-th-list"></i>
-            {% translate "Table" %}
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link"
-             href="#timelinetabcontents"
-             id="timelinetabcontents-tab"
-             data-bs-toggle="tab"
-             role="tab"
-             aria-controls="timelinetabcontents"
-             aria-selected="false">
-            <i class="fas fa-history"></i>
-            {% translate "Timeline" %}
-          </a>
-        </li>
-      </ul>
-    {% endif %}
-    <div class="card-body">
-      {{ search_message|safe }}
-      <div class="tab-content" id="tableTabContent">
-        <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel" aria-labelledby="datatabletabcontents-tab">
+  {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
+    <ul class="nav nav-underline justify-content-end mx-3">
+      <li class="nav-item">
+        <a class="nav-link active"
+           href="#datatabletabcontents"
+           id="datatabletabcontents-tab"
+           data-bs-toggle="tab"
+           role="tab"
+           aria-controls="datatabletabcontents"
+           aria-selected="true">
+          <i class="fas fa-th-list"></i>
+          {% translate "Table" %}
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"
+           href="#timelinetabcontents"
+           id="timelinetabcontents-tab"
+           data-bs-toggle="tab"
+           role="tab"
+           aria-controls="timelinetabcontents"
+           aria-selected="false">
+          <i class="fas fa-history"></i>
+          {% translate "Timeline" %}
+        </a>
+      </li>
+    </ul>
+  {% endif %}
+  <div class="tab-content" id="tableTabContent">
+    <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel" aria-labelledby="datatabletabcontents-tab">
+      <div class="card border-0">
+        <div class="card-body">
           <form method="post" action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
             {% csrf_token %}
             {# Main Datatable #}
@@ -143,126 +141,42 @@
                     </optgroup>
                   </select>
                 </li>
-                <div class="d-flex justify-content-end p-3">
-                  <button type="submit" class="btn btn-outline-secondary">
-                    <i class="fa-regular fa-circle-right"></i> {% translate "Go" %}
+                <div class="d-grid p-3">
+                  <button type="submit" class="btn btn-outline-primary">
+                    {% translate "Go" %}
+                    <i class="fa-solid fa-arrow-right"></i>
                   </button>
                 </div>
               </ul>
             </div>
           </form>
-        </div>
-        {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
-          <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
-            <div id="timeline-embed" style="width: 100%; height: 80vh"></div>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-  {% if from_saved_query %}
-    <div class="alert alert-primary mx-3" role="alert">
-      {% if saved_query.user == user %}
-        <p>
-          {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
-          <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="alert-link text-decoration-underline link-offset-2">{% translate "Delete Saved Query" %}</a>
-        </p>
-      {% endif %}
-      <hr />
-      <p class="mb-0">
-        {% blocktranslate with saved_query.id as query_id %}
+          {% if search_message %}
+            <div class="alert alert-primary mt-3" role="alert">{{ search_message|safe }}</div>
+          {% endif %}
+          {% if from_saved_query %}
+            <div class="alert alert-primary mt-3" role="alert">
+              {% if saved_query.user == user %}
+                <p>
+                  {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
+                  <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="alert-link text-decoration-underline link-offset-2">{% translate "Delete Saved Query" %}</a>
+                </p>
+              {% endif %}
+              <hr />
+              <p class="mb-0">
+                {% blocktranslate with saved_query.id as query_id %}
         <a href="../reports/?saved_query={{ query_id }}" class="alert-link text-decoration-underline link-offset-2">Run a report</a> on this query to see stats and charts for the data listed below.
         {% endblocktranslate %}
-      </p>
-    </div>
-  {% endif %}
-  <div class="card border-0 mb-3">
-    <div class="card-body">
-      <h5 class="card-title">{% translate "Query Selection" %}</h5>
-      <ul class="nav nav-underline" id="queriesTab" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active"
-                  id="save-query-tab"
-                  data-bs-toggle="tab"
-                  data-bs-target="#save-query-tab-pane"
-                  type="button"
-                  role="tab"
-                  aria-controls="save-query-tab-pane"
-                  aria-selected="true"><i class="fa fa-floppy-disk me-2"></i>{% translate "Save Query" %}</button>
-        </li>
-        {% if user_saved_queries %}
-          <li class="nav-item" role="presentation">
-            <button class="nav-link"
-                    id="use-saved-queries-tab"
-                    data-bs-toggle="tab"
-                    data-bs-target="#use-saved-queries-tab-pane"
-                    type="button"
-                    role="tab"
-                    aria-controls="use-saved-queries-tab-pane"
-                    aria-selected="false">
-              <i class="fas fa-clipboard-check me-2"></i>{% translate "Use Saved Query" %}
-            </button>
-          </li>
-        {% endif %}
-      </ul>
-      <div class="tab-content" id="queriesTabContent">
-        {# Save Query pane #}
-        <div class="tab-pane fade show active"
-             id="save-query-tab-pane"
-             role="tabpanel"
-             aria-labelledby="save-query-tab"
-             tabindex="0">
-          <div class="row my-3">
-            <div class="col-12 col-lg-6">
-              <form method="post" action="{% url 'helpdesk:savequery' %}">
-                {% csrf_token %}
-                <input type="hidden" name="query_encoded" value="{{ urlsafe_query }}" />
-                <div class="mb-3">
-                  <label class="form-label" for="id_title">{% translate "Query Name" %}</label>
-                  <input class="form-control" type="text" name="title" id="id_title" />
-                  <div class="form-text">{% translate "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</div>
-                </div>
-                <div class="form-check form-switch mb-3">
-                  <input class="form-check-input" type="checkbox" name="shared" id="id_shared" />
-                  <label class="form-label mb-0" for="id_shared">{% translate "Share this query with other users." %}</label>
-                  <div class="form-text">{% translate "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</div>
-                </div>
-                <div class="d-flex justify-content-end">
-                  <button type="submit" class="btn btn-outline-secondary">{% translate "Save Query" %}</button>
-                </div>
-              </form>
+              </p>
             </div>
-          </div>
+          {% endif %}
         </div>
-        {# Use Saved query pane #}
-        {% if user_saved_queries %}
-          <div class="tab-pane fade"
-               id="use-saved-queries-tab-pane"
-               role="tabpanel"
-               aria-labelledby="use-saved-queries-tab"
-               tabindex="0">
-            <div class="row my-3">
-              <div class="col-12 col-md-8 col-lg-6">
-                <form method="get" action="{% url 'helpdesk:list' %}">
-                  <label class="form-label" for="id_query_selector">{% translate "Select a query" %}</label>
-                  <div class="input-group mb-3">
-                    <select class="form-select" name="saved_query" id="id_query_selector">
-                      {% for q in user_saved_queries %}
-                        <option value="{{ q.id }}">
-                          {{ q.title }}{% if q.shared %}
-                          (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
-                        {% endif %}
-                      </option>
-                    {% endfor %}
-                  </select>
-                  <button class="btn btn-outline-secondary" type="submit">{% translate "Run Query" %}</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      {% endif %}
+      </div>
     </div>
+    {% if helpdesk_settings.HELPDESK_TICKETS_TIMELINE_ENABLED %}
+      <div class="tab-pane fade" id="timelinetabcontents" role="tabpanel" aria-labelledby="timelinetabcontents-tab">
+        <div id="timeline-embed" style="width: 100%; height: 80vh"></div>
+      </div>
+    {% endif %}
   </div>
   {# Filters Offcanvas #}
   <a class="btn btn-light"
@@ -300,7 +214,100 @@
       </div>
     </div>
   </div>
-</div>
+  {# Queries Offcanvas #}
+  <button class="btn btn-light"
+          id="queries"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#offcanvasQueries"
+          aria-controls="offcanvasQueries"><i class="fa-solid fa-q me-2"></i>{% translate "Queries" %}</button>
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasQueries" aria-labelledby="offcanvasQueriesLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasQueriesLabel">{% translate "Query Selection" %}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <ul class="nav nav-underline" id="queriesTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active"
+                  id="save-query-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#save-query-tab-pane"
+                  type="button"
+                  role="tab"
+                  aria-controls="save-query-tab-pane"
+                  aria-selected="true"><i class="fa fa-floppy-disk me-2"></i>{% translate "Save Query" %}</button>
+        </li>
+        {% if user_saved_queries %}
+          <li class="nav-item" role="presentation">
+            <button class="nav-link"
+                    id="use-saved-queries-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#use-saved-queries-tab-pane"
+                    type="button"
+                    role="tab"
+                    aria-controls="use-saved-queries-tab-pane"
+                    aria-selected="false">
+              <i class="fas fa-clipboard-check me-2"></i>{% translate "Use Saved Query" %}
+            </button>
+          </li>
+        {% endif %}
+      </ul>
+      <div class="tab-content" id="queriesTabContent">
+        {# Save Query pane #}
+        <div class="tab-pane fade show active"
+             id="save-query-tab-pane"
+             role="tabpanel"
+             aria-labelledby="save-query-tab"
+             tabindex="0">
+          <form method="post" action="{% url 'helpdesk:savequery' %}">
+            {% csrf_token %}
+            <input type="hidden" name="query_encoded" value="{{ urlsafe_query }}" />
+            <div class="my-3">
+              <label class="form-label" for="id_title">{% translate "Query Name" %}</label>
+              <input class="form-control" type="text" name="title" id="id_title" />
+              <div class="form-text">{% translate "This name appears in the drop-down list of saved queries. If you share your query, other users will see this name, so choose something clear and descriptive!" %}</div>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" name="shared" id="id_shared" />
+              <label class="form-label mb-0" for="id_shared">{% translate "Share this query with other users." %}</label>
+              <div class="form-text">{% translate "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</div>
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn btn-outline-primary">{% translate "Save Query" %}<i class="fa-solid fa-arrow-right ms-2"></i></button>
+            </div>
+          </form>
+        </div>
+        {# Use Saved query pane #}
+        {% if user_saved_queries %}
+          <div class="tab-pane fade"
+               id="use-saved-queries-tab-pane"
+               role="tabpanel"
+               aria-labelledby="use-saved-queries-tab"
+               tabindex="0">
+            <form method="get" action="{% url 'helpdesk:list' %}">
+              <div class="my-3">
+                <label class="form-label" for="id_query_selector">{% translate "Select a query" %}</label>
+                <select class="form-select" name="saved_query" id="id_query_selector">
+                  {% for q in user_saved_queries %}
+                    <option value="{{ q.id }}">
+                      {{ q.title }}
+                      {% if q.shared %}
+                        (Shared{% if user != q.user %} by {{ q.user.get_username }}{% endif %})
+                      {% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="d-grid">
+                <button class="btn btn-outline-primary" type="submit">{% translate "Run Query" %}<i class="fa-solid fa-arrow-right ms-2"></i></button>
+              </div>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock helpdesk_body %}
 
 {% block helpdesk_js %}
@@ -349,6 +356,7 @@
                       topStart: [
                            $("#actions-dropdown"),
                            $("#advanced-filters"),
+                           $("#queries"),
                       ],
                       topEnd: {
                            'search': {
