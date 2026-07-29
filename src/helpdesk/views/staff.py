@@ -7,11 +7,13 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 
-from ..lib import format_time_spent
-from ..templated_email import send_templated_mail
+import json
+import re
+import typing
 from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
@@ -20,16 +22,27 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import F, Q, Case, When
-from django.forms import HiddenInput, inlineformset_factory, TextInput
-from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.db.models import Case, F, Q, When
+from django.forms import HiddenInput, TextInput, inlineformset_factory
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.html import escape
+from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
 from django.views.generic.edit import FormView, UpdateView
+from rest_framework import status
+from rest_framework.decorators import api_view
+
+import helpdesk.views.abstract_views as abstract_views
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
@@ -38,13 +51,13 @@ from helpdesk.decorators import (
     superuser_required,
 )
 from helpdesk.forms import (
+    CUSTOMFIELD_DATE_FORMAT,
     ChecklistForm,
     ChecklistTemplateForm,
     CreateChecklistForm,
-    CUSTOMFIELD_DATE_FORMAT,
     EditFollowUpForm,
-    EditTicketForm,
     EditTicketCustomFieldForm,
+    EditTicketForm,
     EmailIgnoreForm,
     FormControlDeleteFormSet,
     MultipleTicketSelectForm,
@@ -57,9 +70,9 @@ from helpdesk.forms import (
     UserSettingsForm,
 )
 from helpdesk.lib import (
+    get_assignable_users,
     queue_template_context,
     safe_template_context,
-    get_assignable_users,
 )
 from helpdesk.models import (
     Checklist,
@@ -80,21 +93,16 @@ from helpdesk.models import (
     UserSettings,
 )
 from helpdesk.query import get_query_class, query_from_base64, query_to_base64
-from helpdesk.user import HelpdeskUser
 from helpdesk.update_ticket import (
-    update_ticket,
-    subscribe_to_ticket_updates,
     return_ticketccstring_and_show_subscribe,
+    subscribe_to_ticket_updates,
+    update_ticket,
 )
-import helpdesk.views.abstract_views as abstract_views
+from helpdesk.user import HelpdeskUser
 from helpdesk.views.permissions import MustBeStaffMixin
-import json
-import re
-from rest_framework import status
-from rest_framework.decorators import api_view
-import typing
-from django.utils.timezone import now
 
+from ..lib import format_time_spent
+from ..templated_email import send_templated_mail
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.models import KBItem
@@ -1091,9 +1099,12 @@ def check_redirect_on_user_query(request, huser):
     return None
 
 
+@staff_member_required
 @helpdesk_staff_member_required
-def ticket_list(request):
-    context = {}
+def ticket_list(request: HttpRequest) -> HttpResponse:
+    """
+    Main ticket list view that shows a datatable with different filters.
+    """
 
     huser = HelpdeskUser(request.user)
 
@@ -1106,6 +1117,7 @@ def ticket_list(request):
         "sortreverse": False,
         "search_string": "",
     }
+
     default_query_params = {
         "filtering": {
             "status__in": [1, 2],
@@ -1115,18 +1127,36 @@ def ticket_list(request):
         "sortreverse": False,
     }
 
-    #: check for a redirect, see function doc for details
-    redirect = check_redirect_on_user_query(request, huser)
-    if redirect:
-        return redirect
-    try:
-        saved_query, query_params = load_saved_query(request, query_params)
-    except QueryLoadError:
-        return HttpResponseRedirect(reverse("helpdesk:list"))
+    filter_in_params = [
+        ("queue", "queue__id__in"),
+        ("assigned_to", "assigned_to__id__in"),
+        ("status", "status__in"),
+        ("priority", "priority__in"),
+        ("kbitem", "kbitem__in"),
+    ]
 
-    if saved_query:
-        pass
-    elif not {
+    filter_null_params = dict(
+        [
+            ("queue", "queue__id__isnull"),
+            ("assigned_to", "assigned_to__id__isnull"),
+            ("status", "status__isnull"),
+            ("priority", "priority__isnull"),
+            ("kbitem", "kbitem__isnull"),
+        ]
+    )
+
+    ALLOWED_SORTS = {
+        "status",
+        "assigned_to",
+        "created",
+        "title",
+        "queue",
+        "priority",
+        "last_followup",
+        "kbitem",
+    }
+
+    FILTERS = {
         "queue",
         "assigned_to",
         "status",
@@ -1135,30 +1165,33 @@ def ticket_list(request):
         "sort",
         "sortreverse",
         "kbitem",
-    }.intersection(request.GET):
+    }
+
+    filters_applied = FILTERS.intersection(request.GET)
+
+    # If searching from Nav bar search -> redirect to ticket detail
+    redirect = check_redirect_on_user_query(request, huser)
+    if redirect:
+        return redirect
+
+    try:
+        saved_query, query_params = load_saved_query(request, query_params)
+    except QueryLoadError:
+        return HttpResponseRedirect(reverse("helpdesk:list"))
+
+    if saved_query:
+        pass
+
+    elif not filters_applied:
         # Fall-back if no querying is being done
         query_params = deepcopy(default_query_params)
+
     else:
-        filter_in_params = [
-            ("queue", "queue__id__in"),
-            ("assigned_to", "assigned_to__id__in"),
-            ("status", "status__in"),
-            ("priority", "priority__in"),
-            ("kbitem", "kbitem__in"),
-        ]
-        filter_null_params = dict(
-            [
-                ("queue", "queue__id__isnull"),
-                ("assigned_to", "assigned_to__id__isnull"),
-                ("status", "status__isnull"),
-                ("priority", "priority__isnull"),
-                ("kbitem", "kbitem__isnull"),
-            ]
-        )
         for param, filter_command in filter_in_params:
             if request.GET.get(param) is not None:
                 patterns = request.GET.getlist(param)
                 if not patterns:
+                    # Caters for the case where the filter is only a null filter
                     continue
                 try:
                     minus_1_ndx = patterns.index("-1")
@@ -1167,9 +1200,6 @@ def ticket_list(request):
                     query_params["filtering_null"][filter_null_params[param]] = True
                 except ValueError:
                     pass
-                if not patterns:
-                    # Caters for the case where the filter is only a null filter
-                    continue
                 try:
                     pattern_pks = [int(pattern) for pattern in patterns]
                     query_params["filtering"][filter_command] = pattern_pks
@@ -1185,26 +1215,12 @@ def ticket_list(request):
             query_params["filtering"]["created__lte"] = date_to
 
         # KEYWORD SEARCHING
-        q = request.GET.get("q", "")
-        context["query"] = q
-        query_params["search_string"] = q
+        query_params["search_string"] = request.GET.get("q", "")
 
         # SORTING
         sort = request.GET.get("sort", None)
-        if sort not in (
-            "status",
-            "assigned_to",
-            "created",
-            "title",
-            "queue",
-            "priority",
-            "last_followup",
-            "kbitem",
-        ):
-            sort = "created"
-        query_params["sorting"] = sort
-
         sortreverse = request.GET.get("sortreverse", None)
+        query_params["sorting"] = sort if sort in ALLOWED_SORTS else "created"
         query_params["sortreverse"] = sortreverse
 
     urlsafe_query = query_to_base64(query_params)
@@ -1213,10 +1229,13 @@ def ticket_list(request):
         Q(user=request.user) | Q(shared__exact=True)
     )
 
+    # Search notice message
     search_message = ""
-    if query_params["search_string"] and settings.DATABASES["default"][
-        "ENGINE"
-    ].endswith("sqlite"):
+    is_sqlite = settings.DATABASES["default"]["ENGINE"].endswith("sqlite")
+    user_is_searching = query_params.get("search_string")
+    q = request.GET.get("q", "")
+
+    if user_is_searching and is_sqlite:
         search_message = _(
             "<p><strong>Note:</strong> Your keyword search is case sensitive "
             "because of your database. This means the search will <strong>not</strong> "
@@ -1227,38 +1246,33 @@ def ticket_list(request):
         )
 
     kbitem_choices = []
-    kbitem = []
+    kbitems = []
 
     if helpdesk_settings.HELPDESK_KB_ENABLED:
         kbitem_choices = [(item.pk, str(item)) for item in KBItem.objects.all()]
-        kbitem = KBItem.objects.all()
+        kbitems = KBItem.objects.all()
 
-    return render(
-        request,
-        "helpdesk/ticket_list.html",
-        dict(
-            context,
-            default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
-            assignable_users=get_assignable_users(
-                helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
-            ),
-            kb_items=kbitem,
-            queue_choices=huser.get_queues(),
-            status_choices=Ticket.STATUS_CHOICES,
-            priority_choices=Ticket.PRIORITY_CHOICES,
-            kbitem_choices=kbitem_choices,
-            urlsafe_query=urlsafe_query,
-            user_saved_queries=user_saved_queries,
-            query_params=query_params,
-            from_saved_query=saved_query is not None,
-            saved_query=saved_query,
-            search_message=search_message,
-            helpdesk_settings=helpdesk_settings,
+    ctx = dict(
+        query=q,
+        query_params=query_params,
+        default_tickets_per_page=request.user.usersettings_helpdesk.tickets_per_page,
+        assignable_users=get_assignable_users(
+            helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
         ),
+        kb_items=kbitems,
+        kbitem_choices=kbitem_choices,
+        queue_choices=huser.get_queues(),
+        status_choices=Ticket.STATUS_CHOICES,
+        priority_choices=Ticket.PRIORITY_CHOICES,
+        urlsafe_query=urlsafe_query,
+        user_saved_queries=user_saved_queries,
+        from_saved_query=saved_query is not None,
+        saved_query=saved_query,
+        search_message=search_message,
+        helpdesk_settings=helpdesk_settings,
     )
 
-
-ticket_list = staff_member_required(ticket_list)
+    return render(request, "helpdesk/ticket_list.html", ctx)
 
 
 class QueryLoadError(Exception):
