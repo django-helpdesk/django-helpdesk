@@ -1,6 +1,7 @@
 import json
 from base64 import b64decode, b64encode
 
+from django.core.exceptions import SuspiciousOperation
 from django.db.models import F, Max, OuterRef, Q, Subquery, Window
 from django.urls import reverse
 from django.utils.html import escape
@@ -76,6 +77,46 @@ DATATABLES_ORDER_COLUMN_CHOICES = Choices(
 DATATABLES_COLUMN_NUM_LOOKUP = {v: k for k, v in DATATABLES_ORDER_COLUMN_CHOICES}
 
 
+# Keys the ticket-list UI actually produces (see filter_in_params /
+# filter_null_params in views/staff.py:ticket_list and the date filter
+# in templates/helpdesk/filters/date.html). `filtering` / `filtering_null`
+# come from a client-controlled, base64-encoded payload and are passed
+# straight into Q(**...), so any key not on this list must be rejected
+# before it reaches the ORM: an unvalidated key lets a filter traverse
+# arbitrary FK/reverse-FK relations (e.g. assigned_to__password), turning
+# `recordsFiltered` into a boolean oracle over unrelated tables.
+ALLOWED_FILTER_FIELDS = {
+    "queue__id__in",
+    "queue__id__isnull",
+    "assigned_to__id__in",
+    "assigned_to__id__isnull",
+    "status__in",
+    "status__isnull",
+    "priority__in",
+    "priority__isnull",
+    "kbitem__in",
+    "kbitem__isnull",
+    "created__gte",
+    "created__lte",
+}
+
+
+def _validate_filter_keys(filters):
+    invalid = set(filters) - ALLOWED_FILTER_FIELDS
+    if invalid:
+        raise SuspiciousOperation(
+            f"Disallowed filter field(s): {', '.join(sorted(invalid))}"
+        )
+
+
+def _validate_sorting(sorting):
+    # Same allowlist already used by get_datatables_context() to resolve
+    # column numbers, reused here so timeline_ticket_list (and any other
+    # caller of __run__) can't order_by() an arbitrary relation path.
+    if sorting not in DATATABLES_COLUMN_NUM_LOOKUP:
+        raise SuspiciousOperation(f"Disallowed sort field: {sorting}")
+
+
 def get_query_class():
     from django.conf import settings
 
@@ -114,6 +155,8 @@ class __Query__:
         q_args = []
         value_filters = self.params.get("filtering", {})
         null_filters = self.params.get("filtering_null", {})
+        _validate_filter_keys(value_filters)
+        _validate_filter_keys(null_filters)
         if null_filters and value_filters:
             # Check if any of the value value_filters are for the same field as the
             # ISNULL filter so that an OR filter can be set up
@@ -144,6 +187,7 @@ class __Query__:
         )
         sorting = self.params.get("sorting", None)
         if sorting:
+            _validate_sorting(sorting)
             sortreverse = self.params.get("sortreverse", None)
             if sortreverse:
                 sorting = f"-{sorting}"
