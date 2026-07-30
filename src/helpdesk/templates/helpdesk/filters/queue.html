@@ -8,7 +8,7 @@
           aria-expanded="false"
           aria-controls="collapseQueue">{% translate "Queue" %}</button>
 </div>
-<div class="collapse my-3"id="collapseQueue">
+<div class="collapse my-3" id="collapseQueue">
   {% with unassigned=-1 %}
     <div class="form-check">
       <input class="form-check-input"
@@ -17,7 +17,7 @@
              value="{{ unassigned }}"
              id="queue-check-{{ unassigned }}"
              {% if query_params.filtering_null.queue__id__isnull %}checked{% endif %} />
-      <label class="form-check-label" for="owner-check-{{ unassigned }}">{% translate "Unassigned" %}</label>
+      <label class="form-check-label" for="queue-check-{{ unassigned }}">{% translate "Unassigned" %}</label>
     </div>
   {% endwith %}
   {% for q in queue_choices %}

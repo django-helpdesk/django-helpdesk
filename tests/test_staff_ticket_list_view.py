@@ -64,7 +64,7 @@ class StaffTicketListViewTests(TestCase):
         # User should be redirected to login screen
         self.assertEqual(r.status_code, HTTPStatus.FOUND)
         self.assertRedirects(r, login_url)
-        self.assertTemplateNotUsed(self.template)
+        self.assertTemplateNotUsed(r, self.template)
 
     def test_staff_user_can_access_ticket_list_page(self):
         # Arrange: staff user logs in

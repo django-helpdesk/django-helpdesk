@@ -1199,20 +1199,6 @@ def ticket_list(request: HttpRequest) -> HttpResponse:
         query_params = deepcopy(default_query_params)
 
     else:
-        filter_in_params = [
-            ("queue", "queue__id__in"),
-            ("assigned_to", "assigned_to__id__in"),
-            ("status", "status__in"),
-            ("priority", "priority__in"),
-            ("kbitem", "kbitem__in"),
-        ]
-        filter_null_params = {
-            "queue": "queue__id__isnull",
-            "assigned_to": "assigned_to__id__isnull",
-            "status": "status__isnull",
-            "priority": "priority__isnull",
-            "kbitem": "kbitem__isnull",
-        }
         for param, filter_command in filter_in_params:
             if request.GET.get(param) is not None:
                 patterns = request.GET.getlist(param)
