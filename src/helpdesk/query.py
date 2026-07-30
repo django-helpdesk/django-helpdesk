@@ -104,7 +104,9 @@ ALLOWED_FILTER_FIELDS = {
 def _validate_filter_keys(filters):
     invalid = set(filters) - ALLOWED_FILTER_FIELDS
     if invalid:
-        raise SuspiciousOperation(f"Disallowed filter field(s): {', '.join(sorted(invalid))}")
+        raise SuspiciousOperation(
+            f"Disallowed filter field(s): {', '.join(sorted(invalid))}"
+        )
 
 
 def _validate_sorting(sorting):
