@@ -173,3 +173,52 @@ class QueryTests(TestCase):
                 "draw": 0,
             },
         )
+
+    def test_query_rejects_unallowed_filtering_key(self):
+        """A staff user must not be able to filter on arbitrary related-model
+        fields (e.g. another user's password hash) via `filtering`."""
+        self.loginUser()
+        query = query_to_base64(
+            {"filtering": {"assigned_to__password__startswith": "pbkdf2"}}
+        )
+        response = self.client.get(
+            reverse("helpdesk:datatables_ticket_list", args=[query])
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_query_rejects_unallowed_filtering_null_key(self):
+        self.loginUser()
+        query = query_to_base64(
+            {"filtering_null": {"assigned_to__password__isnull": True}}
+        )
+        response = self.client.get(
+            reverse("helpdesk:datatables_ticket_list", args=[query])
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_query_rejects_unallowed_sorting_key_on_datatables(self):
+        self.loginUser()
+        query = query_to_base64({"sorting": "queue__email_box_pass"})
+        response = self.client.get(
+            reverse("helpdesk:datatables_ticket_list", args=[query])
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_query_rejects_unallowed_sorting_key_on_timeline(self):
+        """Regression test: unlike datatables_ticket_list, timeline_ticket_list
+        has no second, allowlisted order_by() to neutralize an injected sort,
+        so __run__ itself must reject it."""
+        self.loginUser()
+        query = query_to_base64({"sorting": "queue__email_box_pass"})
+        response = self.client.get(
+            reverse("helpdesk:timeline_ticket_list", args=[query])
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_query_allows_known_sorting_key_on_timeline(self):
+        self.loginUser()
+        query = query_to_base64({"sorting": "queue"})
+        response = self.client.get(
+            reverse("helpdesk:timeline_ticket_list", args=[query])
+        )
+        self.assertEqual(response.status_code, 200)
