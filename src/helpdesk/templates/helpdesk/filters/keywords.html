@@ -1,13 +1,15 @@
 {% load i18n humanize %}
-<div class="row">
-    <div class="col col-sm-3">
-        <label for='id_query'>{% trans "Keywords" %}</label>
-    </div>
-    <div class="col col-sm-3">
-        <input type='text' name='q' value='{{ query_params.search_string }}' id='id_query' />
-    </div>
-    <div class="col col-sm-6">
-        <button class='filterBuilderRemove btn btn-danger btn-sm float-end'><i class="fas fa-trash-alt"></i></button>
-    </div>
-      <p class='filterHelp'>{% trans "Keywords are case-insensitive, and will be looked for pretty much everywhere possible. Prepend with 'queue:' or 'priority:' to search by queue or priority. You can also use the keyword OR to combine multiple searches." %}</p>
+
+<div class="d-grid">
+  <button class="btn btn-light"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseKeywords"
+          aria-expanded="false"
+          aria-controls="collapseKeywords">{% translate "Keywords" %}</button>
+</div>
+<div class="collapse my-3" id="collapseKeywords">
+  <label class="form-label" for="id_query">{% translate "Keywords" %}</label>
+  <input class="form-control" type="text" name="q" value="{{ query_params.search_string }}" id="id_query" />
+  <div class="form-text">{% translate "Keywords are case-insensitive, and will be looked for pretty much everywhere possible. Prepend with 'queue:' or 'priority:' to search by queue or priority. You can also use the keyword OR to combine multiple searches." %}</div>
 </div>
