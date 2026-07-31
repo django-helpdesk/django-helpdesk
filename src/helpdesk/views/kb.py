@@ -8,7 +8,7 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
               resolutions to common problems.
 """
 
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.clickjacking import xframe_options_exempt
 
@@ -17,51 +17,57 @@ from helpdesk import user
 from helpdesk.models import KBCategory, KBItem
 
 
-def index(request):
-    huser = user.huser_from_request(request)
+def index(request: HttpRequest) -> HttpResponse:
+    """
+    List view for public facing knowledge base articles arrange by category.
     # TODO: It'd be great to have a list of most popular items here.
-    return render(
-        request,
-        "helpdesk/kb_index.html",
-        {
-            "kb_categories": huser.get_allowed_kb_categories(),
-            "helpdesk_settings": helpdesk_settings,
-        },
-    )
+    """
+
+    huser = user.huser_from_request(request)
+    ctx = {
+        "kb_categories": huser.get_allowed_kb_categories(),
+        "helpdesk_settings": helpdesk_settings,
+    }
+    return render(request, "helpdesk/kb_index.html", ctx)
 
 
-def category(request, slug, iframe=False):
+def category(request: HttpRequest, slug: str, iframe=False) -> HttpResponse:
+    """
+    List view to show all knowledge base articles for a particular category.
+    """
+
     category = get_object_or_404(KBCategory, slug__iexact=slug)
+
     if not user.huser_from_request(request).can_access_kbcategory(category):
         raise Http404
+
+    staff = request.user.is_authenticated and request.user.is_staff
     items = category.kbitem_set.filter(enabled=True)
     selected_item = request.GET.get("kbitem", None)
+
     try:
         selected_item = int(selected_item)
     except TypeError:
         pass
+
     qparams = request.GET.copy()
-    try:
-        del qparams["kbitem"]
-    except KeyError:
-        pass
+    qparams.pop("kbitem", None)
+
     template = "helpdesk/kb_category.html"
     if iframe:
         template = "helpdesk/kb_category_iframe.html"
-    staff = request.user.is_authenticated and request.user.is_staff
-    return render(
-        request,
-        template,
-        {
-            "category": category,
-            "items": items,
-            "selected_item": selected_item,
-            "query_param_string": qparams.urlencode(),
-            "helpdesk_settings": helpdesk_settings,
-            "iframe": iframe,
-            "staff": staff,
-        },
-    )
+
+    ctx = {
+        "category": category,
+        "items": items,
+        "selected_item": selected_item,
+        "query_param_string": qparams.urlencode(),
+        "helpdesk_settings": helpdesk_settings,
+        "iframe": iframe,
+        "staff": staff,
+    }
+
+    return render(request, template, ctx)
 
 
 @xframe_options_exempt
