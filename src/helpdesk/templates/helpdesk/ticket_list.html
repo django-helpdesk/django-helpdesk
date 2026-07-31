@@ -421,15 +421,19 @@
                            visible: false,
                       }, {
                            data: "status",
-                           render: function(data, type, row, meta) {
-                                const contextMap = {
-                                     "Open": "danger",
-                                     "Reopened": "warning",
-                                     "Resolved": "success",
-                                     "Closed": "success",
-                                     "Duplicate": "secondary"
-                                };
-
+                            render: function(data, type, row, meta) {
+                                 {% translate 'Open' as status_open %}
+                                 {% translate 'Reopened' as status_reopened %}
+                                 {% translate 'Resolved' as status_resolved %}
+                                 {% translate 'Closed' as status_closed %}
+                                 {% translate 'Duplicate' as status_duplicate %}
+                                 const contextMap = {
+                                      "{{ status_open|escapejs }}": "danger",
+                                      "{{ status_reopened|escapejs }}": "warning",
+                                      "{{ status_resolved|escapejs }}": "success",
+                                      "{{ status_closed|escapejs }}": "success",
+                                      "{{ status_duplicate|escapejs }}": "secondary"
+                                 };
                                 const context = contextMap[data] ?? "secondary";
                                 return `<span class="badge text-${context}-emphasis bg-${context}-subtle text-wrap">${data}</span>`
                            },
