@@ -19,7 +19,6 @@ class KBCategoryViewTests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        print("Veer running setUpTestData...")
         cls.user = get_staff_user()
         cls.kb_category = KBCategory.objects.create(
             title="Customer Accounts",

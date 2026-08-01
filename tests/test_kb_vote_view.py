@@ -1,10 +1,11 @@
-from django.test import TestCase
-from django.conf import settings
-from tests.helpers import get_staff_user
-
-from django.urls import resolve, reverse
 from http import HTTPStatus
+
+from django.conf import settings
+from django.test import TestCase
+from django.urls import resolve, reverse
+
 from helpdesk.models import KBCategory, KBItem
+from tests.helpers import get_staff_user
 
 
 class KBVoteViewTests(TestCase):
