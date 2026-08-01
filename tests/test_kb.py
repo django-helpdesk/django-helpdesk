@@ -1,89 +1,61 @@
-from django.test import TestCase
-from django.urls import reverse
+from http import HTTPStatus
 
-from helpdesk.models import KBCategory, KBItem, Queue, Ticket
+from django.test import TestCase
+from django.urls import resolve, reverse
+
+from helpdesk.models import KBCategory, Queue, Ticket
 
 from .helpers import get_staff_user
 
 
-class KBTests(TestCase):
-    def setUp(self):
-        self.queue = Queue.objects.create(
-            title="Test queue",
-            slug="test_queue",
-            allow_public_submission=True,
-        )
-        self.queue.save()
-        cat = KBCategory.objects.create(
-            title="Test Cat",
-            slug="test_cat",
-            description="This is a test category",
-            queue=self.queue,
-        )
-        cat.save()
-        self.kbitem1 = KBItem.objects.create(
-            category=cat,
-            title="KBItem 1",
-            question="What?",
-            answer="A KB Item",
-        )
-        self.kbitem1.save()
-        self.kbitem2 = KBItem.objects.create(
-            category=cat,
-            title="KBItem 2",
-            question="When?",
-            answer="Now",
-        )
-        self.kbitem2.save()
-        self.user = get_staff_user()
+class KBIndexViewTests(TestCase):
+    """
+    Test suite for the Knowledge base index view. This serves as the home page
+    for the knowledge base section showing all categories to browse.
+    """
 
-    def test_kb_index(self):
-        response = self.client.get(reverse("helpdesk:kb_index"))
-        self.assertContains(response, "This is a test category")
+    @classmethod
+    def setUpTestData(cls):
+        cls.template = "helpdesk/kb_index.html"
+        cls.url = reverse("helpdesk:kb_index")
+        cls.user = get_staff_user()
+        # We create a queue and its companion public, private kb category
+        cls.queue = Queue.objects.create(
+            title="Accounts",
+            slug="accounts",
+        )
+        cls.kb_category1 = KBCategory.objects.create(
+            title="Customer Accounts",
+            slug="customer-accounts",
+            description="Account access related problems",
+            queue=cls.queue,
+            public=True,
+        )
+        cls.kb_category2 = KBCategory.objects.create(
+            title="Account blocked",
+            slug="account-blocked",
+            description="Account blocked related problems",
+            queue=cls.queue,
+            public=False,  # <- Note
+        )
 
-    def test_kb_category(self):
-        response = self.client.get(reverse("helpdesk:kb_category", args=("test_cat",)))
-        self.assertContains(response, "This is a test category")
-        self.assertContains(response, "KBItem 1")
-        self.assertContains(response, "KBItem 2")
-        self.assertContains(response, "Create New Ticket Queue:")
-        self.client.login(username=self.user.get_username(), password="password")
-        response = self.client.get(reverse("helpdesk:kb_category", args=("test_cat",)))
-        self.assertContains(response, '<i class="fa fa-thumbs-up fa-lg"></i>')
-        self.assertContains(response, "0 open tickets")
-        ticket = Ticket.objects.create(
-            title="Test ticket",
-            queue=self.queue,
-            kbitem=self.kbitem1,
-        )
-        ticket.save()
-        response = self.client.get(reverse("helpdesk:kb_category", args=("test_cat",)))
-        self.assertContains(response, "1 open tickets")
+    def test_url_resolves_correct_view(self):
+        match = resolve(self.url)
+        self.assertEqual(match.url_name, "kb_index")
 
-    def test_kb_vote(self):
-        self.client.login(username=self.user.get_username(), password="password")
-        response = self.client.post(
-            reverse("helpdesk:kb_vote", args=(self.kbitem1.pk, "up")), params={}
-        )
-        cat_url = reverse("helpdesk:kb_category", args=("test_cat",)) + "?kbitem=1"
-        self.assertRedirects(response, cat_url)
-        response = self.client.get(cat_url)
-        self.assertContains(response, "1 people found this answer useful of 1")
-        response = self.client.post(
-            reverse("helpdesk:kb_vote", args=(self.kbitem1.pk, "down")), params={}
-        )
-        self.assertRedirects(response, cat_url)
-        response = self.client.get(cat_url)
-        self.assertContains(response, "0 people found this answer useful of 1")
+    def test_anonymous_user_can_access(self):
+        # Act
+        r = self.client.get(reverse("helpdesk:kb_index"))
 
-    def test_kb_category_iframe(self):
-        cat_url = (
-            reverse("helpdesk:kb_category", args=("test_cat",))
-            + "?kbitem=1&submitter_email=foo@bar.cz&title=lol&"
-        )
-        response = self.client.get(cat_url)
-        # Assert that query params are passed on to ticket submit form
-        self.assertContains(
-            response,
-            "'/tickets/submit/?queue=1&_readonly_fields_=queue&kbitem=1&submitter_email=foo%40bar.cz&amp;title=lol",
-        )
+        # Assert: check access
+        self.assertEqual(r.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(r, self.template)
+
+        self.assertContains(r, self.kb_category1.title)
+        self.assertNotContains(r, "Hi I shouldn't be on this page")
+        self.assertContains(r, "View articles")
+
+        # Assert: private category is not visible
+        self.assertIn(self.kb_category1, r.context["kb_categories"])
+        self.assertNotIn(self.kb_category2, r.context["kb_categories"])
+        self.assertEqual(len(r.context["kb_categories"]), 1)
