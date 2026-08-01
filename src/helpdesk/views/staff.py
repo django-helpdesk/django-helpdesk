@@ -155,6 +155,40 @@ def get_form_extra_kwargs(user) -> dict[str, object]:
     }
 
 
+# Sort keys the dashboard templates actually emit (see
+# templates/helpdesk/include/tickets.html and include/unassigned.html),
+# optionally prefixed with "-" for a descending sort. These values land
+# straight in order_by(), so anything else has to be dropped: an unvalidated
+# key lets a sort traverse arbitrary relations (e.g. ?una_sort=queue__email_box_pass
+# orders the unassigned tickets by a queue's plaintext mailbox password),
+# turning row ordering into a side channel over unrelated tables.
+DASHBOARD_ALLOWED_SORTS = {
+    "created",
+    "id",
+    "modified",
+    "priority",
+    "queue",
+    "status",
+}
+
+DASHBOARD_DEFAULT_SORT = "-created"
+
+
+def get_dashboard_sort(request, param, default=DASHBOARD_DEFAULT_SORT):
+    """
+    Read a dashboard sort parameter from the query string and only return it if
+    it is on the allowlist, falling back to `default` otherwise. Silently
+    falling back rather than raising keeps a stale bookmark or a customised
+    template from breaking the page, and matches how ticket_list() already
+    handles its own `sort` parameter.
+    """
+    sorting = request.GET.get(param) or default
+    field = sorting.removeprefix("-")
+    if field not in DASHBOARD_ALLOWED_SORTS:
+        return default
+    return sorting
+
+
 @helpdesk_staff_member_required
 def dashboard(request):
     """
@@ -175,10 +209,10 @@ def dashboard(request):
     unassigned_tickets_page = request.GET.get(_("una_page"), 1)
 
     # sorting parameters for each table
-    user_tickets_sort = request.GET.get("ut_sort", "-created")
-    user_tickets_closed_sort = request.GET.get("utcr_sort", "-created")
-    all_tickets_reported_sort = request.GET.get("atrbcu_sort", "-created")
-    unassigned_tickets_sort = request.GET.get("una_sort", "-created")
+    user_tickets_sort = get_dashboard_sort(request, "ut_sort")
+    user_tickets_closed_sort = get_dashboard_sort(request, "utcr_sort")
+    all_tickets_reported_sort = get_dashboard_sort(request, "atrbcu_sort")
+    unassigned_tickets_sort = get_dashboard_sort(request, "una_sort")
 
     huser = HelpdeskUser(request.user)
     active_tickets = Ticket.objects.select_related("queue").exclude(
