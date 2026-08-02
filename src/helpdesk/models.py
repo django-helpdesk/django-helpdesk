@@ -20,6 +20,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
+from django.db.models import QuerySet
+from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
@@ -1460,28 +1462,14 @@ class EmailTemplate(models.Model):
 
 class KBCategory(models.Model):
     """
-    Lets help users help themselves: the Knowledge Base is a categorised
-    listing of questions & answers.
+    Reprsents a category for a group of questions and answers in the
+    knowledge base.
     """
 
-    name = models.CharField(
-        _("Name of the category"),
-        max_length=100,
-    )
-
-    title = models.CharField(
-        _("Title on knowledgebase page"),
-        max_length=100,
-    )
-
-    slug = models.SlugField(
-        _("Slug"),
-    )
-
-    description = models.TextField(
-        _("Description"),
-    )
-
+    name = models.CharField(_("Name of the category"), max_length=100)
+    title = models.CharField(_("Title on knowledgebase page"), max_length=100)
+    slug = models.SlugField(_("Slug"))
+    description = models.TextField(_("Description"))
     queue = models.ForeignKey(
         Queue,
         blank=True,
@@ -1491,23 +1479,20 @@ class KBCategory(models.Model):
             "Default queue when creating a ticket after viewing this category."
         ),
     )
-
     public = models.BooleanField(
         default=True, verbose_name=_("Is KBCategory publicly visible?")
     )
-
-    def __str__(self):
-        return f"{self.name}"
 
     class Meta:
         ordering = ("title",)
         verbose_name = _("Knowledge base category")
         verbose_name_plural = _("Knowledge base categories")
 
-    def get_absolute_url(self):
-        from django.urls import reverse
+    def __str__(self) -> str:
+        return f"{self.name}"
 
-        return reverse("helpdesk:kb_category", kwargs={"slug": self.slug})
+    def get_absolute_url(self) -> str:
+        return reverse_lazy("helpdesk:kb_category", kwargs={"slug": self.slug})
 
 
 class KBItem(models.Model):
@@ -1516,39 +1501,22 @@ class KBItem(models.Model):
     style system.
     """
 
-    voted_by = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="votes",
-    )
+    voted_by = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="votes")
     downvoted_by = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="downvotes",
+        settings.AUTH_USER_MODEL, related_name="downvotes"
     )
     category = models.ForeignKey(
-        KBCategory,
-        on_delete=models.CASCADE,
-        verbose_name=_("Category"),
+        KBCategory, on_delete=models.CASCADE, verbose_name=_("Category")
     )
-
     title = models.CharField(
         _("Title"),
         max_length=100,
     )
-
-    question = models.TextField(
-        _("Question"),
-    )
-
-    answer = models.TextField(
-        _("Answer"),
-    )
-
+    question = models.TextField(_("Question"))
+    answer = models.TextField(_("Answer"))
     votes = models.IntegerField(
-        _("Votes"),
-        help_text=_("Total number of votes cast for this item"),
-        default=0,
+        _("Votes"), help_text=_("Total number of votes cast for this item"), default=0
     )
-
     recommendations = models.IntegerField(
         _("Positive Votes"),
         help_text=_("Number of votes for this item which were POSITIVE."),
@@ -1569,16 +1537,23 @@ class KBItem(models.Model):
         null=True,
     )
 
-    order = models.PositiveIntegerField(
-        _("Order"),
-        blank=True,
-        null=True,
-    )
+    order = models.PositiveIntegerField(_("Order"), blank=True, null=True)
+    enabled = models.BooleanField(_("Enabled to display to users"), default=True)
 
-    enabled = models.BooleanField(
-        _("Enabled to display to users"),
-        default=True,
-    )
+    class Meta:
+        ordering = ("order", "title")
+        verbose_name = _("Knowledge base item")
+        verbose_name_plural = _("Knowledge base items")
+
+    def __str__(self) -> str:
+        return f"{self.category.title}: {self.title}"
+
+    def get_absolute_url(self) -> str:
+        return reverse_lazy(
+            "helpdesk:kb_category",
+            kwargs={"slug": self.category.slug},
+            query={"kbitem": self.pk},
+        )
 
     def save(self, *args, **kwargs):
         if not self.last_updated:
@@ -1588,49 +1563,29 @@ class KBItem(models.Model):
     def get_team(self):
         return helpdesk_settings.HELPDESK_KBITEM_TEAM_GETTER(self)
 
-    def _score(self):
+    @property
+    def score(self) -> int | str:
         """Return a score out of 10 or Unrated if no votes"""
+
         if self.votes > 0:
             return (self.recommendations / self.votes) * 10
         else:
             return _("Unrated")
 
-    score = property(_score)
+    def query_url(self) -> str:
+        return reverse_lazy("helpdesk:list", query={"kbitem": self.pk})
 
-    def __str__(self):
-        return f"{self.category.title}: {self.title}"
-
-    class Meta:
-        ordering = (
-            "order",
-            "title",
-        )
-        verbose_name = _("Knowledge base item")
-        verbose_name_plural = _("Knowledge base items")
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-
-        return (
-            str(reverse("helpdesk:kb_category", args=(self.category.slug,)))
-            + "?kbitem="
-            + str(self.pk)
-        )
-
-    def query_url(self):
-        from django.urls import reverse
-
-        return str(reverse("helpdesk:list")) + "?kbitem=" + str(self.pk)
-
-    def num_open_tickets(self):
-        return Ticket.objects.filter(kbitem=self, status__in=(1, 2)).count()
-
-    def unassigned_tickets(self):
+    def num_open_tickets(self) -> int:
         return Ticket.objects.filter(
-            kbitem=self, status__in=(1, 2), assigned_to__isnull=True
+            kbitem=self, status__in=Ticket.OPEN_STATUSES
+        ).count()
+
+    def unassigned_tickets(self) -> QuerySet[Ticket]:
+        return Ticket.objects.filter(
+            kbitem=self, status__in=Ticket.OPEN_STATUSES, assigned_to__isnull=True
         )
 
-    def get_markdown(self):
+    def get_markdown(self) -> str:
         return get_markdown(self.answer)
 
 
