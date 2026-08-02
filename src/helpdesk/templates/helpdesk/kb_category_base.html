@@ -38,29 +38,27 @@
         <div id="collapse-{{ item.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionKbItem">
           <div class="accordion-body">
             <h5>{{ item.question }}</h5>
-            <p>{{ item.get_markdown }}</p>
+            <p>{{ item.answer }}</p>
             <div class="d-flex align-items-center">
               {# Upvote / Downvote forms #}
               {% if request.user.pk %}
                 <div class="me-auto">
-                  <form method="post" id="upvoteForm" action="{% url "helpdesk:kb_vote" item.pk "up" %}">
+                  <form method="post" action="{% url "helpdesk:kb_vote" item.pk "up" %}" class="d-inline">
                     {% csrf_token %}
-                  </form>
-                  <form method="post" id="downvoteForm" action="{% url "helpdesk:kb_vote" item.pk "down" %}">
-                    {% csrf_token %}
-                  </form>
-                  <div class="btn-group btn-group-sm" role="group" aria-label="Voting buttons">
-                    <button type="submit" class="btn btn-outline-secondary" form="upvoteForm">
+                    <button type="submit" class="btn btn-light">
                       <i class="fa-regular fa-thumbs-up"></i>
                     </button>
-                    <button type="submit" class="btn btn-outline-secondary" form="downvoteForm">
+                  </form>
+                  <form method="post" action="{% url "helpdesk:kb_vote" item.pk "down" %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-light">
                       <i class="fa-regular fa-thumbs-down"></i>
                     </button>
-                  </div>
+                  </form>
                   {% if item.votes != 0 %}
                     {% blocktranslate with recommendations=item.recommendations votes=item.votes  %}
-                <span class="text-body-secondary small">{{ recommendations }} of {{ votes }} people found this answer useful</span>
-                  {% endblocktranslate %}
+                    <span class="text-body-secondary small">{{ recommendations }} of {{ votes }} people found this answer useful</span>
+                    {% endblocktranslate %}
                   {% endif %}
                 </div>
               {% endif %}
