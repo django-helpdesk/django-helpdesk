@@ -3,7 +3,7 @@ from http import HTTPStatus
 from django.conf import settings
 from django.test import TestCase
 from django.urls import resolve, reverse
-
+from django.shortcuts import resolve_url
 from helpdesk.models import KBCategory, KBItem
 from tests.helpers import get_staff_user
 
@@ -52,7 +52,7 @@ class KBVoteViewTests(TestCase):
 
     def test_anonymous_user_cannot_cast_a_vote(self):
         # Arrange
-        redirect_url = f"{reverse(settings.LOGIN_URL)}?next={self.upvote_url}"
+        redirect_url = f"{resolve_url(settings.LOGIN_URL)}?next={self.upvote_url}"
 
         # Act: cast a vote w/o logging in
         r = self.client.post(self.upvote_url)
