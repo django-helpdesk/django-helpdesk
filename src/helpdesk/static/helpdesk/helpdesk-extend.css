@@ -1,7 +1,7 @@
 /*
 Bootstrap overrides
 */
-@import 'helpdesk-customize.css';
+@import "helpdesk-customize.css";
 
 /* Bootstrap 5 underlines links by default; restore Bootstrap 4 behaviour */
 a:not(.btn) {
@@ -11,106 +11,125 @@ a:not(.btn) {
 /* Bootstrap 5 removed the breadcrumb background; restore the BS4 grey */
 .breadcrumb {
   background-color: #e9ecef;
-  padding: .75rem 1rem;
-  border-radius: .25rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.25rem;
 }
 
 .btn-file {
-    position: relative;
-    overflow: hidden;
+  position: relative;
+  overflow: hidden;
 }
-.btn-file input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    min-width: 100%;
-    min-height: 100%;
-    font-size: 100px;
-    text-align: right;
-    filter: alpha(opacity=0);
-    opacity: 0;
-    outline: none;
-    background: white;
-    cursor: inherit;
-    display: block;
+.btn-file input[type="file"] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  background: white;
+  cursor: inherit;
+  display: block;
 }
 
 .thumbnail.filterBox {
-    float: left;
-    border: solid #ccc 1px;
-    padding: 10px;
-    margin: 4px;
-    max-width: 24%;
-    min-height: 200px;
+  float: left;
+  border: solid #ccc 1px;
+  padding: 10px;
+  margin: 4px;
+  max-width: 24%;
+  min-height: 200px;
 }
 
 .filterBox {
-    display: none;
+  display: none;
 }
 .filterBoxShow {
-    display: block;
+  display: block;
 }
 
-
 .filterBox label {
-    clear: both;
-    display: block;
+  clear: both;
+  display: block;
 }
 
 .filterBox .filterHelp {
-    color: #aaa;
-    font-size: 0.8em;
-    clear: both;
+  color: #aaa;
+  font-size: 0.8em;
+  clear: both;
 }
 
-#searchtabs {margin-bottom: 20px;}
+#searchtabs {
+  margin-bottom: 20px;
+}
 
-.row_tablehead, table.table caption {background-color: #dbd5d9;}
+.row_tablehead,
 table.table caption {
-    padding-left: 2em; 
-    line-height: 2em; font-weight: bold;
+  background-color: #dbd5d9;
 }
-table.ticket-stats caption {color: #fbff00; font-style: italic;}
-table.ticket-stats tbody th, table.ticket-stats tbody tr {padding-left: 20px}
+table.table caption {
+  padding-left: 2em;
+  line-height: 2em;
+  font-weight: bold;
+}
+table.ticket-stats caption {
+  color: #fbff00;
+  font-style: italic;
+}
+table.ticket-stats tbody th,
+table.ticket-stats tbody tr {
+  padding-left: 20px;
+}
 
 .errorlist {
-    list-style: none;
-    padding: 0;
-    color: red;
+  list-style: none;
+  padding: 0;
+  color: red;
 }
 
-.has-error .input-group input, .has-error .input-group select, .has-error .input-group textarea {border-color: #b94a48}
+.has-error .input-group input,
+.has-error .input-group select,
+.has-error .input-group textarea {
+  border-color: #b94a48;
+}
 
 #helpdesk-nav-collapse #searchform {
-    padding-top: 0;
+  padding-top: 0;
 }
-#ticket-description {background-color: #FCF8E3;}
+#ticket-description {
+  background-color: #fcf8e3;
+}
 .followup.well {
-    background-color: #f4f5ff;
+  background-color: #f4f5ff;
 }
 .followup {
-    padding: 20px;
-    margin: 30px;
+  padding: 20px;
+  margin: 30px;
 }
-/*
-Add your custom styles here
-*/
+
 #footer {
-    border-top: 2px solid #AAAAAA;
-    margin-top: 20px;
-    padding: 10px 0;
+  border-top: 2px solid #aaaaaa;
+  margin-top: 20px;
+  padding: 10px 0;
 }
-#helpdesk-body {padding-top: 100px;}
-img.brand {padding-right: 30px;}
+#helpdesk-body {
+  padding-top: 100px;
+}
+img.brand {
+  padding-right: 30px;
+}
 
 div.card-body img {
-	max-width: 900px;
+  max-width: 900px;
 }
 
 pre {
-	background: #eee;
-	padding: 1em;
-	border: 1pt solid white;
+  background: #eee;
+  padding: 1em;
+  border: 1pt solid white;
 }
 
 table .tickettitle {
@@ -120,7 +139,49 @@ table .tickettitle {
   text-overflow: ellipsis;
 }
 
-
 .handle {
-	cursor: grab;
+  cursor: grab;
+}
+
+/* hide google translate top bar */
+.goog-te-banner-frame {
+  display: none !important;
+}
+
+.goog-te-balloon-frame {
+  display: none !important;
+}
+
+/* hide google translate tooltips (generated for every translated item) */
+.goog-tooltip {
+  display: none !important;
+}
+
+/* header */
+#dropdown li.headerlink {
+  width: auto;
+  float: left;
+  text-align: center;
+}
+
+/* query list */
+#dropdown li.headerlink ul {
+  display: none;
+  text-align: left;
+  position: absolute;
+  padding: 5px;
+  z-index: 2;
+}
+
+/* query entries */
+#dropdown li.headerlink:hover ul {
+  display: block;
+  width: auto;
+}
+
+#dropdown li.headerlink:hover ul li {
+  padding: 5px;
+  margin: 1px;
+  float: none;
+  display: block;
 }
