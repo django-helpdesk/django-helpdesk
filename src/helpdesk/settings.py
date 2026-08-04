@@ -504,14 +504,20 @@ if HELPDESK_VALID_EXTENSIONS:
         file=sys.stderr,
     )
 else:
+    # ".htm" and ".html" are deliberately absent. Attachments come from
+    # unauthenticated third parties (inbound email and the public ticket form)
+    # and are linked straight from the ticket page, served inline with a content
+    # type derived from the extension, so an allowed .html attachment is stored
+    # XSS against the staff member who opens it. The attachment field's own help
+    # text has never advertised HTML as an accepted type either. Operators who
+    # really need it can add it back through HELPDESK_VALID_EXTENSIONS, but they
+    # then own the consequences.
     HELPDESK_VALID_EXTENSIONS = getattr(
         settings,
         "HELPDESK_VALID_EXTENSIONS",
         [
             ".txt",
             ".asc",
-            ".htm",
-            ".html",
             ".pdf",
             ".doc",
             ".docx",
