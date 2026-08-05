@@ -3,7 +3,7 @@ from http import HTTPStatus
 from django.test import TestCase
 from django.urls import resolve, reverse
 
-from helpdesk.models import KBCategory, Queue, Ticket
+from helpdesk.models import KBCategory, Queue
 
 from .helpers import get_staff_user
 
