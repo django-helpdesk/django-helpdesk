@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
-from helpdesk.models import KBCategory, KBItem, Queue, Ticket
+from helpdesk.models import FollowUp, KBCategory, KBItem, Queue, Ticket
 from helpdesk.query import query_to_base64
 
 from .helpers import get_staff_user
@@ -222,3 +223,40 @@ class QueryTests(TestCase):
             reverse("helpdesk:timeline_ticket_list", args=[query])
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_query_allows_new_sorting_keys_on_timeline(self):
+        self.loginUser()
+        for sorting in ("id", "due_date", "submitter_email", "last_followup"):
+            for sortreverse in (False, True):
+                with self.subTest(sorting=sorting, sortreverse=sortreverse):
+                    query = query_to_base64(
+                        {"sorting": sorting, "sortreverse": sortreverse}
+                    )
+                    response = self.client.get(
+                        reverse("helpdesk:timeline_ticket_list", args=[query])
+                    )
+                    self.assertEqual(response.status_code, 200)
+
+    def test_query_sorts_datatables_by_last_followup(self):
+        self.loginUser()
+        FollowUp.objects.create(
+            ticket=self.ticket1,
+            date=timezone.now() - timezone.timedelta(days=2),
+        )
+        FollowUp.objects.create(
+            ticket=self.ticket2,
+            date=timezone.now() - timezone.timedelta(days=1),
+        )
+        for sortreverse, expected_order in [(False, [1, 2]), (True, [2, 1])]:
+            with self.subTest(sortreverse=sortreverse):
+                query = query_to_base64(
+                    {"sorting": "last_followup", "sortreverse": sortreverse}
+                )
+                response = self.client.get(
+                    reverse("helpdesk:datatables_ticket_list", args=[query])
+                )
+                self.assertEqual(response.status_code, 200)
+                resp_json = response.json()
+                self.assertEqual(
+                    [row["id"] for row in resp_json["data"]], expected_order
+                )

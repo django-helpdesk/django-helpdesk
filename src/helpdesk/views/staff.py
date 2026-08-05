@@ -1200,6 +1200,9 @@ def ticket_list(request: HttpRequest) -> HttpResponse:
         "priority",
         "last_followup",
         "kbitem",
+        "id",
+        "due_date",
+        "submitter_email",
     }
 
     FILTERS = {

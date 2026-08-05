@@ -117,6 +117,29 @@ def _validate_sorting(sorting):
         raise SuspiciousOperation(f"Disallowed sort field: {sorting}")
 
 
+def last_followup_subquery():
+    """
+    The most recent FollowUp date per ticket, so that the queryset can be
+    annotated before ordering by ``last_followup`` (which is not a real model
+    field, see __run__).
+    """
+    return Subquery(
+        FollowUp.objects.order_by()
+        .annotate(
+            last_followup=Window(
+                expression=Max("date"),
+                partition_by=[
+                    F("ticket_id"),
+                ],
+                order_by="-date",
+            )
+        )
+        .filter(ticket_id=OuterRef("id"))
+        .values("last_followup")
+        .distinct()
+    )
+
+
 def get_query_class():
     from django.conf import settings
 
@@ -191,6 +214,10 @@ class __Query__:
             sortreverse = self.params.get("sortreverse", None)
             if sortreverse:
                 sorting = f"-{sorting}"
+            if sorting.lstrip("-") == "last_followup":
+                # last_followup is an annotation, not a model field, so it must
+                # be attached to the queryset before order_by() can use it.
+                queryset = queryset.annotate(last_followup=last_followup_subquery())
             queryset = queryset.order_by(sorting)
         # https://stackoverflow.com/questions/30487056/django-queryset-contains-duplicate-entries
         return queryset.distinct()
@@ -235,23 +262,13 @@ class __Query__:
         if order == "desc":
             order_column = "-" + order_column
 
-        queryset = objects.annotate(
-            last_followup=Subquery(
-                FollowUp.objects.order_by()
-                .annotate(
-                    last_followup=Window(
-                        expression=Max("date"),
-                        partition_by=[
-                            F("ticket_id"),
-                        ],
-                        order_by="-date",
-                    )
-                )
-                .filter(ticket_id=OuterRef("id"))
-                .values("last_followup")
-                .distinct()
-            )
-        )
+        # The serializer (DatatablesTicketSerializer.get_last_followup) accesses
+        # obj.last_followup, so the annotation must always be present regardless
+        # of sorting. When sorting == "last_followup", __run__ already annotated
+        # it; Django silently overrides with the same expression, so correctness
+        # is preserved. The minor perf cost (one extra subquery in the SQL plan)
+        # is acceptable given the serializer requirement.
+        queryset = objects.annotate(last_followup=last_followup_subquery())
 
         total = queryset.count()
 

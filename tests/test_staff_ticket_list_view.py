@@ -87,6 +87,36 @@ class StaffTicketListViewTests(TestCase):
         # Check default query params are loaded
         self.assertEqual(r.context["query_params"], self.default_params)
 
+    def test_sorting_dropdown_lists_all_sortable_columns(self):
+        self.client.force_login(self.staff_user)
+        r = self.client.get(self.url)
+        self.assertEqual(r.status_code, HTTPStatus.OK)
+        for sort_value in (
+            "id",
+            "created",
+            "last_followup",
+            "due_date",
+            "title",
+            "queue",
+            "status",
+            "priority",
+            "assigned_to",
+            "submitter_email",
+            "kbitem",
+        ):
+            self.assertContains(r, f"value='{sort_value}'")
+
+    def test_sort_last_followup_is_accepted_and_selected(self):
+        self.client.force_login(self.staff_user)
+        r = self.client.get(self.url, data={"sort": "last_followup"})
+        self.assertEqual(r.status_code, HTTPStatus.OK)
+        self.assertEqual(r.context["query_params"]["sorting"], "last_followup")
+        self.assertContains(
+            r,
+            "<option value='last_followup' selected='selected'>",
+            html=False,
+        )
+
     def test_user_saved_queries_executed_correctly(self):
         # Arrange: We create a public saved query for the user
         query = query_to_base64(self.default_params)
@@ -132,3 +162,12 @@ class StaffTicketListViewTests(TestCase):
             r = self.client.get(self.url)
             self.assertEqual(r.context["kb_items"], [])
             self.assertEqual(r.context["kbitem_choices"], [])
+
+    def test_sorting_dropdown_hides_kbitem_when_kb_disabled(self):
+        KB_SETTINGS_PATH = "helpdesk.views.staff.helpdesk_settings.HELPDESK_KB_ENABLED"
+        self.client.force_login(self.staff_user)
+
+        with patch(KB_SETTINGS_PATH, new=False):
+            r = self.client.get(self.url)
+            self.assertEqual(r.status_code, HTTPStatus.OK)
+            self.assertNotContains(r, "value='kbitem'")

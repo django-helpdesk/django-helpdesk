@@ -11,8 +11,17 @@
 <div class="collapse show my-3" id="collapseSorting">
   <label id="sort-by" class="form-label" for="id_sort">{% translate "Sorting" %}</label>
   <select class="form-select" id="id_sort" name="sort">
+    <option value='id'{% if query_params.sorting == "id" %} selected='selected'{% endif %}>
+      {% translate "Ticket" %}
+    </option>
     <option value='created'{% if query_params.sorting == "created" %} selected='selected'{% endif %}>
       {% translate "Created" %}
+    </option>
+    <option value='last_followup'{% if query_params.sorting == "last_followup" %} selected='selected'{% endif %}>
+      {% translate "Last Followup" %}
+    </option>
+    <option value='due_date'{% if query_params.sorting == "due_date" %} selected='selected'{% endif %}>
+      {% translate "Due Date" %}
     </option>
     <option value='title'{% if query_params.sorting == "title" %} selected='selected'{% endif %}>
       {% translate "Title" %}
@@ -29,6 +38,14 @@
     <option value='assigned_to'{% if query_params.sorting == "assigned_to" %} selected='selected'{% endif %}>
       {% translate "Owner" %}
     </option>
+    <option value='submitter_email'{% if query_params.sorting == "submitter_email" %} selected='selected'{% endif %}>
+      {% translate "Submitter E-Mail" %}
+    </option>
+    {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
+    <option value='kbitem'{% if query_params.sorting == "kbitem" %} selected='selected'{% endif %}>
+      {% translate "KB Item" %}
+    </option>
+    {% endif %}
   </select>
   <div class="form-check mt-3">
     <label class="form-check-label" for="id_sortreverse">{% translate "Reverse?" %}</label>
