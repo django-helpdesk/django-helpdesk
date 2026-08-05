@@ -25,6 +25,7 @@ dependencies = [
     "akismet",
     "markdown",
     "beautifulsoup4",
+    "nh3",
     "lxml",
     "pytz",
     "djangorestframework",

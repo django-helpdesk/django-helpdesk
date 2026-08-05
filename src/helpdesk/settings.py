@@ -532,6 +532,15 @@ HELPDESK_VALIDATE_ATTACHMENT_TYPES = getattr(
     settings, "HELPDESK_VALIDATE_ATTACHMENT_TYPES", True
 )
 
+# Let the rendered preview of an inbound email's HTML body load remote images.
+#
+# Off by default, which also stops tracking pixels in a customer's email from
+# firing when a staff member previews it. Most email clients block remote images
+# by default for the same reason. Turn it on if fidelity matters more than that.
+HELPDESK_HTML_PREVIEW_ALLOW_REMOTE_IMAGES = getattr(
+    settings, "HELPDESK_HTML_PREVIEW_ALLOW_REMOTE_IMAGES", False
+)
+
 
 def get_followup_webhook_urls():
     urls = os.environ.get("HELPDESK_FOLLOWUP_WEBHOOK_URLS", None)

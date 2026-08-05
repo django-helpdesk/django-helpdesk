@@ -58,13 +58,18 @@ STRIPPED_SUBJECT_STRINGS = [
 
 # Name of the attachment holding the raw HTML body of an inbound email.
 #
-# Stored with a .txt extension and a text/plain content type on purpose. The
-# body is attacker controlled: anyone able to email a queue can put arbitrary
-# markup and script in it, and attachments are linked straight from the ticket
-# page and served inline by the web server, which derives the content type from
-# the extension. Naming this .html therefore executed the sender's JavaScript
-# in the staff member's session as soon as they opened the attachment while
-# triaging the ticket.
+# Stored with a .txt extension on purpose. The body is attacker controlled:
+# anyone able to email a queue can put arbitrary markup and script in it, and
+# attachments are linked straight from the ticket page and served inline by the
+# web server, which derives the content type from the extension. Naming this
+# .html therefore executed the sender's JavaScript in the staff member's session
+# as soon as they opened the attachment while triaging the ticket.
+#
+# The stored extension is what the web server keys off, so it governs safety.
+# The mime_type recorded in the database is a separate field used only for
+# display and to decide what can be rendered, so it stays text/html: that is
+# what the bytes actually are, and it is what drives the sanitized preview in
+# helpdesk.views.staff.attachment_preview.
 #
 # Deliberately not wrapped in gettext: a translated filename can change the
 # extension (es_CO rendered this as "email_html_body.html.") and so change what
@@ -895,8 +900,10 @@ def extract_email_message_content(
                 (mime_content if formatted_body is None else formatted_body).encode(
                     "utf-8"
                 ),
-                # text/plain, not text/html: see HTML_EMAIL_ATTACHMENT_FILENAME.
-                "text/plain",
+                # Recorded in the database, never used to serve the file: the
+                # stored .txt extension is what keeps this inert. See
+                # HTML_EMAIL_ATTACHMENT_FILENAME.
+                "text/html",
             )
         )
         # Try to get a plain part message

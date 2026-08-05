@@ -125,8 +125,11 @@ class InboundEmailAttachmentTestCase(TestCase):
         attachment = FollowUpAttachment.objects.get()
         self.assertEqual(attachment.filename, HTML_EMAIL_ATTACHMENT_FILENAME)
         self.assertTrue(attachment.filename.endswith(".txt"))
-        self.assertEqual(attachment.mime_type, "text/plain")
+        # The stored extension is what the web server keys off, so that is what
+        # has to be inert. mime_type is only a record of what the bytes are, and
+        # what the sanitized preview keys off.
         self.assertFalse(attachment.file.name.lower().endswith((".htm", ".html")))
+        self.assertEqual(attachment.mime_type, "text/html")
         # The body is kept verbatim, it just is not served as markup any more.
         attachment.file.open("rb")
         content = attachment.file.read().decode("utf-8")
