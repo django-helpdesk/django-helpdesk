@@ -7,6 +7,8 @@ models.py - Model (and hence database) definitions. This is the core of the
             helpdesk structure.
 """
 
+from __future__ import annotations
+
 import datetime
 import mimetypes
 import os

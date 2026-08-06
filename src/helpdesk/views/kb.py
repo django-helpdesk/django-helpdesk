@@ -88,12 +88,12 @@ def category_iframe(request: HttpRequest, slug: str) -> HttpResponse:
 
 @require_POST
 @login_required
-def vote(request: HttpRequest, item_id: int, vote: str = None) -> HttpResponse:
+def vote(request: HttpRequest, item_id: int, vote: str) -> HttpResponse:
     """
     Upvote or downvote a knowledge base answer.
     """
 
-    if not request.method == "POST":
+    if request.method != "POST":
         return HttpResponseBadRequest()
 
     user = request.user

@@ -1,9 +1,10 @@
 from http import HTTPStatus
 
 from django.conf import settings
+from django.shortcuts import resolve_url
 from django.test import TestCase
 from django.urls import resolve, reverse
-from django.shortcuts import resolve_url
+
 from helpdesk.models import KBCategory, KBItem
 from tests.helpers import get_staff_user
 
