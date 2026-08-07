@@ -9,7 +9,6 @@ email-reply-parser
 akismet
 markdown
 beautifulsoup4
-pytz
 pinax_teams
 djangorestframework
 django-model-utils
