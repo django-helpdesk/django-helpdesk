@@ -9,7 +9,6 @@ email-reply-parser
 akismet
 markdown
 beautifulsoup4
-lxml
 pytz
 pinax_teams
 djangorestframework
