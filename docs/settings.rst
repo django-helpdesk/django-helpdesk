@@ -325,6 +325,31 @@ Options that change ticket properties
         HELPDESK_TICKET_FORKED_STATUS: (HELPDESK_TICKET_OPEN_STATUS, HELPDESK_TICKET_FORKED_STATUS, HELPDESK_TICKET_RESOLVED_STATUS, HELPDESK_TICKET_CLOSED_STATUS, HELPDESK_TICKET_DUPLICATE_STATUS,),
     }
 
+- **HELPDESK_TICKET_STATUS_CSS_CLASSES** Customize the Bootstrap CSS class used for the status badge of each ticket in the ticket list.
+
+  The **default** is below::
+
+    HELPDESK_TICKET_STATUS_CSS_CLASSES = {
+        HELPDESK_TICKET_OPEN_STATUS: 'danger',
+        HELPDESK_TICKET_REOPENED_STATUS: 'warning',
+        HELPDESK_TICKET_RESOLVED_STATUS: 'success',
+        HELPDESK_TICKET_CLOSED_STATUS: 'success',
+        HELPDESK_TICKET_DUPLICATE_STATUS: 'secondary',
+    }
+
+  Statuses not present in the map return an empty string from the model; the
+  ticket-list template applies ``secondary`` (gray) as the default when the
+  class is empty. To give a custom status its own badge color, add an entry like this::
+
+    HELPDESK_TICKET_STATUS_CSS_CLASSES = {
+        HELPDESK_TICKET_OPEN_STATUS: 'danger',
+        HELPDESK_TICKET_REOPENED_STATUS: 'warning',
+        HELPDESK_TICKET_RESOLVED_STATUS: 'success',
+        HELPDESK_TICKET_CLOSED_STATUS: 'success',
+        HELPDESK_TICKET_DUPLICATE_STATUS: 'secondary',
+        HELPDESK_TICKET_FORKED_STATUS: 'dark',
+    }
+
 - **HELPDESK_TICKET_PRIORITY_CHOICES** Customize the priority choices for all tickets.
 
   The **default** is below::
@@ -348,6 +373,22 @@ Options that change ticket properties
         (6, _('6. Cold')),
         (7, _('7. Hot')),
     )
+
+- **HELPDESK_TICKET_PRIORITY_CSS_CLASSES** Customize the Bootstrap CSS class used for the priority badge of each ticket in the ticket list.
+
+  The **default** is below::
+
+    HELPDESK_TICKET_PRIORITY_CSS_CLASSES = {
+        1: 'danger',
+        2: 'warning',
+        3: 'success',
+        4: 'info',
+        5: 'secondary',
+    }
+
+  Priorities not present in the map return an empty string from the model; the
+  ticket-list template applies ``secondary`` (gray) as the default when the
+  class is empty.
 
 
 Time Tracking Options

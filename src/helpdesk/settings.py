@@ -200,6 +200,18 @@ TICKET_STATUS_CHOICES_FLOW = getattr(
     settings, "HELPDESK_TICKET_STATUS_CHOICES_FLOW", DEFAULT_TICKET_STATUS_CHOICES_FLOW
 )
 
+# Bootstrap CSS class used to display each ticket status
+DEFAULT_TICKET_STATUS_CSS_CLASSES = {
+    OPEN_STATUS: "danger",
+    REOPENED_STATUS: "warning",
+    RESOLVED_STATUS: "success",
+    CLOSED_STATUS: "success",
+    DUPLICATE_STATUS: "secondary",
+}
+TICKET_STATUS_CSS_CLASSES = getattr(
+    settings, "HELPDESK_TICKET_STATUS_CSS_CLASSES", DEFAULT_TICKET_STATUS_CSS_CLASSES
+)
+
 # Ticket priority choices
 DEFAULT_TICKET_PRIORITY_CHOICES = (
     (1, _("1. Critical")),
@@ -210,6 +222,20 @@ DEFAULT_TICKET_PRIORITY_CHOICES = (
 )
 TICKET_PRIORITY_CHOICES = getattr(
     settings, "HELPDESK_TICKET_PRIORITY_CHOICES", DEFAULT_TICKET_PRIORITY_CHOICES
+)
+
+# Bootstrap CSS class used to display each ticket priority
+DEFAULT_TICKET_PRIORITY_CSS_CLASSES = {
+    1: "danger",
+    2: "warning",
+    3: "success",
+    4: "info",
+    5: "secondary",
+}
+TICKET_PRIORITY_CSS_CLASSES = getattr(
+    settings,
+    "HELPDESK_TICKET_PRIORITY_CSS_CLASSES",
+    DEFAULT_TICKET_PRIORITY_CSS_CLASSES,
 )
 
 
