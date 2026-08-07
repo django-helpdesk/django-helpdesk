@@ -20,14 +20,16 @@ packages = [
 dependencies = [
     "django>=4.2",
     "django-bootstrap4-form",
-    "celery",
+    # django-bootstrap4-form imports `packaging` in its meta.py but only
+    # declares `django`, so it cannot load without this. Until then it reached
+    # us transitively through celery's dependency chain, which stopped being
+    # installed by default here. Declared explicitly rather than left to luck.
+    "packaging",
     "email-reply-parser",
-    "akismet",
     "markdown",
     "beautifulsoup4",
     "djangorestframework",
     "django-model-utils",
-    "django-cleanup",
     "oauthlib",
     "requests-oauthlib",
     "requests",
@@ -58,6 +60,28 @@ classifiers = [
 [project.optional-dependencies]
 teams = [
     "pinax_teams",
+]
+# Poll mailboxes with a periodic celery task instead of cron. See
+# docs/configuration.rst. django-celery-beat is what actually schedules it, and
+# was previously left to the operator to work out.
+celery = [
+    "celery",
+    "django-celery-beat",
+]
+# Check incoming ticket submissions against Akismet. See docs/spam.rst.
+# helpdesk.lib.text_is_spam already degrades to "not spam" when this is absent.
+spam = [
+    "akismet",
+]
+# Delete files from storage when the record referencing them is deleted. See
+# docs/install.rst.
+cleanup = [
+    "django-cleanup",
+]
+# Everything above, for anyone who wants what earlier releases installed by
+# default.
+all = [
+    "django-helpdesk[celery,spam,cleanup,teams]",
 ]
 
 [dependency-groups]
