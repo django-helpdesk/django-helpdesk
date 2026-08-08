@@ -26,16 +26,12 @@ dependencies = [
     "markdown",
     "beautifulsoup4",
     "nh3",
-    "lxml",
-    "pytz",
     "djangorestframework",
     "django-model-utils",
     "django-cleanup",
     "oauthlib",
     "requests-oauthlib",
     "requests",
-    "requests_oauthlib",
-    "setuptools",
 ]
 
 classifiers = [
