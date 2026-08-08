@@ -25,16 +25,12 @@ dependencies = [
     "akismet",
     "markdown",
     "beautifulsoup4",
-    "lxml",
-    "pytz",
     "djangorestframework",
     "django-model-utils",
     "django-cleanup",
     "oauthlib",
     "requests-oauthlib",
     "requests",
-    "requests_oauthlib",
-    "setuptools",
 ]
 
 classifiers = [
