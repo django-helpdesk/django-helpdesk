@@ -1,17 +1,18 @@
 {% extends "helpdesk/public_base.html" %}
+
 {% load i18n %}
 
-{% block helpdesk_title %}{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}{% endblock %}
+{% block helpdesk_title %}
+  {% blocktranslate with category.title as kbcat %}{{ kbcat }}{% endblocktranslate %}
+{% endblock helpdesk_title %}
 
 {% block helpdesk_breadcrumb %}
-<li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
-</li>
-<li class="breadcrumb-item active">{% blocktrans with category.title as kbcat %}{{ kbcat }}{% endblocktrans %}</li>
-{% endblock %}
+  <li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_index' %}">{% translate "Knowledgebase" %}</a>
+  </li>
+  <li class="breadcrumb-item active">{% blocktranslate with category.title as kbcat %}{{ kbcat }}{% endblocktranslate %}</li>
+{% endblock helpdesk_breadcrumb %}
 
 {% block helpdesk_body %}
-{% include 'helpdesk/kb_category_base.html' %}
-</div>
-
-{% endblock %}
+  {% include "helpdesk/kb_category_base.html" %}
+{% endblock helpdesk_body %}
