@@ -63,7 +63,15 @@ jobs:
     
       - name: Run tests
         run: |
-          cd ${GITHUB_WORKSPACE} && uv run --with django~=${{ matrix.django-version }} coverage run quicktest.py
+          # Resolve Django together with the packages that constrain it, rather
+          # than layering `--with django~=X` over an environment that was
+          # resolved against the newest Django. That layering silently produces
+          # combinations the resolver would reject: DRF 3.18 requires Django
+          # >= 5.2, so the 4.2 leg ended up running DRF 3.18 against Django 4.2
+          # and failing at runtime instead of at resolution time.
+          # `uv run --no-sync` is required, otherwise it re-syncs and undoes this.
+          uv pip install "django~=${{ matrix.django-version }}" djangorestframework
+          cd ${GITHUB_WORKSPACE} && uv run --no-sync coverage run quicktest.py
         env:
           DJANGO_SETTINGS_MODULE: helpdesk.settings
 
