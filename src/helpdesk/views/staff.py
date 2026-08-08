@@ -93,6 +93,7 @@ from helpdesk.models import (
     UserSettings,
 )
 from helpdesk.query import get_query_class, query_from_base64, query_to_base64
+from helpdesk.sanitize import preview_csp, sanitize_email_html, sanitizer_available
 from helpdesk.update_ticket import (
     return_ticketccstring_and_show_subscribe,
     subscribe_to_ticket_updates,
@@ -2103,6 +2104,56 @@ def ticket_resolves_del(request, ticket_id, dependency_id):
 
 
 ticket_resolves_del = staff_member_required(ticket_resolves_del)
+
+
+@helpdesk_staff_member_required
+def attachment_preview(request, ticket_id, attachment_id):
+    """Render an attachment that holds HTML, with the markup neutralised.
+
+    Attachments are otherwise linked straight into MEDIA_ROOT and served by the
+    web server, which picks the content type from the file extension. That is why
+    an inbound email's HTML body is stored as .txt: it makes the direct link
+    inert. This view is the only place that turns those bytes back into a
+    rendered document, so it is also the only place that has to be defended, and
+    it is defended three times over. See helpdesk.sanitize for what each layer
+    does and why sanitizing happens here rather than at upload time.
+
+    Going through a view has a second benefit the raw media link never had: the
+    queue and ticket permission checks below actually run.
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+
+    attachment = get_object_or_404(
+        FollowUpAttachment, id=attachment_id, followup__ticket=ticket
+    )
+    if attachment.mime_type != "text/html":
+        raise Http404("This attachment has no HTML rendering.")
+
+    if not sanitizer_available():
+        # Fail closed. Serving the raw bytes as text/html here would hand the
+        # sender exactly the XSS this view exists to prevent.
+        return HttpResponse(
+            "HTML previews are unavailable because the nh3 package is not "
+            "installed. Download the attachment to read its source instead.",
+            content_type="text/plain; charset=utf-8",
+            status=503,
+        )
+
+    attachment.file.open("rb")
+    try:
+        raw = attachment.file.read()
+    finally:
+        attachment.file.close()
+
+    response = HttpResponse(
+        sanitize_email_html(raw.decode("utf-8", errors="replace")),
+        content_type="text/html; charset=utf-8",
+    )
+    response["Content-Security-Policy"] = preview_csp()
+    response["X-Content-Type-Options"] = "nosniff"
+    response["Referrer-Policy"] = "no-referrer"
+    return response
 
 
 @helpdesk_staff_member_required
