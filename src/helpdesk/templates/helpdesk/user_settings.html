@@ -20,8 +20,8 @@
 <form role="form" method='post' action='./'>
     {% csrf_token %}
     {% bootstrap5_form form %}
-    <div class="mb-3">
-      <input type="submit" value="Submit"/>
+    <div class="buttons mb-3">
+      <input type="submit" class="btn btn-primary btn-sm" value='{% trans "Save Changes" %}'/>
     </div>
 </form>
 {% endblock %}
