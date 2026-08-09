@@ -19,16 +19,10 @@ packages = [
 ]
 dependencies = [
     "django>=4.2",
-    "django-bootstrap4-form",
     # Kept as a hard dependency on purpose: it activates automatically when listed
     # in INSTALLED_APPS, as docs/install.rst suggests, so a copy that follows our
     # own instructions would refuse to start without it.
     "django-cleanup",
-    # django-bootstrap4-form imports `packaging` in its meta.py but only
-    # declares `django`, so it cannot load without this. Until then it reached
-    # us transitively through celery's dependency chain, which stopped being
-    # installed by default here. Declared explicitly rather than left to luck.
-    "packaging",
     "email-reply-parser",
     "markdown",
     "beautifulsoup4",

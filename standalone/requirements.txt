@@ -3,7 +3,6 @@ gunicorn
 psycopg2-binary
 django
 
-django-bootstrap4-form
 email-reply-parser
 markdown
 beautifulsoup4

@@ -1,0 +1,15 @@
+{% load bootstrap5_form %}
+{% if form.non_field_errors %}
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {% for non_field_error in form.non_field_errors %}
+      <div>{{ non_field_error }}</div>
+    {% endfor %}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{% endif %}
+
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+
+{% for field in form.visible_fields %}
+  {% include "helpdesk/include/form_field.html" %}
+{% endfor %}

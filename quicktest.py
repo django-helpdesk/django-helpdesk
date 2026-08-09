@@ -40,7 +40,6 @@ class QuickDjangoTest:
         "django.contrib.sessions",
         "django.contrib.sites",
         "django.contrib.staticfiles",
-        "bootstrap4form",
         #  The following commented apps are optional,
         #  related to teams functionalities
         # 'account',
