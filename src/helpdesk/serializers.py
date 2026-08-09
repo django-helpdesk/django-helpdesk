@@ -23,7 +23,9 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     created = serializers.SerializerMethodField()
     due_date = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
+    status_badge_class = serializers.SerializerMethodField()
     row_class = serializers.SerializerMethodField()
+    priority_badge_class = serializers.SerializerMethodField()
     time_spent = serializers.SerializerMethodField()
     queue = serializers.SerializerMethodField()
     kbitem = serializers.SerializerMethodField()
@@ -35,9 +37,11 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
             "ticket",
             "id",
             "priority",
+            "priority_badge_class",
             "title",
             "queue",
             "status",
+            "status_badge_class",
             "created",
             "due_date",
             "assigned_to",
@@ -56,6 +60,12 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_status(self, obj):
         return obj.get_status
+
+    def get_status_badge_class(self, obj):
+        return obj.get_status_badge_class
+
+    def get_priority_badge_class(self, obj):
+        return obj.get_priority_badge_class
 
     def get_created(self, obj):
         return humanize.naturaltime(obj.created)

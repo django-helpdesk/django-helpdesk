@@ -1,6 +1,6 @@
 [project]
 name = "django-helpdesk"
-version = "2.3.1"
+version = "2.3.3"
 description = "Django-powered ticket tracker for your helpdesk"
 authors = [
     {name = "Ross Poulton", email = "ross@rossp.org"},
@@ -25,16 +25,13 @@ dependencies = [
     "akismet",
     "markdown",
     "beautifulsoup4",
-    "lxml",
-    "pytz",
+    "nh3",
     "djangorestframework",
     "django-model-utils",
     "django-cleanup",
     "oauthlib",
     "requests-oauthlib",
     "requests",
-    "requests_oauthlib",
-    "setuptools",
 ]
 
 classifiers = [

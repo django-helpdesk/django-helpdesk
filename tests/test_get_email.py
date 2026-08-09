@@ -1338,7 +1338,7 @@ class GetEmailParametricTemplate:
             self.assertEqual(followup1.ticket.id, 1)
             attach1 = get_object_or_404(FollowUpAttachment, pk=1)
             self.assertEqual(attach1.followup.id, 1)
-            self.assertEqual(attach1.filename, "email_html_body.html")
+            self.assertEqual(attach1.filename, "email_html_body.txt")
             cc0 = get_object_or_404(TicketCC, pk=1)
             self.assertEqual(cc0.email, you)
             cc1 = get_object_or_404(TicketCC, pk=2)
@@ -1357,7 +1357,7 @@ class GetEmailParametricTemplate:
             self.assertEqual(followup2.ticket.id, 2)
             attach2 = get_object_or_404(FollowUpAttachment, pk=2)
             self.assertEqual(attach2.followup.id, 2)
-            self.assertEqual(attach2.filename, "email_html_body.html")
+            self.assertEqual(attach2.filename, "email_html_body.txt")
 
     def test_read_pgp_signed_email(self):
         """Tests reading a PGP signed email to ensure we handle base64

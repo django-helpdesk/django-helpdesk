@@ -93,6 +93,7 @@ from helpdesk.models import (
     UserSettings,
 )
 from helpdesk.query import get_query_class, query_from_base64, query_to_base64
+from helpdesk.sanitize import preview_csp, sanitize_email_html, sanitizer_available
 from helpdesk.update_ticket import (
     return_ticketccstring_and_show_subscribe,
     subscribe_to_ticket_updates,
@@ -155,6 +156,40 @@ def get_form_extra_kwargs(user) -> dict[str, object]:
     }
 
 
+# Sort keys the dashboard templates actually emit (see
+# templates/helpdesk/include/tickets.html and include/unassigned.html),
+# optionally prefixed with "-" for a descending sort. These values land
+# straight in order_by(), so anything else has to be dropped: an unvalidated
+# key lets a sort traverse arbitrary relations (e.g. ?una_sort=queue__email_box_pass
+# orders the unassigned tickets by a queue's plaintext mailbox password),
+# turning row ordering into a side channel over unrelated tables.
+DASHBOARD_ALLOWED_SORTS = {
+    "created",
+    "id",
+    "modified",
+    "priority",
+    "queue",
+    "status",
+}
+
+DASHBOARD_DEFAULT_SORT = "-created"
+
+
+def get_dashboard_sort(request, param, default=DASHBOARD_DEFAULT_SORT):
+    """
+    Read a dashboard sort parameter from the query string and only return it if
+    it is on the allowlist, falling back to `default` otherwise. Silently
+    falling back rather than raising keeps a stale bookmark or a customised
+    template from breaking the page, and matches how ticket_list() already
+    handles its own `sort` parameter.
+    """
+    sorting = request.GET.get(param) or default
+    field = sorting.removeprefix("-")
+    if field not in DASHBOARD_ALLOWED_SORTS:
+        return default
+    return sorting
+
+
 @helpdesk_staff_member_required
 def dashboard(request):
     """
@@ -175,10 +210,10 @@ def dashboard(request):
     unassigned_tickets_page = request.GET.get(_("una_page"), 1)
 
     # sorting parameters for each table
-    user_tickets_sort = request.GET.get("ut_sort", "-created")
-    user_tickets_closed_sort = request.GET.get("utcr_sort", "-created")
-    all_tickets_reported_sort = request.GET.get("atrbcu_sort", "-created")
-    unassigned_tickets_sort = request.GET.get("una_sort", "-created")
+    user_tickets_sort = get_dashboard_sort(request, "ut_sort")
+    user_tickets_closed_sort = get_dashboard_sort(request, "utcr_sort")
+    all_tickets_reported_sort = get_dashboard_sort(request, "atrbcu_sort")
+    unassigned_tickets_sort = get_dashboard_sort(request, "una_sort")
 
     huser = HelpdeskUser(request.user)
     active_tickets = Ticket.objects.select_related("queue").exclude(
@@ -1166,6 +1201,9 @@ def ticket_list(request: HttpRequest) -> HttpResponse:
         "priority",
         "last_followup",
         "kbitem",
+        "id",
+        "due_date",
+        "submitter_email",
     }
 
     FILTERS = {
@@ -2066,6 +2104,56 @@ def ticket_resolves_del(request, ticket_id, dependency_id):
 
 
 ticket_resolves_del = staff_member_required(ticket_resolves_del)
+
+
+@helpdesk_staff_member_required
+def attachment_preview(request, ticket_id, attachment_id):
+    """Render an attachment that holds HTML, with the markup neutralised.
+
+    Attachments are otherwise linked straight into MEDIA_ROOT and served by the
+    web server, which picks the content type from the file extension. That is why
+    an inbound email's HTML body is stored as .txt: it makes the direct link
+    inert. This view is the only place that turns those bytes back into a
+    rendered document, so it is also the only place that has to be defended, and
+    it is defended three times over. See helpdesk.sanitize for what each layer
+    does and why sanitizing happens here rather than at upload time.
+
+    Going through a view has a second benefit the raw media link never had: the
+    queue and ticket permission checks below actually run.
+    """
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+
+    attachment = get_object_or_404(
+        FollowUpAttachment, id=attachment_id, followup__ticket=ticket
+    )
+    if attachment.mime_type != "text/html":
+        raise Http404("This attachment has no HTML rendering.")
+
+    if not sanitizer_available():
+        # Fail closed. Serving the raw bytes as text/html here would hand the
+        # sender exactly the XSS this view exists to prevent.
+        return HttpResponse(
+            "HTML previews are unavailable because the nh3 package is not "
+            "installed. Download the attachment to read its source instead.",
+            content_type="text/plain; charset=utf-8",
+            status=503,
+        )
+
+    attachment.file.open("rb")
+    try:
+        raw = attachment.file.read()
+    finally:
+        attachment.file.close()
+
+    response = HttpResponse(
+        sanitize_email_html(raw.decode("utf-8", errors="replace")),
+        content_type="text/html; charset=utf-8",
+    )
+    response["Content-Security-Policy"] = preview_csp()
+    response["X-Content-Type-Options"] = "nosniff"
+    response["Referrer-Policy"] = "no-referrer"
+    return response
 
 
 @helpdesk_staff_member_required

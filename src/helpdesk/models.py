@@ -508,8 +508,10 @@ class Ticket(models.Model):
     STATUS_CHOICES = helpdesk_settings.TICKET_STATUS_CHOICES
     OPEN_STATUSES = helpdesk_settings.TICKET_OPEN_STATUSES
     STATUS_CHOICES_FLOW = helpdesk_settings.TICKET_STATUS_CHOICES_FLOW
+    STATUS_CSS_CLASSES = helpdesk_settings.TICKET_STATUS_CSS_CLASSES
 
     PRIORITY_CHOICES = helpdesk_settings.TICKET_PRIORITY_CHOICES
+    PRIORITY_CSS_CLASSES = helpdesk_settings.TICKET_PRIORITY_CSS_CLASSES
 
     title = models.CharField(
         _("Title"),
@@ -729,7 +731,12 @@ class Ticket(models.Model):
 
     def _get_priority_css_class(self):
         """
-        Return the boostrap class corresponding to the priority.
+        Return the bootstrap class corresponding to the priority.
+
+        Kept for backwards compatibility: feeds the row_class API field and
+        several non-DataTables templates. Note these are bare badge classes
+        (e.g. "success") which are inert on <tr> elements in Bootstrap 5;
+        see get_priority_badge_class for the badge rendering.
         """
         if self.priority == 2:
             return "warning"
@@ -741,6 +748,22 @@ class Ticket(models.Model):
             return ""
 
     get_priority_css_class = property(_get_priority_css_class)
+
+    def _get_status_badge_class(self):
+        """
+        Return the bootstrap class for the status badge, from the setting.
+        """
+        return self.STATUS_CSS_CLASSES.get(self.status, "")
+
+    get_status_badge_class = property(_get_status_badge_class)
+
+    def _get_priority_badge_class(self):
+        """
+        Return the bootstrap class for the priority badge, from the setting.
+        """
+        return self.PRIORITY_CSS_CLASSES.get(self.priority, "")
+
+    get_priority_badge_class = property(_get_priority_badge_class)
 
     def _get_status(self):
         """

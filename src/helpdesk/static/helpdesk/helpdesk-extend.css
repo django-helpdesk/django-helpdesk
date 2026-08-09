@@ -132,11 +132,18 @@ pre {
   border: 1pt solid white;
 }
 
+/* Ticket titles wrap onto several lines rather than being cut off with an
+   ellipsis, so the whole title is readable without hovering over it. */
 table .tickettitle {
-  max-width: 250px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 30rem;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* On the ticket list the title column is the one worth reading, so give it a
+   floor to grow into instead of letting the narrower columns squeeze it. */
+#ticketTable .tickettitle {
+  min-width: 18rem;
 }
 
 .handle {
