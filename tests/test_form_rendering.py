@@ -32,6 +32,13 @@ class SampleForm(forms.Form):
     preset = forms.CharField(
         label="Preset", widget=forms.TextInput(attrs={"class": "form-control custom"})
     )
+    # Declares the class of the wrong family, as the custom fields built in
+    # forms.py used to: `form-control` stretches a checkbox out of square.
+    mislabelled = forms.BooleanField(
+        label="Mislabelled",
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "form-control keep-me"}),
+    )
 
 
 def render(form):
@@ -63,6 +70,16 @@ class WidgetClassTestCase(TestCase):
         classes = form.fields["preset"].widget.attrs["class"].split()
         self.assertIn("custom", classes)
         self.assertEqual(classes.count("form-control"), 1, classes)
+
+    def test_family_classes_are_exclusive(self):
+        """A widget carrying the wrong family class must not keep it: the two
+        set `width` differently and the checkbox ends up rectangular."""
+        form = SampleForm()
+        apply_classes(form)
+        classes = form.fields["mislabelled"].widget.attrs["class"].split()
+        self.assertIn("form-check-input", classes)
+        self.assertNotIn("form-control", classes)
+        self.assertIn("keep-me", classes)
 
     def test_applying_twice_does_not_duplicate(self):
         form = SampleForm()

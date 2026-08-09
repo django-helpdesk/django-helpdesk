@@ -25,6 +25,12 @@ SELECT_CLASS = "form-select"
 CHECK_CLASS = "form-check-input"
 CONTROL_CLASS = "form-control"
 
+# Exactly one of these belongs on a widget: `form-control` sets `width: 100%`,
+# which stretches a checkbox out of square if it is left alongside
+# `form-check-input`. Whichever one the widget family calls for replaces the
+# others, so a wrong class set in forms.py cannot leak into the markup.
+FAMILY_CLASSES = frozenset({SELECT_CLASS, CHECK_CLASS, CONTROL_CLASS})
+
 # Bootstrap 4 name, no effect in Bootstrap 5, which styles file inputs with the
 # ordinary form-control.
 OBSOLETE_CLASSES = {"form-control-file"}
@@ -46,9 +52,10 @@ def widget_class(widget):
 def apply_classes(form):
     """Give every widget the class its Bootstrap 5 family requires.
 
-    Classes already set in forms.py are kept: several widgets declare
-    `form-control` there, and some carry sizing or behaviour classes unrelated to
-    Bootstrap. Running this twice on the same form is harmless.
+    Classes already set in forms.py are kept, so sizing and behaviour classes
+    such as `date-field` survive. The one exception is the family classes, which
+    are mutually exclusive and so are replaced rather than accumulated. Running
+    this twice on the same form is harmless.
     """
     for name, field in form.fields.items():
         wanted = widget_class(field.widget)
@@ -57,7 +64,9 @@ def apply_classes(form):
         classes = [
             c
             for c in field.widget.attrs.get("class", "").split()
-            if c not in OBSOLETE_CLASSES and c != wanted and c != "is-invalid"
+            if c not in OBSOLETE_CLASSES
+            and c not in FAMILY_CLASSES
+            and c != "is-invalid"
         ]
         classes.insert(0, wanted)
         if form.is_bound and form[name].errors:
