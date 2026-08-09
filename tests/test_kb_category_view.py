@@ -101,9 +101,11 @@ class KBCategoryViewTests(TestCase):
         self.assertContains(r, "Create New Ticket")
 
         # Staff user should see voting buttons
-        content = r.content.decode()
-        self.assertInHTML('<form method="post" id="upvoteForm"', content)
-        self.assertInHTML('<form method="post" id="downvoteForm"', content)
+        upvote_url = f"/kb/{self.kbitem1.id}/vote/up/"
+        downvote_url = f"/kb/{self.kbitem1.id}/vote/down/"
+
+        self.assertContains(r, upvote_url)
+        self.assertContains(r, downvote_url)
 
     # Iframe
     def test_kb_category_iframe_url_resolves_correct_view(self):

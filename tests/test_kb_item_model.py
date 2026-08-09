@@ -51,12 +51,11 @@ class KBItemModelTests(TestCase):
         self.assertEqual(meta.ordering, ("order", "title"))
 
     def test_absolute_url(self):
+        category_url = self.kbitem.category.get_absolute_url()
+        expected = f"{category_url}?kbitem={self.kbitem.id}"
+
         actual = self.kbitem.get_absolute_url()
-        expected = reverse(
-            "helpdesk:kb_category",
-            kwargs={"slug": self.kb_category.slug},
-            query={"kbitem": self.kbitem.id},
-        )
+
         self.assertEqual(actual, expected)
 
     def test_score_for_zero_votes_is_correctly_calculated(self):
@@ -87,7 +86,7 @@ class KBItemModelTests(TestCase):
 
     def test_query_url(self):
         actual = self.kbitem.query_url()
-        expected = reverse("helpdesk:list", query={"kbitem": self.kbitem.id})
+        expected = f"{reverse('helpdesk:list')}?kbitem={self.kbitem.id}"
         self.assertEqual(actual, expected)
 
     def test_num_open_tickets(self):
