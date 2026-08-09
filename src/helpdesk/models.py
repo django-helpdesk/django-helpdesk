@@ -1551,11 +1551,8 @@ class KBItem(models.Model):
         return f"{self.category.title}: {self.title}"
 
     def get_absolute_url(self) -> str:
-        return reverse_lazy(
-            "helpdesk:kb_category",
-            kwargs={"slug": self.category.slug},
-            query={"kbitem": self.pk},
-        )
+        url = self.category.get_absolute_url()
+        return f"{url}?kbitem={self.pk}"
 
     def save(self, *args, **kwargs):
         if not self.last_updated:
@@ -1575,7 +1572,8 @@ class KBItem(models.Model):
             return _("Unrated")
 
     def query_url(self) -> str:
-        return reverse_lazy("helpdesk:list", query={"kbitem": self.pk})
+        url = reverse_lazy("helpdesk:list")
+        return f"{url}?kbitem={self.pk}"
 
     def num_open_tickets(self) -> int:
         return Ticket.objects.filter(
