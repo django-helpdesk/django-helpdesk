@@ -76,7 +76,7 @@ errors with trying to create User settings.
             'django.contrib.humanize',  # Required for elapsed time formatting
             'bootstrap4form', # Required for nicer formatting of forms with the default templates
             'rest_framework',  # required for the API
-            'django_cleanup.apps.CleanupConfig',  # Optional, needs `pip install django-helpdesk[cleanup]`. Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
+            'django_cleanup.apps.CleanupConfig',  # Remove this if you do NOT want to delete files on the file system when the associated record is deleted in the database
             'helpdesk',  # This is us!
         )
 
