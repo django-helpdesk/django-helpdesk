@@ -10,6 +10,26 @@ Please consult the Installation instructions for general instructions and tips.
 The tips below are based on modifications of the original installation instructions.
 
 
+Form rendering no longer needs django-bootstrap4-form
+-----------------------------------------------------
+
+``django-bootstrap4-form`` has been removed. It emitted Bootstrap 3 markup
+(``form-group``, ``control-label``, ``has-error``, ``<div class="checkbox">``),
+none of which exists in the Bootstrap 5 stylesheet this project ships, so the
+affected fields had lost their spacing and their checkboxes and radios were
+unstyled. Forms are now rendered by a template inside django-helpdesk itself.
+
+Remove ``'bootstrap4form'`` from your ``INSTALLED_APPS``. Nothing else is
+required, and the package can be uninstalled unless something else in your
+project uses it.
+
+If you have overridden ``user_settings.html``, ``edit_ticket.html`` or
+``public_create_ticket_base.html``, replace ``{{ form|bootstrap4form }}`` with::
+
+    {% load bootstrap5_form %}
+    {% bootstrap5_form form %}
+
+
 Optional integrations are no longer installed by default
 --------------------------------------------------------
 

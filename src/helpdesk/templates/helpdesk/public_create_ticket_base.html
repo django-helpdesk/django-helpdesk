@@ -1,4 +1,4 @@
-{% load i18n bootstrap4form %}
+{% load i18n bootstrap5_form %}
 {% load load_helpdesk_settings %}
 
 {% with request|load_helpdesk_settings as helpdesk_settings %}
@@ -13,7 +13,7 @@
         {% endif %}
         <form role="form" method='post' enctype='multipart/form-data'>
             {% csrf_token %}
-            {{ form|bootstrap4form }}
+            {% bootstrap5_form form %}
             <button type="submit" class="btn btn-primary btn-lg btn-block">
                 {% trans "Submit Ticket" %} <i class="fa fa-paper-plane"></i>
             </button>

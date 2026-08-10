@@ -1,0 +1,38 @@
+{% load bootstrap5_form %}
+{% comment %}
+  One form field, in Bootstrap 5 markup. Widget classes are set in Python by
+  bootstrap5_form.apply_classes, so this template only lays fields out.
+
+  Errors use `invalid-feedback d-block` rather than plain `invalid-feedback`,
+  because the latter is only revealed by a sibling `.is-invalid` and that
+  relationship does not hold for the choice groups below.
+{% endcomment %}
+{% if field|is_checkbox %}
+  <div class="mb-3 form-check">
+    {{ field }}
+    <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+  </div>
+{% elif field|is_choice_group %}
+  <fieldset class="mb-3">
+    <legend class="form-label {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}</legend>
+    {% for choice in field %}
+      <div class="form-check">
+        {{ choice.tag }}
+        <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+      </div>
+    {% endfor %}
+    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+  </fieldset>
+{% else %}
+  <div class="mb-3">
+    {% if field.auto_id %}
+      <label class="form-label {% if field.field.required %}{{ form.required_css_class }}{% endif %}" for="{{ field.auto_id }}">{{ field.label }}</label>
+    {% endif %}
+    {{ field }}
+    {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+  </div>
+{% endif %}

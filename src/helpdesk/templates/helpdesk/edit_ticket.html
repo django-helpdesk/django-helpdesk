@@ -1,6 +1,6 @@
 {% extends "helpdesk/base.html" %}
 
-{% load i18n bootstrap4form %}
+{% load i18n bootstrap5_form %}
 
 {% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
 
@@ -30,7 +30,7 @@
                 <form method='post'>
                     {% csrf_token %}
                     <fieldset>
-                        {{ form|bootstrap4form }}
+                        {% bootstrap5_form form %}
                         <div class='buttons mb-3'>
                             <input type='submit' class="btn btn-primary btn-sm" value='{% trans "Save Changes" %}'/>
                             <a href='{{ ticket.get_absolute_url }}'>
