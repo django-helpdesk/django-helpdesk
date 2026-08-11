@@ -8,6 +8,7 @@ views/kb.py - Public-facing knowledgebase views. The knowledgebase is a
               resolutions to common problems.
 """
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import (
     Http404,
@@ -16,6 +17,7 @@ from django.http import (
     HttpResponseRedirect,
 )
 from django.shortcuts import get_object_or_404, render
+from django.utils.translation import gettext as _
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.decorators.http import require_POST
 
@@ -122,5 +124,6 @@ def vote(request: HttpRequest, item_id: int, vote: str) -> HttpResponse:
             item.voted_by.remove(voter)
 
     item.save()
+    messages.success(request, _("Vote registered successfully"), fail_silently=True)
 
     return HttpResponseRedirect(item.get_absolute_url())
