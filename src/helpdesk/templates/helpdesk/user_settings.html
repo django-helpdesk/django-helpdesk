@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}{% load i18n bootstrap4form %}
+{% extends "helpdesk/base.html" %}{% load i18n bootstrap5_form %}
 
 {% block helpdesk_title %}{% trans "Change User Settings" %}{% endblock %}
 
@@ -19,9 +19,9 @@
 {% block form_content %}
 <form role="form" method='post' action='./'>
     {% csrf_token %}
-    {{ form|bootstrap4form }}
-    <div class="mb-3">
-      <input type="submit" value="Submit"/>
+    {% bootstrap5_form form %}
+    <div class="buttons mb-3">
+      <input type="submit" class="btn btn-primary btn-sm" value='{% trans "Save Changes" %}'/>
     </div>
 </form>
 {% endblock %}

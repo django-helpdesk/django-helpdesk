@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.humanize",
-    "bootstrap4form",
     "helpdesk",  # This is us!
     "rest_framework",  # required for the API
 ]

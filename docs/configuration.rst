@@ -19,7 +19,7 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    You will need to create a support queue, and associated login/host values, in the Django admin interface, in order for mail to be picked-up from the mail server and placed in the tickets table of your database. The values in the settings file alone, will not create the necessary values to trigger the get_email function.
 
- If you wish to use `celery` instead of cron, you must add 'django_celery_beat' to `INSTALLED_APPS` and add a periodic celery task through the Django admin.
+ If you wish to use `celery` instead of cron, install the optional dependencies with ``pip install django-helpdesk[celery]``, add 'django_celery_beat' to `INSTALLED_APPS`, and add a periodic celery task through the Django admin pointing at ``helpdesk.tasks.helpdesk_process_email``.
 
    You will need to create a support queue, and associated login/host values, in the Django admin interface, in order for mail to be picked-up from the mail server and placed in the tickets table of your database. The values in the settings file alone, will not create the necessary values to trigger the get_email function.
    
