@@ -1487,7 +1487,7 @@ class EmailTemplate(models.Model):
 
 class KBCategory(models.Model):
     """
-    Reprsents a category for a group of questions and answers in the
+    Represents a category for a group of questions and answers in the
     knowledge base.
     """
 
