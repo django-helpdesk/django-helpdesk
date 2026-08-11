@@ -73,7 +73,7 @@
     <div class="tab-content" id="myTabContent">
       {# Followup Pane #}
       {% if followups %}
-        {% load ticket_to_link %}
+        {% load ticket_to_link followup_permissions %}
         <div class="tab-pane fade show active"
              id="followup-tab-pane"
              role="tabpanel"
@@ -93,18 +93,19 @@
                       <small>{% trans "Private" %}</small>
                     {% endif %}
                   </span>
-                  <div class="dropdown ms-2">
-                    <a class="btn btn-light btn-sm"
-                       href="#"
-                       role="button"
-                       data-bs-toggle="dropdown"
-                       aria-expanded="false">
-                      <i class="fa-solid fa-ellipsis-vertical"></i>
-                    </a>
-                    <ul class="dropdown-menu">
-                      {# Edit button: show if followup has user AND setting is enabled #}
-                      {% if helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP and followup.user %}
-                        {% if request.user == followup.user or user.is_superuser %}
+                  {# Skip the menu entirely rather than open an empty one: most #}
+                  {# follow-ups offer no action to most staff members. #}
+                  {% if followup|can_edit_followup:request.user or followup|can_delete_followup:request.user %}
+                    <div class="dropdown ms-2">
+                      <a class="btn btn-light btn-sm"
+                         href="#"
+                         role="button"
+                         data-bs-toggle="dropdown"
+                         aria-expanded="false">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                      </a>
+                      <ul class="dropdown-menu">
+                        {% if followup|can_edit_followup:request.user %}
                           <li>
                             <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}"
                                class="dropdown-item">
@@ -113,19 +114,18 @@
                             </a>
                           </li>
                         {% endif %}
-                      {% endif %}
-                      {# Delete button: show if user is superuser AND setting is enabled #}
-                      {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
-                        <li>
-                          <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}"
-                             class="dropdown-item link-danger">
-                            <i class="fa-regular fa-trash-can me-1"></i>
-                            {% translate "Delete" %}
-                          </a>
-                        </li>
-                      {% endif %}
-                    </ul>
-                  </div>
+                        {% if followup|can_delete_followup:request.user %}
+                          <li>
+                            <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}"
+                               class="dropdown-item link-danger">
+                              <i class="fa-regular fa-trash-can me-1"></i>
+                              {% translate "Delete" %}
+                            </a>
+                          </li>
+                        {% endif %}
+                      </ul>
+                    </div>
+                  {% endif %}
                 </div>
                 <small class="text-secondary">
                   {{ followup.date|naturaltime }} {% if followup.user %}· {{ followup.user }}{% endif %}
