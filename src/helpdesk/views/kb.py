@@ -13,7 +13,6 @@ from django.http import (
     Http404,
     HttpRequest,
     HttpResponse,
-    HttpResponseBadRequest,
     HttpResponseRedirect,
 )
 from django.shortcuts import get_object_or_404, render
@@ -93,38 +92,34 @@ def vote(request: HttpRequest, item_id: int, vote: str) -> HttpResponse:
     Upvote or downvote a knowledge base answer.
     """
 
-    if request.method != "POST":
-        return HttpResponseBadRequest()
-
-    user = request.user
+    voter = request.user
     item = get_object_or_404(KBItem, pk=item_id)
-    has_upvoted = item.voted_by.contains(user)
-    has_downvoted = item.downvoted_by.contains(user)
+    has_upvoted = item.voted_by.contains(voter)
+    has_downvoted = item.downvoted_by.contains(voter)
 
     if vote == "up":
         # User never upvoted & wants to upvote
         if not has_upvoted:
             item.votes += 1
             item.recommendations += 1
-            item.voted_by.add(user)
+            item.voted_by.add(voter)
 
         # User downvoted earlier but now wants to upvote
         if has_downvoted:
             item.votes = max(item.votes - 1, 0)
-            item.downvoted_by.remove(user)
+            item.downvoted_by.remove(voter)
 
-     if vote == "down":
-         # User never downvoted & wants to downvote
-         if not has_downvoted:
-             item.votes += 1
-             item.downvoted_by.add(user)
+    if vote == "down":
+        # User never downvoted & wants to downvote
+        if not has_downvoted:
+            item.votes += 1
+            item.downvoted_by.add(user)
 
-         # User upvoted earlier but now wants to downvote
-         if has_upvoted:
-             item.votes = max(item.votes - 1, 0)
-             item.recommendations = max(item.recommendations - 1, 0)
-             item.voted_by.remove(user)
-
+        # User upvoted earlier but now wants to downvote
+        if has_upvoted:
+            item.votes = max(item.votes - 1, 0)
+            item.recommendations = max(item.recommendations - 1, 0)
+            item.voted_by.remove(user)
 
     item.save()
 
