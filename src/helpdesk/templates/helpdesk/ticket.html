@@ -81,7 +81,7 @@
              tabindex="0">
           <div class="list-group list-group-flush my-3" id="followup-list">
             {% for followup in followups %}
-              <div class="list-group-item list-group-item-action">
+              <div class="list-group-item list-group-item-action followup-item followup-item-{{ followup.direction }}">
                 <div class="d-flex align-items-center">
                   <h6 class="mb-0">{{ followup.title|escape|num_to_link }}</h6>
                   <span class="text-secondary ms-auto">
@@ -89,9 +89,17 @@
                       <i class="fa-regular fa-clock fa-sm"></i>
                       <small>{{ followup.time_spent_formated }} ·</small>
                     {% endif %}
-                    {% if not followup.public %}
-                      <small>{% trans "Private" %}</small>
-                    {% endif %}
+                    {# Name the audience as well as coloring the row, so the #}
+                    {# distinction survives for color blind users and in print. #}
+                    <span class="badge followup-item-badge">
+                      {% if followup.direction == 'internal' %}
+                        <i class="fa-solid fa-lock fa-sm me-1"></i>{% translate "Private" %}
+                      {% elif followup.direction == 'outbound' %}
+                        <i class="fa-solid fa-arrow-right fa-sm me-1"></i>{% translate "To submitter" %}
+                      {% else %}
+                        <i class="fa-solid fa-arrow-left fa-sm me-1"></i>{% translate "From submitter" %}
+                      {% endif %}
+                    </span>
                   </span>
                   <div class="dropdown ms-2">
                     <a class="btn btn-light btn-sm"
