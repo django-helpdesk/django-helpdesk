@@ -113,13 +113,13 @@ def vote(request: HttpRequest, item_id: int, vote: str) -> HttpResponse:
         # User never downvoted & wants to downvote
         if not has_downvoted:
             item.votes += 1
-            item.downvoted_by.add(user)
+            item.downvoted_by.add(voter)
 
         # User upvoted earlier but now wants to downvote
         if has_upvoted:
             item.votes = max(item.votes - 1, 0)
             item.recommendations = max(item.recommendations - 1, 0)
-            item.voted_by.remove(user)
+            item.voted_by.remove(voter)
 
     item.save()
 
