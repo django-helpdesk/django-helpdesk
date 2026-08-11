@@ -23,19 +23,22 @@
     </div>
     <p class="lead">{{ category.description|linebreaksbr }}</p>
   {% endblock header %}
-
   <div class="accordion" id="accordionKbItem">
     {% for item in items %}
       <div class="accordion-item">
         <h2 class="accordion-header">
-          <button class="accordion-button collapsed"
+          <button class="accordion-button
+                         {% if selected_item != item.id %}collapsed{% endif %}"
                   type="button"
                   data-bs-toggle="collapse"
                   data-bs-target="#collapse-{{ item.id }}"
-                  aria-expanded="false"
+                  aria-expanded="{% if selected_item == item.id %}true{% else %}false{% endif %}"
                   aria-controls="collapse-{{ item.id }}">{{ item.title }}</button>
         </h2>
-        <div id="collapse-{{ item.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionKbItem">
+        <div id="collapse-{{ item.id }}"
+             class="accordion-collapse collapse
+                    {% if selected_item == item.id %}show{% endif %}"
+             data-bs-parent="#accordionKbItem">
           <div class="accordion-body">
             <h5>{{ item.question }}</h5>
             <div class="card-answer">{{ item.get_markdown }}</div>
