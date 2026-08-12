@@ -27,8 +27,11 @@ from helpdesk.views.api import (
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.views import kb
 
+# Importing the module is the side effect: that is what registers the
+# @shared_task it defines, for projects that do not rely on Celery's own
+# autodiscover_tasks(). Celery is an optional extra, so its absence is not an
+# error, there is simply no task to register.
 try:
-    # TODO: why is it imported? due to some side-effect or by mistake?
     import helpdesk.tasks  # NOQA
 except ImportError:
     pass
@@ -100,6 +103,11 @@ if helpdesk_settings.HELPDESK_UI_ENABLED:
             "tickets/<int:ticket_id>/attachment_delete/<int:attachment_id>/",
             staff.attachment_del,
             name="attachment_del",
+        ),
+        path(
+            "tickets/<int:ticket_id>/attachment_preview/<int:attachment_id>/",
+            staff.attachment_preview,
+            name="attachment_preview",
         ),
         path(
             "tickets/<int:ticket_id>/checklists/<int:checklist_id>/",

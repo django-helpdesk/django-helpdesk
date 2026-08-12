@@ -3,7 +3,7 @@ Spam Filtering
 
 django-helpdesk includes a copy of ``akismet.py`` by `Michael Foord <http://www.voidspace.org.uk/>`_, which lets incoming ticket submissions be automatically checked against either the `Akismet <http://akismet.com/>`_ or `TypePad Anti-Spam <http://antispam.typepad.com/>`_ services.
 
-To enable this functionality, sign up for an API key with one of these two services.
+To enable this functionality, install the optional dependency with ``pip install django-helpdesk[spam]`` and sign up for an API key with one of these two services. Without that dependency installed, submissions are simply never flagged as spam.
 
 Akismet
 ~~~~~~~

@@ -2,6 +2,15 @@
 <li class="list-group-item ps-0">
   <a class="d-block" href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename|truncatechars:40 }}</a>
   <small class="text-secondary">({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</small>
+  {% if attachment.mime_type == "text/html" %}
+    {# The link above serves the original source inertly. This one renders it, sanitized. #}
+    <a href="{% url 'helpdesk:attachment_preview' ticket.id attachment.id %}"
+       target="_blank"
+       class="text-secondary"
+       title="{% trans 'View formatted' %}">
+      <i class="fa-regular fa-eye fa-sm ms-2"></i>
+    </a>
+  {% endif %}
   {% if attachment.followup.user and request.user == attachment.followup.user %}
     <a href="{% url 'helpdesk:attachment_del' ticket.id attachment.id %}"
        class="text-secondary">

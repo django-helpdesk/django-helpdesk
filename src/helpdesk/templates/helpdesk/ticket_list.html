@@ -398,46 +398,26 @@
                                 }
                                 return data
                            }
-                      }, {
-                           data: "priority",
-                           render: function(data, type, row, meta) {
-                                const contextMap = {
-                                     1: "danger",
-                                     2: "warning",
-                                     3: "success",
-                                     4: "info",
-                                     5: "secondary"
-                                };
-
-                                const context = contextMap[data] ?? "secondary";
-                                return `<span class="badge text-${context}-emphasis bg-${context}-subtle">${data}</span>`
-                           },
-                           visible: false,
-                      }, {
-                           data: "queue",
-                           render: function(data, type, row, meta) {
-                                return `<span class="badge text-bg-light text-secondary">${data.title}</span>`
-                           },
-                           visible: false,
-                      }, {
-                           data: "status",
+}, {
+                            data: "priority",
                             render: function(data, type, row, meta) {
-                                 {% translate 'Open' as status_open %}
-                                 {% translate 'Reopened' as status_reopened %}
-                                 {% translate 'Resolved' as status_resolved %}
-                                 {% translate 'Closed' as status_closed %}
-                                 {% translate 'Duplicate' as status_duplicate %}
-                                 const contextMap = {
-                                      "{{ status_open|escapejs }}": "danger",
-                                      "{{ status_reopened|escapejs }}": "warning",
-                                      "{{ status_resolved|escapejs }}": "success",
-                                      "{{ status_closed|escapejs }}": "success",
-                                      "{{ status_duplicate|escapejs }}": "secondary"
-                                 };
-                                const context = contextMap[data] ?? "secondary";
-                                return `<span class="badge text-${context}-emphasis bg-${context}-subtle text-wrap">${data}</span>`
-                           },
-                      }, {
+                                 const context = row.priority_badge_class || "secondary";
+                                 return `<span class="badge text-${context}-emphasis bg-${context}-subtle">${data}</span>`
+                            },
+                            visible: false,
+                       }, {
+                            data: "queue",
+                            render: function(data, type, row, meta) {
+                                 return `<span class="badge text-bg-light text-secondary">${data.title}</span>`
+                            },
+                            visible: false,
+                       }, {
+                            data: "status",
+                             render: function(data, type, row, meta) {
+                                 const context = row.status_badge_class || "secondary";
+                                 return `<span class="badge text-${context}-emphasis bg-${context}-subtle text-wrap">${data}</span>`
+                            },
+                       }, {
                            data: "created",
                            render: renderDateTime
                       }, {

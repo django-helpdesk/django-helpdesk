@@ -1,6 +1,6 @@
 [project]
 name = "django-helpdesk"
-version = "2.3.1"
+version = "2.3.3"
 description = "Django-powered ticket tracker for your helpdesk"
 authors = [
     {name = "Ross Poulton", email = "ross@rossp.org"},
@@ -19,22 +19,19 @@ packages = [
 ]
 dependencies = [
     "django>=4.2",
-    "django-bootstrap4-form",
-    "celery",
+    # Kept as a hard dependency on purpose: it activates automatically when listed
+    # in INSTALLED_APPS, as docs/install.rst suggests, so a copy that follows our
+    # own instructions would refuse to start without it.
+    "django-cleanup",
     "email-reply-parser",
-    "akismet",
     "markdown",
     "beautifulsoup4",
-    "lxml",
-    "pytz",
+    "nh3",
     "djangorestframework",
     "django-model-utils",
-    "django-cleanup",
     "oauthlib",
     "requests-oauthlib",
     "requests",
-    "requests_oauthlib",
-    "setuptools",
 ]
 
 classifiers = [
@@ -62,6 +59,23 @@ classifiers = [
 [project.optional-dependencies]
 teams = [
     "pinax_teams",
+]
+# Poll mailboxes with a periodic celery task instead of cron. See
+# docs/configuration.rst. django-celery-beat is what actually schedules it, and
+# was previously left to the operator to work out.
+celery = [
+    "celery",
+    "django-celery-beat",
+]
+# Check incoming ticket submissions against Akismet. See docs/spam.rst.
+# helpdesk.lib.text_is_spam already degrades to "not spam" when this is absent.
+spam = [
+    "akismet",
+]
+# Everything above, for anyone who wants what earlier releases installed by
+# default.
+all = [
+    "django-helpdesk[celery,spam,teams]",
 ]
 
 [dependency-groups]

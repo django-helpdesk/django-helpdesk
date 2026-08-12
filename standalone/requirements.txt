@@ -3,14 +3,9 @@ gunicorn
 psycopg2-binary
 django
 
-django-bootstrap4-form
-celery
 email-reply-parser
-akismet
 markdown
 beautifulsoup4
-lxml
-pytz
 pinax_teams
 djangorestframework
 django-model-utils
