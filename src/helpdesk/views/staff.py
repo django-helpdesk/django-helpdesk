@@ -435,34 +435,15 @@ def followup_edit(request, ticket_id, followup_id):
             ).distinct()
 
         if form.is_valid():
-            title = form.cleaned_data["title"]
-            _ticket = form.cleaned_data["ticket"]
-            comment = form.cleaned_data["comment"]
-            public = form.cleaned_data["public"]
-            new_status = form.cleaned_data["new_status"]
-            time_spent = form.cleaned_data["time_spent"]
-            # will save previous date
-            old_date = followup.date
-            new_followup = FollowUp(
-                title=title,
-                date=old_date,
-                ticket=_ticket,
-                comment=comment,
-                public=public,
-                new_status=new_status,
-                time_spent=time_spent,
-            )
-            # keep old user if one did exist before.
-            if followup.user:
-                new_followup.user = followup.user
-            new_followup.save()
-            # get list of old attachments & link them to new_followup
-            attachments = FollowUpAttachment.objects.filter(followup=followup)
-            for attachment in attachments:
-                attachment.followup = new_followup
-                attachment.save()
-            # delete old followup
-            followup.delete()
+            # Edit in place: a copy would lose the message ID and the
+            # TicketChange rows, which cascade away with the old row.
+            followup.title = form.cleaned_data["title"]
+            followup.ticket = form.cleaned_data["ticket"]
+            followup.comment = form.cleaned_data["comment"]
+            followup.public = form.cleaned_data["public"]
+            followup.new_status = form.cleaned_data["new_status"]
+            followup.time_spent = form.cleaned_data["time_spent"]
+            followup.save()
             return HttpResponseRedirect(reverse("helpdesk:view", args=[ticket.id]))
 
 
