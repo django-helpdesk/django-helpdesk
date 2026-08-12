@@ -40,7 +40,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "django-helpdesk"
-copyright = "2011-2023, Django-helpdesk Contributors"
+copyright = "2011-2026, Django-helpdesk Contributors"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
