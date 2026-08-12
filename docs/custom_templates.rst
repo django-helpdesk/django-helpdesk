@@ -22,8 +22,9 @@ a reply that went out to the submitter. Every follow-up carries a
     A public follow-up written by staff, so the submitter can read it.
 
 ``followup-item-inbound``
-    A public follow-up that came in from the submitter, either by e-mail or
-    through the public ticket view.
+    A public follow-up that came in from the submitter by e-mail. Submissions
+    made through the public ticket view are not currently attributed to the
+    submitter, so they are classed as ``followup-item-outbound`` instead.
 
 Restyle these classes in ``helpdesk-customize.css`` to fit your own palette.
 The colors are backed up by a text label in each follow-up header, so keep
