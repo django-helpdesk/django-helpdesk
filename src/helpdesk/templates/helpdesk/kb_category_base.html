@@ -48,19 +48,19 @@
                 <div class="me-auto">
                   <form method="post" action="{% url "helpdesk:kb_vote" item.pk "up" %}" class="d-inline">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-light">
+                    <button type="submit" class="btn btn-outline-success btn-sm">
                       <i class="fa-regular fa-thumbs-up"></i>
                     </button>
                   </form>
                   <form method="post" action="{% url "helpdesk:kb_vote" item.pk "down" %}" class="d-inline">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-light">
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
                       <i class="fa-regular fa-thumbs-down"></i>
                     </button>
                   </form>
                   {% if item.votes != 0 %}
                     {% blocktranslate with recommendations=item.recommendations votes=item.votes  %}
-                    <span class="text-body-secondary small">{{ recommendations }} of {{ votes }} people found this answer useful</span>
+                    <span class="text-body-secondary small ms-2">{{ recommendations }} of {{ votes }} people found this answer useful</span>
                     {% endblocktranslate %}
                   {% endif %}
                 </div>
