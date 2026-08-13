@@ -7,7 +7,7 @@ DEBUG = True
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": Path(BASE_DIR / "test.db"),
+        "NAME": BASE_DIR / "test.db",
         "USER": "",
         "PASSWORD": "",
         "HOST": "",
