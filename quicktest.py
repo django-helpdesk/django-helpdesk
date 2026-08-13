@@ -24,7 +24,7 @@ if __name__ == "__main__":
     and run them via a custom test runner.
     """
     parser = argparse.ArgumentParser(usage="[args]", description="Run Django tests.")
-    parser.add_argument("tests", nargs="*", type=str, default=".")
+    parser.add_argument("tests", nargs="*", type=str, default=["."])
     parser.add_argument("--verbosity", "-v", nargs="?", type=int, default=1)
     args = parser.parse_args()
 
