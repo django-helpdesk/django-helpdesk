@@ -12,11 +12,10 @@ concurrency:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # limit number of matrices by applying sensible combinations 
+        # limit number of matrices by applying sensible combinations
         include:
           # Explicitly include Python 3.9 only with Django 4.2
           - python-version: "3.9"
@@ -27,19 +26,21 @@ jobs:
           # Explicitly include Python 3.14 only with Django 5.2
           - python-version: "3.14"
             django-version: "5.2"
-        # Define the general matrix for Python with Django 
+        # Define the general matrix for Python with Django
         python-version: ["3.10", "3.11", "3.12"]
         django-version: ["4.2", "5.0", "5.1", "5.2"]
     steps:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -48,19 +49,18 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ hashFiles('pyproject.toml') }}-${{ matrix.python-version }}-${{ matrix.django-version }} 
+          key: ${{ hashFiles('pyproject.toml') }}-${{ matrix.python-version }}-${{ matrix.django-version }}
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           uv venv
           make sync
-    
+
       - name: Run Lint and formatting checks
         run: |
           make checkformat
-    
-    
+
       - name: Run tests
         run: |
           # Resolve Django together with the packages that constrain it, rather
@@ -72,8 +72,6 @@ jobs:
           # `uv run --no-sync` is required, otherwise it re-syncs and undoes this.
           uv pip install "django~=${{ matrix.django-version }}" djangorestframework
           cd ${GITHUB_WORKSPACE} && uv run --no-sync coverage run quicktest.py
-        env:
-          DJANGO_SETTINGS_MODULE: helpdesk.settings
 
       - name: Convert coverage to LCOV
         if: matrix.python-version == '3.12' && matrix.django-version == '5.2'

@@ -146,6 +146,59 @@ table .tickettitle {
   min-width: 18rem;
 }
 
+/* Follow-ups are color coded by who can see them and which way they went, so
+   staff can tell an internal note from a reply to the submitter at a glance.
+   The color is backed up by the badge text in each follow-up header, so it is
+   never the only thing carrying the meaning. */
+.followup-item {
+  border-left: 4px solid transparent;
+}
+
+/* Private, staff-only notes keep the plain background. */
+.followup-item-internal {
+  border-left-color: #adb5bd;
+}
+
+.followup-item-internal .followup-item-badge {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+/* Sent out to the submitter. */
+.followup-item-outbound {
+  background-color: #eaf6ec;
+  border-left-color: #198754;
+}
+
+.followup-item-outbound .followup-item-badge {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+/* Received from the submitter. */
+.followup-item-inbound {
+  background-color: #fdf6e3;
+  border-left-color: #ffc107;
+}
+
+.followup-item-inbound .followup-item-badge {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+/* list-group-item-action repaints the background on hover, which would undo
+   the color coding, so darken each tint slightly instead. */
+.followup-item-outbound.list-group-item-action:hover,
+.followup-item-outbound.list-group-item-action:focus {
+  background-color: #d9eddf;
+}
+
+.followup-item-inbound.list-group-item-action:hover,
+.followup-item-inbound.list-group-item-action:focus {
+  background-color: #faedcd;
+}
+
+
 .handle {
   cursor: grab;
 }
