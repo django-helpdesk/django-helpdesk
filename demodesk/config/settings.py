@@ -5,6 +5,8 @@ Django settings for django-helpdesk demodesk project.
 
 import os
 
+from django.contrib.messages import constants as messages
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -237,6 +239,12 @@ FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 
 # for Django 3.2+, set default for autofields:
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+
+MESSAGE_TAGS = {
+    messages.INFO: "primary",
+    messages.ERROR: "danger",
+}
 
 try:
     from .local_settings import *

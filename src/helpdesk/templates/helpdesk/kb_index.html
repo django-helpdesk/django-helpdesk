@@ -1,32 +1,38 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/public_base.html" %}
 
-{% block helpdesk_title %}{% trans "Knowledgebase" %}{% endblock %}
+{% load i18n %}
+
+{% block helpdesk_title %}
+  {% trans "Knowledgebase" %}
+{% endblock helpdesk_title %}
 
 {% block helpdesk_breadcrumb %}
-<li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:kb_index' %}">{% trans "Knowledgebase" %}</a>
-</li>
-<li class="breadcrumb-item active">{% trans "Overview" %}</li>
-{% endblock %}
+  <li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:kb_index' %}">{% translate "Knowledgebase" %}</a>
+  </li>
+  <li class="breadcrumb-item active">{% translate "Overview" %}</li>
+{% endblock helpdesk_breadcrumb %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Knowledgebase" %}</h2>
-
-<p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
-
-{% for category in kb_categories %}
-{% cycle 'one' 'two' 'three' as catnumperrow silent %}
-{% if catnumperrow == 'one' %}<div class="card-deck">{% endif %}
-<div class="card">
-    <div class="card-header">
-      <h5>{{ category.title }}</h5>
+  <article class="m-md-3">
+    <h2>{% translate "Knowledgebase" %}</h2>
+    <p class="lead">{% translate "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+      {% for category in kb_categories %}
+        <div class="col">
+          <div class="card h-100">
+            <div class="card-body">
+              <h5>{{ category.title }}</h5>
+              <p class="text-secondary">{{ category.description }}</p>
+            </div>
+            <div class="card-footer bg-transparent d-flex justify-content-end border-0 py-2">
+              <a class="icon-link icon-link-hover" href="{{ category.get_absolute_url }}">{% translate "View articles" %}
+                <i class="fa-solid fa-chevron-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-    <div class="card-body">
-        <p class="card-text">{{ category.description }}</p>
-        <p class="card-text"><small class="text-muted"><a class="btn btn-primary" href='{{ category.get_absolute_url }}'>{% trans 'View articles' %} <i class="fa fa-share"></i></a></small></p>
-    </div>
-</div>
-{% if catnumperrow == 'three' %}</div>{% endif %}
-{% endfor %}
-
-{% endblock %}
+  </article>
+{% endblock helpdesk_body %}

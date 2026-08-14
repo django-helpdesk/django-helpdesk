@@ -1,0 +1,24 @@
+{% load static i18n %}
+
+{% for message in messages %}
+  {% with klass=message.tags %}
+    <div class="alert alert-{{ klass }} alert-dismissible fade show mx-4" role="alert">
+      {% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+        <i class="fa-solid fa-circle-info me-2"></i>
+        <strong>{% translate "Info:" %}</strong>
+      {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+        <i class="fa-solid fa-circle-check me-2"></i>
+        <strong>{% translate "Success:" %}</strong>
+      {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        <strong>{% translate "Warning:" %}</strong>
+      {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+        <i class="fa-solid fa-fire me-2"></i>
+        <strong>{% translate "Error:" %}</strong>
+      {% endif %}
+
+      <span class="alert-text">{{ message }}</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endwith %}
+{% endfor %}

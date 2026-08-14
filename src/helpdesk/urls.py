@@ -229,6 +229,17 @@ urlpatterns += [
 ]
 
 
+KNOWLEDGE_BASE_PATTERNS = [
+    path("kb/", kb.index, name="kb_index"),
+    path("kb/<slug:slug>/", kb.category, name="kb_category"),
+    path("kb_iframe/<slug:slug>/", kb.category_iframe, name="kb_category_iframe"),
+    path("kb/<int:item_id>/vote/<str:vote>/", kb.vote, name="kb_vote"),
+]
+
+if helpdesk_settings.HELPDESK_KB_ENABLED:
+    urlpatterns += KNOWLEDGE_BASE_PATTERNS
+
+
 if helpdesk_settings.HELPDESK_API_ENABLED:
     router = DefaultRouter()
     router.register(r"tickets", TicketViewSet, basename="ticket")
@@ -269,17 +280,6 @@ urlpatterns += [
     ),
 ]
 
-if helpdesk_settings.HELPDESK_KB_ENABLED:
-    urlpatterns += [
-        path("kb/", kb.index, name="kb_index"),
-        re_path(r"^kb/(?P<slug>[A-Za-z0-9_-]+)/$", kb.category, name="kb_category"),
-        re_path(r"^kb/(?P<item>\d+)/vote/(?P<vote>up|down)/$", kb.vote, name="kb_vote"),
-        re_path(
-            r"^kb_iframe/(?P<slug>[A-Za-z0-9_-]+)/$",
-            kb.category_iframe,
-            name="kb_category_iframe",
-        ),
-    ]
 
 urlpatterns += [
     path(

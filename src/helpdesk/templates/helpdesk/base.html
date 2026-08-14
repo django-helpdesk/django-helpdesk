@@ -2,34 +2,42 @@
 {% load saved_queries load_helpdesk_settings %}
 
 {% with request|load_helpdesk_settings as helpdesk_settings %}
-{% with user|saved_queries as user_saved_queries_ %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    {% include "helpdesk/base-head.html" %}
-    {% block helpdesk_head %}{% endblock helpdesk_head %}
-    {% include "helpdesk/base_js.html" %}
-  </head>
-  <body id="bg-dark">
-    {% include "helpdesk/navigation-header.html" %}
-    <div id="wrapper">
-      {% include "helpdesk/navigation-sidebar.html" %}
-      <div id="content-wrapper">
-        <div class="container-fluid">
-          <nav aria-label="breadcrumb">
-            <ol class="breadcrumb bg-transparent">
-              {% block helpdesk_breadcrumb %}{% endblock helpdesk_breadcrumb %}
-            </ol>
-          </nav>
-          {% block helpdesk_body %}{% endblock helpdesk_body %}
+  {% with user|saved_queries as user_saved_queries_ %}
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <title>
+          {% block helpdesk_title %}Helpdesk{% endblock helpdesk_title %} :: {% translate "Powered by django-helpdesk" %}
+        </title>
+        {% include "helpdesk/base-head.html" %}
+        {% block helpdesk_head %}
+        {% endblock helpdesk_head %}
+        {% include "helpdesk/base_js.html" %}
+      </head>
+      <body id="bg-dark">
+        {% include "helpdesk/navigation-header.html" %}
+        <div id="wrapper">
+          {% include "helpdesk/navigation-sidebar.html" %}
+          <div id="content-wrapper">
+            {% include "helpdesk/messages.html" %}
+            <div class="container-fluid">
+              <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent">
+                  {% block helpdesk_breadcrumb %}
+                  {% endblock helpdesk_breadcrumb %}
+                </ol>
+              </nav>
+              {% block helpdesk_body %}
+              {% endblock helpdesk_body %}
+            </div>
+            {% include "helpdesk/attribution.html" %}
+          </div>
         </div>
-        {% include "helpdesk/attribution.html" %}
-      </div>
-    </div>
-    {% include "helpdesk/debug.html" %}
-    <script src="{% static "helpdesk/js/sb-admin.js" %}"></script>
-    {% block helpdesk_js %}{% endblock helpdesk_js %}
-  </body>
-</html>
-{% endwith %}
+        {% include "helpdesk/debug.html" %}
+        <script src="{% static "helpdesk/js/sb-admin.js" %}"></script>
+        {% block helpdesk_js %}
+        {% endblock helpdesk_js %}
+      </body>
+    </html>
+  {% endwith %}
 {% endwith %}

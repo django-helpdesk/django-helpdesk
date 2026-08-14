@@ -1,14 +1,15 @@
-{% load i18n %}
-{% load saved_queries %}
+{% load i18n saved_queries %}
+
 <!DOCTYPE html>
 <head>
-    {% include 'helpdesk/base-head.html' %}
-    {% block helpdesk_head %}{% endblock %}
+  <title>{{ category.title }} :: {% translate "Powered by django-helpdesk" %}</title>
+  {% include "helpdesk/base-head.html" %}
+  {% block helpdesk_head %}
+  {% endblock helpdesk_head %}
 </head>
-
 <body>
-    {% block helpdesk_body %}
-    {% include 'helpdesk/kb_category_base.html' %}
-    {% endblock %}
-    {% include 'helpdesk/base_js.html' %}
+  {% block helpdesk_body %}
+    {% include "helpdesk/kb_category_base.html" %}
+  {% endblock helpdesk_body %}
+  {% include "helpdesk/base_js.html" %}
 </body>
