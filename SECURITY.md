@@ -37,7 +37,9 @@ Everything below is theirs to drive, not to delegate and hope.
 
 2. **Request the CVE at draft stage**, not at the end.
    GitHub quotes up to three working days to review the request, and requesting it discloses nothing, so it may as well run in parallel with the fix.
-   Publishing before the identifier is assigned is fine: it gets attached to the advisory when their review completes.
+   If the identifier has not arrived by the time everything else is ready, decide deliberately whether to wait rather than assuming it will catch up.
+   Publishing first does not simply defer the assignment: another CNA can pick the published advisory up and assign a CVE from it, with their own severity and their own wording.
+   That is what happened to GHSA-q46c-8w98-fq2g, which VulnCheck assigned CVE-2026-73531 from five days after we published, while GitHub's own review was still pending.
 
 3. **Fill in the affected version range honestly.**
    Work out when the vulnerable code was actually introduced rather than assuming it was recent, and make the upper bound match the version that will carry the fix.
