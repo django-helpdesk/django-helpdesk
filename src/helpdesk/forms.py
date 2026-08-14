@@ -147,6 +147,14 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
             "This ticket is merged into the selected ticket."
         )
 
+        # If there is only a single queue configured, there is nothing
+        # meaningful to choose, so hide the field entirely.
+        if "queue" in self.fields:
+            queues = Queue.objects.all()
+            if queues.count() == 1:
+                self.fields["queue"].initial = queues.first().pk
+                self.fields["queue"].widget = forms.HiddenInput()
+
         for field in CustomField.objects.all():
             initial_value = None
             try:
@@ -476,6 +484,12 @@ class TicketForm(AbstractTicketForm):
         super().__init__(*args, **kwargs)
         if queue_choices:
             self.fields["queue"].choices = queue_choices
+            # If there is only a single queue to choose from, there is
+            # nothing meaningful to choose, so hide the field and default
+            # to it.
+            if len(queue_choices) == 1:
+                self.fields["queue"].initial = queue_choices[0][0]
+                self.fields["queue"].widget = forms.HiddenInput()
         self.fields["body"].required = body_reqd
         self.fields["assigned_to"].choices = [("", "--------")] + [
             (u.id, u.get_username())

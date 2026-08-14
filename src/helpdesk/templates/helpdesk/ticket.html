@@ -299,15 +299,19 @@
                           {% endfor %}
                         </select>
                       </div>
-                      <div class="col-md-3">
-                        <label class="form-label" for="id_queue">{% translate "Queue" %}</label>
-                        <select class="form-select" id="id_queue" name="queue">
-                          {% for queue_id, queue_name in queues %}
-                            <option value="{{ queue_id }}"
-                                    {% if queue_id == ticket.queue.id %} selected{% endif %}>{{ queue_name }}</option>
-                          {% endfor %}
-                        </select>
-                      </div>
+                      {% if queues|length > 1 %}
+                        <div class="col-md-3">
+                          <label class="form-label" for="id_queue">{% translate "Queue" %}</label>
+                          <select class="form-select" id="id_queue" name="queue">
+                            {% for queue_id, queue_name in queues %}
+                              <option value="{{ queue_id }}"
+                                      {% if queue_id == ticket.queue.id %} selected{% endif %}>{{ queue_name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      {% else %}
+                        <input type="hidden" id="id_queue" name="queue" value="{{ ticket.queue.id }}" />
+                      {% endif %}
                       <div class="col-md-3">
                         <label class="form-label" for="id_due_date">{% translate "Due on" %}</label>
                         {{ form.due_date }}
