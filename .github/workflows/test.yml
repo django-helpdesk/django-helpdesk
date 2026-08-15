@@ -25,7 +25,7 @@ jobs:
           - python-version: "3.11"
             django-version: "5.2"
         # Define the general matrix for Python with Django
-        python-version: [ "3.12", "3.13", "3.14"]]
+        python-version: [ "3.12", "3.13", "3.14"]
         django-version: ["6.0", "6.1"]
     steps:
       - uses: actions/checkout@v5
