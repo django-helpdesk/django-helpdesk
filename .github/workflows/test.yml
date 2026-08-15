@@ -16,19 +16,17 @@ jobs:
     strategy:
       matrix:
         # limit number of matrices by applying sensible combinations
+        # Django 6 only supports Python 3.12+
         include:
-          # Explicitly include Python 3.9 only with Django 4.2
-          - python-version: "3.9"
-            django-version: "4.2"
-          # Explicitly include Python 3.13 only with Django 5.1
-          - python-version: "3.13"
-            django-version: "5.1"
-          # Explicitly include Python 3.14 only with Django 5.2
-          - python-version: "3.14"
+          # Explicitly include Python 3.10 only with Django 5.2
+          - python-version: "3.10"
+            django-version: "5.2"
+          # Explicitly include Python 3.11 only with Django 5.2
+          - python-version: "3.11"
             django-version: "5.2"
         # Define the general matrix for Python with Django
-        python-version: ["3.10", "3.11", "3.12"]
-        django-version: ["4.2", "5.0", "5.1", "5.2"]
+        python-version: [ "3.12", "3.13", "3.14"]]
+        django-version: ["6.0", "6.1"]
     steps:
       - uses: actions/checkout@v5
         with:
@@ -74,12 +72,12 @@ jobs:
           cd ${GITHUB_WORKSPACE} && uv run --no-sync coverage run quicktest.py
 
       - name: Convert coverage to LCOV
-        if: matrix.python-version == '3.12' && matrix.django-version == '5.2'
+        if: matrix.python-version == '3.11' && matrix.django-version == '5.2'
         run: |
           uv run coverage lcov
 
       - name: Upload coverage to Coveralls
-        if: matrix.python-version == '3.12' && matrix.django-version == '5.2'
+        if: matrix.python-version == '3.11' && matrix.django-version == '5.2'
         uses: coverallsapp/github-action@v2
         with:
           file: coverage.lcov
