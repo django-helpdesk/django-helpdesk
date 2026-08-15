@@ -1,11 +1,11 @@
 [project]
 name = "django-helpdesk"
-version = "2.3.3"
+version = "2.4.0"
 description = "Django-powered ticket tracker for your helpdesk"
 authors = [
     {name = "Ross Poulton", email = "ross@rossp.org"},
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.rst"
 license = {text = "BSD-3-Clause"}
 keywords = ["django", "helpdesk", "django-helpdesk", "tickets", "incidents", "cases", "bugs", "track", "support"]
@@ -18,7 +18,7 @@ packages = [
     { include="helpdesk", from="." },
 ]
 dependencies = [
-    "django>=4.2",
+    "django>=5.2",
     # Kept as a hard dependency on purpose: it activates automatically when listed
     # in INSTALLED_APPS, as docs/install.rst suggests, so a copy that follows our
     # own instructions would refuse to start without it.
@@ -38,19 +38,19 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
     "Framework :: Django",
-    "Framework :: Django :: 4.0",
-    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
     "Intended Audience :: Customer Service",
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Office/Business",
     "Topic :: Software Development :: Bug Tracking",
     "Topic :: Software Development :: Libraries :: Python Modules",
@@ -87,8 +87,7 @@ test = [
     "argparse>=1.4.0",
     "coverage>=7.10.4",
     "factory-boy>=3.3.3",
-    "faker>=37.5.3,<=37.10.0; python_version < '3.10'",
-    "faker>=37.11.0; python_version >= '3.10'",
+    "faker>=37.11.0",
     "freezegun>=1.5.5",
     "isort>=6.0.1",
     "mock>=5.2.0",
