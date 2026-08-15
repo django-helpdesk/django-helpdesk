@@ -17,14 +17,10 @@ Prerequisites
 
 Before getting started, ensure your system meets the following recommended dependencies:
 
-* Python 3.8+
-* Django 3.2 LTS
+* Python 3.10+
+* Django 5.2+
   
 Ensure any extra Django modules you wish to use are compatible before continuing.
-
-**NOTE**: Python 2 support was deprecated in ``django-helpdesk`` as of version 0.2.x
-and completely removed in version 0.3.0. Users that still need Python 2 support should
-remain on version 0.2.x.
 
 
 Getting The Code
