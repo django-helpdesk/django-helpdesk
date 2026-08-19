@@ -643,7 +643,7 @@ class Ticket(models.Model):
     def time_spent_formated(self):
         return format_time_spent(self.time_spent)
 
-    def send(self, roles, dont_send_to=None, **kwargs):
+    def send(self, roles, dont_send_to=None, sent_to=None, **kwargs):
         """
         Send notifications to everyone interested in this ticket.
 
@@ -666,7 +666,8 @@ class Ticket(models.Model):
 
         **kwargs are passed to send_templated_mail defined in templated_email.py
 
-        returns the set of email addresses the notification was delivered to.
+        returns the group of email addresses that wont be mailed to again, which is
+        the addresses delivered to and dont_send_to and the queue address.
 
         """
         recipients = set()
@@ -676,13 +677,10 @@ class Ticket(models.Model):
 
         recipients.add(self.queue.email_address)
 
-        def should_receive(email):
-            return email and email not in recipients
-
         def send(role, recipient):
             if recipient and recipient not in recipients and role in roles:
                 template, context = roles[role]
-                send_templated_mail(
+                delivered = send_templated_mail(
                     template,
                     context,
                     recipient,
@@ -690,6 +688,8 @@ class Ticket(models.Model):
                     **kwargs,
                 )
                 recipients.add(recipient)
+                if sent_to is not None and delivered:
+                    sent_to.add(recipient)
 
         send("submitter", self.submitter_email)
         send("ticket_cc", self.queue.updated_ticket_cc)
@@ -1060,6 +1060,17 @@ class FollowUp(models.Model):
 
     time_spent = models.DurationField(
         help_text=_("Time spent on this follow up"), blank=True, null=True
+    )
+
+    email_recipients = models.JSONField(
+        _("E-Mail Recipients"),
+        blank=True,
+        null=True,
+        default=None,
+        help_text=_(
+            "Addresses successfully notified by e-mail about this follow-up. "
+            "Null means recipients were not recorded."
+        ),
     )
 
     class Meta:

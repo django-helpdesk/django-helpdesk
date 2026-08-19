@@ -328,6 +328,7 @@ class TicketTest(APITestCase):
                         "followupattachment_set": [],
                         "date": frozen_date_time_str + date_suffix_hack,
                         "message_id": None,
+                        "email_recipients": ["test@mail.com"],
                     }
                 ],
                 "custom_varchar": "test",
