@@ -9,7 +9,7 @@
     "datatables.net-buttons-bs5": "^3.2.5",
     "datatables.net-buttons-dt": "^3.2.5",
     "fontawesome-free": "npm:@fortawesome/fontawesome-free@^6.7.2",
-    "jquery": "3.7.1",
+    "jquery": "4.0.0",
     "jquery-ui": "1.14.1",
     "metismenu": "3.0.7",
     "raphael": "2.3.0"
