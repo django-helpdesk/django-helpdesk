@@ -16,6 +16,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import redirect_to_login
@@ -484,7 +485,15 @@ def get_attachments_for_ticket(ticket):
 @helpdesk_staff_member_required
 def view_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
-    ticket_perm_check(request, ticket)
+    try:
+        ticket_perm_check(request, ticket)
+    except PermissionDenied:
+        messages.error(
+            request,
+            _("You don't have permission to view ticket - %(ticket)s.")
+            % {"ticket": str(ticket)},
+        )
+        return HttpResponseRedirect(reverse("helpdesk:list"))
 
     if "take" in request.GET:
         update_ticket(request.user, ticket, owner=request.user.id)
