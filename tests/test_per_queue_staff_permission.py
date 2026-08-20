@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -397,3 +398,28 @@ class PerQueuePermissionSecurityTestCase(TestCase):
         url = reverse("helpdesk:rss_queue", kwargs={"queue_slug": self.queue_2.slug})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
+
+    def test_view_ticket_redirects_with_error_for_inaccessible_queue(self):
+        """user_1 is redirected to the ticket list with an error message when
+        viewing a ticket in queue_2 instead of hitting a bare 403 page."""
+        self._login_user_1()
+        url = reverse("helpdesk:view", kwargs={"ticket_id": self.ticket_2.id})
+        response = self.client.get(url, follow=True)
+        self.assertRedirects(response, reverse("helpdesk:list"))
+        stored_messages = list(response.context["messages"])
+        self.assertEqual(len(stored_messages), 1)
+        self.assertEqual(stored_messages[0].level, messages.ERROR)
+        self.assertEqual(
+            str(stored_messages[0]),
+            f"You don't have permission to view ticket - {self.ticket_2}.",
+        )
+
+    def test_view_ticket_allowed_for_accessible_queue(self):
+        """The redirect only applies when permission is denied: user_1 can
+        still view a ticket in their own queue."""
+        self._login_user_1()
+        url = reverse("helpdesk:view", kwargs={"ticket_id": self.ticket_1.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["ticket"].id, self.ticket_1.id)
+        self.assertEqual(len(list(response.context["messages"])), 0)
