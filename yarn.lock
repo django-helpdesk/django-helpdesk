@@ -85,7 +85,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"datatables.net@npm:2.3.4, datatables.net@npm:^2, datatables.net@npm:^2.3.4":
+"datatables.net@npm:2.3.4, datatables.net@npm:^2":
   version: 2.3.4
   resolution: "datatables.net@npm:2.3.4"
   dependencies:
@@ -110,12 +110,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"datatables.net@npm:^3.0.1":
+  version: 3.0.2
+  resolution: "datatables.net@npm:3.0.2"
+  checksum: 10c0/7a58f9c07b8f652afbf200bd6bfea7f1653c94d6a938ad318e72e5b8300273aa4cd4a1adc8428d5f5a0f0252ce8dba7c3e31c9241b64bfe41f899240e0af6f4d
+  languageName: node
+  linkType: hard
+
 "django-helpdesk@workspace:.":
   version: 0.0.0-use.local
   resolution: "django-helpdesk@workspace:."
   dependencies:
     bootstrap: "npm:5.3.8"
-    datatables.net: "npm:^2.3.4"
+    datatables.net: "npm:^3.0.1"
     datatables.net-bs5: "npm:^3.0.1"
     datatables.net-buttons: "npm:^3.2.5"
     datatables.net-buttons-bs5: "npm:^3.2.5"
