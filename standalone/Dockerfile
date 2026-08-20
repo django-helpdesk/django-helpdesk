@@ -14,7 +14,7 @@ COPY . .
 RUN yarn build:static
 
 # --- Stage 2: Main Django image ---
-FROM python:3.11-slim-bullseye AS app
+FROM python:3.13-slim-bullseye AS app
 LABEL src=https://github.com/django-helpdesk/django-helpdesk
 RUN apt-get update
 RUN apt-get install -yqq \
