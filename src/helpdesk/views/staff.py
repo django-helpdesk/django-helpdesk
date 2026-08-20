@@ -490,8 +490,8 @@ def view_ticket(request, ticket_id):
     except PermissionDenied:
         messages.error(
             request,
-            _("You don't have permission to view ticket #%(ticket_id)s.")
-            % {"ticket_id": ticket.id},
+            _("You don't have permission to view ticket - %(ticket)s.")
+            % {"ticket": str(ticket)},
         )
         return HttpResponseRedirect(reverse("helpdesk:list"))
 
