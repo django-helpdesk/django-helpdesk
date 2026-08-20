@@ -7,6 +7,7 @@ WORKDIR /app
 COPY django-helpdesk/ .
 
 # Enable Corepack to use the defined packageManager in package.json
+RUN npm install -g corepack # no longer packaged by defaults as of node 26
 RUN corepack enable
 # Install dependencies
 RUN yarn install
