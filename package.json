@@ -10,8 +10,8 @@
     "datatables.net-buttons-dt": "^3.2.5",
     "fontawesome-free": "npm:@fortawesome/fontawesome-free@^6.7.2",
     "jquery": "4.0.0",
-    "jquery-ui": "1.14.1",
-    "metismenu": "3.0.7",
+    "jquery-ui": "1.14.2",
+    "metismenu": "3.1.0",
     "raphael": "2.3.0"
   },
   "scripts": {

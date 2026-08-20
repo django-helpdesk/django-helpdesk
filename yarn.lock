@@ -106,8 +106,8 @@ __metadata:
     datatables.net-buttons-dt: "npm:^3.2.5"
     fontawesome-free: "npm:@fortawesome/fontawesome-free@^6.7.2"
     jquery: "npm:4.0.0"
-    jquery-ui: "npm:1.14.1"
-    metismenu: "npm:3.0.7"
+    jquery-ui: "npm:1.14.2"
+    metismenu: "npm:3.1.0"
     raphael: "npm:2.3.0"
   languageName: unknown
   linkType: soft
@@ -126,12 +126,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jquery-ui@npm:1.14.1":
-  version: 1.14.1
-  resolution: "jquery-ui@npm:1.14.1"
+"jquery-ui@npm:1.14.2":
+  version: 1.14.2
+  resolution: "jquery-ui@npm:1.14.2"
   dependencies:
     jquery: "npm:>=1.12.0 <5.0.0"
-  checksum: 10c0/cf7a3c0aac369e513d78bc5864bbafb6ddf85a43513ca5d00b11d65e2890a6618ff2ef5b8cb2925db9a6b7d0c2482d717fb10cc813e419024ae8bc457e18f51d
+  checksum: 10c0/83b65744c4f4f2e9fa12833feb76c964f9565ef8301ef4e224e93e6c867e10a45d7da3e93bc7bcaec5227a61e09a2a6d1ce0198d9c38de08e4ada3d53a628615
   languageName: node
   linkType: hard
 
@@ -149,12 +149,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"metismenu@npm:3.0.7":
-  version: 3.0.7
-  resolution: "metismenu@npm:3.0.7"
+"metismenu@npm:3.1.0":
+  version: 3.1.0
+  resolution: "metismenu@npm:3.1.0"
   peerDependencies:
-    jquery: ^3.4.1
-  checksum: 10c0/5e31a2e117c8f9e4feabdfaee9dda2b5b2a75f71966bb5d2864575d17cc6c5e0e5b6354644346d8b1d31e9418609143c5d29fd5d5ead63135da881d3a5589f33
+    jquery: ">=4.0.0"
+  checksum: 10c0/2ddaa1bc9fdb3d99347f3e2160d8c640a00b4711813b2653ac601f3d7aac986581bcb2424c694aaddf0b061097d8a9174a50a59c41187baad5acc31864056fb9
   languageName: node
   linkType: hard
 
