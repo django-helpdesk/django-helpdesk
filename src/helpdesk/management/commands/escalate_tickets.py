@@ -86,12 +86,14 @@ class Command(BaseCommand):
 
                 context = safe_template_context(ticket)
 
+                sent_to = set()
                 ticket.send(
                     {
                         "submitter": ("escalated_submitter", context),
                         "ticket_cc": ("escalated_cc", context),
                         "assigned_to": ("escalated_owner", context),
                     },
+                    sent_to=sent_to,
                     fail_silently=True,
                 )
 
@@ -106,6 +108,7 @@ class Command(BaseCommand):
                         public=True,
                         comment=_("Ticket escalated after %(nb)s days")
                         % {"nb": queue.escalate_days},
+                        email_recipients=sorted(sent_to),
                     )
 
                     followup.ticketchange_set.create(

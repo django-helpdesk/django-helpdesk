@@ -435,11 +435,15 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             and ticket.assigned_to.usersettings_helpdesk.email_on_ticket_assign
         ):
             roles["assigned_to"] = ("assigned_owner", context)
+        sent_to = set()
         ticket.send(
             roles,
+            sent_to=sent_to,
             fail_silently=True,
             files=files,
         )
+        followup.email_recipients = sorted(sent_to)
+        followup.save()
 
 
 class TicketForm(AbstractTicketForm):
@@ -529,12 +533,13 @@ class TicketForm(AbstractTicketForm):
         else:
             files = None
 
-        # emit signal when the TicketForm.save is done
-        new_ticket_done.send(sender="TicketForm", ticket=ticket)
-
         self._send_messages(
             ticket=ticket, queue=queue, followup=followup, files=files, user=user
         )
+
+        # emit signal when the TicketForm.save is done
+        new_ticket_done.send(sender="TicketForm", ticket=ticket)
+
         return ticket
 
 
@@ -624,10 +629,11 @@ class PublicTicketForm(AbstractTicketForm):
 
         files = self._attach_files_to_follow_up(followup)
 
+        self._send_messages(ticket=ticket, queue=queue, followup=followup, files=files)
+
         # emit signal when the PublicTicketForm.save is done
         new_ticket_done.send(sender="PublicTicketForm", ticket=ticket)
 
-        self._send_messages(ticket=ticket, queue=queue, followup=followup, files=files)
         return ticket
 
 

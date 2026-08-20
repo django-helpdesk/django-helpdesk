@@ -855,6 +855,7 @@ def mass_update(request):
                 title=_("KBItem set in bulk update"),
                 public=False,
                 user=request.user,
+                email_recipients=[],
             )
         elif action == "close" and t.status != Ticket.CLOSED_STATUS:
             t.status = Ticket.CLOSED_STATUS
@@ -865,11 +866,12 @@ def mass_update(request):
                 public=False,
                 user=request.user,
                 new_status=Ticket.CLOSED_STATUS,
+                email_recipients=[],
             )
         elif action == "close_public" and t.status != Ticket.CLOSED_STATUS:
             t.status = Ticket.CLOSED_STATUS
             t.save()
-            t.followup_set.create(
+            followup = t.followup_set.create(
                 date=timezone.now(),
                 title=_("Closed in bulk update"),
                 public=True,
@@ -898,13 +900,17 @@ def mass_update(request):
             ):
                 roles["assigned_to"] = ("closed_owner", context)
 
+            sent_to = set()
             messages_sent_to.update(
                 t.send(
                     roles,
                     dont_send_to=messages_sent_to,
+                    sent_to=sent_to,
                     fail_silently=True,
                 )
             )
+            followup.email_recipients = sorted(sent_to)
+            followup.save()
 
         elif action == "delete":
             t.delete()
