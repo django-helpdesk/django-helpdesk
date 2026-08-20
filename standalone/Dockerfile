@@ -1,5 +1,5 @@
 # --- Stage 1: Build frontend assets ---
-FROM node:20 AS frontend-builder
+FROM node:26 AS frontend-builder
 
 # Copy source and build static assets
 WORKDIR /app
