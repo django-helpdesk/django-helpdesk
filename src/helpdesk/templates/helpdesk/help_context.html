@@ -42,7 +42,7 @@
             </li>
             <li class="list-group-item" id="queue_slug">
               <p class="fw-medium mb-0">queue.slug</p>
-              {% translate "The 'slug' of the queue, a single-word lowercase identifier used in urls and e-mail subjects." %}
+              {% translate 'The "slug" of the queue, a single-word lowercase identifier used in urls and e-mail subjects.' %}
             </li>
             <li class="list-group-item" id="queue_email_address">
               <p class="fw-medium mb-0">queue.email_address</p>
@@ -88,7 +88,7 @@
             </li>
             <li class="list-group-item" id="ticket_get_status">
               <p class="fw-medium mb-0">ticket.get_status</p>
-              {% translate "Status of this ticket (Text-based, includes 'On Hold' if required)" %}
+              {% translate 'Status of this ticket (Text-based, includes "On Hold" if required)' %}
             </li>
             <li class="list-group-item" id="ticket_on_hold">
               <p class="fw-medium mb-0">ticket.on_hold</p>
@@ -116,11 +116,12 @@
             </li>
             <li class="list-group-item" id="ticket_ticket">
               <p class="fw-medium mb-0">ticket.ticket</p>
-              {% translate "The ticket ID in form '[queue_slug-id]', used in e-mail subjects." %}
+              {% translate 'The ticket ID in form "[queue_slug-id]", used in e-mail subjects. For example, use' %}
+              <code>{% verbatim %} {{ ticket.ticket }}{% endverbatim %}</code>
             </li>
             <li class="list-group-item" id="ticket_ticket_for_url">
               <p class="fw-medium mb-0">ticket.ticket_for_url</p>
-              {% translate "The ticket ID in form 'queue_slug-id', used in URLs" %}
+              {% translate 'The ticket ID in form "queue_slug-id", used in URLs' %}
             </li>
             <li class="list-group-item" id="ticket_ticket_url">
               <p class="fw-medium mb-0">ticket.ticket_url</p>
@@ -132,7 +133,7 @@
             </li>
             <li class="list-group-item" id="ticket_assigned_to">
               <p class="fw-medium mb-0">ticket.assigned_to</p>
-              {% translate "Name of the staff member assigned to this ticket, or 'Unassigned' if it is unassigned." %}
+              {% translate 'Name of the staff member assigned to this ticket, or "Unassigned" if it is unassigned.' %}
             </li>
             <li class="list-group-item" id="ticket_queue">
               <p class="fw-medium mb-0">ticket.queue</p>
