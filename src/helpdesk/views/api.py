@@ -1,6 +1,7 @@
 from typing import ClassVar
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
@@ -23,18 +24,22 @@ from helpdesk.user import HelpdeskUser
 def accessible_tickets(user):
     """The tickets `user` is allowed to reach through the API.
 
-    This mirrors `HelpdeskUser.can_access_ticket()` rather than being merely
-    stricter than it. The staff UI grants access through the queue permission
-    model and additionally to a ticket assigned to the user, even when that
-    ticket sits in a queue they were not granted, so the API has to grant the
-    same set or it would deny requests the UI allows.
+    This is the queryset form of `HelpdeskUser.can_access_ticket()`: a queue the
+    user was granted, or a ticket assigned to them even when its queue was not.
+
+    `can_access_queue()` is the authorization helper and is what the staff views
+    consult before serving a ticket. `get_queues()` is a different thing: it also
+    returns every queue accepting public submissions, so it is wider than what
+    the user may actually open. Filtering through the authorization helper keeps
+    the API aligned with the check the UI applies per ticket.
 
     With HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION disabled, or for a
-    superuser, `get_queues()` returns every queue and this filter is a no-op.
+    superuser, `has_full_access()` is true, every queue passes and this filter is
+    a no-op.
     """
-    return Ticket.objects.filter(
-        Q(queue__in=HelpdeskUser(user).get_queues()) | Q(assigned_to=user)
-    ).distinct()
+    huser = HelpdeskUser(user)
+    queues = [q for q in huser.get_queues() if huser.can_access_queue(q)]
+    return Ticket.objects.filter(Q(queue__in=queues) | Q(assigned_to=user)).distinct()
 
 
 def restrict_relation(serializer, field_name, queryset):
@@ -44,11 +49,23 @@ def restrict_relation(serializer, field_name, queryset):
     both through `get_queryset()`. Creation is the remaining path: a POST names
     a ticket or a follow-up by primary key, and without this the serializer
     would accept one belonging to a queue the user cannot access.
+
+    Raises rather than returning quietly when the field is absent or is not a
+    relation. Skipping silently would drop an authorization check the moment a
+    field is renamed, which is the one failure mode this must not have.
     """
     target = getattr(serializer, "child", serializer)
     field = target.fields.get(field_name)
-    if field is not None and hasattr(field, "queryset"):
-        field.queryset = queryset
+    if field is None:
+        raise ImproperlyConfigured(
+            f"{type(target).__name__} has no field {field_name!r} to restrict."
+        )
+    if not hasattr(field, "queryset"):
+        raise ImproperlyConfigured(
+            f"{type(target).__name__}.{field_name} is not a relation, "
+            "so it cannot be restricted to a queryset."
+        )
+    field.queryset = queryset
 
 
 class ConservativePagination(PageNumberPagination):
@@ -122,10 +139,10 @@ class TicketViewSet(viewsets.ModelViewSet):
         restrict_relation(
             serializer, "queue", HelpdeskUser(self.request.user).get_queues()
         )
-        # merged_to points at another Ticket, so it is a second way to reach
-        # across the boundary: without this a restricted user can link one of
-        # their own tickets to a foreign one, which both confirms that ticket
-        # exists and writes a reference into it.
+        # merged_to points at another Ticket, so it is a second way across the
+        # boundary: without this a restricted user can link one of their own
+        # tickets to a foreign one, which both confirms that ticket exists and
+        # writes a reference into it.
         restrict_relation(
             serializer, "merged_to", accessible_tickets(self.request.user)
         )

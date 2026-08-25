@@ -567,10 +567,9 @@ class PerQueueApiAuthorizationTestCase(TestCase):
         self.assertFalse(Ticket.objects.filter(title="planted").exists())
 
     def test_ticket_cannot_be_merged_into_a_foreign_ticket(self):
-        """Raised by @DavidVadnais in review. `merged_to` is a second relation
-        pointing at a Ticket, so narrowing `queue` alone left a way to write a
-        reference into a queue the user cannot reach, and to confirm that a
-        ticket is there."""
+        """`merged_to` is a second relation pointing at a Ticket, so narrowing
+        `queue` alone would leave a way to write a reference into a queue the
+        user cannot reach, and to confirm a ticket is there."""
         self.login_staff()
         response = self.client.patch(
             f"/api/tickets/{self.ticket_a.id}/",
@@ -633,20 +632,42 @@ class PerQueueApiAuthorizationTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200, response.content)
 
-    def test_public_submission_queues_are_visible_to_every_staff_member(self):
-        """Also raised by @DavidVadnais. `get_queues()` deliberately includes
-        queues that accept public submissions, whoever the staff member is, and
-        the UI behaves the same way. Reusing that helper means the API inherits
-        it rather than inventing a different rule, so this pins the grant as
-        intended rather than leaving it to look like a hole."""
+    def test_api_and_ui_agree_on_a_public_submission_queue(self):
+        """`get_queues()` includes every queue that accepts public submissions,
+        but `can_access_queue()` does not, and it is the latter that the staff
+        views consult before serving a ticket. So a restricted account is denied
+        such a ticket in the UI, and the API has to deny it too rather than
+        following the wider helper.
+
+        Asserting both sides here rather than a bare status code: the point is
+        that they agree, whatever the project later decides that answer should
+        be.
+        """
         public_queue = Queue.objects.create(
             title="Public", slug="pub", allow_public_submission=True
         )
         public_ticket = Ticket.objects.create(title="Public one", queue=public_queue)
         self.login_staff()
-        self.assertEqual(
-            self.client.get(f"/api/tickets/{public_ticket.id}/").status_code, 200
+        ui = self.client.get(
+            reverse("helpdesk:view", kwargs={"ticket_id": public_ticket.id}),
+            follow=True,
         )
+        self.assertRedirects(ui, reverse("helpdesk:list"))
+        api = self.client.get(f"/api/tickets/{public_ticket.id}/")
+        self.assertEqual(api.status_code, 404)
+
+    def test_restricting_an_unknown_relation_raises(self):
+        """A renamed field must not quietly drop the restriction, which would
+        remove an authorization check with no signal at all."""
+        from django.core.exceptions import ImproperlyConfigured
+
+        from helpdesk.serializers import TicketSerializer
+        from helpdesk.views.api import restrict_relation
+
+        with self.assertRaises(ImproperlyConfigured):
+            restrict_relation(TicketSerializer(), "queue_renamed", Queue.objects.none())
+        with self.assertRaises(ImproperlyConfigured):
+            restrict_relation(TicketSerializer(), "title", Queue.objects.none())
 
     def test_superuser_sees_every_queue(self):
         self.client.login(username="root", password="pass")
