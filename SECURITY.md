@@ -35,11 +35,13 @@ Everything below is theirs to drive, not to delegate and hope.
    For a report that arrived by email, open the draft yourself under Security > Advisories, credit the reporter and add them as a collaborator.
    Either way they usually know the issue better than we do, and they will catch an inaccurate write-up before it is public.
 
-2. **Request the CVE at draft stage**, not at the end.
-   GitHub quotes up to three working days to review the request, and requesting it discloses nothing, so it may as well run in parallel with the fix.
-   If the identifier has not arrived by the time everything else is ready, decide deliberately whether to wait rather than assuming it will catch up.
-   Publishing first does not simply defer the assignment: another CNA can pick the published advisory up and assign a CVE from it, with their own severity and their own wording.
-   That is what happened to GHSA-q46c-8w98-fq2g, which VulnCheck assigned CVE-2026-73531 from five days after we published, while GitHub's own review was still pending.
+2. **Request the CVE at draft stage**, then stop thinking about it.
+   Requesting it discloses nothing, so it may as well run in parallel with the fix, but do not treat the identifier as a prerequisite for anything.
+   GitHub's own support told us in August 2026 that CVE requests are being processed in order of arrival with a turnaround of about three weeks, that individual requests cannot be expedited, and, most usefully, that **Dependabot alerts are driven from the advisory rather than from the CVE assignment**.
+   Publishing therefore protects users immediately, whether or not an identifier exists yet, and the CVE is the external record rather than the thing that warns anybody.
+   Two consequences worth knowing.
+   Waiting for the identifier before publishing buys nothing and delays the alerts, so do not do it.
+   And another CNA may assign one from the published advisory before GitHub's review completes, with their own severity and wording, as VulnCheck did for GHSA-q46c-8w98-fq2g with CVE-2026-73531 five days after we published; if that happens, adopt their identifier rather than arguing a difference.
 
 3. **Fill in the affected version range honestly.**
    Work out when the vulnerable code was actually introduced rather than assuming it was recent, and make the upper bound match the version that will carry the fix.
