@@ -122,6 +122,13 @@ class TicketViewSet(viewsets.ModelViewSet):
         restrict_relation(
             serializer, "queue", HelpdeskUser(self.request.user).get_queues()
         )
+        # merged_to points at another Ticket, so it is a second way to reach
+        # across the boundary: without this a restricted user can link one of
+        # their own tickets to a foreign one, which both confirms that ticket
+        # exists and writes a reference into it.
+        restrict_relation(
+            serializer, "merged_to", accessible_tickets(self.request.user)
+        )
         return serializer
 
 

@@ -566,6 +566,22 @@ class PerQueueApiAuthorizationTestCase(TestCase):
         self.assertIn("queue", response.json())
         self.assertFalse(Ticket.objects.filter(title="planted").exists())
 
+    def test_ticket_cannot_be_merged_into_a_foreign_ticket(self):
+        """Raised by @DavidVadnais in review. `merged_to` is a second relation
+        pointing at a Ticket, so narrowing `queue` alone left a way to write a
+        reference into a queue the user cannot reach, and to confirm that a
+        ticket is there."""
+        self.login_staff()
+        response = self.client.patch(
+            f"/api/tickets/{self.ticket_a.id}/",
+            {"merged_to": self.ticket_b.id},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("merged_to", response.json())
+        self.ticket_a.refresh_from_db()
+        self.assertIsNone(self.ticket_a.merged_to_id)
+
     # Positive controls
 
     def test_permitted_queue_is_still_reachable(self):
@@ -605,6 +621,31 @@ class PerQueueApiAuthorizationTestCase(TestCase):
                 f"/api/followups-attachments/{self.attachment_b.id}/"
             ).status_code,
             200,
+        )
+
+    def test_ticket_can_be_merged_into_a_permitted_ticket(self):
+        self.login_staff()
+        other_a = Ticket.objects.create(title="Other in A", queue=self.queue_a)
+        response = self.client.patch(
+            f"/api/tickets/{self.ticket_a.id}/",
+            {"merged_to": other_a.id},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_public_submission_queues_are_visible_to_every_staff_member(self):
+        """Also raised by @DavidVadnais. `get_queues()` deliberately includes
+        queues that accept public submissions, whoever the staff member is, and
+        the UI behaves the same way. Reusing that helper means the API inherits
+        it rather than inventing a different rule, so this pins the grant as
+        intended rather than leaving it to look like a hole."""
+        public_queue = Queue.objects.create(
+            title="Public", slug="pub", allow_public_submission=True
+        )
+        public_ticket = Ticket.objects.create(title="Public one", queue=public_queue)
+        self.login_staff()
+        self.assertEqual(
+            self.client.get(f"/api/tickets/{public_ticket.id}/").status_code, 200
         )
 
     def test_superuser_sees_every_queue(self):
