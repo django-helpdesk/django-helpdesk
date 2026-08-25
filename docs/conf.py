@@ -49,7 +49,6 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "django-helpdesk"
 copyright = "2011-2026, Django-helpdesk Contributors"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -110,6 +109,9 @@ html_theme = "furo"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
+    "source_repository": "https://github.com/django-helpdesk/django-helpdesk",
+    "source_branch": "main",
+    "source_directory": "docs/",
     "top_of_page_buttons": ["view", "edit"],
     "dark_css_variables": {
         "admonition-font-size": "100%",
