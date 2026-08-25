@@ -116,8 +116,8 @@ Suppressible Log Messages
 Some logging messages support being switched on or off according to deployment preferences.
 The following settings variables control emitting log messages for specific scenarios
 
-``LOG_WARN_WHEN_CC_EMAIL_NOT_LINKED_TO_A_USER`` (default:``False``)
+``HELPDESK_LOG_WARN_WHEN_CC_EMAIL_NOT_LINKED_TO_A_USER`` (default:``False``)
   There is no user matching the email address in the CC list.
 
-``LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER`` (default:``True``)
+``HELPDESK_LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER`` (default:``True``)
   There is more than 1 user matching the email address in the CC list.

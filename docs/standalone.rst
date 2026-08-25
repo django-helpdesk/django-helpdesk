@@ -105,7 +105,7 @@ Database Configuration
    ``POSTGRES_USER``, ``postgres``, "Database user"
    ``POSTGRES_PASSWORD``, ``postgres``, "Database password"
    ``POSTGRES_HOST``, ``postgres``, "Database host"
-   ``POSTGRES_PORT``, ``5432``, "Database poort"
+   ``POSTGRES_PORT``, ``5432``, "Database port"
 
 Email Configuration
 *******************
@@ -139,8 +139,8 @@ Security Settings
    :align: left
    :widths: auto
 
-   ``DJANGO_HELPDESK_SECRET_KEY``, "Required", "Django secret key"
-   ``DJANGO_HELPDESK_ALLOWED_HOSTS``, ``* localhost 0.0.0.0``, "Comma-separated list of allowed hosts"
+   ``DJANGO_HELPDESK_SECRET_KEY``, "*Required*", "Django secret key"
+   ``DJANGO_HELPDESK_ALLOWED_HOSTS``, "``*, localhost, 0.0.0.0``", "Comma-separated list of allowed hosts"
 
 Helpdesk Core Settings
 **********************
