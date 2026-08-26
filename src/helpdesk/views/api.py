@@ -2,7 +2,6 @@ from typing import ClassVar
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.pagination import PageNumberPagination
@@ -24,14 +23,16 @@ from helpdesk.user import HelpdeskUser
 def accessible_tickets(user):
     """The tickets `user` is allowed to reach through the API.
 
-    This is the queryset form of `HelpdeskUser.can_access_ticket()`: a queue the
-    user was granted, or a ticket assigned to them even when its queue was not.
+    This is the queryset form of the check the staff views actually apply, which
+    is `can_access_queue()` on the ticket's queue.
 
-    `can_access_queue()` is the authorization helper and is what the staff views
-    consult before serving a ticket. `get_queues()` is a different thing: it also
-    returns every queue accepting public submissions, so it is wider than what
-    the user may actually open. Filtering through the authorization helper keeps
-    the API aligned with the check the UI applies per ticket.
+    Two helpers look like they belong here and do not. `get_queues()` is wider:
+    it also returns every queue accepting public submissions, so it covers
+    tickets the UI refuses to open. `can_access_ticket()` looks wider too, since
+    it grants a ticket assigned to the user whatever its queue, but that branch
+    never runs in the UI: `ticket_perm_check()` tests the queue first and denies
+    before reaching it. Granting it here would leave the API more permissive than
+    the interface, which is the shape of the problem this is fixing.
 
     With HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION disabled, or for a
     superuser, `has_full_access()` is true, every queue passes and this filter is
@@ -39,7 +40,7 @@ def accessible_tickets(user):
     """
     huser = HelpdeskUser(user)
     queues = [q for q in huser.get_queues() if huser.can_access_queue(q)]
-    return Ticket.objects.filter(Q(queue__in=queues) | Q(assigned_to=user)).distinct()
+    return Ticket.objects.filter(queue__in=queues)
 
 
 def restrict_relation(serializer, field_name, queryset):

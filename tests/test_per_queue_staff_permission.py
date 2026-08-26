@@ -598,14 +598,22 @@ class PerQueueApiAuthorizationTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 201, response.content)
 
-    def test_ticket_assigned_to_the_user_stays_reachable_outside_their_queues(self):
-        """The staff UI grants this through can_access_ticket(), so the API has
-        to as well rather than being stricter than the interface."""
+    def test_api_and_ui_agree_on_a_ticket_assigned_outside_the_user_queues(self):
+        """`can_access_ticket()` reads as though an assignee may always reach
+        their ticket, but `ticket_perm_check()` tests the queue first and denies
+        before that branch runs, so the UI refuses it. The API must refuse it
+        too: granting it would leave the API more permissive than the interface.
+        """
         self.ticket_b.assigned_to = self.staff
         self.ticket_b.save()
         self.login_staff()
+        ui = self.client.get(
+            reverse("helpdesk:view", kwargs={"ticket_id": self.ticket_b.id}),
+            follow=True,
+        )
+        self.assertRedirects(ui, reverse("helpdesk:list"))
         self.assertEqual(
-            self.client.get(f"/api/tickets/{self.ticket_b.id}/").status_code, 200
+            self.client.get(f"/api/tickets/{self.ticket_b.id}/").status_code, 404
         )
 
     def test_superuser_can_retrieve_the_followup_and_attachment(self):
