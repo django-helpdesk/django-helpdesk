@@ -1,9 +1,6 @@
 API
 ===
 
-.. contents:: In this document...
-   :depth: 2
-
 A REST API (built with ``djangorestframework``) is available in order to list, create, update and delete tickets from
 other tools thanks to HTTP requests.
 
@@ -24,25 +21,45 @@ POST
 ----
 
 Accessing the endpoint ``/api/tickets/`` with a **POST** request will let you create a new tickets.
+You need to provide a JSON body with the following data
 
-You need to provide a JSON body with the following data :
+``queue``
+    ID of the queue
 
-- **queue**: ID of the queue
-- **title**: the title (subject) of the ticket
-- **description**: the description of the ticket
-- **resolution**: an optional text for the resoltuion of the ticket
-- **submitter_email**: the email of the ticket submitter
-- **assigned_to**: ID of the ticket's assigned user
-- **status**: integer corresponding to the status (OPEN=1, REOPENED=2, RESOLVED=3, CLOSED=4, DUPLICATE=5). It is OPEN by default.
-- **on_hold**: boolean to indicates if the ticket is on hold
-- **priority**: integer corresponding to different degrees of priority 1 to 5 (1 is Critical and 5 is Very Low)
-- **due_date**: date representation for when the ticket is due
-- **merged_to**: ID of the ticket to which it is merged
+``title``
+    The title (subject) of the ticket
 
-Note that ``status`` will automatically be set to OPEN. Also, some fields are not configurable during creation:
-``resolution``, ``on_hold`` and ``merged_to``.
+``description``
+    The description of the ticket
 
-Moreover, if you created custom fields, you can add them into the body with the key ``custom_<custom-field-slug>``.
+``resolution``
+    An optional text for the resoltuion of the ticket
+
+``submitter_email``
+    The email of the ticket submitter
+
+``assigned_to``
+    ID of the ticket's assigned user
+
+``status``
+    Integer corresponding to the status (OPEN=1, REOPENED=2, RESOLVED=3, CLOSED=4, DUPLICATE=5). It is OPEN by default.
+
+``on_hold``
+    Boolean to indicates if the ticket is on hold
+
+``priority``
+    Integer corresponding to different degrees of priority 1 to 5 (1 is Critical and 5 is Very Low)
+
+``due_date``
+    Date representation for when the ticket is due
+
+``merged_to``
+  ID of the ticket to which it is merged
+
+.. note::
+     ``status`` will automatically be set to OPEN. Also, some fields are not configurable during creation
+     ``resolution``, ``on_hold`` and ``merged_to``.
+     Moreover, if you created custom fields, you can add them into the body with the key ``custom_<custom-field-slug>``.
 
 Here is an example of a cURL request to create a ticket (using Basic authentication) ::
 
@@ -83,11 +100,11 @@ Accessing the endpoint ``/api/users/`` with a **POST** request will let you crea
 
 You need to provide a JSON body with the following data :
 
-- **first_name**: first name
-- **last_name**: last name
-- **username**: username
-- **email**: user email
-- **password**: user password
+- ``first_name``: first name
+- ``last_name``: last name
+- ``username``: username
+- ``email``: user email
+- ``password``: user password
 
 PUT
 ---

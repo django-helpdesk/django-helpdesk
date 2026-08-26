@@ -37,15 +37,14 @@ Two packages used to be installed with every copy of django-helpdesk even though
 the project itself never imports them, and neither is needed for a default
 install. They are now optional extras:
 
-===================  ======================================  ==================================
-Feature              Install with                            Needed if you
-===================  ======================================  ==================================
-Celery mail polling  ``pip install django-helpdesk[celery]``  schedule ``helpdesk.tasks``
-                                                             instead of running ``get_email``
-                                                             from cron
-Akismet spam check   ``pip install django-helpdesk[spam]``    set ``AKISMET_API_KEY`` or
-                                                             ``TYPEPAD_ANTISPAM_API_KEY``
-===================  ======================================  ==================================
+.. csv-table::
+   :header: "Feature", "Install with", "Needed if you"
+   :align: left
+   :widths: auto
+
+   "Celery mail polling", ``pip install django-helpdesk[celery]``, "schedule ``helpdesk.tasks`` instead of running
+   ``get_email`` from cron"
+   "Akismet spam check", ``pip install django-helpdesk[spam]``, "set ``AKISMET_API_KEY`` or ``TYPEPAD_ANTISPAM_API_KEY``"
 
 If you would rather not work out which apply to you, ``pip install
 django-helpdesk[all]`` restores exactly what earlier releases pulled in.
@@ -68,14 +67,14 @@ configuration from starting at all. It stays a hard dependency.
 0.2 -> 0.3
 ----------
 
-- Under `INSTALLED_APPS`, `bootstrapform` needs to be replaced with `bootstrap4form`
+- Under ``INSTALLED_APPS``, ``bootstrapform`` needs to be replaced with ``bootstrap4form``
 
-- Unless turning off `pinax_teams`, add the following to `INSTALLED_APPS` for `pinax_teams`::
+- Unless turning off ``pinax_teams``, add the following to ``INSTALLED_APPS`` for ``pinax_teams``::
 
     "account",
     "pinax.invitations",
     "pinax.teams",
     "reversion",
 
-  
-- If using `send_templated_mail`, then it now needs to be imported from `helpdesk.templated_email`
+
+- If using ``send_templated_mail``, then it now needs to be imported from ``helpdesk.templated_email``
