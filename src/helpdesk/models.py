@@ -513,21 +513,12 @@ class Ticket(models.Model):
     PRIORITY_CHOICES = helpdesk_settings.TICKET_PRIORITY_CHOICES
     PRIORITY_CSS_CLASSES = helpdesk_settings.TICKET_PRIORITY_CSS_CLASSES
 
-    title = models.CharField(
-        _("Title"),
-        max_length=200,
-    )
+    title = models.CharField(_("Title"), max_length=200)
 
-    queue = models.ForeignKey(
-        Queue,
-        on_delete=models.CASCADE,
-        verbose_name=_("Queue"),
-    )
+    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, verbose_name=_("Queue"))
 
     created = models.DateTimeField(
-        _("Created"),
-        blank=True,
-        help_text=_("Date this ticket was first created"),
+        _("Created"), blank=True, help_text=_("Date this ticket was first created")
     )
 
     modified = models.DateTimeField(
@@ -556,9 +547,7 @@ class Ticket(models.Model):
     )
 
     status = models.IntegerField(
-        _("Status"),
-        choices=STATUS_CHOICES,
-        default=OPEN_STATUS,
+        _("Status"), choices=STATUS_CHOICES, default=OPEN_STATUS
     )
 
     on_hold = models.BooleanField(
@@ -631,6 +620,33 @@ class Ticket(models.Model):
         blank=True,
     )
 
+    class Meta:
+        get_latest_by = "created"
+        ordering = ("id",)
+        verbose_name = _("Ticket")
+        verbose_name_plural = _("Tickets")
+
+    def __str__(self) -> str:
+        return f"{self.id} {self.title}"
+
+    def get_absolute_url(self) -> str:
+        return reverse_lazy("helpdesk:view", args=(self.id,))
+
+    def save(self, *args, **kwargs) -> None:
+        if not self.id:
+            # This is a new ticket as no ID yet exists.
+            self.created = timezone.now()
+
+        if not self.priority:
+            self.priority = 3
+
+        self.modified = timezone.now()
+
+        if len(self.title) > 200:
+            self.title = self.title[:197] + "..."
+
+        super().save(*args, **kwargs)
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
@@ -701,35 +717,32 @@ class Ticket(models.Model):
                 send("ticket_cc", cc.email_address)
         return recipients
 
-    def _get_assigned_to(self):
-        """Custom property to allow us to easily print 'Unassigned' if a
-        ticket has no owner, or the users name if it's assigned. If the user
-        has a full name configured, we use that, otherwise their username."""
-        if not self.assigned_to:
+    @property
+    def get_assigned_to(self) -> str:
+        """Show the full name or username of the staff working on this ticket
+        else just say 'Unassigned'."""
+
+        taker = self.assigned_to
+
+        if not taker:
             return _("Unassigned")
-        else:
-            if self.assigned_to.get_full_name():
-                return self.assigned_to.get_full_name()
-            else:
-                return self.assigned_to.get_username()
 
-    get_assigned_to = property(_get_assigned_to)
+        return taker.get_full_name() or taker.get_username()
 
-    def _get_ticket(self):
+    @property
+    def ticket(self) -> str:
         """A user-friendly ticket ID, which is a combination of ticket ID
         and queue slug. This is generally used in e-mail subjects."""
 
         return f"[{self.ticket_for_url}]"
 
-    ticket = property(_get_ticket)
-
-    def _get_ticket_for_url(self):
+    @property
+    def ticket_for_url(self) -> str:
         """A URL-friendly ticket ID, used in links."""
         return f"{self.queue.slug}-{self.id}"
 
-    ticket_for_url = property(_get_ticket_for_url)
-
-    def _get_priority_css_class(self):
+    @property
+    def get_priority_css_class(self) -> str:
         """
         Return the bootstrap class corresponding to the priority.
 
@@ -738,46 +751,28 @@ class Ticket(models.Model):
         (e.g. "success") which are inert on <tr> elements in Bootstrap 5;
         see get_priority_badge_class for the badge rendering.
         """
-        if self.priority == 2:
-            return "warning"
-        elif self.priority == 1:
-            return "danger"
-        elif self.priority == 5:
-            return "success"
-        else:
-            return ""
+        CSS_MAP = {1: "danger", 2: "warning", 5: "success"}
+        return CSS_MAP.get(self.priority, "")
 
-    get_priority_css_class = property(_get_priority_css_class)
+    @property
+    def get_status_badge_class(self) -> str:
+        """Return the bootstrap class for the status badge, from the setting."""
 
-    def _get_status_badge_class(self):
-        """
-        Return the bootstrap class for the status badge, from the setting.
-        """
         return self.STATUS_CSS_CLASSES.get(self.status, "")
 
-    get_status_badge_class = property(_get_status_badge_class)
-
-    def _get_priority_badge_class(self):
-        """
-        Return the bootstrap class for the priority badge, from the setting.
-        """
+    @property
+    def get_priority_badge_class(self) -> str:
+        """Return the bootstrap class for the priority badge, from the setting."""
         return self.PRIORITY_CSS_CLASSES.get(self.priority, "")
 
-    get_priority_badge_class = property(_get_priority_badge_class)
+    @property
+    def get_status(self) -> str:
+        """Displays the ticket status, with an "On Hold" message if needed."""
 
-    def _get_status(self):
-        """
-        Displays the ticket status, with an "On Hold" message if needed.
-        """
-        held_msg = ""
-        if self.on_hold:
-            held_msg = _(" - On Hold")
-        dep_msg = ""
-        if not self.can_be_resolved:
-            dep_msg = _(" - Open dependencies")
+        held_msg = _(" - On Hold") if self.on_hold else ""
+        dep_msg = "" if self.can_be_resolved else _(" - Open dependencies")
+
         return f"{self.get_status_display()}{held_msg}{dep_msg}"
-
-    get_status = property(_get_status)
 
     def _get_allowed_status_flow(self):
         """
@@ -798,33 +793,33 @@ class Ticket(models.Model):
 
     get_allowed_status_flow = property(_get_allowed_status_flow)
 
-    def _get_ticket_url(self):
+    @property
+    def ticket_url(self) -> str:
         """
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
         from django.contrib.sites.models import Site
         from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
 
         try:
             site = Site.objects.get_current()
         except ImproperlyConfigured:
             site = Site(domain="configure-django-sites.com")
+
         if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
             protocol = "https"
         else:
             protocol = "http"
+
         return "{}://{}{}?ticket={}&email={}&key={}".format(
             protocol,
             site.domain,
-            reverse("helpdesk:public_view"),
+            reverse_lazy("helpdesk:public_view"),
             self.ticket_for_url,
             self.submitter_email,
             self.secret_key,
         )
-
-    ticket_url = property(_get_ticket_url)
 
     def _get_staff_url(self):
         """
@@ -871,35 +866,6 @@ class Ticket(models.Model):
             return User.objects.get(email=self.submitter_email)
         except (User.DoesNotExist, User.MultipleObjectsReturned):
             return None
-
-    class Meta:
-        get_latest_by = "created"
-        ordering = ("id",)
-        verbose_name = _("Ticket")
-        verbose_name_plural = _("Tickets")
-
-    def __str__(self):
-        return f"{self.id} {self.title}"
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-
-        return reverse("helpdesk:view", args=(self.id,))
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            # This is a new ticket as no ID yet exists.
-            self.created = timezone.now()
-
-        if not self.priority:
-            self.priority = 3
-
-        self.modified = timezone.now()
-
-        if len(self.title) > 200:
-            self.title = self.title[:197] + "..."
-
-        super().save(*args, **kwargs)
 
     @staticmethod
     def queue_and_id_from_query(query):
