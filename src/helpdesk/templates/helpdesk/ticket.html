@@ -138,6 +138,16 @@
                 <small class="text-secondary">
                   {{ followup.date|naturaltime }} {% if followup.user %}· {{ followup.user }}{% endif %}
                 </small>
+                {% if followup.email_recipients is not None %}
+                  <small class="text-secondary d-block">
+                    <i class="fa-regular fa-envelope fa-sm me-1"></i>
+                    {% if followup.email_recipients %}
+                      {% blocktranslate with recipients=followup.email_recipients|join:", " %}Emailed: {{ recipients }}{% endblocktranslate %}
+                    {% else %}
+                      {% translate "Emailed: no one" %}
+                    {% endif %}
+                  </small>
+                {% endif %}
                 {# Ticket comments #}
                 {% if followup.comment %}
                   <div class="mt-3">{{ followup.get_markdown|urlizetrunc:50|num_to_link }}</div>

@@ -1,5 +1,5 @@
 # --- Stage 1: Build frontend assets ---
-FROM node:20 AS frontend-builder
+FROM node:26 AS frontend-builder
 
 # Copy source and build static assets
 WORKDIR /app
@@ -7,6 +7,7 @@ WORKDIR /app
 COPY django-helpdesk/ .
 
 # Enable Corepack to use the defined packageManager in package.json
+RUN npm install -g corepack # no longer packaged by defaults as of node 26
 RUN corepack enable
 # Install dependencies
 RUN yarn install
@@ -14,7 +15,7 @@ COPY . .
 RUN yarn build:static
 
 # --- Stage 2: Main Django image ---
-FROM python:3.11-slim-bullseye AS app
+FROM python:3.13-slim-bullseye AS app
 LABEL src=https://github.com/django-helpdesk/django-helpdesk
 RUN apt-get update
 RUN apt-get install -yqq \
