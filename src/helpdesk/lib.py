@@ -289,3 +289,22 @@ def get_assignable_users(filter_staff: bool) -> QuerySet:
         users = users.filter(is_staff=True)
 
     return users.order_by(User.USERNAME_FIELD)
+
+
+def build_base_url() -> str:
+    """
+    Construct the base uri of the project based on domain configured
+    in the sites framework. Ex: https://mydomain.com
+    """
+
+    from django.contrib.sites.models import Site
+    from django.core.exceptions import ImproperlyConfigured
+
+    try:
+        site = Site.objects.get_current()
+    except ImproperlyConfigured:
+        site = Site(domain="configure-django-sites.com")
+
+    protocol = "https" if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK else "http"
+
+    return f"{protocol}://{site.domain}"
