@@ -25,7 +25,7 @@ from django.db import models
 from django.db.models import QuerySet
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from markdown import markdown
@@ -34,7 +34,12 @@ from rest_framework import serializers
 
 from helpdesk import settings as helpdesk_settings
 
-from .lib import convert_value, daily_time_spent_calculation, format_time_spent
+from .lib import (
+    build_base_url,
+    convert_value,
+    daily_time_spent_calculation,
+    format_time_spent,
+)
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
 
@@ -799,100 +804,69 @@ class Ticket(models.Model):
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
+        base_url = build_base_url()
 
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain="configure-django-sites.com")
-
-        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
-            protocol = "https"
-        else:
-            protocol = "http"
-
-        return "{}://{}{}?ticket={}&email={}&key={}".format(
-            protocol,
-            site.domain,
+        return "{}{}?ticket={}&email={}&key={}".format(
+            base_url,
             reverse_lazy("helpdesk:public_view"),
             self.ticket_for_url,
             self.submitter_email,
             self.secret_key,
         )
 
-    def _get_staff_url(self):
-        """
-        Returns a staff-only URL for this ticket, used when giving a URL to
-        a staff member (in emails etc)
-        """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
+    @property
+    def staff_url(self) -> str:
+        """The absolute url of a ticket with a fully qualified domain."""
 
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain="configure-django-sites.com")
-        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
-            protocol = "https"
-        else:
-            protocol = "http"
-        return "{}://{}{}".format(
-            protocol,
-            site.domain,
-            reverse("helpdesk:view", args=[self.id]),
-        )
+        base_url = build_base_url()
+        path = self.get_absolute_url()
 
-    staff_url = property(_get_staff_url)
+        return f"{base_url}{path}"
 
-    def _can_be_resolved(self):
-        """
-        Returns a boolean.
-        True = any dependencies are resolved
-        False = There are non-resolved dependencies
-        """
-        return (
-            TicketDependency.objects.filter(ticket=self)
-            .filter(depends_on__status__in=Ticket.OPEN_STATUSES)
-            .count()
-            == 0
-        )
+    @property
+    def can_be_resolved(self) -> bool:
+        """If all dependencies (if any) on a ticket are resolved then True otherwise False."""
 
-    can_be_resolved = property(_can_be_resolved)
+        qs = TicketDependency.objects.filter(ticket=self)
+        unresolved_deps = qs.filter(depends_on__status__in=Ticket.OPEN_STATUSES)
+        return not unresolved_deps.exists()
 
-    def get_submitter_userprofile(self):
-        try:
-            return User.objects.get(email=self.submitter_email)
-        except (User.DoesNotExist, User.MultipleObjectsReturned):
-            return None
+    def get_submitter_userprofile(self) -> User | None:
+        return User.objects.filter(email=self.submitter_email).first()
 
     @staticmethod
-    def queue_and_id_from_query(query):
-        # Apply the opposite logic here compared to self._get_ticket_for_url
-        # Ensure that queues with '-' in them will work
-        parts = query.split("-")
-        queue = "-".join(parts[0:-1])
-        return queue, parts[-1]
+    def queue_and_id_from_query(query) -> tuple[str, str]:
+        """
+        Apply the opposite logic here compared to `ticket_for_url`
+        Ensure that queues with '-' in them will work
 
-    def get_markdown(self):
+        Ex:
+            "pay-1" -> ("pay", "1")
+            "1-ord-99-72 -> ("1-ord-99", "72")
+        """
+
+        *parts, ticket_id = query.split("-")
+        return "-".join(parts), ticket_id
+
+    def get_markdown(self) -> SafeString:
         return get_markdown(self.description)
 
     @property
-    def get_resolution_markdown(self):
+    def get_resolution_markdown(self) -> SafeString:
         return get_markdown(self.resolution)
 
-    def add_email_to_ticketcc_if_not_in(self, email=None, user=None, ticketcc=None):
+    def add_email_to_ticketcc_if_not_in(
+        self,
+        email: str | None = None,
+        user: User | None = None,
+        ticketcc: TicketCC | None = None,
+    ):
         """
         Check that given email/user_email/ticketcc_email is not already present on the ticket
         (submitter email, assigned to, or in ticket CCs) and add it to a new ticket CC,
-        or move the given one
-
-        :param str email:
-        :param User user:
-        :param TicketCC ticketcc:
-        :rtype: TicketCC|None
+        or move the given one.
         """
+
         if ticketcc:
             email = ticketcc.display
         elif user:
