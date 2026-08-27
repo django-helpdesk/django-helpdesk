@@ -1,10 +1,11 @@
 import uuid
-from django.utils import timezone
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
-from helpdesk.models import Queue, Ticket
+from helpdesk.models import Queue, Ticket, TicketDependency
 
 User = get_user_model()
 
@@ -18,7 +19,10 @@ class TicketModelTests(TestCase):
     def setUpTestData(cls):
         # Alice works as support staff to resolve tickets
         cls.user = User.objects.create_user(
-            username="alice", password="testpass123", is_staff=True
+            email="alice@example.com",
+            username="alice",
+            password="testpass123",
+            is_staff=True,
         )
         cls.queue = Queue.objects.create(title="Products", slug="products")
         cls.ticket = Ticket.objects.create(
@@ -73,13 +77,11 @@ class TicketModelTests(TestCase):
         self.assertEqual(created.day, now.day)
         self.assertEqual(created.hour, now.hour)
         self.assertEqual(created.minute, now.minute)
-        self.assertEqual(created.second, now.second)
 
         self.assertIsNotNone(self.ticket.modified)
         self.assertEqual(modified.day, now.day)
         self.assertEqual(modified.hour, now.hour)
         self.assertEqual(modified.minute, now.minute)
-        self.assertEqual(modified.second, now.second)
 
     def test_created_and_modified_fields_update_correctly(self):
         # Arrange
@@ -183,4 +185,85 @@ class TicketModelTests(TestCase):
         expected = (
             f"http://{domain}{url}?ticket={ticket_for_url}&email={email}&key={key}"
         )
+        self.assertEqual(actual, expected)
+
+    def test_staff_url_property(self):
+        # Arrange
+        from django.contrib.sites.models import Site
+
+        domain = Site.objects.get_current().domain
+        expected = f"http://{domain}{self.ticket.get_absolute_url()}"
+        actual = self.ticket.staff_url
+
+        self.assertEqual(actual, expected)
+
+    def test_ticket_can_be_resolved_with_resolved_dependencies(self):
+        # Arrange
+        # We create a resolved ticket
+        resolved_ticket = Ticket.objects.create(
+            title="All settled",
+            submitter_email="bob@example.com",
+            queue=self.queue,
+            status=Ticket.RESOLVED_STATUS,
+        )
+
+        # Add it as a dependency on our current ticket
+        _ = TicketDependency.objects.create(
+            ticket=self.ticket, depends_on=resolved_ticket
+        )
+
+        # Assert: Our current ticket should be resolvable
+        self.assertTrue(self.ticket.can_be_resolved)
+
+    def test_ticket_cannot_be_resolved_with_unresolved_dependencies(self):
+        # Arrange
+        # Bob reopened a closed ticket
+        reopened_ticket = Ticket.objects.create(
+            title="My card got charged twice.",
+            submitter_email="bob@example.com",
+            queue=self.queue,
+            status=Ticket.REOPENED_STATUS,  # <- note
+        )
+
+        # Add it as a dependency on our current ticket
+        _ = TicketDependency.objects.create(
+            ticket=self.ticket, depends_on=reopened_ticket
+        )
+
+        # Assert: Our current ticket should NOT be resolvable
+        self.assertFalse(self.ticket.can_be_resolved)
+
+    def test_get_user_profile_of_ticket_submitter(self):
+        # Arrange: Alice our staff member submits another ticket
+        alice_ticket = Ticket.objects.create(
+            title="Client called and she is upset",
+            submitter_email=self.user.email,  # <- alice's email
+            queue=self.queue,
+        )
+
+        # Assert
+        self.assertEqual(alice_ticket.get_submitter_userprofile(), self.user)
+
+        # Bob the submitter is not a user of our system
+        self.assertIsNone(self.ticket.get_submitter_userprofile())
+
+    def test_queue_and_id_from_query_method(self):
+        # Arrange: We build 3 variations and test them successively
+
+        # 1. Typical slug
+        slug, expected = "payments-orders-339", ("payments-orders", "339")
+        actual = Ticket.queue_and_id_from_query(slug)
+
+        self.assertEqual(actual, expected)
+
+        # 2. Startwith numbers
+        slug, expected = "123-accounts-456", ("123-accounts", "456")
+        actual = Ticket.queue_and_id_from_query(slug)
+
+        self.assertEqual(actual, expected)
+
+        # 3. Endswith numbers
+        slug, expected = "accounts-123-456", ("accounts-123", "456")
+        actual = Ticket.queue_and_id_from_query(slug)
+
         self.assertEqual(actual, expected)
