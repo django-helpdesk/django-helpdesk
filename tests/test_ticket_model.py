@@ -109,7 +109,7 @@ class TicketModelTests(TestCase):
 
         self.ticket.refresh_from_db()
 
-        self.assertEndsWith(self.ticket.title, "...")
+        self.assertEqual(self.ticket.title[-3:], "...")
         self.assertEqual(len(self.ticket.title), 200)
 
     def test_get_assigned_to_property(self):
