@@ -267,3 +267,83 @@ class TicketModelTests(TestCase):
         actual = Ticket.queue_and_id_from_query(slug)
 
         self.assertEqual(actual, expected)
+
+    def test_add_email_to_ticket_cc_via_email_is_idempotent(self):
+        # First we make sure we have no ticketcc
+        qs = self.ticket.ticketcc_set.all()
+        self.assertFalse(qs.exists())
+
+        # Arrange: Charlie wants to be notified about our ticket
+        charlies_email = "charlie@example.com"
+
+        # Act: We'll add him thrice
+        self.ticket.add_email_to_ticketcc_if_not_in(email=charlies_email)
+        self.ticket.add_email_to_ticketcc_if_not_in(email=charlies_email)
+        self.ticket.add_email_to_ticketcc_if_not_in(email=charlies_email)
+
+        # Assert
+        # Make sure charlie is added only once
+        qs = self.ticket.ticketcc_set.all()
+        ticket_cc = qs.first()
+
+        self.assertEqual(len(qs), 1)
+        self.assertEqual(ticket_cc.email, charlies_email)
+
+    def test_add_email_to_ticket_cc_via_user_is_idempotent(self):
+        # First we make sure we have no ticketcc
+        qs = self.ticket.ticketcc_set.all()
+        self.assertFalse(qs.exists())
+
+        # Arrange: Alice wants to be notified about bob's ticket
+        alice = self.user
+
+        # Act: We'll add her thrice
+        self.ticket.add_email_to_ticketcc_if_not_in(user=alice)
+        self.ticket.add_email_to_ticketcc_if_not_in(user=alice)
+        self.ticket.add_email_to_ticketcc_if_not_in(user=alice)
+
+        # Assert
+        # Make sure alice is added only once
+        qs = self.ticket.ticketcc_set.all()
+        ticket_cc = qs.first()
+
+        self.assertEqual(len(qs), 1)
+        self.assertEqual(ticket_cc.user, alice)
+
+    def test_adding_submitter_email_to_ticket_is_idempotent(self):
+        # First we make sure we have no ticketcc
+        qs = self.ticket.ticketcc_set.all()
+        self.assertFalse(qs.exists())
+
+        # Arrange:
+        email = self.ticket.submitter_email
+
+        # Act: We'll add bob (who's also the submitter) to ticketcc thrice
+        self.ticket.add_email_to_ticketcc_if_not_in(email=email)
+        self.ticket.add_email_to_ticketcc_if_not_in(email=email)
+        self.ticket.add_email_to_ticketcc_if_not_in(email=email)
+
+        # Assert: this should have no effect and no ticketcc should be created
+        qs = self.ticket.ticketcc_set.all()
+        self.assertFalse(qs.exists())
+
+    def test_adding_assigned_to_email_to_ticket_is_idempotent(self):
+        # First we make sure we have no ticketcc
+        qs = self.ticket.ticketcc_set.all()
+        self.assertFalse(qs.exists())
+
+        # Arrange: Alice decides to take up the ticket
+        self.ticket.assigned_to = self.user
+        self.ticket.save()
+        self.ticket.refresh_from_db()
+
+        # Act: We'll add alice (who's assigned to the ticket) to ticketcc thrice
+        email = self.user.email
+        self.ticket.add_email_to_ticketcc_if_not_in(email=email)
+        self.ticket.add_email_to_ticketcc_if_not_in(email=email)
+        self.ticket.add_email_to_ticketcc_if_not_in(email=email)
+
+        # Assert: this should have no effect and no ticketcc should be created
+        qs = self.ticket.ticketcc_set.all()
+        self.assertFalse(qs.exists())
+        self.assertEqual(self.ticket.assigned_to, self.user)
