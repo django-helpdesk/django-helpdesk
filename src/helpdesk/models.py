@@ -860,45 +860,43 @@ class Ticket(models.Model):
         email: str | None = None,
         user: User | None = None,
         ticketcc: TicketCC | None = None,
-    ):
+    ) -> TicketCC | None:
         """
         Check that given email/user_email/ticketcc_email is not already present on the ticket
         (submitter email, assigned to, or in ticket CCs) and add it to a new ticket CC,
         or move the given one.
         """
 
-        if ticketcc:
-            email = ticketcc.display
-        elif user:
-            if user.email:
-                email = user.email
-            else:
-                # Ignore if user has no email address
-                return
-        elif not email:
-            raise ValueError(
-                "You must provide at least one parameter to get the email from"
+        new_email = (
+            getattr(ticketcc, "display", None) or getattr(user, "email", None) or email
+        )
+        if not new_email:
+            raise ValidationError(
+                "You must provide at least one parameter to get the email from",
+                code="invalid",
             )
 
         # Prepare all emails already into the ticket
-        ticket_emails = [x.display for x in self.ticketcc_set.all()]
-        if self.submitter_email:
-            ticket_emails.append(self.submitter_email)
-        if self.assigned_to and self.assigned_to.email:
-            ticket_emails.append(self.assigned_to.email)
+        ticket_emails = [x.display for x in self.ticketcc_set.all()] + [
+            self.submitter_email,
+            getattr(self.assigned_to, "email", None),
+        ]
 
         # Check that email is not already part of the ticket
-        if email not in ticket_emails:
-            if ticketcc:
-                ticketcc.ticket = self
-                ticketcc.save(update_fields=["ticket"])
-            elif user:
-                ticketcc = self.ticketcc_set.create(user=user)
-            else:
-                ticketcc = self.ticketcc_set.create(email=email)
-            return ticketcc
+        if new_email in ticket_emails:
+            return
 
-    def set_custom_field_values(self):
+        if ticketcc:
+            ticketcc.ticket = self
+            ticketcc.save(update_fields=["ticket"])
+        elif user:
+            ticketcc, _ = self.ticketcc_set.get_or_create(user=user)
+        else:
+            ticketcc, _ = self.ticketcc_set.get_or_create(email=new_email)
+
+        return ticketcc
+
+    def set_custom_field_values(self) -> None:
         for field in CustomField.objects.all():
             try:
                 value = self.ticketcustomfieldvalue_set.get(field=field).value
@@ -906,7 +904,7 @@ class Ticket(models.Model):
                 value = None
             setattr(self, f"custom_{field.name}", value)
 
-    def save_custom_field_values(self, data):
+    def save_custom_field_values(self, data) -> None:
         for field, value in data.items():
             if field.startswith("custom_"):
                 field_name = field.replace("custom_", "", 1)
