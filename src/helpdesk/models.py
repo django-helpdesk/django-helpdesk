@@ -523,13 +523,17 @@ class Ticket(models.Model):
     queue = models.ForeignKey(Queue, on_delete=models.CASCADE, verbose_name=_("Queue"))
 
     created = models.DateTimeField(
-        _("Created"), blank=True, help_text=_("Date this ticket was first created")
+        _("Created"),
+        blank=True,
+        help_text=_("Date this ticket was first created"),
+        auto_now_add=True,
     )
 
     modified = models.DateTimeField(
         _("Modified"),
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
+        auto_now=True,
     )
 
     submitter_email = models.EmailField(
@@ -638,14 +642,8 @@ class Ticket(models.Model):
         return reverse_lazy("helpdesk:view", args=(self.id,))
 
     def save(self, *args, **kwargs) -> None:
-        if not self.id:
-            # This is a new ticket as no ID yet exists.
-            self.created = timezone.now()
-
         if not self.priority:
             self.priority = 3
-
-        self.modified = timezone.now()
 
         if len(self.title) > 200:
             self.title = self.title[:197] + "..."
@@ -871,9 +869,8 @@ class Ticket(models.Model):
             getattr(ticketcc, "display", None) or getattr(user, "email", None) or email
         )
         if not new_email:
-            raise ValidationError(
+            raise ValueError(
                 "You must provide at least one parameter to get the email from",
-                code="invalid",
             )
 
         # Prepare all emails already into the ticket
