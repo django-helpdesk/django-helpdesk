@@ -1,7 +1,9 @@
 Configuration
 =============
 
-   **IMPORTANT NOTE**: Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
+.. note::
+
+  Any tickets created via POP3 or IMAP mailboxes will DELETE the original e-mail from the mail server.
 
 Before django-helpdesk will be much use, you need to do some basic configuration. Most of this is done via the Django admin screens.
 
@@ -19,15 +21,14 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    You will need to create a support queue, and associated login/host values, in the Django admin interface, in order for mail to be picked-up from the mail server and placed in the tickets table of your database. The values in the settings file alone, will not create the necessary values to trigger the get_email function.
 
- If you wish to use `celery` instead of cron, install the optional dependencies with ``pip install django-helpdesk[celery]``, add 'django_celery_beat' to `INSTALLED_APPS`, and add a periodic celery task through the Django admin pointing at ``helpdesk.tasks.helpdesk_process_email``.
+   If you wish to use ``celery`` instead of ``cron``, install the optional dependencies with ``pip install django-helpdesk[celery]``, add ``django_celery_beat`` to ``INSTALLED_APPS``, and add a periodic celery task through the Django admin pointing at ``helpdesk.tasks.helpdesk_process_email``.
 
    You will need to create a support queue, and associated login/host values, in the Django admin interface, in order for mail to be picked-up from the mail server and placed in the tickets table of your database. The values in the settings file alone, will not create the necessary values to trigger the get_email function.
-   
-   DEBUGGING EMAIL EXTRACTION
-   ==========================
-   You can run the management command manually from the command line with additional commands options:
-       **debug_to_stdout** - set this when manually running the command from a terminal so that additional debugging about which queues are being processed is written to stdout (console by default)
-   For example: 
+
+   **Debugging Email Extraction**
+
+   You can run the management command manually from the command line with additional commands option ``debug_to_stdout``. Set this when manually running the command from a terminal so that additional debugging about which queues are being processed is written to stdout (console by default)::
+
        **/path/to/helpdesksite/manage.py get_email --debug_to_stdout**
 
 4. If you wish to automatically escalate tickets based on their age, set up a cronjob to run the escalation command on a regular basis::
@@ -48,15 +49,17 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    If you wish to temporarily pause escalations for a specific ticket (e.g., while waiting for a customer response or a third-party fix), you can put it **on hold**. This prevents the automatic escalation command from acting on that ticket.
 
-   To put a ticket on hold:  
-   - In the ticket detail page, check the box labelled *"On Hold"* (or similar, depending on your template) and save the ticket.  
+   To put a ticket on hold:
+   - In the ticket detail page, check the box labelled **On Hold** (or similar, depending on your template) and save the ticket.
 
-   **Important details about the "on hold" feature:**
-   - It **only affects automatic escalations**. The `escalate_tickets` command will skip any ticket marked as "on hold".
-   - It does **not** block users from adding manual follow-ups or changing other ticket fields.
-   - The system does **not** automatically remove the "on hold" status when a new follow-up is added. You must manually uncheck the box to re-enable escalations.
+   .. note::
+      Important details about the "on hold" feature:
 
-   This feature is useful when you need to stop the escalation clock without losing the ticket's history or preventing manual work.
+      - It **only affects automatic escalations**. The ``escalate_tickets`` command will skip any ticket marked as "on hold".
+      - It does **not** block users from adding manual follow-ups or changing other ticket fields.
+      - The system does **not** automatically remove the "on hold" status when a new follow-up is added. You must manually uncheck the box to re-enable escalations.
+
+      This feature is useful when you need to stop the escalation clock without losing the ticket's history or preventing manual work.
 
 6. Log in to your Django admin screen, and go to the 'Sites' module. If the site ``example.com`` is listed, click it and update the details so they are relevant for your website.
 
@@ -76,7 +79,7 @@ Locale
 ^^^^^^
 The *Locale* value must match the value in the ``locale`` column in the ``helpdesk_emailtemplate`` table if you wish to use those templates. For default installations/templates those values are ``cs``, ``de``, ``en``, ``es``, ``fi``, ``fr``, ``it``, ``pl``, ``ru`` and ``zh``.
 
-If you want to use a different *Local* then you will need to generate/edit the necessary templates (and set the value in the ``locale`` column) for those locales. This includes when using language variants, such as ``de-CH``, ``en-GB`` or ``fr-CA`` for example. 
+If you want to use a different *Locale* then you will need to generate/edit the necessary templates (and set the value in the ``locale`` column) for those locales. This includes when using language variants, such as ``de-CH``, ``en-GB`` or ``fr-CA`` for example.
 
 E-Mail Check Interval
 ^^^^^^^^^^^^^^^^^^^^^
@@ -100,7 +103,7 @@ The crontab interval overrides the *E-Mail Check Interval*, and resets the *E-Ma
 
 Custom Navigation Header
 ------------------------
-You may add your own site specific navigation header to be included inside the <body> tag and before django-helpdesk navbar.
+You may add your own site specific navigation header to be included inside the ``<body>`` tag and before django-helpdesk navbar.
 
 1. Create an override template in your project's templates directory::
 
@@ -111,7 +114,10 @@ You may add your own site specific navigation header to be included inside the <
 Suppressible Log Messages
 -------------------------
 Some logging messages support being switched on or off according to deployment preferences.
+The following settings variables control emitting log messages for specific scenarios
 
-The following settings variables control emitting log messages for specific scenarios:
-  LOG_WARN_WHEN_CC_EMAIL_NOT_LINKED_TO_A_USER - there is no user matching the email address in the CC list. Defaults to False
-  LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER - there is more than 1 user matching the email address in the CC list. Defaults to True
+``HELPDESK_LOG_WARN_WHEN_CC_EMAIL_NOT_LINKED_TO_A_USER`` (default:``False``)
+  There is no user matching the email address in the CC list.
+
+``HELPDESK_LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER`` (default:``True``)
+  There is more than 1 user matching the email address in the CC list.

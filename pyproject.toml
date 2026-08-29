@@ -79,6 +79,9 @@ all = [
 ]
 
 [dependency-groups]
+docs = [
+    "furo>=2025.12.19",
+]
 teams = [
     "pinax-invitations>=8.0.0",
     "pinax-teams>=3.0.0",
