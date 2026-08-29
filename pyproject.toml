@@ -88,7 +88,7 @@ teams = [
 ]
 test = [
     "argparse>=1.4.0",
-    "coverage>=7.10.4",
+    "coverage>=7.16.0",
     "factory-boy>=3.3.3",
     "faker>=37.11.0",
     "freezegun>=1.5.5",
