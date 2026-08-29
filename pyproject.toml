@@ -97,8 +97,12 @@ test = [
     "pysocks>=1.7.1",
 ]
 
+[project.scripts]
+demodesk = "demodesk.manage:main"
+
 [project.urls]
 Homepage = "https://github.com/django-helpdesk/django-helpdesk"
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -117,6 +121,32 @@ excludes = [
 [tool.ruff]
 exclude = [".venv", "migrations", "docs", "src/helpdesk/static", "src/helpdesk/template*"]
 
-[project.scripts]
-demodesk = "demodesk.manage:main"
+[tool.coverage.run]
+branch = true
+source = ["src/helpdesk"]
+omit = [
+    "*/helpdesk/migrations/*",
+    # omit single files
+    # "main/asgi.py",
+]
 
+[tool.coverage.report]
+ignore_errors = true
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if __name__==.__main__.:",
+]
+
+[tool.coverage.html]
+show_contexts = true
