@@ -15,24 +15,32 @@
         {% include "helpdesk/base_js.html" %}
       </head>
       <body id="bg-dark">
-        {% include "helpdesk/navigation-header.html" %}
-        <div id="wrapper">
-          {% include "helpdesk/navigation-sidebar.html" %}
-          <div id="content-wrapper">
-            {% include "helpdesk/messages.html" %}
-            <div class="container-fluid">
-              <nav aria-label="breadcrumb">
-                <ol class="breadcrumb bg-transparent">
-                  {% block helpdesk_breadcrumb %}
-                  {% endblock helpdesk_breadcrumb %}
-                </ol>
-              </nav>
-              {% block helpdesk_body %}
-              {% endblock helpdesk_body %}
+        {% block body %}
+          {% block header %}
+            {% include "helpdesk/navigation-header.html" %}
+          {% endblock header %}
+          <div id="wrapper">
+            {% block sidebar %}
+              {% include "helpdesk/navigation-sidebar.html" %}
+            {% endblock sidebar %}
+            <div id="content-wrapper">
+              {% include "helpdesk/messages.html" %}
+              <div class="container-fluid">
+                <nav aria-label="breadcrumb">
+                  <ol class="breadcrumb bg-transparent">
+                    {% block helpdesk_breadcrumb %}
+                    {% endblock helpdesk_breadcrumb %}
+                  </ol>
+                </nav>
+                {% block helpdesk_body %}
+                {% endblock helpdesk_body %}
+              </div>
+              {% block footer %}
+                {% include "helpdesk/attribution.html" %}
+              {% endblock footer %}
             </div>
-            {% include "helpdesk/attribution.html" %}
           </div>
-        </div>
+        {% endblock body %}
         {% include "helpdesk/debug.html" %}
         <script src="{% static "helpdesk/js/sb-admin.js" %}"></script>
         {% block helpdesk_js %}
