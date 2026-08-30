@@ -1,48 +1,62 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
-{% block helpdesk_title %}{% trans "Helpdesk Login" %}{% endblock %}
+{% extends "helpdesk/public_base.html" %}
 
-{% block helpdesk_body %}
+{% load i18n static %}
 
-{% if request.user.is_authenticated %}
-    <meta http-equiv="REFRESH" content="0;url={% url 'helpdesk:home' %}">
-{% else %}
+{% block helpdesk_title %}
+  {% translate "Helpdesk Login" %}
+{% endblock helpdesk_title %}
 
-    <div class="container">
-      <div class="card card-login mx-auto mt-5">
-        <div class="card-header">{% trans 'Please Sign In' %}</div>
-        <div class="card-body">
-          <form role="form" method='post' action='./'>
-                {% if form.errors %}
-                <div class="alert alert-danger">{% trans "Your username and password didn't match. Please try again." %}</div>
-                {% endif %}
-            <div class="mb-3">
-              <div class="form-label-group">
-                <input type="text" id="username" name="username" class="form-control" placeholder="Username" required="required" autofocus="autofocus">
-                <label for="username">Username</label>
+{% block body %}
+  {% if request.user.is_authenticated %}
+    <meta http-equiv="REFRESH" content="0;url={% url 'helpdesk:home' %}" />
+  {% endif %}
+  <div class="container-fluid">
+    <div class="row align-items-center vh-100">
+      <div class="col-12 col-md-6 col-lg-3 mx-auto">
+        <div class="text-center mb-4">
+          <img src="{% static "helpdesk/img/icon.svg" %}" alt="Django helpdesk logo" width="48" height="48" />
+        </div>
+        <div class="card">
+          <div class="card-body m-3">
+            <h5 class="text-center py-3">{% translate "Log in to your account" %}</h5>
+            <form role="form" method="post">
+              {% csrf_token %}
+              {% if form.errors %}
+                <div class="alert alert-danger">{% translate "Your username and password didn't match. Please try again." %}</div>
+              {% endif %}
+              <div class="mb-3">
+                <label class="form-label" for="username">{% translate "Username" %}</label>
+                <input type="text"
+                       id="username"
+                       name="username"
+                       class="form-control"
+                       placeholder="Your username"
+                       required="required"
+                       autofocus="autofocus" />
               </div>
-            </div>
-            <div class="mb-3">
-              <div class="form-label-group">
-                <input type="password" id="password" name="password" class="form-control" placeholder="Password" required="required">
-                <label for="password">Password</label>
+              <div class="mb-3">
+                <label class="form-label" for="password">{% translate "Password" %}</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="Your Password" required="required" />
               </div>
-            </div>
-            <div class="mb-3">
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" value="remember-me">
-                  {% trans 'Remember Password' %}
-                </label>
+              <div class="mb-3">
+                <div class="form-check checkbox">
+                  <input class="form-check-input" type="checkbox" id="checkRemember" value="remember-me" />
+                  <label class="form-check-label" for="checkRemember">{% translate "Remember me" %}</label>
+                </div>
               </div>
-            </div>
-            <input class="btn btn-lg btn-primary btn-block" type='submit' value='{% trans "Login" %}' />
-            {% if next %}
-              <input type="hidden" name="next" value="{{ next }}" />
-            {% endif %}
-          {% csrf_token %}</form>
+              <div class="d-grid gap-2 py-3">
+                <button class="btn btn-primary" type="submit">{% translate "Login" %}</button>
+              </div>
+              {% if next %}
+                <input type="hidden" name="next" value="{{ next }}" />
+              {% endif %}
+            </form>
+          </div>
+        </div>
+        <div class="d-flex justify-content-center text-sm py-3">
+          <a href="/" class="link-secondary">{% translate "Take me back" %}</a>
         </div>
       </div>
     </div>
-
-{% endif %}
-{% endblock %}
+  </div>
+{% endblock body %}
