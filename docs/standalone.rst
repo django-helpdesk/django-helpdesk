@@ -215,7 +215,7 @@ S3 base attachment support
 
 You will need to use the standalone-extras image for S3 support.
 
-Working from the previous SES example we add the following to `local_settings`:
+Working from the previous SES example we add the following to ``local_settings``:
 
 .. code-block:: python
 

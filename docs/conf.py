@@ -193,6 +193,17 @@ html_split_index = False
 htmlhelp_basename = "django-helpdeskdoc"
 
 
+# -- Options for EPUB output ---------------------------------------------
+
+# The EPUB builder has no sidebar and no favicon, so it never references the
+# logo files. Keep them out of the archive: their formats are not part of the
+# EPUB media types and Sphinx warns about every file it cannot map.
+epub_exclude_files = [
+    "_static/logo.avif",
+    "_static/logo.ico",
+]
+
+
 # -- Options for LaTeX output --------------------------------------------
 
 # The paper size ('letter' or 'a4').
@@ -250,3 +261,19 @@ man_pages = [
         1,
     )
 ]
+
+
+# -- Custom object types -------------------------------------------------
+
+
+def setup(app):
+    # django-helpdesk settings live in the deployer's own settings.py, so they
+    # are not objects of any Python domain module. Registering them as their
+    # own object type gives each one an anchor and an index entry, and makes
+    # :setting:`NAME` a cross-reference the build resolves.
+    app.add_object_type(
+        "setting",
+        "setting",
+        objname="django-helpdesk setting",
+        indextemplate="pair: %s; setting",
+    )
