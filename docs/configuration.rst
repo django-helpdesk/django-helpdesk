@@ -121,3 +121,53 @@ The following settings variables control emitting log messages for specific scen
 
 ``HELPDESK_LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER`` (default:``True``)
   There is more than 1 user matching the email address in the CC list.
+
+.. _production-hardening:
+
+Production hardening
+--------------------
+
+django-helpdesk does not attempt to be a hardened deployment on its own, and
+this is worth stating plainly because its default shape is unusual: unlike most
+Django applications, it ships a **public-facing login page** and a **public
+ticket submission form**, so a normal installation is reachable from the
+internet rather than sitting behind an intranet.
+
+The authentication view is a thin wrapper around
+``django.contrib.auth.views.LoginView``, so django-helpdesk inherits Django's
+behaviour and Django deliberately does not rate limit authentication. That means
+the following are the deployer's responsibility, not this project's.
+
+**Rate limiting authentication.** Nothing here limits how many login attempts an
+address may make, so an exposed instance will accept unlimited password
+guessing. Either handle it in front of the application, at your reverse proxy or
+WAF, or install a Django app that does it. `django-axes
+<https://github.com/jazzband/django-axes>`_ and `django-defender
+<https://github.com/kencochrane/django-defender>`_ are the usual choices, and
+either is preferable to us reimplementing lockout logic that would then need a
+cache backend and its own denial-of-service trade-offs.
+
+**Password policy.** Set ``AUTH_PASSWORD_VALIDATORS`` in your settings. Django
+ships validators for minimum length, common passwords and numeric-only
+passwords, and none of them apply unless you configure them.
+
+**Serving attachments.** Attachment content comes from unauthenticated third
+parties, through inbound email and through the public submission form. Do not
+serve ``MEDIA_ROOT`` in a way that renders attachments inline, and see
+``HELPDESK_VALID_EXTENSIONS`` for the extensions accepted on upload.
+
+**Transport and cookies.** Serve the site over HTTPS. If you terminate TLS at a
+proxy, set the ``SECURE_PROXY_SSL_HEADER`` *environment variable* to any
+non-empty value: django-helpdesk then sets Django's ``SECURE_PROXY_SSL_HEADER``
+to ``("HTTP_X_FORWARDED_PROTO", "https")`` and turns on
+``SESSION_COOKIE_SECURE`` and ``CSRF_COOKIE_SECURE`` for you. Without it, set
+those two yourself.
+
+**Turning off what you do not use.** ``HELPDESK_API_ENABLED = False`` removes the
+REST API routes entirely, and ``HELPDESK_SUBMIT_A_TICKET_PUBLIC = False`` removes
+the public submission form. Reducing the exposed surface is cheaper than
+defending it.
+
+Django's own `deployment checklist
+<https://docs.djangoproject.com/en/stable/howto/deployment/checklist/>`_ covers
+the rest and is worth running through before going live.
