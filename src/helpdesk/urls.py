@@ -7,7 +7,6 @@ urls.py - Mapping of URL's to our various views. Note we always used NAMED
           views for simplicity in linking later on.
 """
 
-from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
@@ -15,7 +14,7 @@ from rest_framework.routers import DefaultRouter
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import helpdesk_staff_member_required, protect_view
-from helpdesk.views import feeds, login, public, staff
+from helpdesk.views import feeds, public, staff
 from helpdesk.views.api import (
     CreateUserView,
     FollowUpAttachmentViewSet,
@@ -23,6 +22,7 @@ from helpdesk.views.api import (
     TicketViewSet,
     UserTicketViewSet,
 )
+from helpdesk.views.auth import login, logout, password_change, password_change_done
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.views import kb
@@ -254,31 +254,14 @@ if helpdesk_settings.HELPDESK_API_ENABLED:
     urlpatterns += [path("api/", include(router.urls))]
 
 
-urlpatterns += [
-    path("login/", login.login, name="login"),
-    path(
-        "logout/",
-        auth_views.LogoutView.as_view(
-            template_name="helpdesk/registration/logged_out.html"
-        ),
-        name="logout",
-    ),
-    path(
-        "password_change/",
-        auth_views.PasswordChangeView.as_view(
-            template_name="helpdesk/registration/change_password.html",
-            success_url="./done",
-        ),
-        name="password_change",
-    ),
-    path(
-        "password_change/done",
-        auth_views.PasswordChangeDoneView.as_view(
-            template_name="helpdesk/registration/change_password_done.html",
-        ),
-        name="password_change_done",
-    ),
+AUTH_PATTERNS = [
+    path("login/", login, name="login"),
+    path("logout/", logout, name="logout"),
+    path("password_change/", password_change, name="password_change"),
+    path("password_change/done/", password_change_done, name="password_change_done"),
 ]
+
+urlpatterns += AUTH_PATTERNS
 
 
 urlpatterns += [
