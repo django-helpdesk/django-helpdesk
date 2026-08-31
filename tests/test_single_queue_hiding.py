@@ -20,7 +20,7 @@ class TicketFormSingleQueueTestCase(TestCase):
     def test_queue_hidden_when_only_one_choice(self):
         form = TicketForm(queue_choices=[(1, "Products")])
         self.assertIsInstance(form.fields["queue"].widget, forms.HiddenInput)
-        self.assertEqual(form.fields["queue"].initial, 1)
+        self.assertEqual(form["queue"].value(), 1)
 
     def test_queue_shown_when_multiple_choices(self):
         form = TicketForm(

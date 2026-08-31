@@ -492,7 +492,7 @@ class TicketForm(AbstractTicketForm):
             # nothing meaningful to choose, so hide the field and default
             # to it.
             if len(queue_choices) == 1:
-                self.fields["queue"].initial = queue_choices[0][0]
+                self.initial["queue"] = queue_choices[0][0]
                 self.fields["queue"].widget = forms.HiddenInput()
         self.fields["body"].required = body_reqd
         self.fields["assigned_to"].choices = [("", "--------")] + [
