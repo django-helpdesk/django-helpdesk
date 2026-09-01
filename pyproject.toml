@@ -143,7 +143,7 @@ preserve_blank_lines=true
 use_gitignore=true
 
 [tool.djlint.css]
-indent_size=5
+indent_size=2
 
 [tool.djlint.js]
-indent_size=5
+indent_size=2
