@@ -298,11 +298,10 @@ def build_base_url() -> str:
     """
 
     from django.contrib.sites.models import Site
-    from django.core.exceptions import ImproperlyConfigured
 
     try:
         site = Site.objects.get_current()
-    except ImproperlyConfigured:
+    except Site.DoesNotExist:
         site = Site(domain="configure-django-sites.com")
 
     protocol = "https" if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK else "http"

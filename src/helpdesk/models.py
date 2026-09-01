@@ -642,9 +642,6 @@ class Ticket(models.Model):
         return reverse_lazy("helpdesk:view", args=(self.id,))
 
     def save(self, *args, **kwargs) -> None:
-        if not self.priority:
-            self.priority = 3
-
         if len(self.title) > 200:
             self.title = self.title[:197] + "..."
 
@@ -803,14 +800,9 @@ class Ticket(models.Model):
         a URL to the submitter of a ticket.
         """
         base_url = build_base_url()
+        path = reverse_lazy("helpdesk:public_view")
 
-        return "{}{}?ticket={}&email={}&key={}".format(
-            base_url,
-            reverse_lazy("helpdesk:public_view"),
-            self.ticket_for_url,
-            self.submitter_email,
-            self.secret_key,
-        )
+        return f"{base_url}{path}?ticket={self.ticket_for_url}&email={self.submitter_email}&key={self.secret_key}"
 
     @property
     def staff_url(self) -> str:
