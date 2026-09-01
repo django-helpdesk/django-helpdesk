@@ -1,8 +1,7 @@
+from django.contrib.sites.models import Site
 from django.test import TestCase
 
 from helpdesk.lib import build_base_url
-
-from django.contrib.sites.models import Site
 
 
 class HelperTests(TestCase):

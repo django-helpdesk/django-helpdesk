@@ -127,6 +127,7 @@ exclude = [".venv", "migrations", "docs", "src/helpdesk/static", "src/helpdesk/t
 [tool.coverage.run]
 branch = true
 source = ["src/helpdesk"]
+dynamic_context = "test_function"
 omit = [
     "*/helpdesk/migrations/*",
     # omit single files
