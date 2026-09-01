@@ -8,13 +8,15 @@ from django.contrib.auth.views import (
 )
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import resolve_url
+from django.urls import reverse_lazy
 
 default_login_view = LoginView.as_view(template_name="helpdesk/registration/login.html")
 
 logout = LogoutView.as_view(template_name="helpdesk/registration/logged_out.html")
 
 password_change = PasswordChangeView.as_view(
-    template_name="helpdesk/registration/change_password.html", success_url="./done"
+    template_name="helpdesk/registration/change_password.html",
+    success_url=reverse_lazy("helpdesk:password_change_done"),
 )
 
 password_change_done = PasswordChangeDoneView.as_view(
