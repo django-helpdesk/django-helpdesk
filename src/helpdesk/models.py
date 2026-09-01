@@ -769,10 +769,16 @@ class Ticket(models.Model):
     def get_status(self) -> str:
         """Displays the ticket status, with an "On Hold" message if needed."""
 
-        held_msg = _(" - On Hold") if self.on_hold else ""
-        dep_msg = "" if self.can_be_resolved else _(" - Open dependencies")
+        held_msg, dep_msg = _("On Hold"), _("Open dependencies")
+        status = self.get_status_display()
 
-        return f"{self.get_status_display()}{held_msg}{dep_msg}"
+        if self.on_hold:
+            status = f"{status} - {held_msg}"
+
+        if not self.can_be_resolved:
+            status = f"{status} - {dep_msg}"
+
+        return status
 
     def _get_allowed_status_flow(self):
         """
