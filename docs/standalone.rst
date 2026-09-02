@@ -75,6 +75,8 @@ Configuration for Production Use
 
 2. For custom configurations, bindmount a ``local_settings.py`` into ``/opt/django-helpdesk/standalone/config/local_settings.py``.
 
+   See :ref:`production-hardening` for what django-helpdesk leaves to the deployer, in particular rate limiting the login page.
+
 3. To customize the logo in the top-left corner of the helpdesk:
 
    .. code-block:: html
