@@ -25,7 +25,7 @@ from django.db import models
 from django.db.models import QuerySet
 from django.urls import reverse_lazy
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from markdown import markdown
@@ -34,7 +34,12 @@ from rest_framework import serializers
 
 from helpdesk import settings as helpdesk_settings
 
-from .lib import convert_value, daily_time_spent_calculation, format_time_spent
+from .lib import (
+    build_base_url,
+    convert_value,
+    daily_time_spent_calculation,
+    format_time_spent,
+)
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
 
@@ -513,27 +518,22 @@ class Ticket(models.Model):
     PRIORITY_CHOICES = helpdesk_settings.TICKET_PRIORITY_CHOICES
     PRIORITY_CSS_CLASSES = helpdesk_settings.TICKET_PRIORITY_CSS_CLASSES
 
-    title = models.CharField(
-        _("Title"),
-        max_length=200,
-    )
+    title = models.CharField(_("Title"), max_length=200)
 
-    queue = models.ForeignKey(
-        Queue,
-        on_delete=models.CASCADE,
-        verbose_name=_("Queue"),
-    )
+    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, verbose_name=_("Queue"))
 
     created = models.DateTimeField(
         _("Created"),
         blank=True,
         help_text=_("Date this ticket was first created"),
+        auto_now_add=True,
     )
 
     modified = models.DateTimeField(
         _("Modified"),
         blank=True,
         help_text=_("Date this ticket was most recently changed."),
+        auto_now=True,
     )
 
     submitter_email = models.EmailField(
@@ -556,9 +556,7 @@ class Ticket(models.Model):
     )
 
     status = models.IntegerField(
-        _("Status"),
-        choices=STATUS_CHOICES,
-        default=OPEN_STATUS,
+        _("Status"), choices=STATUS_CHOICES, default=OPEN_STATUS
     )
 
     on_hold = models.BooleanField(
@@ -631,6 +629,24 @@ class Ticket(models.Model):
         blank=True,
     )
 
+    class Meta:
+        get_latest_by = "created"
+        ordering = ("id",)
+        verbose_name = _("Ticket")
+        verbose_name_plural = _("Tickets")
+
+    def __str__(self) -> str:
+        return f"{self.id} {self.title}"
+
+    def get_absolute_url(self) -> str:
+        return reverse_lazy("helpdesk:view", args=(self.id,))
+
+    def save(self, *args, **kwargs) -> None:
+        if len(self.title) > 200:
+            self.title = self.title[:197] + "..."
+
+        super().save(*args, **kwargs)
+
     @property
     def time_spent(self):
         """Return back total time spent on the ticket. This is calculated value
@@ -701,35 +717,32 @@ class Ticket(models.Model):
                 send("ticket_cc", cc.email_address)
         return recipients
 
-    def _get_assigned_to(self):
-        """Custom property to allow us to easily print 'Unassigned' if a
-        ticket has no owner, or the users name if it's assigned. If the user
-        has a full name configured, we use that, otherwise their username."""
-        if not self.assigned_to:
+    @property
+    def get_assigned_to(self) -> str:
+        """Show the full name or username of the staff working on this ticket
+        else just say 'Unassigned'."""
+
+        taker = self.assigned_to
+
+        if not taker:
             return _("Unassigned")
-        else:
-            if self.assigned_to.get_full_name():
-                return self.assigned_to.get_full_name()
-            else:
-                return self.assigned_to.get_username()
 
-    get_assigned_to = property(_get_assigned_to)
+        return taker.get_full_name() or taker.get_username()
 
-    def _get_ticket(self):
+    @property
+    def ticket(self) -> str:
         """A user-friendly ticket ID, which is a combination of ticket ID
         and queue slug. This is generally used in e-mail subjects."""
 
         return f"[{self.ticket_for_url}]"
 
-    ticket = property(_get_ticket)
-
-    def _get_ticket_for_url(self):
+    @property
+    def ticket_for_url(self) -> str:
         """A URL-friendly ticket ID, used in links."""
         return f"{self.queue.slug}-{self.id}"
 
-    ticket_for_url = property(_get_ticket_for_url)
-
-    def _get_priority_css_class(self):
+    @property
+    def get_priority_css_class(self) -> str:
         """
         Return the bootstrap class corresponding to the priority.
 
@@ -738,46 +751,34 @@ class Ticket(models.Model):
         (e.g. "success") which are inert on <tr> elements in Bootstrap 5;
         see get_priority_badge_class for the badge rendering.
         """
-        if self.priority == 2:
-            return "warning"
-        elif self.priority == 1:
-            return "danger"
-        elif self.priority == 5:
-            return "success"
-        else:
-            return ""
+        CSS_MAP = {1: "danger", 2: "warning", 5: "success"}
+        return CSS_MAP.get(self.priority, "")
 
-    get_priority_css_class = property(_get_priority_css_class)
+    @property
+    def get_status_badge_class(self) -> str:
+        """Return the bootstrap class for the status badge, from the setting."""
 
-    def _get_status_badge_class(self):
-        """
-        Return the bootstrap class for the status badge, from the setting.
-        """
         return self.STATUS_CSS_CLASSES.get(self.status, "")
 
-    get_status_badge_class = property(_get_status_badge_class)
-
-    def _get_priority_badge_class(self):
-        """
-        Return the bootstrap class for the priority badge, from the setting.
-        """
+    @property
+    def get_priority_badge_class(self) -> str:
+        """Return the bootstrap class for the priority badge, from the setting."""
         return self.PRIORITY_CSS_CLASSES.get(self.priority, "")
 
-    get_priority_badge_class = property(_get_priority_badge_class)
+    @property
+    def get_status(self) -> str:
+        """Displays the ticket status, with an "On Hold" message if needed."""
 
-    def _get_status(self):
-        """
-        Displays the ticket status, with an "On Hold" message if needed.
-        """
-        held_msg = ""
+        held_msg, dep_msg = _("On Hold"), _("Open dependencies")
+        status = self.get_status_display()
+
         if self.on_hold:
-            held_msg = _(" - On Hold")
-        dep_msg = ""
-        if not self.can_be_resolved:
-            dep_msg = _(" - Open dependencies")
-        return f"{self.get_status_display()}{held_msg}{dep_msg}"
+            status = f"{status} - {held_msg}"
 
-    get_status = property(_get_status)
+        if not self.can_be_resolved:
+            status = f"{status} - {dep_msg}"
+
+        return status
 
     def _get_allowed_status_flow(self):
         """
@@ -798,167 +799,99 @@ class Ticket(models.Model):
 
     get_allowed_status_flow = property(_get_allowed_status_flow)
 
-    def _get_ticket_url(self):
+    @property
+    def ticket_url(self) -> str:
         """
         Returns a publicly-viewable URL for this ticket, used when giving
         a URL to the submitter of a ticket.
         """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
+        base_url = build_base_url()
+        path = reverse_lazy("helpdesk:public_view")
 
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain="configure-django-sites.com")
-        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
-            protocol = "https"
-        else:
-            protocol = "http"
-        return "{}://{}{}?ticket={}&email={}&key={}".format(
-            protocol,
-            site.domain,
-            reverse("helpdesk:public_view"),
-            self.ticket_for_url,
-            self.submitter_email,
-            self.secret_key,
-        )
+        return f"{base_url}{path}?ticket={self.ticket_for_url}&email={self.submitter_email}&key={self.secret_key}"
 
-    ticket_url = property(_get_ticket_url)
+    @property
+    def staff_url(self) -> str:
+        """The absolute url of a ticket with a fully qualified domain."""
 
-    def _get_staff_url(self):
-        """
-        Returns a staff-only URL for this ticket, used when giving a URL to
-        a staff member (in emails etc)
-        """
-        from django.contrib.sites.models import Site
-        from django.core.exceptions import ImproperlyConfigured
-        from django.urls import reverse
+        base_url = build_base_url()
+        path = self.get_absolute_url()
 
-        try:
-            site = Site.objects.get_current()
-        except ImproperlyConfigured:
-            site = Site(domain="configure-django-sites.com")
-        if helpdesk_settings.HELPDESK_USE_HTTPS_IN_EMAIL_LINK:
-            protocol = "https"
-        else:
-            protocol = "http"
-        return "{}://{}{}".format(
-            protocol,
-            site.domain,
-            reverse("helpdesk:view", args=[self.id]),
-        )
+        return f"{base_url}{path}"
 
-    staff_url = property(_get_staff_url)
+    @property
+    def can_be_resolved(self) -> bool:
+        """If all dependencies (if any) on a ticket are resolved then True otherwise False."""
 
-    def _can_be_resolved(self):
-        """
-        Returns a boolean.
-        True = any dependencies are resolved
-        False = There are non-resolved dependencies
-        """
-        return (
-            TicketDependency.objects.filter(ticket=self)
-            .filter(depends_on__status__in=Ticket.OPEN_STATUSES)
-            .count()
-            == 0
-        )
+        qs = TicketDependency.objects.filter(ticket=self)
+        unresolved_deps = qs.filter(depends_on__status__in=Ticket.OPEN_STATUSES)
+        return not unresolved_deps.exists()
 
-    can_be_resolved = property(_can_be_resolved)
-
-    def get_submitter_userprofile(self):
-        try:
-            return User.objects.get(email=self.submitter_email)
-        except (User.DoesNotExist, User.MultipleObjectsReturned):
-            return None
-
-    class Meta:
-        get_latest_by = "created"
-        ordering = ("id",)
-        verbose_name = _("Ticket")
-        verbose_name_plural = _("Tickets")
-
-    def __str__(self):
-        return f"{self.id} {self.title}"
-
-    def get_absolute_url(self):
-        from django.urls import reverse
-
-        return reverse("helpdesk:view", args=(self.id,))
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            # This is a new ticket as no ID yet exists.
-            self.created = timezone.now()
-
-        if not self.priority:
-            self.priority = 3
-
-        self.modified = timezone.now()
-
-        if len(self.title) > 200:
-            self.title = self.title[:197] + "..."
-
-        super().save(*args, **kwargs)
+    def get_submitter_userprofile(self) -> User | None:
+        return User.objects.filter(email=self.submitter_email).first()
 
     @staticmethod
-    def queue_and_id_from_query(query):
-        # Apply the opposite logic here compared to self._get_ticket_for_url
-        # Ensure that queues with '-' in them will work
-        parts = query.split("-")
-        queue = "-".join(parts[0:-1])
-        return queue, parts[-1]
+    def queue_and_id_from_query(query) -> tuple[str, str]:
+        """
+        Apply the opposite logic here compared to `ticket_for_url`
+        Ensure that queues with '-' in them will work
 
-    def get_markdown(self):
+        Ex:
+            "pay-1" -> ("pay", "1")
+            "1-ord-99-72 -> ("1-ord-99", "72")
+        """
+
+        *parts, ticket_id = query.split("-")
+        return "-".join(parts), ticket_id
+
+    def get_markdown(self) -> SafeString:
         return get_markdown(self.description)
 
     @property
-    def get_resolution_markdown(self):
+    def get_resolution_markdown(self) -> SafeString:
         return get_markdown(self.resolution)
 
-    def add_email_to_ticketcc_if_not_in(self, email=None, user=None, ticketcc=None):
+    def add_email_to_ticketcc_if_not_in(
+        self,
+        email: str | None = None,
+        user: User | None = None,
+        ticketcc: TicketCC | None = None,
+    ) -> TicketCC | None:
         """
         Check that given email/user_email/ticketcc_email is not already present on the ticket
         (submitter email, assigned to, or in ticket CCs) and add it to a new ticket CC,
-        or move the given one
-
-        :param str email:
-        :param User user:
-        :param TicketCC ticketcc:
-        :rtype: TicketCC|None
+        or move the given one.
         """
-        if ticketcc:
-            email = ticketcc.display
-        elif user:
-            if user.email:
-                email = user.email
-            else:
-                # Ignore if user has no email address
-                return
-        elif not email:
+
+        new_email = (
+            getattr(ticketcc, "display", None) or getattr(user, "email", None) or email
+        )
+        if not new_email:
             raise ValueError(
-                "You must provide at least one parameter to get the email from"
+                "You must provide at least one parameter to get the email from",
             )
 
         # Prepare all emails already into the ticket
-        ticket_emails = [x.display for x in self.ticketcc_set.all()]
-        if self.submitter_email:
-            ticket_emails.append(self.submitter_email)
-        if self.assigned_to and self.assigned_to.email:
-            ticket_emails.append(self.assigned_to.email)
+        ticket_emails = [x.display for x in self.ticketcc_set.all()] + [
+            self.submitter_email,
+            getattr(self.assigned_to, "email", None),
+        ]
 
         # Check that email is not already part of the ticket
-        if email not in ticket_emails:
-            if ticketcc:
-                ticketcc.ticket = self
-                ticketcc.save(update_fields=["ticket"])
-            elif user:
-                ticketcc = self.ticketcc_set.create(user=user)
-            else:
-                ticketcc = self.ticketcc_set.create(email=email)
-            return ticketcc
+        if new_email in ticket_emails:
+            return
 
-    def set_custom_field_values(self):
+        if ticketcc:
+            ticketcc.ticket = self
+            ticketcc.save(update_fields=["ticket"])
+        elif user:
+            ticketcc, _ = self.ticketcc_set.get_or_create(user=user)
+        else:
+            ticketcc, _ = self.ticketcc_set.get_or_create(email=new_email)
+
+        return ticketcc
+
+    def set_custom_field_values(self) -> None:
         for field in CustomField.objects.all():
             try:
                 value = self.ticketcustomfieldvalue_set.get(field=field).value
@@ -966,7 +899,7 @@ class Ticket(models.Model):
                 value = None
             setattr(self, f"custom_{field.name}", value)
 
-    def save_custom_field_values(self, data):
+    def save_custom_field_values(self, data) -> None:
         for field, value in data.items():
             if field.startswith("custom_"):
                 field_name = field.replace("custom_", "", 1)

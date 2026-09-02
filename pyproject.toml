@@ -88,7 +88,7 @@ teams = [
 ]
 test = [
     "argparse>=1.4.0",
-    "coverage>=7.10.4",
+    "coverage>=7.16.0",
     "factory-boy>=3.3.3",
     "faker>=37.11.0",
     "freezegun>=1.5.5",
@@ -100,8 +100,12 @@ test = [
     "pysocks>=1.7.1",
 ]
 
+[project.scripts]
+demodesk = "demodesk.manage:main"
+
 [project.urls]
 Homepage = "https://github.com/django-helpdesk/django-helpdesk"
+
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
@@ -119,9 +123,6 @@ excludes = [
 
 [tool.ruff]
 exclude = [".venv", "migrations", "docs", "src/helpdesk/static", "src/helpdesk/template*"]
-
-[project.scripts]
-demodesk = "demodesk.manage:main"
 
 [tool.djlint]
 blank_line_before_tag="load,extends"
@@ -147,3 +148,35 @@ indent_size=2
 
 [tool.djlint.js]
 indent_size=2
+
+[tool.coverage.run]
+branch = true
+source = ["src/helpdesk"]
+dynamic_context = "test_function"
+omit = [
+    "*/helpdesk/migrations/*",
+    # omit single files
+    # "main/asgi.py",
+]
+
+[tool.coverage.report]
+ignore_errors = true
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if __name__==.__main__.:",
+]
+
+[tool.coverage.html]
+show_contexts = true
+

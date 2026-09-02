@@ -423,3 +423,273 @@ class PerQueuePermissionSecurityTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["ticket"].id, self.ticket_1.id)
         self.assertEqual(len(list(response.context["messages"])), 0)
+
+
+class PerQueueApiAuthorizationTestCase(TestCase):
+    """
+    The REST API must apply the same per-queue boundary as the staff UI.
+
+    Reported as GHSA-g9r9-54m2-m6g5. Issue #1335 had already noted that the DRF
+    API does not consult `can_access_queue()`, but the fix in PR #1338 only
+    covered `user.py`, `views/feeds.py` and `views/staff.py`, so the API kept
+    serving every queue for four more months. These tests exist so that gap
+    cannot reopen silently: they live next to the UI tests that were added at
+    the time precisely so the API is not forgotten again.
+
+    A filtered queryset yields 404 rather than 403 for a foreign object, which
+    is the usual DRF outcome and is fine: it denies access without confirming
+    that the object exists.
+    """
+
+    def setUp(self):
+        self.original_setting = settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
+        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = True
+        User = get_user_model()
+
+        self.queue_a = Queue.objects.create(title="Queue A", slug="qa")
+        self.queue_b = Queue.objects.create(title="Queue B", slug="qb")
+
+        self.staff = User.objects.create(
+            username="restricted_staff", is_staff=True, email="staff@example.com"
+        )
+        self.staff.set_password("pass")
+        self.staff.save()
+        self.staff.user_permissions.add(
+            Permission.objects.get(codename=self.queue_a.permission_name[9:])
+        )
+
+        self.superuser = User.objects.create(
+            username="root", is_staff=True, is_superuser=True, email="r@example.com"
+        )
+        self.superuser.set_password("pass")
+        self.superuser.save()
+
+        self.ticket_a = Ticket.objects.create(title="Ticket in A", queue=self.queue_a)
+        self.ticket_b = Ticket.objects.create(
+            title="Ticket in B", queue=self.queue_b, description="CONFIDENTIAL"
+        )
+
+        self.followup_b = FollowUp.objects.create(
+            ticket=self.ticket_b,
+            title="Internal note",
+            comment="not for you",
+            public=False,
+            date=timezone.now(),
+        )
+        self.attachment_b = FollowUpAttachment.objects.create(
+            followup=self.followup_b,
+            file=SimpleUploadedFile("secret.txt", b"secret", content_type="text/plain"),
+            filename="secret.txt",
+        )
+
+    def tearDown(self):
+        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = self.original_setting
+
+    def login_staff(self):
+        self.client.login(username="restricted_staff", password="pass")
+
+    # Reads
+
+    def test_ticket_list_only_shows_permitted_queues(self):
+        self.login_staff()
+        response = self.client.get("/api/tickets/")
+        self.assertEqual(response.status_code, 200)
+        ids = [t["id"] for t in response.json()["results"]]
+        self.assertIn(self.ticket_a.id, ids)
+        self.assertNotIn(self.ticket_b.id, ids)
+
+    def test_foreign_ticket_cannot_be_retrieved(self):
+        self.login_staff()
+        response = self.client.get(f"/api/tickets/{self.ticket_b.id}/")
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(b"CONFIDENTIAL", response.content)
+
+    def test_foreign_internal_followup_cannot_be_retrieved(self):
+        self.login_staff()
+        response = self.client.get(f"/api/followups/{self.followup_b.id}/")
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(b"not for you", response.content)
+
+    def test_foreign_attachment_cannot_be_retrieved(self):
+        self.login_staff()
+        response = self.client.get(
+            f"/api/followups-attachments/{self.attachment_b.id}/"
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertNotIn(b"secret.txt", response.content)
+
+    # Writes
+
+    def test_foreign_ticket_cannot_be_modified(self):
+        self.login_staff()
+        response = self.client.patch(
+            f"/api/tickets/{self.ticket_b.id}/",
+            {"title": "hijacked"},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 404)
+        self.ticket_b.refresh_from_db()
+        self.assertEqual(self.ticket_b.title, "Ticket in B")
+
+    def test_followup_cannot_be_created_against_a_foreign_ticket(self):
+        self.login_staff()
+        response = self.client.post(
+            "/api/followups/",
+            {"ticket": self.ticket_b.id, "title": "intrusion", "comment": "x"},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("ticket", response.json())
+        self.assertFalse(
+            FollowUp.objects.filter(ticket=self.ticket_b, title="intrusion").exists()
+        )
+
+    def test_ticket_creation_in_a_foreign_queue_is_rejected_by_the_serializer(self):
+        """Not one of the reported vectors: creation was already blocked, but by
+        TicketForm restricting its queue choices, which the serializer delegates
+        to. The relation is now narrowed at the serializer too, so the refusal no
+        longer depends on a form the API happens to reuse. Kept as a control.
+        """
+        self.login_staff()
+        response = self.client.post(
+            "/api/tickets/",
+            {
+                "queue": self.queue_b.id,
+                "title": "planted",
+                "description": "x",
+                "submitter_email": "a@example.com",
+                "priority": 3,
+            },
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("queue", response.json())
+        self.assertFalse(Ticket.objects.filter(title="planted").exists())
+
+    def test_ticket_cannot_be_merged_into_a_foreign_ticket(self):
+        """`merged_to` is a second relation pointing at a Ticket, so narrowing
+        `queue` alone would leave a way to write a reference into a queue the
+        user cannot reach, and to confirm a ticket is there."""
+        self.login_staff()
+        response = self.client.patch(
+            f"/api/tickets/{self.ticket_a.id}/",
+            {"merged_to": self.ticket_b.id},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("merged_to", response.json())
+        self.ticket_a.refresh_from_db()
+        self.assertIsNone(self.ticket_a.merged_to_id)
+
+    # Positive controls
+
+    def test_permitted_queue_is_still_reachable(self):
+        self.login_staff()
+        self.assertEqual(
+            self.client.get(f"/api/tickets/{self.ticket_a.id}/").status_code, 200
+        )
+
+    def test_followup_can_be_created_on_a_permitted_ticket(self):
+        self.login_staff()
+        response = self.client.post(
+            "/api/followups/",
+            {"ticket": self.ticket_a.id, "title": "legitimate", "comment": "x"},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content)
+
+    def test_api_and_ui_agree_on_a_ticket_assigned_outside_the_user_queues(self):
+        """`can_access_ticket()` reads as though an assignee may always reach
+        their ticket, but `ticket_perm_check()` tests the queue first and denies
+        before that branch runs, so the UI refuses it. The API must refuse it
+        too: granting it would leave the API more permissive than the interface.
+        """
+        self.ticket_b.assigned_to = self.staff
+        self.ticket_b.save()
+        self.login_staff()
+        ui = self.client.get(
+            reverse("helpdesk:view", kwargs={"ticket_id": self.ticket_b.id}),
+            follow=True,
+        )
+        self.assertRedirects(ui, reverse("helpdesk:list"))
+        self.assertEqual(
+            self.client.get(f"/api/tickets/{self.ticket_b.id}/").status_code, 404
+        )
+
+    def test_superuser_can_retrieve_the_followup_and_attachment(self):
+        """Proves the two 404s above are authorization decisions rather than a
+        mistyped URL: the same paths return 200 for an unrestricted account."""
+        self.client.login(username="root", password="pass")
+        self.assertEqual(
+            self.client.get(f"/api/followups/{self.followup_b.id}/").status_code, 200
+        )
+        self.assertEqual(
+            self.client.get(
+                f"/api/followups-attachments/{self.attachment_b.id}/"
+            ).status_code,
+            200,
+        )
+
+    def test_ticket_can_be_merged_into_a_permitted_ticket(self):
+        self.login_staff()
+        other_a = Ticket.objects.create(title="Other in A", queue=self.queue_a)
+        response = self.client.patch(
+            f"/api/tickets/{self.ticket_a.id}/",
+            {"merged_to": other_a.id},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_api_and_ui_agree_on_a_public_submission_queue(self):
+        """`get_queues()` includes every queue that accepts public submissions,
+        but `can_access_queue()` does not, and it is the latter that the staff
+        views consult before serving a ticket. So a restricted account is denied
+        such a ticket in the UI, and the API has to deny it too rather than
+        following the wider helper.
+
+        Asserting both sides here rather than a bare status code: the point is
+        that they agree, whatever the project later decides that answer should
+        be.
+        """
+        public_queue = Queue.objects.create(
+            title="Public", slug="pub", allow_public_submission=True
+        )
+        public_ticket = Ticket.objects.create(title="Public one", queue=public_queue)
+        self.login_staff()
+        ui = self.client.get(
+            reverse("helpdesk:view", kwargs={"ticket_id": public_ticket.id}),
+            follow=True,
+        )
+        self.assertRedirects(ui, reverse("helpdesk:list"))
+        api = self.client.get(f"/api/tickets/{public_ticket.id}/")
+        self.assertEqual(api.status_code, 404)
+
+    def test_restricting_an_unknown_relation_raises(self):
+        """A renamed field must not quietly drop the restriction, which would
+        remove an authorization check with no signal at all."""
+        from django.core.exceptions import ImproperlyConfigured
+
+        from helpdesk.serializers import TicketSerializer
+        from helpdesk.views.api import restrict_relation
+
+        with self.assertRaises(ImproperlyConfigured):
+            restrict_relation(TicketSerializer(), "queue_renamed", Queue.objects.none())
+        with self.assertRaises(ImproperlyConfigured):
+            restrict_relation(TicketSerializer(), "title", Queue.objects.none())
+
+    def test_superuser_sees_every_queue(self):
+        self.client.login(username="root", password="pass")
+        response = self.client.get("/api/tickets/")
+        ids = [t["id"] for t in response.json()["results"]]
+        self.assertIn(self.ticket_a.id, ids)
+        self.assertIn(self.ticket_b.id, ids)
+
+    def test_nothing_changes_when_per_queue_permissions_are_disabled(self):
+        """The default configuration gives every staff member full access by
+        design, so the fix must not narrow it."""
+        settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = False
+        self.login_staff()
+        response = self.client.get("/api/tickets/")
+        ids = [t["id"] for t in response.json()["results"]]
+        self.assertIn(self.ticket_a.id, ids)
+        self.assertIn(self.ticket_b.id, ids)
