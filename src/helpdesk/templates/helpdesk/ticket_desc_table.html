@@ -34,6 +34,16 @@
               </form>
             {% endif %}
           </li>
+          {% if can_escalate %}
+          <li>
+            <form class="d-inline" method="post" action="escalate/">
+              {% csrf_token %}
+              <button class="dropdown-item" type="submit">
+                <i class="fa-solid fa-arrow-up-wide-short me-2"></i>{% translate "Escalate now" %}
+              </button>
+            </form>
+          </li>
+          {% endif %}
           <li>
             <hr class="dropdown-divider">
           </li>

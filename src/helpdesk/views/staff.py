@@ -40,6 +40,7 @@ from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
+from django.views.decorators.http import require_POST
 from django.views.generic.edit import FormView, UpdateView
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -51,6 +52,7 @@ from helpdesk.decorators import (
     is_helpdesk_staff,
     superuser_required,
 )
+from helpdesk.escalation import can_escalate, escalate_ticket
 from helpdesk.forms import (
     CUSTOMFIELD_DATE_FORMAT,
     ChecklistForm,
@@ -584,6 +586,7 @@ def view_ticket(request, ticket_id):
             "assignable_users": get_assignable_users(
                 helpdesk_settings.HELPDESK_STAFF_ONLY_TICKET_OWNERS
             ),
+            "can_escalate": can_escalate(ticket),
             **extra_context_kwargs,
         },
     )
@@ -914,6 +917,8 @@ def mass_update(request):
 
         elif action == "delete":
             t.delete()
+        elif action == "escalate" and can_escalate(t):
+            escalate_ticket(t, user=request.user)
 
     return HttpResponseRedirect(reverse("helpdesk:list"))
 
@@ -1545,6 +1550,26 @@ def unhold_ticket(request, ticket_id):
 
 
 unhold_ticket = staff_member_required(unhold_ticket)
+
+
+@helpdesk_staff_member_required
+@require_POST
+def escalate_ticket_view(request, ticket_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+    if can_escalate(ticket):
+        escalate_ticket(ticket, user=request.user)
+        messages.success(
+            request,
+            _("Ticket escalated to priority %(priority)s.")
+            % {"priority": ticket.priority},
+        )
+    else:
+        messages.info(request, _("This ticket cannot be escalated any further."))
+    return HttpResponseRedirect(ticket.get_absolute_url())
+
+
+escalate_ticket_view = staff_member_required(escalate_ticket_view)
 
 
 @helpdesk_staff_member_required

@@ -14,8 +14,9 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
+from helpdesk.escalation import escalatable_tickets, escalate_ticket
 from helpdesk.lib import safe_template_context
-from helpdesk.models import EscalationExclusion, Queue, Ticket
+from helpdesk.models import EscalationExclusion, Queue
 
 
 class Command(BaseCommand):
@@ -73,48 +74,33 @@ class Command(BaseCommand):
 
             req_last_escl_date = timezone.now() - timedelta(days=days)
 
-            for ticket in (
-                queue.ticket_set.filter(status__in=Ticket.OPEN_STATUSES)
-                .exclude(priority=1)
-                .filter(Q(on_hold__isnull=True) | Q(on_hold=False))
-                .filter(
-                    Q(last_escalation__lte=req_last_escl_date)
-                    | Q(last_escalation__isnull=True, created__lte=req_last_escl_date)
-                )
+            for ticket in escalatable_tickets(queue.ticket_set).filter(
+                Q(last_escalation__lte=req_last_escl_date)
+                | Q(last_escalation__isnull=True, created__lte=req_last_escl_date)
             ):
-                ticket.last_escalation = timezone.now()
-                ticket.priority -= 1
-                ticket.save()
-
-                context = safe_template_context(ticket)
-
-                sent_to = set()
-                ticket.send(
-                    {
-                        "submitter": ("escalated_submitter", context),
-                        "ticket_cc": ("escalated_cc", context),
-                        "assigned_to": ("escalated_owner", context),
-                    },
-                    sent_to=sent_to,
-                    fail_silently=True,
-                )
-
-                if verbose:
-                    self.stdout.write(
-                        f"  - Esclating {ticket.ticket} from {ticket.priority + 1}>{ticket.priority}"
+                if notify_only:
+                    context = safe_template_context(ticket)
+                    sent_to = set()
+                    ticket.send(
+                        {
+                            "submitter": ("escalated_submitter", context),
+                            "ticket_cc": ("escalated_cc", context),
+                            "assigned_to": ("escalated_owner", context),
+                        },
+                        sent_to=sent_to,
+                        fail_silently=True,
                     )
-
-                if not notify_only:
-                    followup = ticket.followup_set.create(
-                        title=_("Ticket Escalated"),
-                        public=True,
+                    if verbose:
+                        self.stdout.write(
+                            f"  - Esclating {ticket.ticket} from {ticket.priority}>{ticket.priority - 1}"
+                        )
+                else:
+                    escalate_ticket(
+                        ticket,
                         comment=_("Ticket escalated after %(nb)s days")
                         % {"nb": queue.escalate_days},
-                        email_recipients=sorted(sent_to),
                     )
-
-                    followup.ticketchange_set.create(
-                        field=_("Priority"),
-                        old_value=ticket.priority + 1,
-                        new_value=ticket.priority,
-                    )
+                    if verbose:
+                        self.stdout.write(
+                            f"  - Esclating {ticket.ticket} from {ticket.priority + 1}>{ticket.priority}"
+                        )
