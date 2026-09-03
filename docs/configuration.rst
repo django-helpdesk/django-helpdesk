@@ -27,9 +27,9 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    **Debugging Email Extraction**
 
-   You can run the management command manually from the command line with additional commands option ``debug_to_stdout``. Set this when manually running the command from a terminal so that additional debugging about which queues are being processed is written to stdout (console by default)::
+   You can run the management command manually from the command line with the :option:`--debug_to_stdout <get_email --debug_to_stdout>` option. Set this when manually running the command from a terminal so that additional debugging about which queues are being processed is written to stdout (console by default)::
 
-       **/path/to/helpdesksite/manage.py get_email --debug_to_stdout**
+    /path/to/helpdesksite/manage.py get_email --debug_to_stdout
 
 4. If you wish to automatically escalate tickets based on their age, set up a cronjob to run the escalation command on a regular basis::
 
@@ -37,7 +37,7 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 
    This will run the escalation process hourly, using the 'Escalation Days' setting for each queue to determine which tickets to escalate.
 
-   To notify users of outstanding tickets without adding an entry to the ticket, use the `notify-only` flag. This will send the emails without creating a follow-up::
+   To notify users of outstanding tickets without adding an entry to the ticket, use the :option:`--notify-only <escalate_tickets --notify-only>` flag. This will send the emails without creating a follow-up::
 
     0 * * * * /path/to/helpdesksite/manage.py escalate_tickets --notify-only
 
@@ -72,6 +72,78 @@ Before django-helpdesk will be much use, you need to do some basic configuration
 8. If you wish to use SOCKS4/5 proxy with Helpdesk Queue email operations, install PySocks manually. Please note that mixing both SOCKS and non-SOCKS email sources for different queues is only supported under Python 2; on Python 3, SOCKS proxy support is all-or-nothing: either all queue email sources must use SOCKS or none may use it. If you need this functionality on Python 3 please `let us know <https://github.com/django-helpdesk/django-helpdesk/issues/new>`_.
 
 You're now up and running! Happy ticketing.
+
+
+Management commands
+-------------------
+
+The commands below are the ones referenced in the steps above. Run them through
+your project's ``manage.py``, and remember that a cronjob needs the relevant
+Django environment variables set.
+
+.. program:: get_email
+
+``get_email``
+^^^^^^^^^^^^^
+
+Import e-mail from the inboxes configured on each queue and turn the messages
+into tickets or follow-ups.
+
+.. option:: --quiet
+
+   Hide details about each queue and message as they are processed.
+
+.. option:: --debug_to_stdout
+
+   Log additional messaging to stdout, including which queues are being
+   processed. Useful when running the command by hand.
+
+.. program:: escalate_tickets
+
+``escalate_tickets``
+^^^^^^^^^^^^^^^^^^^^
+
+Raise the priority of tickets that have gone untouched for longer than their
+queue's *Escalation Days* setting.
+
+.. option:: -q <slug ...>, --queues <slug ...>
+
+   Queue slugs to include, as a space separated list. All queues by default.
+
+.. option:: -x, --escalate-verbosely
+
+   Display the tickets that were escalated.
+
+.. option:: -n, --notify-only
+
+   Send the e-mail reminders without escalating the tickets, so no follow-up is
+   added to the ticket.
+
+.. program:: create_escalation_exclusions
+
+``create_escalation_exclusions``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Create the calendar entries that keep given days out of the escalation
+calculation.
+
+.. option:: -d <day ...>, --days <day ...>
+
+   Required. Days of the week to exclude (``monday``, ``tuesday``, and so on),
+   as a space separated list.
+
+.. option:: -o <n>, --occurrences <n>
+
+   How many weeks ahead to exclude those days. Defaults to ``1``.
+
+.. option:: -q <slug ...>, --queues <slug ...>
+
+   Queue slugs to include, as a space separated list. All queues by default.
+
+.. option:: -x, --exclude-verbosely
+
+   Display the list of dates that were excluded.
+
 
 Queue settings via admin interface
 ----------------------------------
@@ -154,7 +226,7 @@ passwords, and none of them apply unless you configure them.
 **Serving attachments.** Attachment content comes from unauthenticated third
 parties, through inbound email and through the public submission form. Do not
 serve ``MEDIA_ROOT`` in a way that renders attachments inline, and see
-``HELPDESK_VALID_EXTENSIONS`` for the extensions accepted on upload.
+:setting:`HELPDESK_VALID_EXTENSIONS` for the extensions accepted on upload.
 
 **Transport and cookies.** Serve the site over HTTPS. If you terminate TLS at a
 proxy, set the ``SECURE_PROXY_SSL_HEADER`` *environment variable* to any
