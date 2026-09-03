@@ -121,6 +121,20 @@
         </form>
       </div>
       <div class="col">
+        <small class="text-uppercase text-secondary">{% translate "Escalation" %}</small>
+        <p>
+          {% if not ticket.queue.escalate_days %}
+            {% translate "Not configured" %}
+          {% else %}
+            {% blocktranslate count days=ticket.queue.escalate_days %}Every {{ days }} day{% plural %}Every {{ days }} days{% endblocktranslate %}
+            {% if ticket.last_escalation %}
+              <br>
+              {% blocktranslate with n=ticket.last_escalation|days_ago %}Last escalated {{ n }} days ago{% endblocktranslate %}
+            {% endif %}
+          {% endif %}
+        </p>
+      </div>
+      <div class="col">
         <small class="text-uppercase text-secondary">{% translate "Submitted by" %}</small>
         <div class="input-group input-group-sm">
           <input type="text"

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from django.conf import settings
 from django.template import Library
 from django.template.defaultfilters import date as date_filter
@@ -16,6 +16,16 @@ register = Library()
 def get(value, arg, default=None):
     """Call the dictionary get function"""
     return value.get(arg, default)
+
+
+@register.filter
+def days_ago(value):
+    """Return the whole number of days between value and today."""
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        value = value.date()
+    return (date.today() - value).days
 
 
 @register.filter(expects_localtime=True)

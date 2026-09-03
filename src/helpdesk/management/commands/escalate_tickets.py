@@ -65,7 +65,9 @@ class Command(BaseCommand):
             days = 0
 
             while workdate < today:
-                if not EscalationExclusion.objects.filter(date=workdate).exists():
+                if not EscalationExclusion.objects.filter(
+                    Q(date=workdate) & (Q(queues=queue) | Q(queues__isnull=True))
+                ).distinct().exists():
                     days += 1
                 workdate = workdate + timedelta(days=1)
 
