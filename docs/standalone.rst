@@ -156,7 +156,6 @@ Helpdesk Core Settings
    ``HELPDESK_EMAIL_ON_TICKET_ASSIGN``, ``True``, "Send email on ticket assignment"
    ``HELPDESK_EMAIL_ON_TICKET_CHANGE``, ``True``, "Send email on ticket changes"
    ``HELPDESK_LOGIN_VIEW_TICKETLIST``, ``True``, "Show ticket list after login"
-   ``HELPDESK_PRESET_REPLIES``, ``True``, "Enable preset replies"
    ``HELPDESK_TICKETS_PER_PAGE``, ``25``, "Number of tickets per page"
 
 Public Portal Settings

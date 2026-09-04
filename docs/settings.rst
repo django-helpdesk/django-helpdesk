@@ -86,6 +86,20 @@ Settings related to attachments
 
    If you'd like to turn of filtering of helpdesk extension types you can set this to ``False``.
 
+.. setting:: HELPDESK_ATTACHMENT_DIR_PERMS
+
+   *Default:* ``"755"``
+
+   Permissions used when creating the directories that hold ticket attachments, as an octal string. Parsed with base 8, so ``"755"`` means ``rwxr-xr-x``.
+
+.. setting:: HELPDESK_HTML_PREVIEW_ALLOW_REMOTE_IMAGES
+
+   *Default:* ``False``
+
+   Allow the HTML preview of a ticket message to load images from remote hosts. Off by default, which means a tracking pixel in a customer's e-mail does not fire when a staff member previews it. Set it to ``True`` only if full rendering fidelity matters more than that.
+
+   The preview is served with a ``Content-Security-Policy`` that sandboxes the document and disables scripting regardless of this setting. This toggle only widens ``img-src``.
+
 .. setting:: HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE
 
    *Default:* ``False``
@@ -125,6 +139,20 @@ These changes are visible throughout django-helpdesk
    *Default:* ``True``
 
    Show knowledgebase links?
+
+.. setting:: HELPDESK_UI_ENABLED
+
+   *Default:* ``True``
+
+   Register the web interface routes. Set it to ``False`` to serve the REST API without the staff and public web interface, for a deployment that drives django-helpdesk entirely from another front end.
+
+   Read when the URL configuration is built, so a change takes effect on the next process start rather than immediately.
+
+.. setting:: HELPDESK_USE_CDN
+
+   *Default:* ``False``
+
+   Serve jQuery and the other bundled JavaScript from public CDNs instead of the static files shipped with the package.
 
 .. setting:: HELPDESK_NAVIGATION_ENABLED
 
@@ -196,17 +224,37 @@ These changes are visible throughout django-helpdesk
 
    Maximum size, in bytes, of file attachments that will be sent via email
 
+.. setting:: HELPDESK_USE_HTTPS_IN_EMAIL_LINK
+
+   *Default:* the value of Django's ``SECURE_SSL_REDIRECT``
+
+   Scheme used for the ticket links in outgoing e-mail. ``True`` builds ``https://`` links, ``False`` builds ``http://``. The host comes from the current ``Site``, so that has to be configured as well for the links to be correct.
+
 .. setting:: QUEUE_EMAIL_BOX_UPDATE_ONLY
 
    *Default:* ``False``
 
    Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
+.. setting:: HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL
+
+   *Default:* ``False``
+
+   Keep the forwarded and replied text of an incoming e-mail that creates a new ticket, instead of stripping it. Useful when a customer forwards an existing thread, an error report from another service for instance, and expects support to see all of it.
+
 .. setting:: HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET
 
    *Default:* ``True``
 
    If False, disable the dependencies fields on ticket.
+
+.. setting:: HELPDESK_QUERY_CLASS
+
+   *Default:* django-helpdesk's own query class
+
+   A callable returning the class used to build and run ticket list queries. It is called with no arguments, and the class it returns is instantiated with the same signature as the built-in one. Use it to change how the ticket list is filtered and sorted without forking the views.
+
+   Resolved once when the staff views are imported, so a change takes effect on the next process start.
 
 .. setting:: HELPDESK_ENABLE_TIME_SPENT_ON_TICKET
 
@@ -691,7 +739,4 @@ The following settings were defined in previous versions and are no longer suppo
 
    Discontinued in favor of :setting:`HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION`.
 
-.. setting:: HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL
-
-   Do not ignore forwarded and replied text from the email messages which create a new ticket; useful for cases when customer forwards some email (error from service or something) and wants support to see that
 
