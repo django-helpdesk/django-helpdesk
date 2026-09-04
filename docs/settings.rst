@@ -373,7 +373,7 @@ Options that change ticket properties
 
    If you wish to modify or introduce new status choices, you may add them like this::
 
-     # Don't forget to import the gettext_lazy function at the begining of your settings file
+     # Don't forget to import the gettext_lazy function at the beginning of your settings file
      from django.utils.translation import gettext_lazy as _
 
      # Explicitly define status list integer values
@@ -693,5 +693,5 @@ The following settings were defined in previous versions and are no longer suppo
 
 .. setting:: HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL
 
-   Do not ignore fowarded and replied text from the email messages which create a new ticket; useful for cases when customer forwards some email (error from service or something) and wants support to see that
+   Do not ignore forwarded and replied text from the email messages which create a new ticket; useful for cases when customer forwards some email (error from service or something) and wants support to see that
 

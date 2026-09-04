@@ -33,7 +33,7 @@ You need to provide a JSON body with the following data
     The description of the ticket
 
 ``resolution``
-    An optional text for the resoltuion of the ticket
+    An optional text for the resolution of the ticket
 
 ``submitter_email``
     The email of the ticket submitter
