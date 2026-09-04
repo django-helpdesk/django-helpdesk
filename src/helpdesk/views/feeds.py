@@ -32,12 +32,19 @@ class OpenTicketsByUser(Feed):
 
     def get_object(self, request, user_name, queue_slug=None):
         user = get_object_or_404(User, username=user_name)
+        huser = HelpdeskUser(request.user)
         if queue_slug:
             queue = get_object_or_404(Queue, slug=queue_slug)
+            if not huser.can_access_queue(queue):
+                raise PermissionDenied()
         else:
             queue = None
 
-        return {"user": user, "queue": queue}
+        return {
+            "user": user,
+            "queue": queue,
+            "accessible": huser.accessible_tickets(),
+        }
 
     def title(self, obj):
         if obj["queue"]:
@@ -77,16 +84,13 @@ class OpenTicketsByUser(Feed):
             )
 
     def items(self, obj):
+        # Scoped to the caller, not to obj["user"]: the feed can be requested
+        # for any username, so filtering only by assignee served another
+        # person's tickets from every queue.
+        tickets = obj["accessible"].filter(assigned_to=obj["user"])
         if obj["queue"]:
-            return (
-                Ticket.objects.filter(assigned_to=obj["user"])
-                .filter(queue=obj["queue"])
-                .filter(Q_OPEN_STATUSES)
-            )
-        else:
-            return Ticket.objects.filter(assigned_to=obj["user"]).filter(
-                Q_OPEN_STATUSES
-            )
+            tickets = tickets.filter(queue=obj["queue"])
+        return tickets.filter(Q_OPEN_STATUSES)
 
     def item_pubdate(self, item):
         return item.created
@@ -106,8 +110,11 @@ class UnassignedTickets(Feed):
     description = _("Unassigned Open and Reopened tickets")
     link = ""  # '%s?assigned_to=' % reverse('helpdesk:list')
 
+    def get_object(self, request):
+        return HelpdeskUser(request.user).accessible_tickets()
+
     def items(self, obj):
-        return Ticket.objects.filter(assigned_to__isnull=True).filter(Q_OPEN_STATUSES)
+        return obj.filter(assigned_to__isnull=True).filter(Q_OPEN_STATUSES)
 
     def item_pubdate(self, item):
         return item.created
@@ -129,8 +136,14 @@ class RecentFollowUps(Feed):
     )
     link = "/tickets/"  # reverse('helpdesk:list')
 
-    def items(self):
-        return FollowUp.objects.order_by("-date")[:20]
+    def get_object(self, request):
+        return HelpdeskUser(request.user).accessible_tickets()
+
+    def items(self, obj):
+        # Narrowed before the slice, not after, or the twenty most recent
+        # follow-ups would be selected across every queue and then filtered
+        # down to whatever happened to be reachable.
+        return FollowUp.objects.filter(ticket__in=obj).order_by("-date")[:20]
 
 
 class OpenTicketsByQueue(Feed):

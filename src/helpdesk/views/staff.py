@@ -347,10 +347,11 @@ dashboard = staff_member_required(dashboard)
 
 
 def ticket_perm_check(request, ticket):
-    huser = HelpdeskUser(request.user)
-    if not huser.can_access_queue(ticket.queue):
-        raise PermissionDenied()
-    if not huser.can_access_ticket(ticket):
+    # can_access_ticket() only. Testing can_access_queue() first denied before
+    # the assignment branch could ever apply, which made a ticket assigned to
+    # the user unreachable when it lived outside their queues, and left that
+    # branch of can_access_ticket() dead.
+    if not HelpdeskUser(request.user).can_access_ticket(ticket):
         raise PermissionDenied()
 
 
@@ -379,9 +380,12 @@ delete_ticket = staff_member_required(delete_ticket)
 @helpdesk_staff_member_required
 def followup_edit(request, ticket_id, followup_id):
     """Edit followup options with an ability to change the ticket."""
-    followup = get_object_or_404(FollowUp, id=followup_id)
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
+    # Bound to the ticket the caller was just authorized for. Resolving the two
+    # ids independently only proved access to the one in the URL, which let a
+    # permitted ticket id be paired with a follow-up from any other queue.
+    followup = get_object_or_404(FollowUp, id=followup_id, ticket=ticket)
 
     if request.method == "GET":
         form = EditFollowUpForm(
@@ -399,17 +403,20 @@ def followup_edit(request, ticket_id, followup_id):
         if ticket.status not in Ticket.OPEN_STATUSES:
             # If current ticket is closed, add it to the queryset
             form.fields["ticket"].queryset = (
-                Ticket.objects.filter(
-                    Q(id=ticket.id) | Q(status__in=Ticket.OPEN_STATUSES)
-                )
+                HelpdeskUser(request.user)
+                .accessible_tickets()
+                .filter(Q(id=ticket.id) | Q(status__in=Ticket.OPEN_STATUSES))
                 .distinct()
                 .order_by("-id")
             )
         else:
             # If ticket is open, just show open tickets
-            form.fields["ticket"].queryset = Ticket.objects.filter(
-                status__in=Ticket.OPEN_STATUSES
-            ).order_by("-id")
+            form.fields["ticket"].queryset = (
+                HelpdeskUser(request.user)
+                .accessible_tickets()
+                .filter(status__in=Ticket.OPEN_STATUSES)
+                .order_by("-id")
+            )
 
         ticketcc_string = return_ticketccstring_and_show_subscribe(
             request.user, ticket
@@ -430,10 +437,12 @@ def followup_edit(request, ticket_id, followup_id):
 
         # Needed to allow editing of closed tickets followups
         original_ticket = get_object_or_404(Ticket, id=followup.ticket.id)
-        if original_ticket.status not in Ticket.OPEN_STATUSES:
-            form.fields["ticket"].queryset = Ticket.objects.filter(
-                Q(id=original_ticket.id) | Q(status__in=Ticket.OPEN_STATUSES)
-            ).distinct()
+        form.fields["ticket"].queryset = (
+            HelpdeskUser(request.user)
+            .accessible_tickets()
+            .filter(Q(id=original_ticket.id) | Q(status__in=Ticket.OPEN_STATUSES))
+            .distinct()
+        )
 
         if form.is_valid():
             # Edit in place: a copy would lose the message ID and the
@@ -446,6 +455,25 @@ def followup_edit(request, ticket_id, followup_id):
             followup.time_spent = form.cleaned_data["time_spent"]
             followup.save()
             return HttpResponseRedirect(reverse("helpdesk:view", args=[ticket.id]))
+
+        # An invalid form used to fall off the end of the view and return None.
+        # Scoping the ticket queryset makes that reachable: an id outside the
+        # caller's queues is now a validation error rather than an accepted
+        # value, and a rejected request deserves the form back with its errors.
+        ticketcc_string = return_ticketccstring_and_show_subscribe(
+            request.user, ticket
+        )[0]
+        return render(
+            request,
+            "helpdesk/followup_edit.html",
+            {
+                "followup": followup,
+                "ticket": ticket,
+                "form": form,
+                "ticketcc_string": ticketcc_string,
+                "ticket_attachments": get_attachments_for_ticket(ticket),
+            },
+        )
 
 
 followup_edit = staff_member_required(followup_edit)
@@ -488,10 +516,13 @@ def view_ticket(request, ticket_id):
     try:
         ticket_perm_check(request, ticket)
     except PermissionDenied:
+        # Identified by id only. Ticket.__str__ includes the title, so
+        # interpolating the object echoed the title of a ticket the user was
+        # just refused, turning the denial itself into a disclosure.
         messages.error(
             request,
-            _("You don't have permission to view ticket - %(ticket)s.")
-            % {"ticket": str(ticket)},
+            _("You don't have permission to view ticket %(ticket_id)s.")
+            % {"ticket_id": ticket.id},
         )
         return HttpResponseRedirect(reverse("helpdesk:list"))
 
@@ -556,10 +587,22 @@ def view_ticket(request, ticket_id):
 
         return redirect("helpdesk:edit_ticket_checklist", ticket.id, checklist.id)
 
+    # Both dependency directions expose the id and title of the other ticket, so
+    # they are scoped to what this user may open. Without it, opening a ticket of
+    # your own disclosed the title of any ticket linked to it, in any queue, with
+    # no id manipulation needed.
+    reachable = HelpdeskUser(request.user).accessible_tickets()
     # List open tickets on top
-    dependencies = ticket.ticketdependency.annotate(
-        rank=Case(When(depends_on__status__in=Ticket.OPEN_STATUSES, then=1), default=2)
-    ).order_by("rank")
+    dependencies = (
+        ticket.ticketdependency.filter(depends_on__in=reachable)
+        .annotate(
+            rank=Case(
+                When(depends_on__status__in=Ticket.OPEN_STATUSES, then=1), default=2
+            )
+        )
+        .order_by("rank")
+    )
+    resolves = ticket.depends_on.filter(ticket__in=reachable)
 
     # add custom fields to further details panel
     customfields_form = EditTicketCustomFieldForm(None, instance=ticket)
@@ -571,6 +614,7 @@ def view_ticket(request, ticket_id):
             "ticket": ticket,
             "followups": get_followups_for_ticket(ticket),
             "dependencies": dependencies,
+            "resolves": resolves,
             "ticket_attachments": get_attachments_for_ticket(ticket),
             "submitter_userprofile_url": submitter_userprofile_url,
             "form": form,
@@ -676,7 +720,11 @@ def get_ticket_from_request_with_authorisation(
         except (Ticket.DoesNotExist, ValueError):
             raise PermissionDenied()
 
-    return get_object_or_404(Ticket, id=ticket_id)
+    # Staff branch: scoped to the queues this user may open, so the POST side of
+    # an update cannot reach further than its GET side.
+    return get_object_or_404(
+        HelpdeskUser(request.user).accessible_tickets(), id=ticket_id
+    )
 
 
 def get_due_date_from_form_or_ticket(form, ticket: Ticket) -> datetime.date | None:
@@ -1067,7 +1115,9 @@ def merge_tickets(request):
     data to keep per attributes as well as custom fields.
     Follow-ups and ticketCC will be moved to the main ticket and other tickets won't be able to receive new answers.
     """
-    ticket_select_form = MultipleTicketSelectForm(request.GET or None)
+    ticket_select_form = MultipleTicketSelectForm(
+        request.GET or None, user=request.user
+    )
     tickets = custom_fields = None
     if ticket_select_form.is_valid():
         tickets = ticket_select_form.cleaned_data.get("tickets")
@@ -1136,7 +1186,10 @@ def check_redirect_on_user_query(request, huser):
 
         if filter_:
             try:
-                ticket = huser.get_tickets_in_queues().get(**filter_)
+                # accessible_tickets(), not get_tickets_in_queues(): searching
+                # a ticket number redirected to a ticket the caller would then
+                # be refused, which confirms the id exists.
+                ticket = huser.accessible_tickets().get(**filter_)
                 return HttpResponseRedirect(ticket.staff_url)
             except Ticket.DoesNotExist:
                 # Go on to standard keyword searching
@@ -1464,8 +1517,14 @@ class UpdateTicketView(
         return kwargs
 
     def get_object(self, queryset=None):
+        # Starts from the authorized queryset rather than the default manager,
+        # so a foreign-queue id is a 404 here as it is in the sibling routes.
+        # Those call ticket_perm_check() after resolving; this class resolves
+        # through the queryset instead, which cannot be forgotten separately.
         ticket_id = self.kwargs["ticket_id"]
-        return Ticket.objects.get(id=ticket_id)
+        return get_object_or_404(
+            HelpdeskUser(self.request.user).accessible_tickets(), id=ticket_id
+        )
 
     def form_valid(self, form):
         ticket_id = self.kwargs["ticket_id"]
@@ -2411,7 +2470,10 @@ def kanban_update_ticket(request, ticket_id):
         return JsonResponse({"error": "POST required"}, status=405)
     ticket = get_object_or_404(Ticket, id=ticket_id)
     huser = HelpdeskUser(request.user)
-    if ticket.queue not in huser.get_queues():
+    # can_access_queue(), not get_queues(): the latter also returns queues that
+    # accept public submissions, which would let a status be written on a ticket
+    # this user cannot open.
+    if not huser.can_access_queue(ticket.queue):
         return JsonResponse({"error": "Permission denied"}, status=403)
     try:
         data = json.loads(request.body)
