@@ -19,7 +19,7 @@ User = get_user_model()
 
 
 def add_staff_subscription(user: User, ticket: Ticket) -> None:
-    """Auto subscribe the staff member if that's what the settigs say and the
+    """Auto subscribe the staff member if that's what the settings say and the
     user is authenticated and a staff member"""
     if (
         helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE
@@ -94,7 +94,7 @@ def subscribe_to_ticket_updates(
 def get_and_set_ticket_status(
     new_status: int, ticket: Ticket, follow_up: FollowUp
 ) -> tuple[str, int]:
-    """Performs comparision on previous status to new status,
+    """Performs comparison on previous status to new status,
     updating the title as required.
 
     Returns:

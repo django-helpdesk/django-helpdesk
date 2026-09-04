@@ -13,7 +13,7 @@ class MarkDown(SimpleTestCase):
         self.assertEqual(output_value, expected_value)
 
     def test_markdown_nl2br(self):
-        """warning, after Line 1 - two withespace, esle did't work"""
+        """warning, after Line 1 - two withespace, else did't work"""
         expected_value = "<p>Line 1<br />\n                    Line 2</p>"
         input_value = """Line 1  
                     Line 2"""

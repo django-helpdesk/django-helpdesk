@@ -336,7 +336,7 @@ class GetEmailCommonTests(TestCase):
 
         for att_retrieved in followup.followupattachment_set.all():
             if helpdesk.email.HTML_EMAIL_ATTACHMENT_FILENAME == att_retrieved.filename:
-                # Ignore the HTML formatted conntent of the email that is attached
+                # Ignore the HTML formatted content of the email that is attached
                 continue
             self.assertTrue(
                 att_retrieved.filename.endswith(att_filename),

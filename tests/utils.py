@@ -24,7 +24,7 @@ from PIL import Image
 
 def strip_accents(text):
     """
-    Strip accents from input String. (only works on Pythin 3
+    Strip accents from input String. (only works on Python 3
 
     :param text: The input string.
     :type text: String.

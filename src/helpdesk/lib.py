@@ -190,7 +190,7 @@ def process_attachments(followup, attached_files):
 
 
 def format_time_spent(time_spent):
-    """Format time_spent attribute to "[H]HHh:MMm" text string to be allign in
+    """Format time_spent attribute to "[H]HHh:MMm" text string to be align in
     all graphical outputs
     """
     if time_spent:
