@@ -681,7 +681,7 @@ def get_ticket_from_request_with_authorisation(
 
 def get_due_date_from_form_or_ticket(form, ticket: Ticket) -> datetime.date | None:
     """Tries to locate the due date for a ticket from the form
-    'due_date' parameter or the `due_date_*` paramaters.
+    'due_date' parameter or the `due_date_*` parameters.
     """
     due_date = form.cleaned_data.get("due_date") or None
     if due_date is None:

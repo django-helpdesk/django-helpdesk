@@ -290,7 +290,7 @@ class Queue(models.Model):
 
     permission_name = models.CharField(
         _("Django auth permission name"),
-        max_length=72,  # based on prepare_permission_name() pre-pending chars to slug
+        max_length=72,  # based on prepare_permission_name() prepending chars to slug
         blank=True,
         null=True,
         editable=False,
@@ -365,7 +365,7 @@ class Queue(models.Model):
         help_text=_(
             "If logging is enabled, what directory should we use to "
             "store log files for this queue? "
-            "The standard logging mechanims are used if no directory is set"
+            "The standard logging mechanisms are used if no directory is set"
         ),
     )
 
@@ -682,7 +682,7 @@ class Ticket(models.Model):
 
         **kwargs are passed to send_templated_mail defined in templated_email.py
 
-        returns the group of email addresses that wont be mailed to again, which is
+        returns the group of email addresses that won't be mailed to again, which is
         the addresses delivered to and dont_send_to and the queue address.
 
         """

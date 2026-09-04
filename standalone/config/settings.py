@@ -145,7 +145,7 @@ LOGIN_REDIRECT_URL = "helpdesk:home"
 
 
 DATABASES = {
-    # Setup postgress db with postgres as host and db name and read password from env var
+    # Setup postgresql db with postgres as host and db name and read password from env var
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("POSTGRES_DB", "postgres"),
