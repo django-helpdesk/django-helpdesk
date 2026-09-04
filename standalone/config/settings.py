@@ -120,7 +120,6 @@ HELPDESK_DEFAULT_SETTINGS = {
 }
 
 # Should the public web portal be enabled?
-HELPDESK_PUBLIC_ENABLED = os.environ.get("HELPDESK_PUBLIC_ENABLED", "True") == "True"
 HELPDESK_VIEW_A_TICKET_PUBLIC = (
     os.environ.get("HELPDESK_VIEW_A_TICKET_PUBLIC", "True") == "True"
 )
