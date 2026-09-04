@@ -115,7 +115,6 @@ HELPDESK_DEFAULT_SETTINGS = {
     == "True",
     "login_view_ticketlist": os.environ.get("HELPDESK_LOGIN_VIEW_TICKETLIST", "True")
     == "True",
-    "preset_replies": os.environ.get("HELPDESK_PRESET_REPLIES", "True") == "True",
     "tickets_per_page": os.environ.get("HELPDESK_TICKETS_PER_PAGE", "25"),
 }
 
