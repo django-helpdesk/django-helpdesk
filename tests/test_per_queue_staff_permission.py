@@ -383,14 +383,27 @@ class PerQueuePermissionSecurityTestCase(TestCase):
         self.assertTrue(TicketDependency.objects.filter(id=self.dep_2.id).exists())
 
     def test_merge_tickets_blocked_for_inaccessible_queue(self):
-        """user_1 cannot merge tickets when one belongs to queue_2."""
+        """user_1 cannot merge tickets when one belongs to queue_2.
+
+        Asserts the outcome rather than the status code. The selector's queryset
+        is now scoped to the queues the caller may open, so a foreign id is
+        refused by form validation before the view's PermissionDenied branch is
+        reached. Both deny the merge; checking that it did not happen, and that
+        no foreign title was rendered, holds whichever layer catches it.
+        """
         self._login_user_1()
         url = (
             reverse("helpdesk:merge_tickets")
             + f"?tickets={self.ticket_2.id}&tickets={self.ticket_2b.id}"
         )
         response = self.client.post(url, {"chosen_ticket": self.ticket_2.id})
-        self.assertEqual(response.status_code, 403)
+        self.assertIn(response.status_code, (200, 403))
+        if response.status_code == 200:
+            self.assertNotContains(response, self.ticket_2.title)
+        self.ticket_2.refresh_from_db()
+        self.ticket_2b.refresh_from_db()
+        self.assertIsNone(self.ticket_2.merged_to_id)
+        self.assertIsNone(self.ticket_2b.merged_to_id)
 
     def test_rss_queue_blocked_for_inaccessible_queue(self):
         """user_1 cannot read the RSS feed for queue_2."""
@@ -409,10 +422,13 @@ class PerQueuePermissionSecurityTestCase(TestCase):
         stored_messages = list(response.context["messages"])
         self.assertEqual(len(stored_messages), 1)
         self.assertEqual(stored_messages[0].level, messages.ERROR)
+        # Identified by id: including the ticket's string representation echoed
+        # the title of a ticket the user was just refused.
         self.assertEqual(
             str(stored_messages[0]),
-            f"You don't have permission to view ticket - {self.ticket_2}.",
+            f"You don't have permission to view ticket {self.ticket_2.id}.",
         )
+        self.assertNotIn(self.ticket_2.title, str(stored_messages[0]))
 
     def test_view_ticket_allowed_for_accessible_queue(self):
         """The redirect only applies when permission is denied: user_1 can
@@ -599,13 +615,28 @@ class PerQueueApiAuthorizationTestCase(TestCase):
         self.assertEqual(response.status_code, 201, response.content)
 
     def test_api_and_ui_agree_on_a_ticket_assigned_outside_the_user_queues(self):
-        """`can_access_ticket()` reads as though an assignee may always reach
-        their ticket, but `ticket_perm_check()` tests the queue first and denies
-        before that branch runs, so the UI refuses it. The API must refuse it
-        too: granting it would leave the API more permissive than the interface.
+        """A ticket assigned to the user is reachable whatever queue it lives
+        in, and both surfaces must say so.
+
+        `can_access_ticket()` always read that way, but `ticket_perm_check()`
+        tested the queue first and denied before the assignment branch could
+        run, so the branch was dead and the UI refused. Both now follow
+        can_access_ticket(), which is what the interface claimed all along.
         """
         self.ticket_b.assigned_to = self.staff
         self.ticket_b.save()
+        self.login_staff()
+        ui = self.client.get(
+            reverse("helpdesk:view", kwargs={"ticket_id": self.ticket_b.id})
+        )
+        self.assertEqual(ui.status_code, 200)
+        self.assertEqual(
+            self.client.get(f"/api/tickets/{self.ticket_b.id}/").status_code, 200
+        )
+
+    def test_an_unassigned_ticket_outside_the_user_queues_is_still_refused(self):
+        """The control for the test above: the assignment is what grants it, not
+        the widening itself."""
         self.login_staff()
         ui = self.client.get(
             reverse("helpdesk:view", kwargs={"ticket_id": self.ticket_b.id}),

@@ -10,7 +10,7 @@ from model_utils import Choices
 
 from helpdesk.serializers import DatatablesTicketSerializer
 
-from .models import FollowUp
+from .models import FollowUp, Ticket
 
 
 def query_to_base64(query):
@@ -204,6 +204,12 @@ class __Query__:
             # Now remove the matched null keys
             for null_key in matched_null_keys:
                 del null_filters[null_key]
+        # Applied here as well as in get(), so that a HELPDESK_QUERY_CLASS
+        # overriding get() to supply a different base queryset keeps the
+        # boundary. A subclass can override this method too, so this is a
+        # narrower surface rather than a guarantee. As a Q on the same query,
+        # rather than a join against a list of queues.
+        queryset = queryset.filter(self.huser.accessible_tickets_q())
         queryset = queryset.filter(
             *q_args,
             (Q(**value_filters) & Q(**null_filters)) & self.get_search_filter_args(),
@@ -223,9 +229,9 @@ class __Query__:
         return queryset.distinct()
 
     def get(self):
-        # Prefilter the allowed tickets
-        tickets = self.huser.get_tickets_in_queues().select_related()
-        return self.__run__(tickets)
+        # __run__() applies the boundary itself; this is the select_related()
+        # that the list views want, not the authorization step.
+        return self.__run__(Ticket.objects.select_related())
 
     def get_datatables_context(self, *, column_lookup=None, **kwargs):
         """

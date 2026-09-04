@@ -46,6 +46,7 @@ from helpdesk.settings import (
     HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST,
 )
 from helpdesk.signals import new_ticket_done
+from helpdesk.user import HelpdeskUser
 from helpdesk.validators import validate_file_extension
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
@@ -143,6 +144,13 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
         # Disable and add help_text to the merged_to field on this form
         self.fields["merged_to"].disabled = True
+        # A disabled field's value is ignored on submit, so its queryset only
+        # decides what is rendered. Left at the default manager it listed the id
+        # and title of every ticket in the installation, including queues the
+        # viewer cannot open, so it is narrowed to the value actually in use.
+        self.fields["merged_to"].queryset = Ticket.objects.filter(
+            pk=self.instance.merged_to_id
+        )
         self.fields["merged_to"].help_text = _(
             "This ticket is merged into the selected ticket."
         )
@@ -735,9 +743,25 @@ class TicketResolvesForm(forms.ModelForm):
 class MultipleTicketSelectForm(forms.Form):
     tickets = forms.ModelMultipleChoiceField(
         label=_("Tickets to merge"),
-        queryset=Ticket.objects.filter(merged_to=None),
+        queryset=Ticket.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "form-control"}),
     )
+
+    def __init__(self, *args, user=None, **kwargs):
+        """The choices are narrowed to what `user` may open.
+
+        merge_tickets() already refuses to merge a ticket from a queue the
+        caller cannot access, but the picker itself listed the id and title of
+        every unmerged ticket in the installation. Passing the user keeps the
+        two consistent: what cannot be merged is not offered either.
+        """
+        super().__init__(*args, **kwargs)
+        tickets = (
+            HelpdeskUser(user).accessible_tickets()
+            if user is not None
+            else Ticket.objects.none()
+        )
+        self.fields["tickets"].queryset = tickets.filter(merged_to=None)
 
     def clean_tickets(self):
         tickets = self.cleaned_data.get("tickets")
