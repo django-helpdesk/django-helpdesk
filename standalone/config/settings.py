@@ -127,6 +127,9 @@ HELPDESK_SUBMIT_A_TICKET_PUBLIC = (
     os.environ.get("HELPDESK_SUBMIT_A_TICKET_PUBLIC", "True") == "True"
 )
 
+# Should the Kanban board be enabled?
+HELPDESK_KANBAN_ENABLED = os.environ.get("HELPDESK_KANBAN_ENABLED", "True") == "True"
+
 # Should the Knowledgebase be enabled?
 HELPDESK_KB_ENABLED = os.environ.get("HELPDESK_KB_ENABLED", "True") == "True"
 
