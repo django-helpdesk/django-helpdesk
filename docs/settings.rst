@@ -202,6 +202,12 @@ These changes are visible throughout django-helpdesk
 
    Only process mail with a valid tracking ID; all other mail will be ignored instead of creating a new ticket.
 
+.. setting:: HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL
+
+   *Default:* ``False``
+
+   Keep the forwarded and replied text of an incoming e-mail that creates a new ticket, instead of stripping it. Useful when a customer forwards an existing thread, an error report from another service for instance, and expects support to see all of it.
+
 .. setting:: HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET
 
    *Default:* ``True``
@@ -691,7 +697,4 @@ The following settings were defined in previous versions and are no longer suppo
 
    Discontinued in favor of :setting:`HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION`.
 
-.. setting:: HELPDESK_FULL_FIRST_MESSAGE_FROM_EMAIL
-
-   Do not ignore forwarded and replied text from the email messages which create a new ticket; useful for cases when customer forwards some email (error from service or something) and wants support to see that
 
