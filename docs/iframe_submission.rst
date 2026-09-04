@@ -1,5 +1,5 @@
 Ticket submission with embedded iframe
-=====================================
+======================================
 
 Django-helpdesk associates an email address with each submitted ticket.
 
