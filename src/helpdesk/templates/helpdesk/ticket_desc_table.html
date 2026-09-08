@@ -96,7 +96,7 @@
             <div class="input-group input-group-sm">
               <select name="owner" class="form-select">
                 <option value="0"
-                        {% if not ticket.assigned_to %} disabled selected{% endif %}>{% trans "Unassigned" %}</option>
+                        {% if not ticket.assigned_to %} disabled selected{% endif %}>{% translate "Unassigned" %}</option>
                 {% for user in assignable_users %}
                   <option value="{{ user.id }}"
                           {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
@@ -107,7 +107,7 @@
               <button class="btn btn-outline-primary"
                       type="submit"
                       data-bs-toggle="tooltip"
-                      title="{% trans 'Save ticket assignment' %}">
+                      title="{% translate 'Save ticket assignment' %}">
                 <i class="fas fa-user-check"></i>
               </button>
               <a class="btn btn-outline-primary"
@@ -345,7 +345,7 @@
                   <ul class="list-unstyled">
                     {% for task in checklist.tasks.all %}
                       <li class="mb-1"
-                          {% if task.completion_date %} title="{% trans "Completed on" %} {{ task.completion_date }}" {% endif %}>
+                          {% if task.completion_date %} title="{% translate "Completed on" %} {{ task.completion_date }}" {% endif %}>
                         <div class="form-check">
                           <input class="form-check-input"
                                  type="checkbox"

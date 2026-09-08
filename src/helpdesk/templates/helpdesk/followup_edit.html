@@ -1,5 +1,5 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
-{% block helpdesk_title %}{% trans "Edit followup" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Edit followup" %}{% endblock %}
 
 {% block helpdesk_head %}
 <script type="text/javascript">
@@ -13,13 +13,13 @@
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
 </li>
 <li class="breadcrumb-item">
     <a href="{{ ticket.get_absolute_url }}">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
 </li>
 <li class="breadcrumb-item active">
-    {% trans "Edit FollowUp" %}
+    {% translate "Edit FollowUp" %}
 </li>
 {% endblock %}
 
@@ -29,18 +29,18 @@
 
 <div class="card mb-3">
     <div class="card-header">
-        {% trans "Edit FollowUp" %}
+        {% translate "Edit FollowUp" %}
     </div>
     <div class="card-body">
         <form action="." method="POST" name="edit_followup_form">
             {{ form.non_field_errors }}
             <fieldset>
             <dl>
-                <dt><label for='id_ticket'>{% trans "Reassign ticket:" %}</label></dt>
+                <dt><label for='id_ticket'>{% translate "Reassign ticket:" %}</label></dt>
                 <dd>{{ form.ticket }}</dd>
-                <dt><label for="id_title">{% trans "Title:" %}</label></dt>
+                <dt><label for="id_title">{% translate "Title:" %}</label></dt>
                 <dd>{{ form.title }}</dd>
-                <dt><label for="id_comment">{% trans "Comment:" %}</label></dt>
+                <dt><label for="id_comment">{% translate "Comment:" %}</label></dt>
                 <dd>{{ form.comment }}</dd>
                 <style>
                     #id_comment { width: 100%; min-height: 400px; resize: vertical; box-sizing: border-box; }

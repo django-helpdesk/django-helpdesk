@@ -1,52 +1,52 @@
 {% extends "helpdesk/base.html" %}{% load i18n static %}
 
-{% block helpdesk_title %}{% trans "Kanban Board" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Kanban Board" %}{% endblock %}
 
 {% block helpdesk_head %}
 <link rel="stylesheet" href="{% static 'helpdesk/kanban.css' %}">
 {% endblock %}
 
 {% block helpdesk_breadcrumb %}
-<li class="breadcrumb-item active">{% trans "Kanban Board" %}</li>
+<li class="breadcrumb-item active">{% translate "Kanban Board" %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
 <div class="mb-3 p-3 rounded" style="background:#2e3440;">
   <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
     <div>
-      <h4 class="text-white mb-1">{% trans "Kanban Board" %}</h4>
-      <p class="text-white-50 small mb-0">{% trans "Drag cards between columns to update their status." %}</p>
+      <h4 class="text-white mb-1">{% translate "Kanban Board" %}</h4>
+      <p class="text-white-50 small mb-0">{% translate "Drag cards between columns to update their status." %}</p>
     </div>
     <div>
       <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
         <div>
           <label for="due-weeks-input" class="text-white fw-semibold d-block mb-1">
-            {% trans "Filter by due date" %}
+            {% translate "Filter by due date" %}
           </label>
           <div class="d-flex align-items-center gap-2">
-            <span class="text-white small text-nowrap">{% trans "Due in next" %}</span>
+            <span class="text-white small text-nowrap">{% translate "Due in next" %}</span>
             <input id="due-weeks-input" type="number" name="due_weeks" min="1" max="52"
                    value="{{ due_weeks|default:'' }}"
                    class="form-control form-control-sm"
                    style="width:70px;"
                    placeholder="{{ default_due_weeks|default:'—' }}">
-            <span class="text-white small text-nowrap">{% trans "weeks" %}</span>
+            <span class="text-white small text-nowrap">{% translate "weeks" %}</span>
             <div class="form-check form-check-inline mb-0 ms-1">
               <input class="form-check-input" type="checkbox" id="exclude-overdue" name="exclude_overdue" value="1"{% if exclude_overdue %} checked{% endif %}>
-              <label class="form-check-label text-white text-nowrap" for="exclude-overdue">{% trans "Exclude overdue" %}</label>
+              <label class="form-check-label text-white text-nowrap" for="exclude-overdue">{% translate "Exclude overdue" %}</label>
             </div>
-            <button type="submit" class="btn btn-sm btn-primary">{% trans "Apply" %}</button>
+            <button type="submit" class="btn btn-sm btn-primary">{% translate "Apply" %}</button>
             {% if due_weeks and due_weeks != default_due_weeks %}
-            <a href="{% url 'helpdesk:kanban' %}" class="btn btn-sm btn-outline-secondary">{% trans "Reset" %}</a>
+            <a href="{% url 'helpdesk:kanban' %}" class="btn btn-sm btn-outline-secondary">{% translate "Reset" %}</a>
             {% endif %}
             {% if due_weeks %}
-            <a href="{% url 'helpdesk:kanban' %}?due_weeks=0" class="btn btn-sm btn-outline-secondary">{% trans "Show all" %}</a>
+            <a href="{% url 'helpdesk:kanban' %}?due_weeks=0" class="btn btn-sm btn-outline-secondary">{% translate "Show all" %}</a>
             {% elif default_due_weeks %}
-            <a href="{% url 'helpdesk:kanban' %}" class="btn btn-sm btn-outline-secondary">{% trans "Reset to default" %}</a>
+            <a href="{% url 'helpdesk:kanban' %}" class="btn btn-sm btn-outline-secondary">{% translate "Reset to default" %}</a>
             {% endif %}
           </div>
           <p class="text-white-50 small mt-1 mb-0">
-            {% trans "Only shows tickets with a due date set between now and the chosen number of weeks from today." %}
+            {% translate "Only shows tickets with a due date set between now and the chosen number of weeks from today." %}
           </p>
         </div>
       </form>
@@ -55,12 +55,12 @@
   <div class="alert mt-2 py-2 mb-0 small {% if due_weeks %}alert-info{% else %}alert-warning{% endif %}">
     {% if due_weeks %}
       {% if exclude_overdue %}
-        {% blocktrans with w=due_weeks %}Showing only tickets due within the next <strong>{{ w }} week{{ w|pluralize }}</strong>. Overdue and tickets without a due date are hidden.{% endblocktrans %}
+        {% blocktranslate with w=due_weeks %}Showing only tickets due within the next <strong>{{ w }} week{{ w|pluralize }}</strong>. Overdue and tickets without a due date are hidden.{% endblocktranslate %}
       {% else %}
-        {% blocktrans with w=due_weeks %}Showing tickets due within the next <strong>{{ w }} week{{ w|pluralize }}</strong> plus any overdue open tickets. Tickets without a due date are hidden.{% endblocktrans %}
+        {% blocktranslate with w=due_weeks %}Showing tickets due within the next <strong>{{ w }} week{{ w|pluralize }}</strong> plus any overdue open tickets. Tickets without a due date are hidden.{% endblocktranslate %}
       {% endif %}
     {% else %}
-      {% trans "Showing all tickets. No date filter is active — this may be slow with large datasets." %}
+      {% translate "Showing all tickets. No date filter is active — this may be slow with large datasets." %}
     {% endif %}
   </div>
 </div>
@@ -155,12 +155,12 @@
         .then(r => r.json())
         .then(data => {
           if (data.status === 'ok') {
-            showToast('{% trans "Status updated." %}', 'success');
+            showToast('{% translate "Status updated." %}', 'success');
           } else {
-            showToast(data.error || '{% trans "Update failed." %}', 'danger');
+            showToast(data.error || '{% translate "Update failed." %}', 'danger');
           }
         })
-        .catch(() => showToast('{% trans "Network error." %}', 'danger'));
+        .catch(() => showToast('{% translate "Network error." %}', 'danger'));
     });
   });
 

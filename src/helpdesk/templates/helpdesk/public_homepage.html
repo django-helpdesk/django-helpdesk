@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}
 {% load i18n %}
 
-{% block helpdesk_title %}{% trans "Welcome to Helpdesk" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Welcome to Helpdesk" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
@@ -15,7 +15,7 @@
         <div class="row">
             {% if kb_categories %}
                 <div class="col-sm">
-                    <h2>{% trans "Knowledgebase Articles" %}</h2>
+                    <h2>{% translate "Knowledgebase Articles" %}</h2>
                     {% for category in kb_categories %}
                         <div class="card" style="margin-top: 15px">
                             <div class="card-body">
@@ -24,7 +24,7 @@
                                 <p class="card-text">
                                     <small class="text-muted">
                                         <a href='{{ category.get_absolute_url }}'>
-                                            {% trans 'View articles' %} <i class="fa fa-arrow-right"></i>
+                                            {% translate 'View articles' %} <i class="fa fa-arrow-right"></i>
                                         </a>
                                     </small>
                                 </p>
@@ -37,37 +37,37 @@
             <div class="col-sm">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <h2>{% trans "Submit a Ticket" %}</h2>
+                        <h2>{% translate "Submit a Ticket" %}</h2>
                         {% include 'helpdesk/public_create_ticket_base.html' %}
                     </div>
                 </div>
             </div>
 
             {% if not helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-                <h2>{% trans "Please use button at upper right to login first." %}</h2>
+                <h2>{% translate "Please use button at upper right to login first." %}</h2>
             {% endif %}
 
             {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC %}
                 <div class="col-sm">
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            <h2>{% trans "View a Ticket" %}</h2>
+                            <h2>{% translate "View a Ticket" %}</h2>
                             <form method='get' action="{% url 'helpdesk:public_view' %}">
                                 <fieldset>
                                     <div class="mb-3 {% if field.errors %}has-error{% endif %}">
-                                        <label for='id_ticket'>{% trans "Ticket" %}</label>
+                                        <label for='id_ticket'>{% translate "Ticket" %}</label>
                                         <div class="input-group">
                                             <input type='text' name='ticket' class='form-control'/>
                                         </div>
                                     </div>
                                     <div class="mb-3 {% if field.errors %}has-error{% endif %}">
-                                        <label for='id_email'>{% trans "Your E-mail Address" %}</label>
+                                        <label for='id_email'>{% translate "Your E-mail Address" %}</label>
                                         <div class="input-group">
                                             <input type='text' name='email' class='form-control'/>
                                         </div>
                                     </div>
                                     <div class='buttons mb-3'>
-                                        <input type='submit' class="btn btn-primary" value='{% trans "View Ticket" %}'/>
+                                        <input type='submit' class="btn btn-primary" value='{% translate "View Ticket" %}'/>
                                     </div>
                                 </fieldset>
                             </form>

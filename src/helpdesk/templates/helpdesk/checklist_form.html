@@ -2,11 +2,11 @@
 
 {% load i18n %}
 
-{% block helpdesk_title %}{% trans "Edit Checklist" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Edit Checklist" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+        <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
     </li>
     <li class="breadcrumb-item">
         <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
@@ -18,10 +18,10 @@
     <div class="card">
         <div class="card-header">
             <h2>
-                {% trans "Edit Checklist" %}
+                {% translate "Edit Checklist" %}
                 <a class="btn btn-danger float-end" href='{% url "helpdesk:delete_ticket_checklist" ticket.id checklist.id %}'>
                     <i class="fas fa-trash"></i>
-                    {% trans "Delete checklist" %}
+                    {% translate "Delete checklist" %}
                 </a>
             </h2>
         </div>
@@ -45,9 +45,9 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th class="text-end">{% trans "Position" %}</th>
-                        <th>{% trans "Description" %}</th>
-                        <th class="text-center">{% trans "Delete?" %}</th>
+                        <th class="text-end">{% translate "Position" %}</th>
+                        <th>{% translate "Description" %}</th>
+                        <th class="text-center">{% translate "Delete?" %}</th>
                     </tr>
                     </thead>
                     <tbody id="tasks">
@@ -58,16 +58,16 @@
                 </table>
                 <button type="button" class="btn btn-secondary" id="addRow">
                     <i class="fas fa-plus"></i>
-                    {% trans "Add task" %}
+                    {% translate "Add task" %}
                 </button>
                 <div class='buttons mb-3 text-center'>
                     <a class="btn btn-link" href='{{ ticket.get_absolute_url }}'>
                         <i class="fas fa-times"></i>
-                        {% trans "Cancel Changes" %}
+                        {% translate "Cancel Changes" %}
                     </a>
                     <button type='submit' class="btn btn-primary">
                         <i class="fas fa-save"></i>
-                        {% trans "Save Changes" %}
+                        {% translate "Save Changes" %}
                     </button>
                 </div>
             </form>

@@ -2,39 +2,39 @@
 
 {% load i18n bootstrap5_form %}
 
-{% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Edit Ticket" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+        <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
     </li>
     <li class="breadcrumb-item">
         <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
     </li>
-    <li class="breadcrumb-item active">{% trans "Edit Ticket" %}</li>
+    <li class="breadcrumb-item active">{% translate "Edit Ticket" %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
     <div class="col-xs-6">
         <div class="panel panel-default">
-            <div class="panel-body"><h2>{% trans "Edit a Ticket" %}</h2>
+            <div class="panel-body"><h2>{% translate "Edit a Ticket" %}</h2>
                 <p>
-                    {% trans "Unless otherwise stated, all fields are required." %}
-                    {% trans "Please provide as descriptive a title and description as possible." %}
+                    {% translate "Unless otherwise stated, all fields are required." %}
+                    {% translate "Please provide as descriptive a title and description as possible." %}
                 </p>
                 <p>
-                    <strong>{% trans "Note" %}:</strong>
-                    {% blocktrans %}Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.{% endblocktrans %}
+                    <strong>{% translate "Note" %}:</strong>
+                    {% blocktranslate %}Editing a ticket does <em>not</em> send an e-mail to the ticket owner or submitter. No new details should be entered, this form should only be used to fix incorrect details or clean up the submission.{% endblocktranslate %}
                 </p>
-                {% if errors %}<p class="text-danger">{% for error in errors %}{% trans "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
+                {% if errors %}<p class="text-danger">{% for error in errors %}{% translate "Error: " %}{{ error }}<br>{% endfor %}</p>{% endif %}
                 <form method='post'>
                     {% csrf_token %}
                     <fieldset>
                         {% bootstrap5_form form %}
                         <div class='buttons mb-3'>
-                            <input type='submit' class="btn btn-primary btn-sm" value='{% trans "Save Changes" %}'/>
+                            <input type='submit' class="btn btn-primary btn-sm" value='{% translate "Save Changes" %}'/>
                             <a href='{{ ticket.get_absolute_url }}'>
-                                <button class="btn btn-danger">{% trans "Cancel Changes" %}</button>
+                                <button class="btn btn-danger">{% translate "Cancel Changes" %}</button>
                             </a>
                         </div>
                     </fieldset>

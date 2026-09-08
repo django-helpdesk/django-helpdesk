@@ -1,31 +1,31 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Delete Ticket CC" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Delete Ticket CC" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
 </li>
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
 </li>
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:ticket_cc' ticket.id %}">{% trans "CC Settings" %}</a>
+    <a href="{% url 'helpdesk:ticket_cc' ticket.id %}">{% translate "CC Settings" %}</a>
 </li>
-<li class="breadcrumb-item active">{% trans "Delete CC" %}</li>
+<li class="breadcrumb-item active">{% translate "Delete CC" %}</li>
 {% endblock %}
 
-{% block helpdesk_body %}{% blocktrans with cc.email_address as email_address %}
+{% block helpdesk_body %}{% blocktranslate with cc.email_address as email_address %}
 <h2>Delete Ticket CC</h2>
 
 <p>Are you sure you wish to delete this email address (<em>{{ email_address }}</em>) from the CC list for this ticket? They will stop receiving updates.</p>
-{% endblocktrans %}
+{% endblocktranslate %}
 
 
-<p><a href='../../'><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
+<p><a href='../../'><button class="btn btn-primary btn-lg">{% translate "Don't Delete" %}</button></a></p>
 
 <form method='post' action='./'>
-    <button class="btn btn-danger" type='submit'>{% trans "Yes I Understand - Delete" %}</button>
+    <button class="btn btn-danger" type='submit'>{% translate "Yes I Understand - Delete" %}</button>
 {% csrf_token %}</form>
 
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 {% load static %}
-{% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
+{% block helpdesk_title %}{% translate "View a Ticket" %}{% endblock %}
 
 {% block helpdesk_body %}
 
@@ -15,27 +15,27 @@
     </tr>
 </thead>
 <tbody>
-    <tr><th>{% blocktrans with ticket.queue as queue_name %}Queue</th>
-    <td>{{ queue_name }}{% endblocktrans %}</td></tr>
+    <tr><th>{% blocktranslate with ticket.queue as queue_name %}Queue</th>
+    <td>{{ queue_name }}{% endblocktranslate %}</td></tr>
 <tr>
-    <th>{% trans "Submitted On" %}</th>
+    <th>{% translate "Submitted On" %}</th>
     <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
 </tr>
 
 {% if ticket.due_date %}
     <tr>
-        <th>{% trans "Due On" %}</th>
+        <th>{% translate "Due On" %}</th>
         <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</td>
     </tr>
 {% endif %}
 
 <tr>
-    <th>{% trans "Submitter E-Mail" %}</th>
+    <th>{% translate "Submitter E-Mail" %}</th>
     <td>{{ ticket.submitter_email }}</td>
 </tr>
 
 <tr>
-    <th>{% trans "Priority" %}</th>
+    <th>{% translate "Priority" %}</th>
     <td>{{ ticket.get_priority_display }}</td>
 </tr>
 
@@ -48,20 +48,20 @@
 
 {% if tags_enabled %}
 <tr>
-    <th>{% trans "Tags" %}</th>
+    <th>{% translate "Tags" %}</th>
     <td>{{ ticket.tags }}</td>
 </tr>
 {% endif %}
 
 <tr>
-    <th colspan='2'>{% trans "Description" %}</th>
+    <th colspan='2'>{% translate "Description" %}</th>
 </tr>
 <tr>
     <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
 </tr>
 
 {% if ticket.resolution %}<tr>
-    <th colspan='2'>{% trans "Resolution" %}{% if ticket.get_status_display == "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><button type="button" class="btn btn-primary btn-xs">{% trans "Accept and Close" %}</button></a>{% endif %}</th>
+    <th colspan='2'>{% translate "Resolution" %}{% if ticket.get_status_display == "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><button type="button" class="btn btn-primary btn-xs">{% translate "Accept and Close" %}</button></a>{% endif %}</th>
 </tr>
 <tr>
     <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
@@ -70,7 +70,7 @@
 </table>
 
 {% if ticket.followup_set.public_followups %}
-<h3>{% trans "Follow-Ups" %}</h3>
+<h3>{% translate "Follow-Ups" %}</h3>
 {% load ticket_to_link %}
 {% for followup in ticket.followup_set.public_followups %}
 <div class='followup well card'>
@@ -78,7 +78,7 @@
     {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
     {% if followup.ticketchange_set.all %}<div class='changes'><ul>
 	    {% for change in followup.ticketchange_set.all %}
-	    <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>
+	    <li>{% blocktranslate with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktranslate %}</li>
 	    {% endfor %}
     </ul></div>{% endif %}
 
@@ -99,19 +99,19 @@
 <fieldset>
     <dl>
         {% if preset_replies %}
-        <dt><label for='id_preset'>{% trans "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% trans "(Optional)" %}</span></dt>
+        <dt><label for='id_preset'>{% translate "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% translate "(Optional)" %}</span></dt>
         <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
-        <dd class='form_help_text'>{% trans "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
+        <dd class='form_help_text'>{% translate "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
         {% endif %}
 
-        <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
+        <dt><label for='commentBox'>{% translate "Comment / Resolution" %}</label></dt>
         <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
 	{% url "helpdesk:help_context" as context_help_url %}
-	{% blocktrans %}
+	{% blocktranslate %}
         <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
-	{% endblocktrans %}
+	{% endblocktranslate %}
 
-        {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
+        {% if not ticket.can_be_resolved %}<dd>{% translate "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
         {% if ticket.status == 1 %}
             <input type="hidden" name="new_status" value="{{ ticket.status }}" />
         {% else %}
@@ -128,18 +128,18 @@
         
 {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
 <p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm"
-    id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block';return false;" >{% trans "Attach File(s) &raquo;" %}</button></p>
+    id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block';return false;" >{% translate "Attach File(s) &raquo;" %}</button></p>
 
 <div id='FileUpload' style='display: none;'>
 
     <dl>
-        <dt><label for='id_file'>{% trans "Attach a File" %}</label></dt>
+        <dt><label for='id_file'>{% translate "Attach a File" %}</label></dt>
         <dd>
             <div class="add_file_fields_wrap">
-                <button class="add_file_field_button btn btn-success btn-xs">{% trans "Add Another File" %}</button>
+                <button class="add_file_field_button btn btn-success btn-xs">{% translate "Add Another File" %}</button>
                 <div><label class='btn btn-primary btn-sm btn-file'>
                         Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
-                </label><span>&nbsp;</span><span id='selectedfilename0'>{% trans 'No files selected.' %}</span></div>
+                </label><span>&nbsp;</span><span id='selectedfilename0'>{% translate 'No files selected.' %}</span></div>
             </div>
         </dd>
     </dl>
@@ -148,7 +148,7 @@
 {% endif %}
 </fieldset>
 
-<button class="btn btn-primary btn-lg" style="margin-bottom:10px" type='submit'>{% trans "Update This Ticket" %}</button>
+<button class="btn btn-primary btn-lg" style="margin-bottom:10px" type='submit'>{% translate "Update This Ticket" %}</button>
 
 {% csrf_token %}
 </form>
@@ -175,7 +175,7 @@
       $(add_button).click(function(e){ //on add input button click
           x++;
           e.preventDefault();
-          $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% trans 'No files selected.' %}</span></div>"); //add input box
+          $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% translate 'No files selected.' %}</span></div>"); //add input box
       });
   });
 

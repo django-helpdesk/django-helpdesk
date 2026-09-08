@@ -71,20 +71,20 @@
               <thead class="table-light text-uppercase small">
                 <tr>
                   <th></th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Ticket" %}</th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Priority" %}</th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Queue" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Ticket" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Priority" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Queue" %}</th>
                   <th class="text-body-tertiary fw-medium">{% translate "Status" %}</th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Created" %}</th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Due Date" %}</th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Owner" %}</th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Submitter" %}</th>
-                  <th class="text-body-tertiary fw-medium">{% trans "Last Followup" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Created" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Due Date" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Owner" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Submitter" %}</th>
+                  <th class="text-body-tertiary fw-medium">{% translate "Last Followup" %}</th>
                   {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
-                    <th class="text-body-tertiary fw-medium">{% trans "Time Spent" %}</th>
+                    <th class="text-body-tertiary fw-medium">{% translate "Time Spent" %}</th>
                   {% endif %}
                   {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-                    <th class="text-body-tertiary fw-medium">{% trans "KB item" %}</th>
+                    <th class="text-body-tertiary fw-medium">{% translate "KB item" %}</th>
                   {% endif %}
                 </tr>
               </thead>
@@ -120,21 +120,21 @@
                 </li>
                 <li class="px-3">
                   <select class="form-select" name="action" id="id_mass_action">
-                    <option value='take'>{% trans "Take (Assign to me)" %}</option>
-                    <option value='delete'>{% trans "Delete" %}</option>
-                    <option value='merge'>{% trans "Merge" %}</option>
-                    <optgroup label='{% trans "Close" %}'>
-                      <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
-                      <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
+                    <option value='take'>{% translate "Take (Assign to me)" %}</option>
+                    <option value='delete'>{% translate "Delete" %}</option>
+                    <option value='merge'>{% translate "Merge" %}</option>
+                    <optgroup label='{% translate "Close" %}'>
+                      <option value='close'>{% translate "Close (Don't Send E-Mail)" %}</option>
+                      <option value='close_public'>{% translate "Close (Send E-Mail)" %}</option>
                     </optgroup>
-                    <optgroup label='{% trans "Assign To" %}'>
-                      <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
+                    <optgroup label='{% translate "Assign To" %}'>
+                      <option value='unassign'>{% translate "Nobody (Unassign)" %}</option>
                       {% for u in assignable_users %}
                         <option value='assign_{{ u.id }}'>{{ u.get_username }}</option>
                       {% endfor %}
                     </optgroup>
-                    <optgroup label='{% trans "Set KB Item" %}'>
-                      <option value='kbitem_none'>{% trans "No KB Item" %}</option>
+                    <optgroup label='{% translate "Set KB Item" %}'>
+                      <option value='kbitem_none'>{% translate "No KB Item" %}</option>
                       {% for kbi in kb_items %}
                         <option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>
                       {% endfor %}
@@ -320,7 +320,7 @@
   <script>
        window.helpdesk_settings = {
             LANGUAGE_CODE: "{{ helpdesk_settings.LANGUAGE_CODE|default:'en-US' }}",
-            NO_FOLLOWUP_TEXT: "{% trans helpdesk_settings.ALTERNATIVE_UI_STRINGS.No_followup_found|default:'No followup found' %}"
+            NO_FOLLOWUP_TEXT: "{% translate helpdesk_settings.ALTERNATIVE_UI_STRINGS.No_followup_found|default:'No followup found' %}"
        };
 
        function get_url(row) {
@@ -336,11 +336,11 @@
        $(document).ready(function() {
             // Ticket DataTable Initialization
             $.fn.dataTable.ext.errMode = function(settings, helpPage, message) {
-                 alert("{% trans 'Error fetching tickets occured, please contact the system administrators of this server providing the message below:\n    ' %}" + message)
+                 alert("{% translate 'Error fetching tickets occured, please contact the system administrators of this server providing the message below:\n    ' %}" + message)
             };
             $('#ticketTable').DataTable({
                  language: {
-                      "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+                      "emptyTable": "{% translate 'No Tickets Match Your Selection' %}"
                  },
                  stateSave: true,
                  processing: true,
