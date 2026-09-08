@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}
 {% load i18n %}
 
-{% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Create Ticket" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
@@ -13,7 +13,7 @@
 {% block helpdesk_body %}
     <div class="container">
         <div class="card card-register mx-auto mt-5">
-            <div class="card-header">{% trans "Submit a Ticket" %}</div>
+            <div class="card-header">{% translate "Submit a Ticket" %}</div>
             <div class="card-body">
                 {% include 'helpdesk/public_create_ticket_base.html' %}
             </div>

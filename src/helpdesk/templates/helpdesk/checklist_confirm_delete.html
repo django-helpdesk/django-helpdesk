@@ -2,11 +2,11 @@
 
 {% load i18n %}
 
-{% block helpdesk_title %}{% trans "Delete Checklist" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Delete Checklist" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+        <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
     </li>
     <li class="breadcrumb-item">
         <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
@@ -20,21 +20,21 @@
             <div class="card">
                 <div class="card-header">
                     <h2>
-                        {% trans "Delete Checklist" %}
+                        {% translate "Delete Checklist" %}
                     </h2>
                 </div>
                 <div class="card-body">
                     <form method='post'>
                         {% csrf_token %}
-                        <p>{% trans "Are you sure your want to delete checklist" %} {{ checklist.name }} ?</p>
+                        <p>{% translate "Are you sure your want to delete checklist" %} {{ checklist.name }} ?</p>
                         <div class='buttons mb-3 text-center'>
                             <a class="btn btn-secondary" href='{{ ticket.get_absolute_url }}'>
                                 <i class="fas fa-times"></i>
-                                {% trans "Don't Delete" %}
+                                {% translate "Don't Delete" %}
                             </a>
                             <button type='submit' class="btn btn-danger">
                                 <i class="fas fa-trash"></i>
-                                {% trans "Yes, I Understand - Delete" %}
+                                {% translate "Yes, I Understand - Delete" %}
                             </button>
                         </div>
                     </form>

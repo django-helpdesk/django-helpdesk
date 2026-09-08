@@ -2,14 +2,14 @@
 
 {% load i18n %}
 
-{% block helpdesk_title %}{% trans "Delete Checklist Template" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Delete Checklist Template" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+        <a href="{% url 'helpdesk:system_settings' %}">{% translate "System Settings" %}</a>
     </li>
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:checklist_templates' %}">{% trans "Checklist Templates" %}</a>
+        <a href="{% url 'helpdesk:checklist_templates' %}">{% translate "Checklist Templates" %}</a>
     </li>
     <li class="breadcrumb-item active">
         {{ checklist_template }}
@@ -22,21 +22,21 @@
             <div class="card">
                 <div class="card-header">
                     <h2>
-                        {% trans "Delete Checklist Template" %}
+                        {% translate "Delete Checklist Template" %}
                     </h2>
                 </div>
                 <div class="card-body">
                     <form method='post'>
                         {% csrf_token %}
-                        <p>{% trans "Are you sure your want to delete checklist template" %} {{ checklist_template.name }} ?</p>
+                        <p>{% translate "Are you sure your want to delete checklist template" %} {{ checklist_template.name }} ?</p>
                         <div class='buttons mb-3 text-center'>
                             <a class="btn btn-secondary" href='{% url 'helpdesk:checklist_templates' %}'>
                                 <i class="fas fa-times"></i>
-                                {% trans "Don't Delete" %}
+                                {% translate "Don't Delete" %}
                             </a>
                             <button type='submit' class="btn btn-danger">
                                 <i class="fas fa-trash"></i>
-                                {% trans "Yes, I Understand - Delete" %}
+                                {% translate "Yes, I Understand - Delete" %}
                             </button>
                         </div>
                     </form>

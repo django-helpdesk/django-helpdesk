@@ -6,19 +6,19 @@
         <li class="nav-item{% if 'dashboard' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:dashboard' %}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>{% trans "Dashboard" %}</span>
+            <span>{% translate "Dashboard" %}</span>
           </a>
         </li>
         <li class="nav-item{% if 'tickets' in request.path and 'submit' not in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:list' %}">
             <i class="fas fa-fw fa-tasks"></i>
-            <span>{% trans "All Tickets" %}</span>
+            <span>{% translate "All Tickets" %}</span>
           </a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="ticketsDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fas fa-fw fa-search"></i>
-            <span>{% trans "Saved Queries" %}</span>
+            <span>{% translate "Saved Queries" %}</span>
           </a>
           <div class="dropdown-menu" aria-labelledby="ticketsDropdown">
             {% if user_saved_queries_ %}
@@ -30,27 +30,27 @@
             </a>
             {% endfor %}
             {% else %}
-            <p class="dropdown-item small text-wrap">{% trans "No saved queries currently available. You can create one in the All Tickets page." %}</p>
+            <p class="dropdown-item small text-wrap">{% translate "No saved queries currently available. You can create one in the All Tickets page." %}</p>
             {% endif %}
           </div>
         </li>
         <li class="nav-item{% if 'saved-searches' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:saved_searches_list' %}">
             <i class="fas fa-fw fa-save"></i>
-            <span>{% trans "Manage Saved Queries" %}</span>
+            <span>{% translate "Manage Saved Queries" %}</span>
           </a>
         </li>
         <li class="nav-item{% if 'submit' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:submit' %}">
             <i class="fas fa-fw fa-plus-circle"></i>
-            <span>{% trans "New Ticket" %}</span>
+            <span>{% translate "New Ticket" %}</span>
           </a>
         </li>
         {% if helpdesk_settings.HELPDESK_SHOW_MY_TICKETS_IN_NAV_FOR_STAFF %}
         <li class="nav-item{% if 'my-tickets' in request.path %} active{% endif %}">
             <a class="nav-link" href="{% url 'helpdesk:my-tickets' %}">
                 <i class="fas fa-fw fa-tasks"></i>
-                <span>{% trans "My Tickets" %}</span>
+                <span>{% translate "My Tickets" %}</span>
             </a>
         </li>
         {% endif %}
@@ -58,21 +58,21 @@
         <li class="nav-item{% if 'kanban' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kanban' %}">
             <i class="fas fa-fw fa-columns"></i>
-            <span>{% trans "Kanban Board" %}</span>
+            <span>{% translate "Kanban Board" %}</span>
           </a>
         </li>
         {% endif %}
         <li class="nav-item{% if 'reports' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:report_index' %}">
             <i class="fas fa-fw fa-chart-area"></i>
-            <span>{% trans "Reports" %}</span>
+            <span>{% translate "Reports" %}</span>
           </a>
         </li>
         {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
         <li class="nav-item{% if 'kb' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">
             <i class="fas fa-fw fa-database"></i>
-            <span>{% trans "Knowledgebase" %}</span>
+            <span>{% translate "Knowledgebase" %}</span>
           </a>
         </li>
         {% endif %}
@@ -81,20 +81,20 @@
         <li class="nav-item{% if request.path == '/' %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:home' %}">
             <i class="fas fa-fw fa-home"></i>
-            <span>{% trans "Homepage" %}</span>
+            <span>{% translate "Homepage" %}</span>
           </a>
         </li>
         <li class="nav-item{% if 'submit' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:submit' %}">
             <i class="fas fa-fw fa-plus-circle"></i>
-            <span>{% trans "New Ticket" %}</span>
+            <span>{% translate "New Ticket" %}</span>
           </a>
         </li>
         {% if user.is_authenticated %}
         <li class="nav-item{% if 'my-tickets' in request.path %} active{% endif %}">
             <a class="nav-link" href="{% url 'helpdesk:my-tickets' %}">
                 <i class="fas fa-fw fa-tasks"></i>
-                <span>{% trans "My Tickets" %}</span>
+                <span>{% translate "My Tickets" %}</span>
             </a>
         </li>
 
@@ -103,7 +103,7 @@
         <li class="nav-item{% if 'kb' in request.path %} active{% endif %}">
           <a class="nav-link" href="{% url 'helpdesk:kb_index' %}">
             <i class="fas fa-fw fa-database"></i>
-            <span>{% trans "Knowledgebase" %}</span>
+            <span>{% translate "Knowledgebase" %}</span>
           </a>
         </li>
         {% endif %}

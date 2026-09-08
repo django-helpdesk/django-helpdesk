@@ -1,20 +1,20 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Ignore E-Mail Address" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Ignore E-Mail Address" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
 </li>
-<li class="breadcrumb-item active">{% trans "Ignore E-Mail Address" %}</li>
+<li class="breadcrumb-item active">{% translate "Ignore E-Mail Address" %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Ignore E-Mail Address" %}</h2>
+<h2>{% translate "Ignore E-Mail Address" %}</h2>
 
-<p>{% blocktrans %}To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.{% endblocktrans %}</p>
+<p>{% blocktranslate %}To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.{% endblocktranslate %}</p>
 
-<p>{% blocktrans %}You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.{% endblocktrans %}</p>
+<p>{% blocktranslate %}You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.{% endblocktranslate %}</p>
 
 <form method='post' action='./'>
 
@@ -27,7 +27,7 @@
     {% endfor %}</dl>
 </fieldset>
 
-<input class="btn btn-primary" type='submit' value='{% trans "Ignore E-Mail Address" %}' />
+<input class="btn btn-primary" type='submit' value='{% translate "Ignore E-Mail Address" %}' />
 
 {% csrf_token %}</form>
 
