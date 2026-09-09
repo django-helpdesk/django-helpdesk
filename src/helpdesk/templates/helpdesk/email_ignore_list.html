@@ -1,39 +1,39 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Ignored E-Mail Addresses" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Ignored E-Mail Addresses" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:system_settings' %}">{% trans "System Settings" %}</a>
+        <a href="{% url 'helpdesk:system_settings' %}">{% translate "System Settings" %}</a>
     </li>
     <li class="breadcrumb-item active">Ignored E-Mail Addresses</li>
 {% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
+{% block helpdesk_body %}{% blocktranslate %}
 <h2>Ignored E-Mail Addresses</h2>
 
-<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can add a new item or delete any of the items below as required.</p>{% endblocktrans %}
+<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can add a new item or delete any of the items below as required.</p>{% endblocktranslate %}
 
 
             <div class="row">
                 <div class="col-lg-12">
                     <div class="panel panel-primary">
                         <div class="panel-heading">
-                            {% trans "Ignored E-Mail Addresses" %}
+                            {% translate "Ignored E-Mail Addresses" %}
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <div><a href='add/'><button class="btn btn-success btn-sm"><i class="fa fa-plus-circle"></i>{% trans "Add an Email" %}</button></a></div>
+                            <div><a href='add/'><button class="btn btn-success btn-sm"><i class="fa fa-plus-circle"></i>{% translate "Add an Email" %}</button></a></div>
                             <div class="table-responsive">
                                 <table class="table table-striped table-bordered table-hover">
                                     <thead>
                                         <tr>
-                                            <th>{% trans "Name" %}</th>
-                                            <th>{% trans "E-Mail Address" %}</th>
-                                            <th>{% trans "Date Added" %}</th>
-                                            <th>{% trans "Queues" %}</th>
-                                            <th>{% trans "Keep in mailbox?" %}</th>
-                                            <th>{% trans "Delete" %}</th>
+                                            <th>{% translate "Name" %}</th>
+                                            <th>{% translate "E-Mail Address" %}</th>
+                                            <th>{% translate "Date Added" %}</th>
+                                            <th>{% translate "Queues" %}</th>
+                                            <th>{% translate "Keep in mailbox?" %}</th>
+                                            <th>{% translate "Delete" %}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -42,9 +42,9 @@
                                             <td>{{ ignore.name }}</td>
                                             <td>{{ ignore.email_address }}</td>
                                             <td>{{ ignore.date }}</td>
-                                            <td>{% for queue in ignore.queues.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% trans "All" %}{% endfor %}</td>
-                                            <td>{% if ignore.keep_in_mailbox %}{% trans "Keep" %}{% endif %}</td>
-                                            <td><a href='{% url 'helpdesk:email_ignore_del' ignore.id %}'><button class="btn btn-danger btn-xs">{% trans "Delete" %}</button></a></td>
+                                            <td>{% for queue in ignore.queues.all %}{{ queue.slug }}{% if not forloop.last %}, {% endif %}{% empty %}{% translate "All" %}{% endfor %}</td>
+                                            <td>{% if ignore.keep_in_mailbox %}{% translate "Keep" %}{% endif %}</td>
+                                            <td><a href='{% url 'helpdesk:email_ignore_del' ignore.id %}'><button class="btn btn-danger btn-xs">{% translate "Delete" %}</button></a></td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -60,6 +60,6 @@
             </div>
             <!-- /.row -->
 
-<p>{% trans "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent from that address will be deleted permanently." %}</p>
+<p>{% translate "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent from that address will be deleted permanently." %}</p>
 
 {% endblock %}

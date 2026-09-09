@@ -4,8 +4,8 @@
 {% with request|load_helpdesk_settings as helpdesk_settings %}
     {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
         <p>
-            {% trans "Unless otherwise stated, all fields are required." %}
-            {% trans "Please provide as descriptive a title and description as possible." %}
+            {% translate "Unless otherwise stated, all fields are required." %}
+            {% translate "Please provide as descriptive a title and description as possible." %}
         </p>
 
         {% if form.errors %}
@@ -15,10 +15,10 @@
             {% csrf_token %}
             {% bootstrap5_form form %}
             <button type="submit" class="btn btn-primary btn-lg btn-block">
-                {% trans "Submit Ticket" %} <i class="fa fa-paper-plane"></i>
+                {% translate "Submit Ticket" %} <i class="fa fa-paper-plane"></i>
             </button>
         </form>
     {% else %}
-        <p>{% trans "Public ticket submission is disabled. Please contact the administrator for assistance." %}</p>
+        <p>{% translate "Public ticket submission is disabled. Please contact the administrator for assistance." %}</p>
     {% endif %}
 {% endwith %}

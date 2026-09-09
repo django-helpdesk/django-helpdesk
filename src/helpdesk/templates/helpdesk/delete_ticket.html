@@ -1,27 +1,27 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Delete Ticket" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Delete Ticket" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
 </li>
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
 </li>
-<li class="breadcrumb-item active">{% trans "Delete Ticket" %}</li>
+<li class="breadcrumb-item active">{% translate "Delete Ticket" %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Delete Ticket" %}</h2>
+<h2>{% translate "Delete Ticket" %}</h2>
 
-<p>{% blocktrans with ticket.title as ticket_title %}Are you sure you want to delete this ticket (<em>{{ ticket_title }}</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversibly removed.{% endblocktrans %}</p>
+<p>{% blocktranslate with ticket.title as ticket_title %}Are you sure you want to delete this ticket (<em>{{ ticket_title }}</em>)? All traces of the ticket, including followups, attachments, and updates will be irreversibly removed.{% endblocktranslate %}</p>
 
-<p><a href='../'><button class="btn btn-primary btn-lg">{% trans "No, Don't Delete It" %}</button></a></p>
+<p><a href='../'><button class="btn btn-primary btn-lg">{% translate "No, Don't Delete It" %}</button></a></p>
 
 <form method='post' action='./'>
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
-    <button class="btn btn-danger" type='submit'>{% trans "Yes I Understand - Delete It Anyway" %}</button>
+    <button class="btn btn-danger" type='submit'>{% translate "Yes I Understand - Delete It Anyway" %}</button>
 </form>
 {% endblock %}

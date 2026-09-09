@@ -1,7 +1,7 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 {% load static %}
 
-{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Reports &amp; Statistics" %}{% endblock %}
 
 {% block helpdesk_head %}
 
@@ -9,32 +9,32 @@
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:report_index' %}">{% trans "Reports &amp; Statistics" %}</a>
+    <a href="{% url 'helpdesk:report_index' %}">{% translate "Reports &amp; Statistics" %}</a>
 </li>
 <li class="breadcrumb-item active">{{ title }}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "Reports &amp; Statistics" %}</h2>
+<h2>{% translate "Reports &amp; Statistics" %}</h2>
 
 <div class="card mb-3">
     <div class="card-header">
         <i class="fas fa-filter"></i>
-        {% trans 'Saved Queries' %}
+        {% translate 'Saved Queries' %}
     </div>
     <div class="card-body">
         {% if user_saved_queries_ %}
-            <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
+            <p>{% translate "You can run this query on filtered data by using one of your saved queries." %}</p>
             <form method='GET' action='./'>
-                <label for='saved_query'>{% trans "Select Query:" %}</label>
+                <label for='saved_query'>{% translate "Select Query:" %}</label>
                 <select name='saved_query'>
                     <option value="">--------</option>{% for q in user_saved_queries_ %}
                     <option value="{{ q.id }}"{% if saved_query == q %} selected{% endif %}>{{ q.title }}</option>{% endfor %}
                 </select>
-                <input class="btn btn-primary" type='submit' value='{% trans "Filter Report" %}'>
+                <input class="btn btn-primary" type='submit' value='{% translate "Filter Report" %}'>
             </form>
         {% else %}
-            <p>{% trans "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
+            <p>{% translate "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
         {% endif %}
     </div>
     <!-- /.card-body -->

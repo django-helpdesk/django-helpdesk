@@ -1,12 +1,12 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Create Ticket" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="#">{% trans "Tickets" %}</a>
+        <a href="#">{% translate "Tickets" %}</a>
     </li>
-    <li class="breadcrumb-item active">{% trans "Create Ticket" %}</li>
+    <li class="breadcrumb-item active">{% translate "Create Ticket" %}</li>
 {% endblock %}
 
 {% block helpdesk_head %}
@@ -15,11 +15,11 @@
 {% block helpdesk_body %}
     <div class="container">
         <div class="card card-register mx-auto mt-5">
-            <div class="card-header">{% trans "Submit a Ticket" %}</div>
+            <div class="card-header">{% translate "Submit a Ticket" %}</div>
             <div class="card-body">
                 <p>
-                    {% trans "Unless otherwise stated, all fields are required." %}
-                    {% trans "Please provide as descriptive a title and description as possible." %}
+                    {% translate "Unless otherwise stated, all fields are required." %}
+                    {% translate "Please provide as descriptive a title and description as possible." %}
                 </p>
 
                 {% if form.errors %}
@@ -36,7 +36,7 @@
                                 <label for='id_{{ field.name }}'>
                                     {{ field.label }}
                                     {% if not field.field.required %}
-                                        ({% trans "Optional" %})
+                                        ({% translate "Optional" %})
                                     {% endif %}
                                 </label>
                                 {{ field }}
@@ -44,13 +44,13 @@
                                     <small class='error'>{{ field.errors }}</small>
                                 {% endif %}
                                 {% if field.help_text %}
-                                    <small class='form_help_text help-block'>{% trans field.help_text %}</small>
+                                    <small class='form_help_text help-block'>{% translate field.help_text %}</small>
                                 {% endif %}
                             </div>
                         {% endif %}
                     {% endfor %}
                     <button type="submit" class="btn btn-primary btn-lg btn-block">
-                        <i class="fa fa-send"></i> {% trans "Submit Ticket" %}
+                        <i class="fa fa-send"></i> {% translate "Submit Ticket" %}
                     </button>
                 </form>
             </div>

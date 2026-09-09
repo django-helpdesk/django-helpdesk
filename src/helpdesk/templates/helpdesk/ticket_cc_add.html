@@ -2,41 +2,41 @@
 
 {% load i18n %}
 
-{% block helpdesk_title %}{% trans "Add Ticket CC" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Add Ticket CC" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+        <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
     </li>
     <li class="breadcrumb-item">
         <a href="{% url 'helpdesk:list' %}{{ ticket.id }}/">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
     </li>
     <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:ticket_cc' ticket.id %}">{% trans "CC Settings" %}</a>
+        <a href="{% url 'helpdesk:ticket_cc' ticket.id %}">{% translate "CC Settings" %}</a>
     </li>
-    <li class="breadcrumb-item active">{% trans "Add CC" %}</li>
+    <li class="breadcrumb-item active">{% translate "Add CC" %}</li>
 {% endblock %}
 
 {% block helpdesk_body %}
-    <h2>{% trans 'Add Ticket CC' %}</h2>
+    <h2>{% translate 'Add Ticket CC' %}</h2>
 
     <div class="card mb-3">
         <div class="card-header">
             <i class="fas fa-hand-pointer"></i>
-            {% trans 'To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.' %}
+            {% translate 'To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.' %}
         </div>
         <div class="card-body">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <a class="nav-link{% if not form.errors.user %} active{% endif %}" href="#EmailCC" data-bs-toggle="tab">
-                        {% trans 'Email' %}
+                        {% translate 'Email' %}
                     </a>
                 </li>
                 <li class="divider"></li>
                 <li class="nav-item">
                     <a class="nav-link{% if form.errors.user %} active{% endif %}" href="#UserCC" data-bs-toggle="tab">
-                        {% trans 'User' %}
+                        {% translate 'User' %}
                     </a>
                 </li>
             </ul>
@@ -49,7 +49,7 @@
             <!-- Tab panes -->
             <div class="tab-content">
                 <div class="tab-pane{% if not form.errors.user %} in active{% endif %}" id="EmailCC">
-                    <h4>{% trans 'Add Email' %}</h4>
+                    <h4>{% translate 'Add Email' %}</h4>
                     <form method='post'>
                         {% csrf_token %}
                         <fieldset>
@@ -66,14 +66,14 @@
                                 {% endfor %}
                             </dl>
                         </fieldset>
-                        <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
+                        <button class="btn btn-primary" type='submit'>{% translate "Save Ticket CC" %}</button>
                     <a href="{% url 'helpdesk:ticket_cc' ticket.id %}" class="btn btn-secondary">
-                        {% trans "Cancel" %}
+                        {% translate "Cancel" %}
                     </a>
                     </form>
                 </div>
                 <div class="tab-pane{% if form.errors.user %} in active{% endif %}" id="UserCC">
-                    <h4>{% trans 'Add User' %}</h4>
+                    <h4>{% translate 'Add User' %}</h4>
                     <form method='post'>
                         {% csrf_token %}
                         <fieldset>
@@ -90,9 +90,9 @@
                                 {% endfor %}
                             </dl>
                         </fieldset>
-                        <button class="btn btn-primary" type='submit'>{% trans "Save Ticket CC" %}</button>
+                        <button class="btn btn-primary" type='submit'>{% translate "Save Ticket CC" %}</button>
                     <a href="{% url 'helpdesk:ticket_cc' ticket.id %}" class="btn btn-secondary">
-                        {% trans "Cancel" %}
+                        {% translate "Cancel" %}
                     </a>
                     </form>
                 </div>

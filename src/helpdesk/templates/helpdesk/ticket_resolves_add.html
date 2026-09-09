@@ -1,23 +1,23 @@
 {% extends "helpdesk/base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Add Ticket as Dependency" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Add Ticket as Dependency" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:list' %}">{% trans "Tickets" %}</a>
+    <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
 </li>
 <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:list' %}{{ depends_on.id }}/">{{ depends_on.queue.slug }}-{{ depends_on.id }}</a>
 </li>
-<li class="breadcrumb-item active">{% trans "Add Ticket as Dependency" %}</li>
+<li class="breadcrumb-item active">{% translate "Add Ticket as Dependency" %}</li>
 {% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
+{% block helpdesk_body %}{% blocktranslate %}
 <h2>Add Ticket as Dependency</h2>
 
 <p>Ticket: {{ depends_on }} </p>
 
-<p>Adding this ticket as dependency will stop you resolving the selected ticket until this ticket has been resolved or closed.</p>{% endblocktrans %}
+<p>Adding this ticket as dependency will stop you resolving the selected ticket until this ticket has been resolved or closed.</p>{% endblocktranslate %}
 
 <form method='post' action='./'>
 
@@ -30,7 +30,7 @@
     {% endfor %}</dl>
 </fieldset>
 
-<input class="btn btn-primary" type='submit' value='{% trans "Save Ticket Dependency" %}' />
+<input class="btn btn-primary" type='submit' value='{% translate "Save Ticket Dependency" %}' />
 
 {% csrf_token %}</form>
 

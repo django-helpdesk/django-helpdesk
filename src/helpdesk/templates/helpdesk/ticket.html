@@ -26,7 +26,7 @@
   {% if ticket.merged_to %}
     <div class="card card-body bg-light">
       <h3 class="text-center">
-        {% trans "This ticket has been merged into ticket" %}
+        {% translate "This ticket has been merged into ticket" %}
         <a href="{{ ticket.merged_to.get_absolute_url }}">{{ ticket.merged_to }}</a>
       </h3>
     </div>
@@ -268,7 +268,7 @@
                       <div class="col-md-3">
                         <label class="form-label" for="id_owner">{% translate "Owner" %}</label>
                         <select class="form-select" id="id_owner" name="owner">
-                          <option value="0">{% trans "Unassigned" %}</option>
+                          <option value="0">{% translate "Unassigned" %}</option>
                           {% for u in assignable_users %}
                             <option value="{{ u.id }}" {% if u.id == ticket.assigned_to.id %} selected{% endif %}>{{ u }}</option>
                           {% endfor %}
@@ -369,7 +369,7 @@
                       <input class="form-control" type="file" name="attachment" id="file0" multiple />
                     </div>
                   </div>
-                  <button class="add_file_field_button btn btn-outline-primary btn-sm">{% trans "Add Another File" %}</button>
+                  <button class="add_file_field_button btn btn-outline-primary btn-sm">{% translate "Add Another File" %}</button>
                 </div>
               {% endif %}
               <button class="btn btn-primary" type="submit">{% translate "Update This Ticket" %}</button>
@@ -389,12 +389,12 @@
           <form method="post">
             {% csrf_token %}
             <div class="modal-header">
-              <h5 class="modal-title">{% trans "Add a new checklist" %}</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+              <h5 class="modal-title">{% translate "Add a new checklist" %}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Close' %}"></button>
             </div>
             <div class="modal-body">
-              <p>{% trans "You can select a template to generate a checklist with a predefined set of tasks." %}</p>
-              <p>{% trans "Ignore it and only give a name to create an empty checklist." %}</p>
+              <p>{% translate "You can select a template to generate a checklist with a predefined set of tasks." %}</p>
+              <p>{% translate "Ignore it and only give a name to create an empty checklist." %}</p>
               {{ checklist_form }}
             </div>
             <div class="modal-footer">
@@ -438,7 +438,7 @@
       })
 
       $('.disabledTask').on('click', () => {
-        alert('{% trans 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
+        alert('{% translate 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
       })
 
       document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {

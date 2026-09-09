@@ -1,10 +1,10 @@
 {% extends "helpdesk/base.html" %}{% load i18n bootstrap5_form %}
 
-{% block helpdesk_title %}{% trans "Change User Settings" %}{% endblock %}
+{% block helpdesk_title %}{% translate "Change User Settings" %}{% endblock %}
 
 {% block helpdesk_breadcrumb %}
 <li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:user_settings' %}">{% trans "Settings" %}</a>
+    <a href="{% url 'helpdesk:user_settings' %}">{% translate "Settings" %}</a>
 </li>
 <li class="breadcrumb-item active">
     Change User Settings
@@ -12,16 +12,16 @@
 {% endblock %}
 
 {% block helpdesk_body %}
-<h2>{% trans "User Settings" %}</h2>
+<h2>{% translate "User Settings" %}</h2>
 
-<p>{% blocktrans %}Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.{% endblocktrans %}</p>
+<p>{% blocktranslate %}Use the following options to change the way your helpdesk system works for you. These settings do not impact any other user.{% endblocktranslate %}</p>
 
 {% block form_content %}
 <form role="form" method='post' action='./'>
     {% csrf_token %}
     {% bootstrap5_form form %}
     <div class="buttons mb-3">
-      <input type="submit" class="btn btn-primary btn-sm" value='{% trans "Save Changes" %}'/>
+      <input type="submit" class="btn btn-primary btn-sm" value='{% translate "Save Changes" %}'/>
     </div>
 </form>
 {% endblock %}

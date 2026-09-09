@@ -12,7 +12,7 @@
                   <div class="me-5">{{ entry.1 }} {{ entry.0 }}</div>
                 </div>
                 <a class="card-footer text-white clearfix small z-1" href="{% if entry.1 > 0 %}{% url 'helpdesk:list' %}?{{ entry.3 }}{% else %}#{% endif %}">
-                  <span class="float-start">{% if entry.1 > 0 %}{% trans "View Tickets" %}{% else %}{% trans "No tickets in this range" %}{% endif %}</span>
+                  <span class="float-start">{% if entry.1 > 0 %}{% translate "View Tickets" %}{% else %}{% translate "No tickets in this range" %}{% endif %}</span>
                   <span class="float-end">
                     <i class="fas fa-angle-right"></i>
                   </span>

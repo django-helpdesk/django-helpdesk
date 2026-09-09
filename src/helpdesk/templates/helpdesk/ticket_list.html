@@ -74,20 +74,20 @@
               <thead class="table text-uppercase small">
                 <tr>
                   <th></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Ticket" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Priority" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Queue" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Status" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Created" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Due Date" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Owner" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Submitter" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% trans "Last Followup" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Ticket" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Priority" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Queue" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Status" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Created" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Due Date" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Owner" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Submitter" %}</span></th>
+                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Last Followup" %}</span></th>
                   {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
-                    <th class="fw-medium"><span class="text-body-secondary">{% trans "Time Spent" %}</span></th>
+                    <th class="fw-medium"><span class="text-body-secondary">{% translate "Time Spent" %}</span></th>
                   {% endif %}
                   {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-                    <th class="fw-medium"><span class="text-body-secondary">{% trans "KB Item" %}</span></th>
+                    <th class="fw-medium"><span class="text-body-secondary">{% translate "KB Item" %}</span></th>
                   {% endif %}
                 </tr>
               </thead>
@@ -123,21 +123,21 @@
                 </li>
                 <li class="px-3">
                   <select class="form-select" name="action" id="id_mass_action">
-                    <option value='take'>{% trans "Take (Assign to me)" %}</option>
-                    <option value='delete'>{% trans "Delete" %}</option>
-                    <option value='merge'>{% trans "Merge" %}</option>
-                    <optgroup label='{% trans "Close" %}'>
-                      <option value='close'>{% trans "Close (Don't Send E-Mail)" %}</option>
-                      <option value='close_public'>{% trans "Close (Send E-Mail)" %}</option>
+                    <option value='take'>{% translate "Take (Assign to me)" %}</option>
+                    <option value='delete'>{% translate "Delete" %}</option>
+                    <option value='merge'>{% translate "Merge" %}</option>
+                    <optgroup label='{% translate "Close" %}'>
+                      <option value='close'>{% translate "Close (Don't Send E-Mail)" %}</option>
+                      <option value='close_public'>{% translate "Close (Send E-Mail)" %}</option>
                     </optgroup>
-                    <optgroup label='{% trans "Assign To" %}'>
-                      <option value='unassign'>{% trans "Nobody (Unassign)" %}</option>
+                    <optgroup label='{% translate "Assign To" %}'>
+                      <option value='unassign'>{% translate "Nobody (Unassign)" %}</option>
                       {% for u in assignable_users %}
                         <option value='assign_{{ u.id }}'>{{ u.get_username }}</option>
                       {% endfor %}
                     </optgroup>
-                    <optgroup label='{% trans "Set KB Item" %}'>
-                      <option value='kbitem_none'>{% trans "No KB Item" %}</option>
+                    <optgroup label='{% translate "Set KB Item" %}'>
+                      <option value='kbitem_none'>{% translate "No KB Item" %}</option>
                       {% for kbi in kb_items %}
                         <option value='kbitem_{{ kbi.id }}'>{{ kbi.category.title }}: {{ kbi.title }}</option>
                       {% endfor %}
@@ -328,7 +328,7 @@
   <script>
     window.helpdesk_settings = {
       LANGUAGE_CODE: "{{ helpdesk_settings.LANGUAGE_CODE|default:'en-US' }}",
-      NO_FOLLOWUP_TEXT: "{% trans helpdesk_settings.ALTERNATIVE_UI_STRINGS.No_followup_found|default:'No followup found' %}"
+      NO_FOLLOWUP_TEXT: "{% translate helpdesk_settings.ALTERNATIVE_UI_STRINGS.No_followup_found|default:'No followup found' %}"
     };
 
     function get_url(row) {
@@ -344,11 +344,11 @@
     $(document).ready(function() {
       // Ticket DataTable Initialization
       $.fn.dataTable.ext.errMode = function(settings, helpPage, message) {
-        alert("{% trans 'Error fetching tickets occured, please contact the system administrators of this server providing the message below:\n    ' %}" + message)
+        alert("{% translate 'Error fetching tickets occured, please contact the system administrators of this server providing the message below:\n    ' %}" + message)
       };
       $('#ticketTable').DataTable({
         language: {
-          "emptyTable": "{% trans 'No Tickets Match Your Selection' %}"
+          "emptyTable": "{% translate 'No Tickets Match Your Selection' %}"
         },
         stateSave: true,
         processing: true,
