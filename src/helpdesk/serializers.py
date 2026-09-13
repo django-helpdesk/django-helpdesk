@@ -182,9 +182,20 @@ class UserSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        user = super().create(validated_data)
+        """Build the account with the password already hashed.
+
+        `ModelSerializer.create()` would hand `validated_data` straight to
+        `objects.create()`, password included, and the plain text would go out
+        in the INSERT before `set_password()` overwrote it. That row reaches
+        the write-ahead log, the binary log, the replicas and any query log
+        along the way, and nothing later removes it. Taking the password out
+        first and hashing it before the one and only save keeps it out of every
+        one of those.
+        """
+        password = validated_data.pop("password")
+        user = self.Meta.model(**validated_data)
         user.is_active = True
-        user.set_password(validated_data["password"])
+        user.set_password(password)
         user.save()
         return user
 
