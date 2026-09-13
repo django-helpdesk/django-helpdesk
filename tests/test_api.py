@@ -1,8 +1,10 @@
 import base64
 from _datetime import timedelta
+from typing import ClassVar
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
 from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework import HTTP_HEADER_ENCODING
@@ -465,3 +467,119 @@ class UserTicketTest(APITestCase):
         self.client.logout()
         response = self.client.get("/api/user_tickets/")
         self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+
+
+STRICT_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+
+class CreateUserTest(APITestCase):
+    """The account creation endpoint, which two things once let past.
+
+    Staff membership was the only thing asked for, so a staff account without
+    `auth.add_user` created users the admin site would have refused it, and the
+    submitted password never met the validators the deployment configured.
+    """
+
+    payload: ClassVar[dict] = {
+        "username": "new-user",
+        "first_name": "New",
+        "last_name": "User",
+        "email": "new-user@example.com",
+        "password": "a-long-and-unremarkable-passphrase",
+    }
+
+    @staticmethod
+    def add_user_permission():
+        return Permission.objects.get(
+            content_type__app_label="auth", codename="add_user"
+        )
+
+    def post_payload(self, **overrides):
+        return self.client.post("/api/users/", {**self.payload, **overrides})
+
+    def assertNoUserCreated(self):
+        self.assertFalse(
+            User.objects.filter(username=self.payload["username"]).exists()
+        )
+
+    def test_create_user_staff_without_add_user_permission(self):
+        staff_user = User.objects.create_user(username="staff", is_staff=True)
+        self.client.force_authenticate(staff_user)
+        response = self.post_payload()
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        self.assertNoUserCreated()
+
+    def test_create_user_non_staff_with_add_user_permission(self):
+        user = User.objects.create_user(username="permitted")
+        user.user_permissions.add(self.add_user_permission())
+        self.client.force_authenticate(User.objects.get(pk=user.pk))
+        response = self.post_payload()
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        self.assertNoUserCreated()
+
+    def test_create_user_not_authenticated(self):
+        response = self.post_payload()
+        self.assertEqual(response.status_code, HTTP_403_FORBIDDEN)
+        self.assertNoUserCreated()
+
+    def test_create_user_staff_with_add_user_permission(self):
+        staff_user = User.objects.create_user(username="staff", is_staff=True)
+        staff_user.user_permissions.add(self.add_user_permission())
+        self.client.force_authenticate(User.objects.get(pk=staff_user.pk))
+        response = self.post_payload()
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        created_user = User.objects.get(username=self.payload["username"])
+        self.assertTrue(created_user.is_active)
+        self.assertTrue(created_user.check_password(self.payload["password"]))
+        self.assertNotEqual(created_user.password, self.payload["password"])
+
+    def test_create_user_superuser(self):
+        superuser = User.objects.create_superuser(
+            username="root", email="root@example.com", password="root"
+        )
+        self.client.force_authenticate(superuser)
+        response = self.post_payload()
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+
+    @override_settings(AUTH_PASSWORD_VALIDATORS=STRICT_PASSWORD_VALIDATORS)
+    def test_create_user_password_refused_by_validators(self):
+        staff_user = User.objects.create_user(username="staff", is_staff=True)
+        staff_user.user_permissions.add(self.add_user_permission())
+        self.client.force_authenticate(User.objects.get(pk=staff_user.pk))
+        response = self.post_payload(password="password")
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertIn("password", response.data)
+        self.assertNoUserCreated()
+
+    @override_settings(AUTH_PASSWORD_VALIDATORS=STRICT_PASSWORD_VALIDATORS)
+    def test_create_user_password_too_similar_to_username(self):
+        staff_user = User.objects.create_user(username="staff", is_staff=True)
+        staff_user.user_permissions.add(self.add_user_permission())
+        self.client.force_authenticate(User.objects.get(pk=staff_user.pk))
+        response = self.post_payload(password="new-user-1234")
+        self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
+        self.assertIn("password", response.data)
+        self.assertNoUserCreated()
+
+    @override_settings(AUTH_PASSWORD_VALIDATORS=STRICT_PASSWORD_VALIDATORS)
+    def test_create_user_password_accepted_by_validators(self):
+        staff_user = User.objects.create_user(username="staff", is_staff=True)
+        staff_user.user_permissions.add(self.add_user_permission())
+        self.client.force_authenticate(User.objects.get(pk=staff_user.pk))
+        response = self.post_payload()
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        self.assertTrue(
+            User.objects.get(username=self.payload["username"]).check_password(
+                self.payload["password"]
+            )
+        )
