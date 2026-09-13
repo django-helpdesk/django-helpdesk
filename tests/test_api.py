@@ -4,7 +4,9 @@ from typing import ClassVar
 
 from django.contrib.auth.models import Permission, User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
 from django.test import override_settings
+from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 from freezegun import freeze_time
 from rest_framework import HTTP_HEADER_ENCODING
@@ -542,6 +544,16 @@ class CreateUserTest(APITestCase):
         self.assertTrue(created_user.is_active)
         self.assertTrue(created_user.check_password(self.payload["password"]))
         self.assertNotEqual(created_user.password, self.payload["password"])
+
+    def test_create_user_password_never_reaches_the_database_in_clear(self):
+        staff_user = User.objects.create_user(username="staff", is_staff=True)
+        staff_user.user_permissions.add(self.add_user_permission())
+        self.client.force_authenticate(User.objects.get(pk=staff_user.pk))
+        with CaptureQueriesContext(connection) as context:
+            response = self.post_payload()
+        self.assertEqual(response.status_code, HTTP_201_CREATED)
+        executed_sql = "\n".join(query["sql"] for query in context.captured_queries)
+        self.assertNotIn(self.payload["password"], executed_sql)
 
     def test_create_user_superuser(self):
         superuser = User.objects.create_superuser(
