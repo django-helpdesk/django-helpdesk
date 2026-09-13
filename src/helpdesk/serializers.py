@@ -1,5 +1,6 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, password_validation
 from django.contrib.humanize.templatetags import humanize
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -155,6 +156,30 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("first_name", "last_name", "username", "email", "password")
+
+    def validate(self, attrs):
+        """Apply the project's AUTH_PASSWORD_VALIDATORS to the new password.
+
+        `set_password()` hashes whatever it is handed, so without this the
+        validators a deployment configured hold everywhere a password is set
+        except here, and the API becomes the way around them.
+
+        The validators run against an unsaved user built from the rest of the
+        submitted fields, so the ones comparing a password to the account it
+        belongs to, `UserAttributeSimilarityValidator` among them, have the
+        username and email to compare against.
+        """
+        attrs = super().validate(attrs)
+        password = attrs.get("password")
+        if password is not None:
+            user = get_user_model()(
+                **{name: value for name, value in attrs.items() if name != "password"}
+            )
+            try:
+                password_validation.validate_password(password, user)
+            except DjangoValidationError as error:
+                raise ValidationError({"password": error.messages}) from error
+        return attrs
 
     def create(self, validated_data):
         user = super().create(validated_data)

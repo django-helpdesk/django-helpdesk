@@ -98,6 +98,14 @@ This time, you can attach multiple files thanks to the ``attachments`` field. He
 
 Accessing the endpoint ``/api/users/`` with a **POST** request will let you create a new user.
 
+This endpoint asks for more than the staff flag the other endpoints require: the authenticated account must also
+hold the ``add`` permission on the user model (``auth.add_user``, unless the project defines its own
+``AUTH_USER_MODEL``), the same permission the admin site requires to reach ``/admin/auth/user/add/``. A staff
+account without it gets a ``403``.
+
+The submitted password goes through the ``AUTH_PASSWORD_VALIDATORS`` configured for the project, so one that the
+signup and password change forms would reject is rejected here too, with a ``400`` naming the ``password`` field.
+
 You need to provide a JSON body with the following data :
 
 - ``first_name``: first name
