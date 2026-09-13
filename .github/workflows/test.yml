@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - main
+      # Maintenance lines, 2.4.x and whatever follows. A push to one of these is
+      # a release candidate and deserves the same matrix as main, and it is the
+      # only chance it gets: these branches never reach main through a pull
+      # request, so nothing else would ever run the tests on them.
+      - "*.x"
 
 concurrency:
   group: check-${{ github.ref }}
