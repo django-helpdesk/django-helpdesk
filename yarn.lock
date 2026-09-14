@@ -23,41 +23,41 @@ __metadata:
   languageName: node
   linkType: hard
 
-"datatables.net-bs5@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "datatables.net-bs5@npm:3.0.3"
+"datatables.net-bs5@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "datatables.net-bs5@npm:3.0.4"
   dependencies:
-    datatables.net: "npm:3.0.3"
-  checksum: 10c0/1a6a43a75e7633ed56f0e1596f51658acc21f578f539446eaf947fa8c0eb285d59299d22a9e66c71060b73d22c5382a3fb342ddcddb18765e75caff2e85a8565
+    datatables.net: "npm:3.0.4"
+  checksum: 10c0/b532214ee52f367f7448de60e5fdfc20d1df9dd1c9f3a9d4381294f90cea29e8388168ef5fc607af2a62783643dfbd07a937398aaad1c1ff646eac47852b2aa1
   languageName: node
   linkType: hard
 
-"datatables.net-buttons-bs5@npm:^4.0.2":
-  version: 4.0.2
-  resolution: "datatables.net-buttons-bs5@npm:4.0.2"
+"datatables.net-buttons-bs5@npm:^4.0.3":
+  version: 4.0.3
+  resolution: "datatables.net-buttons-bs5@npm:4.0.3"
   dependencies:
     datatables.net-bs5: "npm:^3"
-    datatables.net-buttons: "npm:4.0.2"
-  checksum: 10c0/9ab1a6ffa59f92eb7ce6d0a864b0c4ae277d6bd300e9987b582bbf3d5ee2d408e66ce193e27669a54784fd377036c5a2befd94588c40f15436d154877d8059e6
+    datatables.net-buttons: "npm:4.0.3"
+  checksum: 10c0/00e55dd5282966622688b515b797e6777186d8287c233b98166ed7c464ec167540f0fb36e2286d51719cf93464f669a6b52d1b4254b2c729cd0222ef4a1d4b01
   languageName: node
   linkType: hard
 
-"datatables.net-buttons-dt@npm:^4.0.1":
-  version: 4.0.2
-  resolution: "datatables.net-buttons-dt@npm:4.0.2"
+"datatables.net-buttons-dt@npm:^4.0.3":
+  version: 4.0.3
+  resolution: "datatables.net-buttons-dt@npm:4.0.3"
   dependencies:
-    datatables.net-buttons: "npm:4.0.2"
+    datatables.net-buttons: "npm:4.0.3"
     datatables.net-dt: "npm:^3"
-  checksum: 10c0/e38f0aeb3e582a8f477b9069796056edcfeaf5418b8a27582e8075748e4f1bf5093b201754d0d100638f2c69abdc9554076da391c9a6cdff2f5c73bfc4277518
+  checksum: 10c0/01aa0c4bbebee0e15a81a273dce658e089702df0e976bf546351d49c334727d5e7e0274ed57615c7d19eab51303f2b7dd1a3422b0d233cba11741535fc905b8c
   languageName: node
   linkType: hard
 
-"datatables.net-buttons@npm:4.0.2, datatables.net-buttons@npm:^4.0.1":
-  version: 4.0.2
-  resolution: "datatables.net-buttons@npm:4.0.2"
+"datatables.net-buttons@npm:4.0.3, datatables.net-buttons@npm:^4.0.3":
+  version: 4.0.3
+  resolution: "datatables.net-buttons@npm:4.0.3"
   dependencies:
     datatables.net: "npm:^3"
-  checksum: 10c0/c52ac78df408efb5b225e0aa3670b5787d86c7bd7224d165de04715e6a600124f8c19db6f950ef156a14049e522ecb679851bf20bab987457660976ebf73b47d
+  checksum: 10c0/966bc7d89a76308e547dc1de1a5f3a6934baaee95b69c6121c2558c6bae9e50b62d0d1c6e42ff688e9a8b9e644c186359c7d15ccd218fa64483740d1cd91a5ec
   languageName: node
   linkType: hard
 
@@ -77,10 +77,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"datatables.net@npm:3.0.3, datatables.net@npm:^3.0.3":
-  version: 3.0.3
-  resolution: "datatables.net@npm:3.0.3"
-  checksum: 10c0/77aa6299cdfad54d657459af05f983262856b140996e5e265a1aed2ce439336938480c5840fada9d90d91421f678becc42e1598648f1ddf3f57de067ce0f1072
+"datatables.net@npm:3.0.4, datatables.net@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "datatables.net@npm:3.0.4"
+  checksum: 10c0/2e54778f25f4fa68f8d0fdfa387a0761788b458bee8d6e4f9291a58760531a375791f5795e99d587613ca7be61f11e2d266055547dc08f26e60e6445161bc3ec
   languageName: node
   linkType: hard
 
@@ -89,11 +89,11 @@ __metadata:
   resolution: "django-helpdesk@workspace:."
   dependencies:
     bootstrap: "npm:5.3.8"
-    datatables.net: "npm:^3.0.3"
-    datatables.net-bs5: "npm:^3.0.3"
-    datatables.net-buttons: "npm:^4.0.1"
-    datatables.net-buttons-bs5: "npm:^4.0.2"
-    datatables.net-buttons-dt: "npm:^4.0.1"
+    datatables.net: "npm:^3.0.4"
+    datatables.net-bs5: "npm:^3.0.4"
+    datatables.net-buttons: "npm:^4.0.3"
+    datatables.net-buttons-bs5: "npm:^4.0.3"
+    datatables.net-buttons-dt: "npm:^4.0.3"
     fontawesome-free: "npm:@fortawesome/fontawesome-free@^6.7.2"
     jquery: "npm:4.0.0"
     jquery-ui: "npm:1.14.2"
