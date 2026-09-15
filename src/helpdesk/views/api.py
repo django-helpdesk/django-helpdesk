@@ -20,29 +20,6 @@ from helpdesk.serializers import (
 from helpdesk.user import HelpdeskUser
 
 
-def accessible_tickets(user):
-    """The tickets `user` is allowed to reach through the API.
-
-    This is the queryset form of the check the staff views actually apply, which
-    is `can_access_queue()` on the ticket's queue.
-
-    Two helpers look like they belong here and do not. `get_queues()` is wider:
-    it also returns every queue accepting public submissions, so it covers
-    tickets the UI refuses to open. `can_access_ticket()` looks wider too, since
-    it grants a ticket assigned to the user whatever its queue, but that branch
-    never runs in the UI: `ticket_perm_check()` tests the queue first and denies
-    before reaching it. Granting it here would leave the API more permissive than
-    the interface, which is the shape of the problem this is fixing.
-
-    With HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION disabled, or for a
-    superuser, `has_full_access()` is true, every queue passes and this filter is
-    a no-op.
-    """
-    huser = HelpdeskUser(user)
-    queues = [q for q in huser.get_queues() if huser.can_access_queue(q)]
-    return Ticket.objects.filter(queue__in=queues)
-
-
 def restrict_relation(serializer, field_name, queryset):
     """Narrow a writable relation so it cannot reference an unreachable object.
 
@@ -109,7 +86,7 @@ class TicketViewSet(viewsets.ModelViewSet):
     permission_classes: ClassVar[list] = [IsAdminUser]
 
     def get_queryset(self):
-        tickets = accessible_tickets(self.request.user)
+        tickets = HelpdeskUser(self.request.user).accessible_tickets()
 
         # filter by status
         status = self.request.query_params.get("status", None)
@@ -145,7 +122,9 @@ class TicketViewSet(viewsets.ModelViewSet):
         # tickets to a foreign one, which both confirms that ticket exists and
         # writes a reference into it.
         restrict_relation(
-            serializer, "merged_to", accessible_tickets(self.request.user)
+            serializer,
+            "merged_to",
+            HelpdeskUser(self.request.user).accessible_tickets(),
         )
         return serializer
 
@@ -157,11 +136,15 @@ class FollowUpViewSet(viewsets.ModelViewSet):
     permission_classes: ClassVar[list] = [IsAdminUser]
 
     def get_queryset(self):
-        return FollowUp.objects.filter(ticket__in=accessible_tickets(self.request.user))
+        return FollowUp.objects.filter(
+            ticket__in=HelpdeskUser(self.request.user).accessible_tickets()
+        )
 
     def get_serializer(self, *args, **kwargs):
         serializer = super().get_serializer(*args, **kwargs)
-        restrict_relation(serializer, "ticket", accessible_tickets(self.request.user))
+        restrict_relation(
+            serializer, "ticket", HelpdeskUser(self.request.user).accessible_tickets()
+        )
         return serializer
 
     def perform_create(self, serializer):
@@ -175,7 +158,9 @@ class FollowUpAttachmentViewSet(viewsets.ModelViewSet):
     permission_classes: ClassVar[list] = [IsAdminUser]
 
     def accessible_followups(self):
-        return FollowUp.objects.filter(ticket__in=accessible_tickets(self.request.user))
+        return FollowUp.objects.filter(
+            ticket__in=HelpdeskUser(self.request.user).accessible_tickets()
+        )
 
     def get_queryset(self):
         return FollowUpAttachment.objects.filter(

@@ -200,12 +200,12 @@
             <i class="fas fa-link"></i>
           </a>
           <ul class="list-unstyled">
-            {% for resolves in ticket.depends_on.all %}
+            {% for dep in resolves %}
               <li>
-                <a href="{{ resolves.ticket.get_absolute_url }}">#{{ resolves.ticket.id }} {{ resolves.ticket.title|truncatechars:38 }}</a>
+                <a href="{{ dep.ticket.get_absolute_url }}">#{{ dep.ticket.id }} {{ dep.ticket.title|truncatechars:38 }}</a>
                 <a class="link-secondary ms-1"
                    data-bs-toggle="tooltip"
-                   href="{% url 'helpdesk:ticket_resolves_del' resolves.ticket.id resolves.id %}"
+                   href="{% url 'helpdesk:ticket_resolves_del' dep.ticket.id dep.id %}"
                    title='{% translate "Drop the dependency on this ticket. A ticket may not be closed until all tickets it depends on are closed or removed." %}'>
                   <i class="fa-regular fa-trash-can"></i>
                 </a>
