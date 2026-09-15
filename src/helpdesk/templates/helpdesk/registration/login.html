@@ -36,7 +36,15 @@
               </div>
               <div class="mb-3">
                 <label class="form-label" for="password">{% translate "Password" %}</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Your Password" required="required" />
+                <input type="password"
+                       id="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="Your Password"
+                       required="required" />
+                <div class="form-text text-end">
+                  <a href="{% url 'helpdesk:password_reset' %}">{% translate "Forgot password?" %}</a>
+                </div>
               </div>
               <div class="mb-3">
                 <div class="form-check checkbox">
