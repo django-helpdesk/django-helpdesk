@@ -819,4 +819,4 @@ class CreateChecklistForm(ChecklistForm):
 
 
 class FormControlDeleteFormSet(forms.BaseInlineFormSet):
-    deletion_widget = forms.CheckboxInput(attrs={"class": "form-control"})
+    deletion_widget = forms.CheckboxInput(attrs={"class": "form-check-input"})

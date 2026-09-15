@@ -7,14 +7,14 @@
       {% if category.queue %}
         {% if iframe %}
           <a href="{% url 'helpdesk:submit_iframe' %}?queue={{ category.queue.pk }}&_readonly_fields_=queue&{{ query_param_string }}"
-             class="btn btn-light ms-auto">
+             class="btn bg-body-tertiary border ms-auto">
             {% translate "Contact a human" %}
             <i class="fa fa-envelope ms-2"></i>
           </a>
         {% else %}
           {# Create ticket link #}
           <a href="{% url 'helpdesk:submit' %}?queue={{ category.queue.pk }}&_readonly_fields_=queue&{{ query_param_string }}"
-             class="btn btn-light ms-auto">
+             class="btn bg-body-tertiary border ms-auto">
             {% translate "Create Ticket" %}
             <i class="fa fa-plus ms-2"></i>
           </a>
@@ -73,13 +73,13 @@
               {% endif %}
               {% if iframe %}
                 <a href="{% url 'helpdesk:submit_iframe' %}?{% if category.queue %}queue={{ category.queue.pk }}&_readonly_fields_=queue&{% endif %}kbitem={{ item.id }}&{{ query_param_string }}"
-                   class="btn btn-light">
+                   class="btn bg-body-tertiary border">
                   {% translate "Contact a human" %}
                   <i class="fa fa-envelope ms-1"></i>
                 </a>
               {% else %}
                 <a href="{% url 'helpdesk:submit' %}?{% if category.queue %}queue={{ category.queue.pk }}&_readonly_fields_=queue&{% endif %}kbitem={{ item.id }}&{{ query_param_string }}"
-                   class="btn btn-light">
+                   class="btn bg-body-tertiary border">
                   {% translate "Create New Ticket" %}
                   <i class="fa fa-plus ms-1"></i>
                 </a>

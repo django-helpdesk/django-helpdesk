@@ -9,7 +9,9 @@
 {% block helpdesk_head %}
   {# Timeline 3 CSS #}
   {% if helpdesk_settings.HELPDESK_USE_CDN %}
-    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css" />
+    <link title="timeline-styles"
+          rel="stylesheet"
+          href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css" />
   {% else %}
     <link title="timeline-styles" rel="stylesheet" href="{% static 'helpdesk/vendor/timeline3/css/timeline.css' %}" />
   {% endif %}
@@ -64,7 +66,10 @@
     </ul>
   {% endif %}
   <div class="tab-content" id="tableTabContent">
-    <div class="tab-pane fade show active" id="datatabletabcontents" role="tabpanel" aria-labelledby="datatabletabcontents-tab">
+    <div class="tab-pane fade show active"
+         id="datatabletabcontents"
+         role="tabpanel"
+         aria-labelledby="datatabletabcontents-tab">
       <div class="card border-0">
         <div class="card-body">
           <form method="post" action="{% url 'helpdesk:mass_update' %}" id="ticket_mass_update">
@@ -93,8 +98,8 @@
               </thead>
             </table>
             {# Actions dropdown #}
-            <div class="dropdown dropend" id="actions-dropdown">
-              <button class="btn btn-outline-secondary border-0 dropdown-toggle"
+            <div class="dropdown" id="actions-dropdown">
+              <button class="btn bg-body-tertiary border dropdown-toggle"
                       type="button"
                       data-bs-toggle="dropdown"
                       data-bs-auto-close="outside"
@@ -145,7 +150,7 @@
                   </select>
                 </li>
                 <li class="d-grid p-3">
-                  <button type="submit" class="btn btn-outline-primary">
+                  <button type="submit" class="btn bg-body-tertiary border">
                     {% translate "Go" %}
                     <i class="fa-solid fa-arrow-right"></i>
                   </button>
@@ -161,7 +166,8 @@
               {% if saved_query.user == user %}
                 <p>
                   {% blocktranslate with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktranslate %}
-                  <a href="{% url 'helpdesk:delete_query' saved_query.id %}" class="alert-link text-decoration-underline link-offset-2">{% translate "Delete Saved Query" %}</a>
+                  <a href="{% url 'helpdesk:delete_query' saved_query.id %}"
+                     class="alert-link text-decoration-underline link-offset-2">{% translate "Delete Saved Query" %}</a>
                 </p>
               {% endif %}
               <hr />
@@ -182,7 +188,7 @@
     {% endif %}
   </div>
   {# Filters Offcanvas #}
-  <a class="btn btn-outline-secondary border-0"
+  <a class="btn bg-body-tertiary border"
      id="advanced-filters"
      data-bs-toggle="offcanvas"
      href="#offcanvasFilters"
@@ -211,14 +217,16 @@
         </ul>
       </form>
     </div>
-    <div class="offcanvas-footer">
-      <div class="d-grid m-3">
-        <button class="btn btn-outline-primary" type="submit" form="filtersForm">{% translate "Apply Filters" %}</button>
-      </div>
+    <div class="offcanvas-footer p-3 d-flex justify-content-end">
+      <button type="button"
+              class="btn bg-body-tertiary border me-3"
+              data-bs-dismiss="offcanvas"
+              aria-label="Close">{% translate "Cancel" %}</button>
+      <button class="btn btn-success" type="submit" form="filtersForm">{% translate "Apply Filters" %}</button>
     </div>
   </div>
   {# Queries Offcanvas #}
-  <button class="btn btn-outline-secondary border-0"
+  <button class="btn bg-body-tertiary border"
           id="queries"
           type="button"
           data-bs-toggle="offcanvas"
@@ -273,12 +281,15 @@
             </div>
             <div class="form-check form-switch mb-3">
               <input class="form-check-input" type="checkbox" name="shared" id="id_shared" />
-              <label class="form-label mb-0" for="id_shared">{% translate "Share this query with other users." %}</label>
+              <label class="form-label mb-0"
+                     for="id_shared">{% translate "Share this query with other users." %}</label>
               <div class="form-text">{% translate "If you share this query, it will be visible by <em>all</em> other logged-in users." %}</div>
             </div>
-            <div class="d-grid">
-              <button type="submit" class="btn btn-outline-primary">{% translate "Save Query" %}<i class="fa-solid fa-arrow-right ms-2"></i></button>
-            </div>
+            <button type="submit" class="btn btn-success me-2">{% translate "Save" %}</button>
+            <button class="btn bg-body-tertiary border"
+                    type="button"
+                    data-bs-dismiss="offcanvas"
+                    aria-label="Close">{% translate "Cancel" %}</button>
           </form>
         </div>
         {# Use Saved query pane #}
@@ -302,9 +313,10 @@
                   {% endfor %}
                 </select>
               </div>
-              <div class="d-grid">
-                <button class="btn btn-outline-primary" type="submit">{% translate "Run Query" %}<i class="fa-solid fa-arrow-right ms-2"></i></button>
-              </div>
+              <button class="btn btn-success me-2" type="submit">{% translate "Run Query" %}</button>
+              <button class="btn bg-body-tertiary border" type="button" data-bs-dismiss="offcanvas" aria-label="Close">
+                {% translate "Cancel" %}
+              </button>
             </form>
           </div>
         {% endif %}
@@ -339,7 +351,7 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    const renderDateTime = (data, type, row, meta) => `<span class="small text-secondary">${data}</span>`
+    const renderDateTime = (data, type, row, meta) => `<span class="small text-body-secondary">${data}</span>`
 
     $(document).ready(function() {
       // Ticket DataTable Initialization
@@ -372,7 +384,7 @@
             },
             'buttons': [{
               extend: "colvis",
-              className: "btn btn-outline-secondary border-0",
+              className: "btn bg-body-tertiary border",
               id: "column-visibility",
               text: "Columns"
             }],
@@ -416,7 +428,7 @@
           }, {
             data: "queue",
             render: function(data, type, row, meta) {
-              return `<span class="badge text-bg-light text-secondary">${data.title}</span>`
+              return `<span class="badge bg-light-subtle text-light-emphasis border border-light-subtle">${data.title}</span>`
             },
             visible: false,
           }, {
@@ -436,19 +448,22 @@
             data: "assigned_to",
             render: function(data, type, row, meta) {
               if (data !== "None") {
-                return data;
+                return `<span class="small text-body-secondary">${data}</span>`
               }
               return "";
             }
           }, {
-            data: "submitter"
+            data: "submitter",
+            render: function(data, type, row, meta) {
+              return `<span class="small text-body-secondary">${data}</span>`
+            }
           }, {
             data: "last_followup",
             render: function(data, type, row) {
               let locale = navigator.language || navigator.userLanguage || window.helpdesk_settings.LANGUAGE_CODE;
 
               if (isNaN(Date.parse(data))) {
-                return `<span class="small text-secondary">${window.helpdesk_settings.NO_FOLLOWUP_TEXT}</span>`
+                return `<span class="small text-body-secondary">${window.helpdesk_settings.NO_FOLLOWUP_TEXT}</span>`
               }
 
               let date = new Date(data);
@@ -461,7 +476,7 @@
                 minute: "2-digit",
                 hour12: true
               });
-              return `<span class="small text-secondary">${lastFollowupDate}</span>`
+              return `<span class="small text-body-secondary">${lastFollowupDate}</span>`
             }
           },
           {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
@@ -478,7 +493,6 @@
         ],
         order: []
       });
-
       {# Shortcuts to select/unselect multiple tickets #}
       $("#select_all_btn").click(function() {
         $(".ticket_multi_select").prop('checked', true);
@@ -494,7 +508,6 @@
 
       $(".buttons-colvis").removeClass('dt-button')
       $("#dt-search-0").removeClass('form-control-sm')
-
       {# Timeline initialization when tab is displayed #}
       // The TL.Timeline constructor takes at least two arguments:
       // the id of the Timeline container (no '#'), and

@@ -113,7 +113,7 @@ class StaffTicketListViewTests(TestCase):
         self.assertEqual(r.context["query_params"]["sorting"], "last_followup")
         self.assertContains(
             r,
-            "<option value='last_followup' selected='selected'>",
+            "<option value='last_followup' selected>",
             html=False,
         )
 

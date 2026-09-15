@@ -1,7 +1,7 @@
 {% load i18n static helpdesk_staff %}
 
 {% include "helpdesk/custom_navigation_header.html" %}
-<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom sticky-top">
   <div class="container-fluid">
     <div class="d-flex align-items-center">
       <a class="navbar-brand" href="{% url 'helpdesk:home' %}">
@@ -36,7 +36,7 @@
           <input type='hidden' name='status' value='2' />
           <input type='hidden' name='status' value='3' />
           <input type='hidden' name='search_type' value='header' />
-          <button class="btn btn-outline-secondary" type="submit">
+          <button class="btn bg-body-tertiary border" type="submit">
             <i class="fas fa-search"></i> {% translate "Go" %}
           </button>
         </div>

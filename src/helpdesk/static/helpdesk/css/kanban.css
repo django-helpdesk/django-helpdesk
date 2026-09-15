@@ -1,10 +1,12 @@
 .kanban-drop-zone {
   transition: background 0.15s;
 }
+
 .kanban-drop-zone.drag-over {
-  background: rgba(var(--bs-secondary-bg-rgb), 0.5);
-  outline: 2px dashed rgba(255, 255, 255, 0.3);
+  background: rgb(var(--bs-secondary-bg-rgb), 0.5);
+  border: 2px dashed rgb(var(--bs-secondary-color-rgb), 0.3);
 }
+
 .kanban-card {
   cursor: grab;
   transition:

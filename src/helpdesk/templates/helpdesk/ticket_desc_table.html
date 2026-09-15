@@ -1,12 +1,12 @@
 {% load i18n static humanize ticket_to_link helpdesk_util %}
 
-<div class="card border-0">
-  <div class="card-body">
+<div class="card border-0 mb-3">
+  <div class="card-body pt-0">
     {# Heading & description #}
     <div class="d-flex">
-      <h2>{{ ticket.title }} <span class="badge rounded-pill bg-light-subtle text-light-emphasis">#{{ ticket.id }}</span> </h2>
+      <h2>{{ ticket.title }} <span class="badge bg-body-tertiary text-secondary-emphasis border">#{{ ticket.id }}</span> </h2>
       <div class="dropdown ms-auto">
-        <button class="btn bg-light-subtle text-light-emphasis dropdown-toggle"
+        <button class="btn bg-body-tertiary border dropdown-toggle"
                 type="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false">{% translate "Actions" %}</button>
@@ -53,7 +53,8 @@
         <hr />
         <p class="mb-0">
           {% if "Resolved" == ticket.get_status_display %}
-            <a href="?close" class="alert-link">{% translate "Accept and Close" %}<i class="fa-solid fa-arrow-right ms-2"></i></a>
+            <a href="?close"
+               class="alert-link">{% translate "Accept and Close" %}<i class="fa-solid fa-arrow-right ms-2"></i></a>
           {% endif %}
         </p>
       </div>
@@ -61,24 +62,27 @@
     {# Ticket description #}
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Due Date" %}</small>
+        <small class="text-uppercase text-body-secondary">{% translate "Due Date" %}</small>
         <p>
           {{ ticket.due_date|date:"DATETIME_FORMAT" }}
           {% if ticket.due_date %}
-            <a class="link-secondary" href="#" data-bs-toggle="tooltip" data-bs-title="{{ ticket.due_date|naturaltime }}"><i class="fa-regular fa-hourglass ms-1"></i></a>
+            <a class="link-secondary"
+               href="#"
+               data-bs-toggle="tooltip"
+               data-bs-title="{{ ticket.due_date|naturaltime }}"><i class="fa-regular fa-hourglass ms-1"></i></a>
           {% endif %}
         </p>
       </div>
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Priority" %}</small>
+        <small class="text-uppercase text-body-secondary">{% translate "Priority" %}</small>
         <p>{{ ticket.get_priority_display }}</p>
       </div>
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Status" %}</small>
+        <small class="text-uppercase text-body-secondary">{% translate "Status" %}</small>
         <p>{{ ticket.get_status }}</p>
       </div>
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Assigned to" %}</small>
+        <small class="text-uppercase text-body-secondary">{% translate "Assigned to" %}</small>
         <form method="post" action="{% url 'helpdesk:update' ticket.id %}">
           {% csrf_token %}
           <input type="hidden" name="ticket_id" value="{{ ticket.id }}" />
@@ -90,17 +94,23 @@
           <div class="d-flex align-items-center gap-2">
             <div class="input-group input-group-sm">
               <select name="owner" class="form-select">
-                <option value="0" {% if not ticket.assigned_to %} disabled selected{% endif %}>{% translate "Unassigned" %}</option>
+                <option value="0"
+                        {% if not ticket.assigned_to %}
+                          disabled selected{% endif %}>{% translate "Unassigned" %}</option>
                 {% for user in assignable_users %}
-                  <option value="{{ user.id }}" {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
+                  <option value="{{ user.id }}"
+                          {% if ticket.assigned_to and ticket.assigned_to.id == user.id %}selected{% endif %}>
                     {{ user.get_full_name|default:user.username }}
                   </option>
                 {% endfor %}
               </select>
-              <button class="btn btn-outline-primary" type="submit" data-bs-toggle="tooltip" title="{% translate 'Save ticket assignment' %}">
+              <button class="btn bg-body-tertiary border"
+                      type="submit"
+                      data-bs-toggle="tooltip"
+                      title="{% translate 'Save ticket assignment' %}">
                 <i class="fas fa-user-check"></i>
               </button>
-              <a class="btn btn-outline-primary"
+              <a class="btn bg-body-tertiary border"
                  data-bs-toggle="tooltip"
                  href="?take"
                  title="{% translate 'Assign this ticket to ' %}{{ request.user.email }}">
@@ -111,25 +121,29 @@
         </form>
       </div>
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Submitted by" %}</small>
+        <small class="text-uppercase text-body-secondary">{% translate "Submitted by" %}</small>
         <div class="input-group input-group-sm">
-          <input type="text" class="form-control" value="{{ ticket.submitter_email }}" aria-label="Submitter email" disabled />
+          <input type="text"
+                 class="form-control"
+                 value="{{ ticket.submitter_email }}"
+                 aria-label="Submitter email"
+                 readonly />
           {% if user.is_superuser %}
             {% if submitter_userprofile_url %}
-              <a class="btn btn-outline-primary"
+              <a class="btn bg-body-tertiary border"
                  data-bs-toggle="tooltip"
                  href="{{ submitter_userprofile_url }}"
                  title="{% translate "Edit " %}{{ ticket.submitter_email }}{% translate " user profile" %}">
                 <i class="fas fa-address-book"></i>
               </a>
             {% endif %}
-            <a class="btn btn-outline-primary"
+            <a class="btn bg-body-tertiary border"
                data-bs-toggle="tooltip"
                href="{% url 'helpdesk:list' %}?q={{ ticket.submitter_email }}"
                title='{% translate "Display tickets filtered for " %}{{ ticket.submitter_email }}{% translate " as a keyword" %}'>
               <i class="fas fa-search"></i>
             </a>
-            <a class="btn btn-outline-primary"
+            <a class="btn bg-body-tertiary border"
                data-bs-toggle="tooltip"
                href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'
                title='{% translate "Add email address for the ticket system to ignore." %}'>
@@ -140,27 +154,27 @@
       </div>
       {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET %}
         <div class="col">
-          <small class="text-uppercase text-secondary">{% translate "Time spent" %}</small>
+          <small class="text-uppercase text-body-secondary">{% translate "Time spent" %}</small>
           <p>{{ ticket.time_spent_formated }}</p>
         </div>
       {% endif %}
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Queue" %}</small>
+        <small class="text-uppercase text-body-secondary">{% translate "Queue" %}</small>
         <p>{{ ticket.queue }}</p>
       </div>
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Copies to" %}</small>
+        <small class="text-uppercase text-body-secondary">{% translate "Copies to" %}</small>
         <div class="input-group input-group-sm">
           {% if ticket.queue.enable_notifications_on_email_events %}
-            <input type="text" class="form-control" value="{{ ticketcc_string }}" disabled />
-            <a class="btn btn-outline-primary btn-sm"
+            <input type="text" class="form-control" value="{{ ticketcc_string }}" readonly />
+            <a class="btn bg-body-tertiary border btn-sm"
                data-bs-toggle='tooltip'
                href='{% url 'helpdesk:ticket_cc' ticket.id %}'
                title='{% translate "Click here to add / remove people who should receive an e-mail whenever this ticket is updated." %}'>
               <i class="fa fa-share"></i>
             </a>
             {% if SHOW_SUBSCRIBE %}
-              <a class="btn btn-outline-primary btn-sm"
+              <a class="btn bg-body-tertiary border btn-sm"
                  data-bs-toggle='tooltip'
                  href='?subscribe'
                  title='{% translate "Click here to subscribe yourself to this ticket, if you want to receive an e-mail whenever this ticket is updated." %}'>
@@ -178,7 +192,7 @@
       </div>
       {% if helpdesk_settings.HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET != False %}
         <div class="col">
-          <small class="text-uppercase text-secondary">{% translate "Resolves" %}</small>
+          <small class="text-uppercase text-body-secondary">{% translate "Resolves" %}</small>
           <a class="link-secondary"
              data-bs-toggle="tooltip"
              href="{% url 'helpdesk:ticket_resolves_add' ticket.id %}"
@@ -202,7 +216,7 @@
           </ul>
         </div>
         <div class="col">
-          <small class="text-uppercase text-secondary">{% translate "Depends on" %}</small>
+          <small class="text-uppercase text-body-secondary">{% translate "Depends on" %}</small>
           <a class="link-secondary ms-1"
              data-bs-toggle="tooltip"
              href="{% url 'helpdesk:ticket_dependency_add' ticket.id %}"
@@ -226,13 +240,13 @@
       {% endif %}
       {% if ticket.kbitem %}
         <div class="col">
-          <small class="text-uppercase text-secondary">{% translate "Knowledgebase item" %}</small>
+          <small class="text-uppercase text-body-secondary">{% translate "Knowledgebase item" %}</small>
           <p><a href="{{ ticket.kbitem.query_url }}">{{ ticket.kbitem|truncatechars:30 }}</a></p>
         </div>
       {% endif %}
       {% if ticket.ticketcustomfieldvalue_set.exists %}
         <div class="col">
-          <small class="text-uppercase text-secondary">{% translate "Additional Info" %}</small>
+          <small class="text-uppercase text-body-secondary">{% translate "Additional Info" %}</small>
           <ul class="list-unstyled">
             {% for customfield in ticket.ticketcustomfieldvalue_set.all %}
               <li>
@@ -257,7 +271,7 @@
       {% endif %}
       {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
         <div class="col">
-          <small class="text-uppercase text-secondary">{% translate "Attachments" %}</small>
+          <small class="text-uppercase text-body-secondary">{% translate "Attachments" %}</small>
           {% with recent_attachments=ticket_attachments|slice:":3" older_attachments=ticket_attachments|slice:"3:" %}
             <ul class="list-group list-group-flush">
               {% for attachment in recent_attachments %}
@@ -289,8 +303,8 @@
         </div>
       {% endif %}
       <div class="col">
-        <small class="text-uppercase text-secondary">{% translate "Checklists" %}</small>
-        <a class="ms-2" data-bs-toggle="modal" data-bs-target="#createChecklistModal" href="">
+        <small class="text-uppercase text-body-secondary">{% translate "Checklists" %}</small>
+        <a class="link-secondary ms-2" data-bs-toggle="modal" data-bs-target="#createChecklistModal" href="">
           <i class="fas fa-plus"></i>
           <span class="visually-hidden">{% translate "Create" %}</span>
         </a>
@@ -307,27 +321,32 @@
                     </span>
                   </p>
                   <div class="btn-group btn-group-sm" role="group" aria-label="Checklist actions">
-                    <button class="btn btn-light"
+                    <button class="btn bg-body-tertiary border"
+                            type="button"
                             data-bs-toggle="collapse"
                             data-bs-target="#checklist{{ checklist.id }}"
                             onclick="$(this).children('i').toggleClass('fa-caret-down fa-caret-up')">
                       <i class="fas fa-caret-down"></i>
                     </button>
-                    <a class="btn btn-light" href="{% url 'helpdesk:edit_ticket_checklist' ticket.id checklist.id %}">
+                    <a class="btn bg-body-tertiary border"
+                       href="{% url 'helpdesk:edit_ticket_checklist' ticket.id checklist.id %}">
                       <i class="fa-regular fa-edit"></i>
                     </a>
                   </div>
                 </div>
-                <div class="collapse" id="checklist{{ checklist.id }}">
-                  <ul class="list-unstyled">
+                <div class="collapse mt-3" id="checklist{{ checklist.id }}">
+                  <ul class="list-unstyled pe-none">
                     {% for task in checklist.tasks.all %}
-                      <li class="mb-1" {% if task.completion_date %} title="{% translate "Completed on" %} {{ task.completion_date }}" {% endif %}>
+                      <li class="mb-1"
+                          {% if task.completion_date %}
+                            title="{% translate "Completed on" %} {{ task.completion_date }}"
+                          {% endif %}>
                         <div class="form-check">
                           <input class="form-check-input"
                                  type="checkbox"
                                  id="task-view-{{ task.id }}"
-                                 disabled{% if task.completion_date %}
-                                 checked{% endif %} />
+                                 {% if task.completion_date %}
+                                   checked{% endif %} />
                           <label class="form-check-label" for="task-view-{{ task.id }}">{{ task }}</label>
                         </div>
                       </li>

@@ -1,16 +1,16 @@
 <tr>
-    {{ form.id }}
-    <td title="Drag & Drop" class="text-end handle">
-        <i class="fas fa-grip-vertical"></i>
-        {{ form.position }}
-        {{ form.position.errors }}
-    </td>
-    <td>
-        {{ form.description }}
-        {{ form.description.errors }}
-    </td>
-    <td>
-        {{ form.DELETE }}
-        {{ form.DELETE.errors }}
-    </td>
+  {{ form.id }}
+  <td title="Drag & Drop" class="handle">
+    <i class="fas fa-grip-vertical text-body-secondary"></i>
+    {{ form.position }}
+    {{ form.position.errors }}
+  </td>
+  <td>
+    {{ form.description }}
+    {{ form.description.errors }}
+  </td>
+  <td>
+    <div class="form-check">{{ form.DELETE }}</div>
+    {{ form.DELETE.errors }}
+  </td>
 </tr>
