@@ -268,6 +268,9 @@ AUTH_PATTERNS = [
     path("logout/", logout, name="logout"),
     path("password_change/", password_change, name="password_change"),
     path("password_change/done/", password_change_done, name="password_change_done"),
+]
+
+PASSWORD_RESET_PATTERNS = [
     path("password-reset/", password_reset, name="password_reset"),
     path("password-reset/done/", password_reset_done, name="password_reset_done"),
     path(
@@ -282,8 +285,11 @@ AUTH_PATTERNS = [
     ),
 ]
 
+
 urlpatterns += AUTH_PATTERNS
 
+if helpdesk_settings.HELPDESK_ENABLE_PASSWORD_RESET:
+    urlpatterns += PASSWORD_RESET_PATTERNS
 
 urlpatterns += [
     path(
