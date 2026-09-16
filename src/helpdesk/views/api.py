@@ -5,7 +5,11 @@ from django.core.exceptions import ImproperlyConfigured
 from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import (
+    DjangoModelPermissions,
+    IsAdminUser,
+    IsAuthenticated,
+)
 from rest_framework.viewsets import GenericViewSet
 
 from helpdesk import settings as helpdesk_settings
@@ -174,6 +178,20 @@ class FollowUpAttachmentViewSet(viewsets.ModelViewSet):
 
 
 class CreateUserView(CreateModelMixin, GenericViewSet):
+    """Create a user account.
+
+    `IsAdminUser` only tests `is_staff`, the flag granting entry to the admin
+    site, never the right to create an account. On its own it leaves this
+    endpoint more permissive than `/admin/auth/user/add/`, which refuses the
+    same request from a staff member lacking `auth.add_user`.
+
+    `DjangoModelPermissions` adds that check. It derives the permission from
+    the queryset's model, so a project substituting its own AUTH_USER_MODEL is
+    covered without naming `auth.add_user` here. Both classes are required:
+    the model permission alone would open the endpoint to any account holding
+    it, staff or not.
+    """
+
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
-    permission_classes: ClassVar[list] = [IsAdminUser]
+    permission_classes: ClassVar[list] = [IsAdminUser, DjangoModelPermissions]

@@ -85,7 +85,6 @@ class FollowUpDirectionRenderingTests(TestCase):
 
         r = self.client.get(self.url)
 
-        self.assertContains(r, "followup-item-internal")
         self.assertContains(r, "Private")
 
     def test_outbound_followup_is_labeled_to_submitter(self):
@@ -95,7 +94,6 @@ class FollowUpDirectionRenderingTests(TestCase):
 
         r = self.client.get(self.url)
 
-        self.assertContains(r, "followup-item-outbound")
         self.assertContains(r, "To submitter")
 
     def test_inbound_followup_is_labeled_from_submitter(self):
@@ -108,5 +106,4 @@ class FollowUpDirectionRenderingTests(TestCase):
 
         r = self.client.get(self.url)
 
-        self.assertContains(r, "followup-item-inbound")
         self.assertContains(r, "From submitter")

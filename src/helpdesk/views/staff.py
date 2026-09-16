@@ -1549,11 +1549,29 @@ def raw_details(request, type_):
         raise Http404
 
     if type_ == "preset" and request.GET.get("id", False):
+        # A pre-set reply is only readable when it is either global or attached
+        # to one of the queues the requesting user may open. accessible_queues()
+        # rather than get_queues(), which also returns the queues merely offered
+        # by the pickers because they accept public submissions.
+        queues = HelpdeskUser(request.user).accessible_queues()
+        # distinct() is load bearing: the filter spans the queues m2m, so a reply
+        # attached to several readable queues comes back once per join row and
+        # get() would raise MultipleObjectsReturned on it.
         try:
-            preset = PreSetReply.objects.get(id=request.GET.get("id"))
-            return HttpResponse(preset.body)
-        except PreSetReply.DoesNotExist:
+            preset = (
+                PreSetReply.objects.filter(
+                    Q(queues__in=queues) | Q(queues__isnull=True)
+                )
+                .distinct()
+                .get(id=request.GET.get("id"))
+            )
+        except (PreSetReply.DoesNotExist, ValueError):
             raise Http404
+        # The body is user supplied content echoed back into a textarea, so it
+        # must never be served as HTML, nor be allowed to be sniffed as such.
+        response = HttpResponse(preset.body, content_type="text/plain; charset=utf-8")
+        response["X-Content-Type-Options"] = "nosniff"
+        return response
 
     raise Http404
 
