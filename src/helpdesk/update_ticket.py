@@ -16,14 +16,21 @@ from helpdesk.models import (
     TicketCC,
 )
 from helpdesk.signals import update_ticket_done
+from helpdesk.user import HelpdeskUser
 
 User = get_user_model()
 
+# Match #42 style ticket references but skip HTML like &#39;
 TICKET_REF_RE = re.compile(r"(?:[^&]|\b|^)#(\d+)\b")
 
 
 def create_ticket_backlinks(source_ticket, followup, user=None):
-    from helpdesk.user import HelpdeskUser
+    if not helpdesk_settings.HELPDESK_ENABLE_BACKLINKS:
+        # If this feature is toggled off then do not do it
+        return
+
+    if not (user and hasattr(user, "is_authenticated") and user.is_authenticated):
+        return
 
     text = followup.comment or ""
     referenced_ids = set()
@@ -42,9 +49,6 @@ def create_ticket_backlinks(source_ticket, followup, user=None):
         "queue"
     )
 
-    if not (user and hasattr(user, "is_authenticated") and user.is_authenticated):
-        return
-
     huser = HelpdeskUser(user)
     referenced_tickets = [t for t in referenced_tickets if huser.can_access_ticket(t)]
 
@@ -55,9 +59,7 @@ def create_ticket_backlinks(source_ticket, followup, user=None):
             % {"ticket_id": source_ticket.id},
             date=timezone.now(),
             public=False,
-            user=user
-            if user and hasattr(user, "is_authenticated") and user.is_authenticated
-            else None,
+            user=user,
         )
 
 
