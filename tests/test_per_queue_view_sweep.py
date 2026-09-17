@@ -78,6 +78,10 @@ NO_TICKET_DATA = {
     "logout": "authentication",
     "password_change": "authentication",
     "password_change_done": "authentication",
+    "password_reset": "authentication",
+    "password_reset_done": "authentication",
+    "password_reset_confirm": "authentication",
+    "password_reset_complete": "authentication",
     "help_context": "static help page",
     "system_settings": "renders configured settings, no ticket data",
 }

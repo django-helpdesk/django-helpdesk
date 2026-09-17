@@ -57,6 +57,12 @@ These settings can be used to change who can access the helpdesk.
 
    When a user visits ``/``, should we redirect to the login page instead of the default homepage?
 
+.. setting:: HELPDESK_ENABLE_PASSWORD_RESET
+
+   *Default:* ``True``
+
+   Should users be allowed to reset their own password? Forgot password link is show on the login form.
+
 .. setting:: HELPDESK_ANON_ACCESS_RAISES_404
 
    *Default:* ``False``
@@ -738,5 +744,3 @@ The following settings were defined in previous versions and are no longer suppo
 .. setting:: HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP
 
    Discontinued in favor of :setting:`HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION`.
-
-

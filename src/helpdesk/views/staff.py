@@ -1533,7 +1533,7 @@ class UpdateTicketView(
                 self.request, ticket_id, False
             )
         except PermissionDenied:
-            return redirect_to_login(self.request.path, "helpdesk:login")
+            return redirect_to_login(self.request.path, settings.LOGIN_URL)
         # Avoid calling super as it will call the save() method on the form
         save_ticket_update(form, self.ticket, self.request.user)
         return return_to_ticket(self.request.user, self.ticket)

@@ -22,7 +22,16 @@ from helpdesk.views.api import (
     TicketViewSet,
     UserTicketViewSet,
 )
-from helpdesk.views.auth import login, logout, password_change, password_change_done
+from helpdesk.views.auth import (
+    login,
+    logout,
+    password_change,
+    password_change_done,
+    password_reset,
+    password_reset_complete,
+    password_reset_confirm,
+    password_reset_done,
+)
 
 if helpdesk_settings.HELPDESK_KB_ENABLED:
     from helpdesk.views import kb
@@ -261,8 +270,26 @@ AUTH_PATTERNS = [
     path("password_change/done/", password_change_done, name="password_change_done"),
 ]
 
+PASSWORD_RESET_PATTERNS = [
+    path("password-reset/", password_reset, name="password_reset"),
+    path("password-reset/done/", password_reset_done, name="password_reset_done"),
+    path(
+        "password-reset/<uidb64>/<token>/",
+        password_reset_confirm,
+        name="password_reset_confirm",
+    ),
+    path(
+        "password-reset-complete/",
+        password_reset_complete,
+        name="password_reset_complete",
+    ),
+]
+
+
 urlpatterns += AUTH_PATTERNS
 
+if helpdesk_settings.HELPDESK_ENABLE_PASSWORD_RESET:
+    urlpatterns += PASSWORD_RESET_PATTERNS
 
 urlpatterns += [
     path(
