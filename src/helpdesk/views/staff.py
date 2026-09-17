@@ -1968,26 +1968,25 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
         return UserSettings.objects.get_or_create(user=self.request.user)[0]
 
 
+@superuser_required
 @helpdesk_superuser_required
-def email_ignore(request):
-    return render(
-        request,
-        "helpdesk/email_ignore_list.html",
-        {
-            "ignore_list": IgnoreEmail.objects.all(),
-        },
-    )
+def email_ignore(request: HttpRequest) -> HttpResponse:
+    """Displays a tabular list of ignored emails to manage."""
+
+    ctx = {"ignore_list": IgnoreEmail.objects.prefetch_related("queues")}
+    return render(request, "helpdesk/email_ignore_list.html", ctx)
 
 
-email_ignore = superuser_required(email_ignore)
-
-
+@superuser_required
 @helpdesk_superuser_required
-def email_ignore_add(request):
+def email_ignore_add(request: HttpRequest) -> HttpResponse:
+    """Show a form to add an email to ignore list."""
+
     if request.method == "POST":
         form = EmailIgnoreForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, _("Email added to ignore list successfully."))
             return HttpResponseRedirect(reverse("helpdesk:email_ignore"))
     else:
         form = EmailIgnoreForm(request.GET)
@@ -1995,20 +1994,19 @@ def email_ignore_add(request):
     return render(request, "helpdesk/email_ignore_add.html", {"form": form})
 
 
-email_ignore_add = superuser_required(email_ignore_add)
-
-
+@superuser_required
 @helpdesk_superuser_required
-def email_ignore_del(request, pk):
-    ignore = get_object_or_404(IgnoreEmail, id=pk)
+def email_ignore_del(request: HttpRequest, id: int) -> HttpResponse:
+    """Remove an email from the ignore list."""
+
+    ignore = get_object_or_404(IgnoreEmail, id=id)
+
     if request.method == "POST":
         ignore.delete()
+        messages.success(request, _("Email removed from ignore list successfully."))
         return HttpResponseRedirect(reverse("helpdesk:email_ignore"))
-    else:
-        return render(request, "helpdesk/email_ignore_del.html", {"ignore": ignore})
 
-
-email_ignore_del = superuser_required(email_ignore_del)
+    return render(request, "helpdesk/email_ignore_del.html", {"ignore": ignore})
 
 
 @helpdesk_staff_member_required
