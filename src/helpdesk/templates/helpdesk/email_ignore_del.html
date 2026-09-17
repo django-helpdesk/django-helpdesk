@@ -1,17 +1,36 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}
 
-{% block helpdesk_title %}{% translate "Delete Ignored E-Mail Address" %}{% endblock %}
+{% load i18n %}
+
+{% block helpdesk_title %}
+  {% translate "Delete Ignored E-Mail Address" %}
+{% endblock helpdesk_title %}
 
 {% block helpdesk_body %}
-<h2>{% translate "Un-Ignore E-Mail Address" %}</h2>
-
-<p>{% blocktranslate with ignore.email_address as email_address %}Are you sure you wish to stop removing this email address (<em>{{ email_address }}</em>) and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.{% endblocktranslate %}</p>
-
-<p><a href='../../'><button class="btn btn-primary btn-lg">{% translate "Keep Ignoring It" %}</button></a></p>
-
-<form method='post' action='./'>
-    <button class="btn btn-danger" type='submit'>{% translate "Stop Ignoring It" %}</button>
-{% csrf_token %}</form>
-
-
-{% endblock %}
+  <div class="row">
+    <div class="col-12 col-md-8 col-lg-4 mx-auto">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="fs-5 mb-0">{% translate "Delete Ignored E-Mail Address" %}</h2>
+        </div>
+        <div class="card-body">
+          <p class="text-body-secondary">
+            {% blocktranslate with ignore.email_address as email_address %}
+            Are you sure you wish to remove (<em>{{ email_address }}</em>) from the ignore list and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.
+            {% endblocktranslate %}
+          </p>
+          <form method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-end">
+              <a class="btn bg-body-tertiary border me-2"
+                 type="button"
+                 role="button"
+                 href="{% url "helpdesk:email_ignore" %}">{% translate "Cancel" %}</a>
+              <button class="btn btn-success" type="submit">{% translate "Delete" %}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock helpdesk_body %}
