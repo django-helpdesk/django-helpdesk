@@ -704,6 +704,11 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             send_info_email(message_id, f, ticket, context, queue, new)
         )
     f.save()
+
+    from helpdesk.update_ticket import create_ticket_backlinks
+
+    create_ticket_backlinks(ticket, f)
+
     if new:
         # emit signal when a new ticket is created
         new_ticket_done.send(sender="create_object_from_email_message", ticket=ticket)

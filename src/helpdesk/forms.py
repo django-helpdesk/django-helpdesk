@@ -46,6 +46,7 @@ from helpdesk.settings import (
     HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST,
 )
 from helpdesk.signals import new_ticket_done
+from helpdesk.update_ticket import create_ticket_backlinks
 from helpdesk.user import HelpdeskUser
 from helpdesk.validators import validate_file_extension
 
@@ -545,6 +546,8 @@ class TicketForm(AbstractTicketForm):
             ticket=ticket, queue=queue, followup=followup, files=files, user=user
         )
 
+        create_ticket_backlinks(ticket, followup, user=user)
+
         # emit signal when the TicketForm.save is done
         new_ticket_done.send(sender="TicketForm", ticket=ticket)
 
@@ -638,6 +641,8 @@ class PublicTicketForm(AbstractTicketForm):
         files = self._attach_files_to_follow_up(followup)
 
         self._send_messages(ticket=ticket, queue=queue, followup=followup, files=files)
+
+        create_ticket_backlinks(ticket, followup, user=user)
 
         # emit signal when the PublicTicketForm.save is done
         new_ticket_done.send(sender="PublicTicketForm", ticket=ticket)
