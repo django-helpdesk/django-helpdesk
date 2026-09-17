@@ -654,7 +654,13 @@ class UserSettingsForm(forms.ModelForm):
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail
-        exclude: ClassVar[list] = []
+        fields = ("queues", "name", "email_address", "keep_in_mailbox")
+        widgets: ClassVar[dict[str, forms.Widget]] = {
+            "queues": forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "email_address": forms.EmailInput(attrs={"class": "form-control"}),
+            "keep_in_mailbox": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
 
 
 class TicketCCForm(forms.ModelForm):
