@@ -33,7 +33,7 @@
   {% else %}
     {# Nav Tabs #}
     <div class="card">
-      <div class="card-header bg-body-tertiary pb-0">
+      <div class="card-header bg-body-tertiary pb-0 d-flex align-items-center">
         <ul class="nav nav-underline" id="ticketTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button class="nav-link active"
@@ -56,6 +56,21 @@
                     aria-selected="false">{% translate "Respond" %}</button>
           </li>
         </ul>
+        {% if followups %}
+          <button type="button"
+                  id="followup-sort-toggle"
+                  class="btn bg-light-subtle text-light-emphasis btn-sm ms-auto"
+                  data-order="{% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}newest_first{% else %}oldest_first{% endif %}">
+            <i class="fa-solid fa-arrow-down-short-wide me-1"></i>
+            <span id="followup-sort-toggle-label">
+              {% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}
+                {% translate "Newest first" %}
+              {% else %}
+                {% translate "Oldest first" %}
+              {% endif %}
+            </span>
+          </button>
+        {% endif %}
       </div>
       <div class="card-body px-0">
         <div class="tab-content" id="myTabContent">
@@ -68,22 +83,6 @@
                  role="tabpanel"
                  aria-labelledby="followup-tab"
                  tabindex="0">
-              {# sort button #}
-              <div class="d-flex justify-content-end mb-2">
-                <button type="button"
-                        id="followup-sort-toggle"
-                        class="btn bg-light-subtle text-light-emphasis btn-sm me-3"
-                        data-order="{% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}newest_first{% else %}oldest_first{% endif %}">
-                  <i class="fa-solid fa-arrow-down-short-wide me-1"></i>
-                  <span id="followup-sort-toggle-label">
-                    {% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}
-                      {% translate "Newest first" %}
-                    {% else %}
-                      {% translate "Oldest first" %}
-                    {% endif %}
-                  </span>
-                </button>
-              </div>
               <ul id="followup-list" class="list-group list-group-flush mb-3">
                 {% for followup in followups %}
                   <li class="list-group-item list-group-item-action">
@@ -505,7 +504,15 @@
         new bootstrap.Tooltip(el);
       });
 
-      // Toggle follow ups between oldest-first and newest-first order.
+      $('#ticketTab button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+        var $sortBtn = $('#followup-sort-toggle');
+        if (e.target.id === 'followup-tab') {
+          $sortBtn.removeClass('d-none');
+        } else {
+          $sortBtn.addClass('d-none');
+        }
+      });
+
       $('#followup-sort-toggle').on('click', function() {
         var $button = $(this);
         var $list = $('#followup-list');
