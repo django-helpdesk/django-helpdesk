@@ -92,6 +92,22 @@ class BacklinkCreationTests(TestCase):
 
         self.assertEqual(self._backlinks(self.ticket_b).count(), 1)
 
+    def test_disabled_setting_creates_no_backlinks(self):
+        """
+        Someone sets HELPDESK_ENABLE_BACKLINKS to false then do not
+        make backlinks
+        """
+        original = helpdesk_settings.HELPDESK_ENABLE_BACKLINKS
+        helpdesk_settings.HELPDESK_ENABLE_BACKLINKS = False
+        self.addCleanup(
+            setattr, helpdesk_settings, "HELPDESK_ENABLE_BACKLINKS", original
+        )
+
+        f = self._followup(self.ticket_a, f"See #{self.ticket_b.id}")
+        create_ticket_backlinks(self.ticket_a, f, user=self.staff_user)
+
+        self.assertFalse(self._backlinks(self.ticket_b).exists())
+
 
 class BacklinkPermissionTests(TestCase):
     """
@@ -149,9 +165,44 @@ class BacklinkPermissionTests(TestCase):
             ).exists()
         )
 
-    def test_no_user_creates_no_backlink(self):
+    def test_email_backlink_created_for_staff_sender(self):
         """
-        Emails can not auth so do not let them make back links
+        When an email sender matches a staff user, backlinks should be created
+        """
+        queue = Queue.objects.create(title="Email Queue", slug="email")
+        ticket_a = Ticket.objects.create(
+            title="Ticket A", queue=queue, status=Ticket.OPEN_STATUS
+        )
+        ticket_b = Ticket.objects.create(
+            title="Ticket B", queue=queue, status=Ticket.OPEN_STATUS
+        )
+
+        User.objects.create_user(
+            username="emailstaff",
+            email="staff@example.com",
+            password="pass",
+            is_staff=True,
+        )
+
+        f = FollowUp.objects.create(
+            ticket=ticket_a,
+            title="E-Mail Received",
+            comment=f"See #{ticket_b.id}",
+            public=True,
+        )
+
+        sender_user = User.objects.filter(email="staff@example.com").first()
+        create_ticket_backlinks(ticket_a, f, user=sender_user)
+
+        self.assertTrue(
+            FollowUp.objects.filter(
+                ticket=ticket_b, title__contains="Referenced in"
+            ).exists()
+        )
+
+    def test_email_backlink_not_created_for_unknown_sender(self):
+        """
+        When an email sender does not match any user, no backlinks are created
         """
         queue = Queue.objects.create(title="Public Queue", slug="pub")
         ticket_a = Ticket.objects.create(

@@ -43,6 +43,7 @@ from helpdesk.exceptions import DeleteIgnoredTicketException, IgnoreTicketExcept
 from helpdesk.lib import process_attachments, safe_template_context
 from helpdesk.models import FollowUp, IgnoreEmail, Queue, Ticket
 from helpdesk.signals import new_ticket_done, update_ticket_done
+from helpdesk.update_ticket import create_ticket_backlinks
 
 # import User model, which may be a custom model
 User = get_user_model()
@@ -705,9 +706,8 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
         )
     f.save()
 
-    from helpdesk.update_ticket import create_ticket_backlinks
-
-    create_ticket_backlinks(ticket, f)
+    sender_user = User.objects.filter(email=sender_email).first()
+    create_ticket_backlinks(ticket, f, user=sender_user)
 
     if new:
         # emit signal when a new ticket is created

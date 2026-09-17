@@ -248,6 +248,12 @@ These changes are visible throughout django-helpdesk
 
    Keep the forwarded and replied text of an incoming e-mail that creates a new ticket, instead of stripping it. Useful when a customer forwards an existing thread, an error report from another service for instance, and expects support to see all of it.
 
+.. setting:: HELPDESK_ENABLE_BACKLINKS
+
+   *Default:* ``True``
+
+   If ``True``, when a ticket comment references another ticket (e.g. ``#42``), an automatic private followup is made in the referenced ticket
+
 .. setting:: HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET
 
    *Default:* ``True``
