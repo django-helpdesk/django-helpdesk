@@ -47,7 +47,6 @@ from rest_framework.decorators import api_view
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
-    helpdesk_superuser_required,
     is_helpdesk_staff,
     superuser_required,
 )
@@ -1969,7 +1968,6 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
 
 
 @superuser_required
-@helpdesk_superuser_required
 def email_ignore(request: HttpRequest) -> HttpResponse:
     """Displays a tabular list of ignored emails to manage."""
 
@@ -1978,7 +1976,6 @@ def email_ignore(request: HttpRequest) -> HttpResponse:
 
 
 @superuser_required
-@helpdesk_superuser_required
 def email_ignore_add(request: HttpRequest) -> HttpResponse:
     """Show a form to add an email to ignore list."""
 
@@ -1995,7 +1992,6 @@ def email_ignore_add(request: HttpRequest) -> HttpResponse:
 
 
 @superuser_required
-@helpdesk_superuser_required
 def email_ignore_del(request: HttpRequest, id: int) -> HttpResponse:
     """Remove an email from the ignore list."""
 
