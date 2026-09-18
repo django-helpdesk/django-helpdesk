@@ -72,7 +72,7 @@ class BacklinkCreationTests(TestCase):
 
     def test_duplicate_reference_creates_one_backlink(self):
         """
-        Ticket A mentions Ticket B twice
+        Ticket a mentions Ticket b two times in the same followup
         """
         f = self._followup(
             self.ticket_a,
@@ -81,6 +81,32 @@ class BacklinkCreationTests(TestCase):
         create_ticket_backlinks(self.ticket_a, f, user=self.staff_user)
 
         self.assertEqual(self._backlinks(self.ticket_b).count(), 1)
+
+    def test_reference_in_multiple_followups_creates_one_backlink(self):
+        """
+        Ticket A mentions Ticket B in three separate followups
+        """
+        for comment in (
+            f"See #{self.ticket_b.id}",
+            f"Still about #{self.ticket_b.id}",
+            f"Closing, see #{self.ticket_b.id}",
+        ):
+            f = self._followup(self.ticket_a, comment)
+            create_ticket_backlinks(self.ticket_a, f, user=self.staff_user)
+
+        self.assertEqual(self._backlinks(self.ticket_b).count(), 1)
+
+    def test_backlinks_from_different_tickets_are_separate(self):
+        ticket_c = Ticket.objects.create(
+            title="Ticket C", queue=self.queue, status=Ticket.OPEN_STATUS
+        )
+
+        f_a = self._followup(self.ticket_a, f"See #{self.ticket_b.id}")
+        create_ticket_backlinks(self.ticket_a, f_a, user=self.staff_user)
+        f_c = self._followup(ticket_c, f"See #{self.ticket_b.id}")
+        create_ticket_backlinks(ticket_c, f_c, user=self.staff_user)
+
+        self.assertEqual(self._backlinks(self.ticket_b).count(), 2)
 
     def test_update_ticket_creates_backlinks(self):
         update_ticket(
