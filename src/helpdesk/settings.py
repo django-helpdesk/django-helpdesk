@@ -71,6 +71,9 @@ HELPDESK_STAFF_VIEW_PROTECTOR = getattr(
 #   able to download your ticket attachments.
 HELPDESK_ENABLE_ATTACHMENTS = getattr(settings, "HELPDESK_ENABLE_ATTACHMENTS", True)
 
+# Create a backlink followup when a ticket references another ticket
+HELPDESK_ENABLE_BACKLINKS = getattr(settings, "HELPDESK_ENABLE_BACKLINKS", True)
+
 # Enable the Dependencies field on ticket view
 HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(
     settings, "HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET", True

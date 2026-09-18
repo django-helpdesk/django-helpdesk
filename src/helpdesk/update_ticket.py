@@ -1,3 +1,5 @@
+import re
+
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -14,8 +16,64 @@ from helpdesk.models import (
     TicketCC,
 )
 from helpdesk.signals import update_ticket_done
+from helpdesk.user import HelpdeskUser
 
 User = get_user_model()
+
+# Match #42 style ticket references but skip HTML like &#39;
+TICKET_REF_RE = re.compile(r"(?:[^&]|\b|^)#(\d+)\b")
+
+
+def create_ticket_backlinks(source_ticket, followup, user=None):
+    if not helpdesk_settings.HELPDESK_ENABLE_BACKLINKS:
+        # If this feature is toggled off then do not do it
+        return
+
+    if not (user and hasattr(user, "is_authenticated") and user.is_authenticated):
+        return
+
+    text = followup.comment or ""
+    referenced_ids = set()
+    for match in TICKET_REF_RE.finditer(text):
+        try:
+            ticket_id = int(match.group(1))
+        except ValueError:
+            continue
+        if ticket_id != source_ticket.id:
+            referenced_ids.add(ticket_id)
+
+    if not referenced_ids:
+        return
+
+    referenced_tickets = Ticket.objects.filter(id__in=referenced_ids).select_related(
+        "queue"
+    )
+
+    huser = HelpdeskUser(user)
+    referenced_tickets = [t for t in referenced_tickets if huser.can_access_ticket(t)]
+
+    if not referenced_tickets:
+        return
+
+    backlink_title = _("Referenced in ticket #%(ticket_id)s") % {
+        "ticket_id": source_ticket.id
+    }
+    already_linked = set(
+        FollowUp.objects.filter(
+            ticket__in=referenced_tickets, title=backlink_title
+        ).values_list("ticket_id", flat=True)
+    )
+
+    for ref_ticket in referenced_tickets:
+        if ref_ticket.id in already_linked:
+            continue
+        FollowUp.objects.create(
+            ticket=ref_ticket,
+            title=backlink_title,
+            date=timezone.now(),
+            public=False,
+            user=user,
+        )
 
 
 def add_staff_subscription(user: User, ticket: Ticket) -> None:
@@ -390,6 +448,8 @@ def update_ticket(
     f.email_recipients = sorted(emailed_to)
     f.save()
     ticket.save()
+
+    create_ticket_backlinks(ticket, f, user=user if is_helpdesk_staff(user) else None)
 
     # emit signal with followup when the ticket update is done
     # internally used for webhooks
