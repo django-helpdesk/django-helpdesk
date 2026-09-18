@@ -1,31 +1,53 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load user_admin_url %}
+{% extends "helpdesk/base.html" %}
 
-{% block helpdesk_title %}{% translate "Change System Settings" %}{% endblock %}
+{% load i18n user_admin_url %}
+
+
+{% block helpdesk_title %}
+  {% translate "Change System Settings" %}
+{% endblock helpdesk_title %}
 
 {% block helpdesk_breadcrumb %}
-<li class="breadcrumb-item">
-    <a href="{% url 'helpdesk:user_settings' %}">{% translate "Settings" %}</a>
-</li>
-<li class="breadcrumb-item active">
-    System Settings
-</li>
-{% endblock %}
+  <li class="breadcrumb-item">
+    <a href="{% url "helpdesk:user_settings" %}">{% translate "Settings" %}</a>
+  </li>
+  <li class="breadcrumb-item active">{% translate "System Settings" %}</li>
+{% endblock helpdesk_breadcrumb %}
 
 {% block helpdesk_body %}
-<h2>{% translate "System Settings" %}</h2>
+  <h2>{% translate "System Settings" %}</h2>
+  <p class="lead text-body-secondary">{% translate "The following items can be maintained by you or other superusers." %}</p>
+  <div class="row">
+    <div class="col-12 col-md-8 col-lg-6">
+      <ul class="list-group">
+        <li class="list-group-item list-group-item-action">
+          <a href="{% url "helpdesk:email_ignore" %}">{% translate "E-Mail Ignore list" %}</a>
+        </li>
+        <li class="list-group-item list-group-item-action">
+          <a href="{% url "helpdesk:checklist_templates" %}">{% translate "Checklist Templates" %}</a>
+        </li>
+        <li class="list-group-item list-group-item-action">
+          <a href="{% url "admin:helpdesk_queue_changelist" %}">{% translate "Maintain Queues" %}</a>
+        </li>
+        <li class="list-group-item list-group-item-action">
+          <a href="{% url "admin:helpdesk_presetreply_changelist" %}">{% translate "Maintain Pre-Set Replies" %}</a>
+        </li>
+        {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
+          <li class="list-group-item list-group-item-action">
+            <a href="{% url "admin:helpdesk_kbcategory_changelist" %}">{% translate "Maintain Knowledgebase Categories" %}</a>
+          </li>
+          <li class="list-group-item list-group-item-action">
+            <a href="{% url "admin:helpdesk_kbitem_changelist" %}">{% translate "Maintain Knowledgebase Items" %}</a>
+          </li>
+        {% endif %}
+        <li class="list-group-item list-group-item-action">
+          <a href="{% url "admin:helpdesk_emailtemplate_changelist" %}">{% translate "Maintain E-Mail Templates" %}</a>
+        </li>
+        <li class="list-group-item list-group-item-action">
+          <a href="{% url "changelist"|user_admin_url %}">{% translate "Maintain Users" %}</a>
+        </li>
+      </ul>
 
-<p>{% blocktranslate %}The following items can be maintained by you or other superusers:{% endblocktranslate %}</p>
-
-<ul>
-    <li><a href='{% url 'helpdesk:email_ignore' %}'>{% translate "E-Mail Ignore list" %}</a></li>
-    <li><a href='{% url 'helpdesk:checklist_templates' %}'>{% translate "Checklist Templates" %}</a></li>
-    <li><a href='{% url 'admin:helpdesk_queue_changelist' %}'>{% translate "Maintain Queues" %}</a></li>
-    <li><a href='{% url 'admin:helpdesk_presetreply_changelist' %}'>{% translate "Maintain Pre-Set Replies" %}</a></li>
-    {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-    <li><a href='{% url 'admin:helpdesk_kbcategory_changelist' %}'>{% translate "Maintain Knowledgebase Categories" %}</a></li>
-    <li><a href='{% url 'admin:helpdesk_kbitem_changelist' %}'>{% translate "Maintain Knowledgebase Items" %}</a></li>
-    {% endif %}
-    <li><a href='{% url 'admin:helpdesk_emailtemplate_changelist' %}'>{% translate "Maintain E-Mail Templates" %}</a></li>
-    <li><a href='{% url 'changelist'|user_admin_url %}'>{% translate "Maintain Users" %}</a></li>
-</ul>
-{% endblock %}
+    </div>
+  </div>
+{% endblock helpdesk_body %}
