@@ -10,7 +10,10 @@
   <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
   </li>
-  <li class="breadcrumb-item active">{% translate "Ignore E-Mail Address" %}</li>
+  <li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:email_ignore' %}">{% translate "Ignore E-Mail Address" %}</a>
+  </li>
+  <li class="breadcrumb-item active">{% translate "Add" %}</li>
 {% endblock helpdesk_breadcrumb %}
 
 {% block helpdesk_body %}

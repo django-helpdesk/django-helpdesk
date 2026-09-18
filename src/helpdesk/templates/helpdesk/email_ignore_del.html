@@ -6,6 +6,16 @@
   {% translate "Delete Ignored E-Mail Address" %}
 {% endblock helpdesk_title %}
 
+{% block helpdesk_breadcrumb %}
+  <li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
+  </li>
+  <li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:email_ignore' %}">{% translate "Ignore E-Mail Address" %}</a>
+  </li>
+  <li class="breadcrumb-item active">{% translate "Delete" %}</li>
+{% endblock helpdesk_breadcrumb %}
+
 {% block helpdesk_body %}
   <div class="row">
     <div class="col-12 col-md-8 col-lg-4 mx-auto">
@@ -14,11 +24,12 @@
           <h2 class="fs-5 mb-0">{% translate "Delete Ignored E-Mail Address" %}</h2>
         </div>
         <div class="card-body">
-          <p class="text-body-secondary">
+          <p>
             {% blocktranslate with ignore.email_address as email_address %}
-            Are you sure you wish to remove (<em>{{ email_address }}</em>) from the ignore list and allow their e-mails to automatically create tickets in your system? You can re-add this e-mail address at any time.
+            Remove <em>({{ email_address }})</em> from the ignore list?
             {% endblocktranslate %}
           </p>
+          <p class="text-body-secondary">{% translate "This will allow them to create tickets. You can re-add this e-mail again anytime." %}</p>
           <form method="post">
             {% csrf_token %}
             <div class="d-flex justify-content-end">
@@ -26,7 +37,7 @@
                  type="button"
                  role="button"
                  href="{% url "helpdesk:email_ignore" %}">{% translate "Cancel" %}</a>
-              <button class="btn btn-success" type="submit">{% translate "Delete" %}</button>
+              <button class="btn btn-danger" type="submit">{% translate "Delete" %}</button>
             </div>
           </form>
         </div>
