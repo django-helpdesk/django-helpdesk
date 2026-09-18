@@ -52,11 +52,24 @@ def create_ticket_backlinks(source_ticket, followup, user=None):
     huser = HelpdeskUser(user)
     referenced_tickets = [t for t in referenced_tickets if huser.can_access_ticket(t)]
 
+    if not referenced_tickets:
+        return
+
+    backlink_title = _("Referenced in ticket #%(ticket_id)s") % {
+        "ticket_id": source_ticket.id
+    }
+    already_linked = set(
+        FollowUp.objects.filter(
+            ticket__in=referenced_tickets, title=backlink_title
+        ).values_list("ticket_id", flat=True)
+    )
+
     for ref_ticket in referenced_tickets:
+        if ref_ticket.id in already_linked:
+            continue
         FollowUp.objects.create(
             ticket=ref_ticket,
-            title=_("Referenced in ticket #%(ticket_id)s")
-            % {"ticket_id": source_ticket.id},
+            title=backlink_title,
             date=timezone.now(),
             public=False,
             user=user,
