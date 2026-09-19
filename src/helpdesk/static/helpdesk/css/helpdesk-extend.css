@@ -62,9 +62,10 @@ div.card-body img {
 }
 
 pre {
-  background: #eee;
+  background: var(--bs-tertiary-bg);
+  color: var(--bs-body-color);
   padding: 1em;
-  border: 1pt solid white;
+  border: 1pt solid var(--bs-border-color);
 }
 
 /* Ticket titles wrap onto several lines rather than being cut off with an

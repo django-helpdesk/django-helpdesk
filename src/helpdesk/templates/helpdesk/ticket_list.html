@@ -80,7 +80,7 @@
                 <tr>
                   <th></th>
                   <th class="fw-medium"><span class="text-body-secondary">{% translate "Ticket" %}</span></th>
-                  <th class="fw-medium"><span class="text-body-secondary">{% translate "Priority" %}</span></th>
+                  <th class="fw-medium dt-head-left"><span class="text-body-secondary">{% translate "Priority" %}</span></th>
                   <th class="fw-medium"><span class="text-body-secondary">{% translate "Queue" %}</span></th>
                   <th class="fw-medium"><span class="text-body-secondary">{% translate "Status" %}</span></th>
                   <th class="fw-medium"><span class="text-body-secondary">{% translate "Created" %}</span></th>
@@ -365,6 +365,16 @@
         stateSave: true,
         processing: true,
         serverSide: true,
+        initComplete: function() {
+          const table = this.api();
+          // DataTables 3 only binds sorting to headers attached during initialization.
+          // Include initially hidden columns, also when visibility comes from saved state.
+          table.columns().every(function() {
+            if (!this.visible() && this.orderable()) {
+              table.order.listener(this.header(), this.index());
+            }
+          });
+        },
         ajax: {
           "url": "{% url 'helpdesk:datatables_ticket_list' urlsafe_query %}",
           "type": "GET",
