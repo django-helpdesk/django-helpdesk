@@ -30,13 +30,23 @@
                        id="username"
                        name="username"
                        class="form-control"
-                       placeholder="Your username"
+                       placeholder="{% translate "Your username" %}"
                        required="required"
                        autofocus="autofocus" />
               </div>
               <div class="mb-3">
                 <label class="form-label" for="password">{% translate "Password" %}</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Your Password" required="required" />
+                <input type="password"
+                       id="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="{% translate "Your Password" %}"
+                       required="required" />
+                {% if helpdesk_settings.HELPDESK_ENABLE_PASSWORD_RESET %}
+                  <div class="form-text text-end">
+                    <a href="{% url 'helpdesk:password_reset' %}">{% translate "Forgot password?" %}</a>
+                  </div>
+                {% endif %}
               </div>
               <div class="mb-3">
                 <div class="form-check checkbox">

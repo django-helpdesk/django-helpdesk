@@ -14,11 +14,11 @@
                             {% if current_sort and sort_param %}
                                 {% with current=current_sort %}
                                     {% if current == 'id' %}
-                                        <a href="?{{ sort_param }}=-id&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Ticket" %} <i class="fas fa-sort-up"></i></a>
+                                        <a href="?{{ sort_param }}=-id&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Ticket" %} <i class="fas fa-sort-up"></i></a>
                                     {% elif current == '-id' %}
-                                        <a href="?{{ sort_param }}=id&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Ticket" %} <i class="fas fa-sort-down"></i></a>
+                                        <a href="?{{ sort_param }}=id&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Ticket" %} <i class="fas fa-sort-down"></i></a>
                                     {% else %}
-                                        <a href="?{{ sort_param }}=id&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Ticket" %} <i class="fas fa-sort"></i></a>
+                                        <a href="?{{ sort_param }}=id&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Ticket" %} <i class="fas fa-sort"></i></a>
                                     {% endif %}
                                 {% endwith %}
                             {% else %}
@@ -29,11 +29,11 @@
                             {% if current_sort and sort_param %}
                                 {% with current=current_sort %}
                                     {% if current == 'priority' %}
-                                        <a href="?{{ sort_param }}=-priority&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Priority" %} <i class="fas fa-sort-up"></i></a>
+                                        <a href="?{{ sort_param }}=-priority&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Priority" %} <i class="fas fa-sort-up"></i></a>
                                     {% elif current == '-priority' %}
-                                        <a href="?{{ sort_param }}=priority&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Priority" %} <i class="fas fa-sort-down"></i></a>
+                                        <a href="?{{ sort_param }}=priority&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Priority" %} <i class="fas fa-sort-down"></i></a>
                                     {% else %}
-                                        <a href="?{{ sort_param }}=priority&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Priority" %} <i class="fas fa-sort"></i></a>
+                                        <a href="?{{ sort_param }}=priority&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Priority" %} <i class="fas fa-sort"></i></a>
                                     {% endif %}
                                 {% endwith %}
                             {% else %}
@@ -44,11 +44,11 @@
                             {% if current_sort and sort_param %}
                                 {% with current=current_sort %}
                                     {% if current == 'queue' %}
-                                        <a href="?{{ sort_param }}=-queue&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Queue" %} <i class="fas fa-sort-up"></i></a>
+                                        <a href="?{{ sort_param }}=-queue&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Queue" %} <i class="fas fa-sort-up"></i></a>
                                     {% elif current == '-queue' %}
-                                        <a href="?{{ sort_param }}=queue&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Queue" %} <i class="fas fa-sort-down"></i></a>
+                                        <a href="?{{ sort_param }}=queue&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Queue" %} <i class="fas fa-sort-down"></i></a>
                                     {% else %}
-                                        <a href="?{{ sort_param }}=queue&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Queue" %} <i class="fas fa-sort"></i></a>
+                                        <a href="?{{ sort_param }}=queue&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Queue" %} <i class="fas fa-sort"></i></a>
                                     {% endif %}
                                 {% endwith %}
                             {% else %}
@@ -59,11 +59,11 @@
                             {% if current_sort and sort_param %}
                                 {% with current=current_sort %}
                                     {% if current == 'status' %}
-                                        <a href="?{{ sort_param }}=-status&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Status" %} <i class="fas fa-sort-up"></i></a>
+                                        <a href="?{{ sort_param }}=-status&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Status" %} <i class="fas fa-sort-up"></i></a>
                                     {% elif current == '-status' %}
-                                        <a href="?{{ sort_param }}=status&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Status" %} <i class="fas fa-sort-down"></i></a>
+                                        <a href="?{{ sort_param }}=status&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Status" %} <i class="fas fa-sort-down"></i></a>
                                     {% else %}
-                                        <a href="?{{ sort_param }}=status&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Status" %} <i class="fas fa-sort"></i></a>
+                                        <a href="?{{ sort_param }}=status&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Status" %} <i class="fas fa-sort"></i></a>
                                     {% endif %}
                                 {% endwith %}
                             {% else %}
@@ -74,11 +74,11 @@
                             {% if current_sort and sort_param %}
                                 {% with current=current_sort %}
                                     {% if current == 'modified' %}
-                                        <a href="?{{ sort_param }}=-modified&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Last Update" %} <i class="fas fa-sort-up"></i></a>
+                                        <a href="?{{ sort_param }}=-modified&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Last Update" %} <i class="fas fa-sort-up"></i></a>
                                     {% elif current == '-modified' %}
-                                        <a href="?{{ sort_param }}=modified&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Last Update" %} <i class="fas fa-sort-down"></i></a>
+                                        <a href="?{{ sort_param }}=modified&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Last Update" %} <i class="fas fa-sort-down"></i></a>
                                     {% else %}
-                                        <a href="?{{ sort_param }}=modified&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-dark">{% translate "Last Update" %} <i class="fas fa-sort"></i></a>
+                                        <a href="?{{ sort_param }}=modified&{{ page_var }}=1#ticket-table-{{ page_var }}" class="text-body">{% translate "Last Update" %} <i class="fas fa-sort"></i></a>
                                     {% endif %}
                                 {% endwith %}
                             {% else %}
