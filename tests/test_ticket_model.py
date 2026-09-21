@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from helpdesk.models import Queue, Ticket, TicketDependency
+from helpdesk.models import Queue, Ticket, TicketCC, TicketDependency
 
 User = get_user_model()
 
@@ -347,3 +347,15 @@ class TicketModelTests(TestCase):
         qs = self.ticket.ticketcc_set.all()
         self.assertFalse(qs.exists())
         self.assertEqual(self.ticket.assigned_to, self.user)
+
+    def test_get_notification_recipients_includes_submitter(self):
+        recipients = self.ticket.get_notification_recipients()
+        self.assertIn("bob@example.com", recipients)
+
+    def test_get_notification_recipients_returns_sorted_list(self):
+        self.queue.enable_notifications_on_email_events = True
+        self.queue.save()
+        TicketCC.objects.create(ticket=self.ticket, email="david.vadnais@example.com")
+        TicketCC.objects.create(ticket=self.ticket, email="jules@example.com")
+        recipients = self.ticket.get_notification_recipients()
+        self.assertEqual(recipients, sorted(recipients))
