@@ -17,8 +17,8 @@
   </div>
 {% elif field|is_choice_group %}
   <fieldset class="mb-3">
-    <label class="form-label
-                  {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}</label>
+    <legend class="fs-6
+                   {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}</legend>
     {% for choice in field %}
       <div class="form-check">
         {{ choice.tag }}
