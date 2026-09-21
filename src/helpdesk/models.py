@@ -717,6 +717,38 @@ class Ticket(models.Model):
                 send("ticket_cc", cc.email_address)
         return recipients
 
+    def get_notification_recipients(self, user=None):
+        """
+        Used to create the informational list of recipients before you send a public
+        follow up
+        """
+        recipients = set()
+        exclude = {self.queue.email_address}
+        if user and user.email:
+            exclude.add(user.email)
+
+        if self.submitter_email and self.submitter_email not in exclude:
+            recipients.add(self.submitter_email)
+
+        if (
+            self.assigned_to
+            and self.assigned_to.email
+            and self.assigned_to.email not in exclude
+            and self.assigned_to.usersettings_helpdesk.email_on_ticket_change
+        ):
+            recipients.add(self.assigned_to.email)
+
+        if self.queue.updated_ticket_cc and self.queue.updated_ticket_cc not in exclude:
+            recipients.add(self.queue.updated_ticket_cc)
+
+        if self.queue.enable_notifications_on_email_events:
+            for cc in self.ticketcc_set.all():
+                addr = cc.email_address
+                if addr and addr not in exclude:
+                    recipients.add(addr)
+
+        return sorted(recipients)
+
     @property
     def get_assigned_to(self) -> str:
         """Show the full name or username of the staff working on this ticket

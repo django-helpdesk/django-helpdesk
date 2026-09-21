@@ -275,6 +275,14 @@
                           <div class="form-text">{% translate "If this is public, the submitter will be e-mailed your comment or resolution." %}</div>
                         </div>
                       {% endif %}
+                      {% if notification_recipients %}
+                        <div class="mb-3" id="notification-recipients">
+                          <small class="form-text text-muted">
+                            {% translate "The following addresses will be notified:" %}
+                            {{ notification_recipients|join:", " }}
+                          </small>
+                        </div>
+                      {% endif %}
                       {# Time spent widget #}
                       {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET and user.is_staff %}
                         <div class="mb-3">

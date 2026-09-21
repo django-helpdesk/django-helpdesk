@@ -563,6 +563,8 @@ def view_ticket(request, ticket_id):
         request.user, ticket
     )
 
+    notification_recipients = ticket.get_notification_recipients(user=request.user)
+
     submitter_userprofile = ticket.get_submitter_userprofile()
     if submitter_userprofile is not None:
         content_type = ContentType.objects.get_for_model(submitter_userprofile)
@@ -621,6 +623,7 @@ def view_ticket(request, ticket_id):
                 Q(queues=ticket.queue) | Q(queues__isnull=True)
             ),
             "ticketcc_string": ticketcc_string,
+            "notification_recipients": notification_recipients,
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
