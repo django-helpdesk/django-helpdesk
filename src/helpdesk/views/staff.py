@@ -1992,10 +1992,10 @@ def email_ignore_add(request: HttpRequest) -> HttpResponse:
 
 
 @superuser_required
-def email_ignore_del(request: HttpRequest, id: int) -> HttpResponse:
+def email_ignore_del(request: HttpRequest, item_id: int) -> HttpResponse:
     """Remove an email from the ignore list."""
 
-    ignore = get_object_or_404(IgnoreEmail, id=id)
+    ignore = get_object_or_404(IgnoreEmail, id=item_id)
 
     if request.method == "POST":
         ignore.delete()
