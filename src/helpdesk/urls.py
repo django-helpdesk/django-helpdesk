@@ -131,7 +131,7 @@ if helpdesk_settings.HELPDESK_UI_ENABLED:
         re_path(r"^raw/(?P<type_>\w+)/$", staff.raw_details, name="raw"),
         path("rss/", staff.rss_list, name="rss_index"),
         path("reports/", staff.report_index, name="report_index"),
-        re_path(r"^reports/(?P<report>\w+)/$", staff.run_report, name="run_report"),
+        path("reports/<slug:report>/", staff.run_report, name="run_report"),
         path("saved-searches/", staff.saved_searches_list, name="saved_searches_list"),
         path("save_query/", staff.save_query, name="savequery"),
         path("delete_query/<int:pk>/", staff.delete_saved_query, name="delete_query"),
