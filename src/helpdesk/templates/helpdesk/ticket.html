@@ -146,7 +146,7 @@
                       {% endif %}
                     </div>
                     <small class="text-body-secondary">
-                      {{ followup.date|naturaltime }} {% if followup.user %}· {{ followup.user }}{% endif %}
+                      <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span> {% if followup.user %}· {{ followup.user }}{% endif %}
                     </small>
                     {% if followup.email_recipients is not None %}
                       <small class="text-body-secondary d-block">
