@@ -1,0 +1,112 @@
+{% load i18n humanize ticket_to_link followup_permissions %}
+
+<ul id="followup-list" class="list-group list-group-flush mb-3">
+  {% for followup in followups %}
+    <li class="list-group-item list-group-item-action">
+      <div class="d-flex align-items-center">
+        {% if followup.direction == "outbound" %}
+          <span class="p-1 me-2 bg-success border border-2 border-success-subtle rounded-circle"></span>
+        {% elif followup.direction == "inbound" %}
+          <span class="p-1 me-2 bg-warning border border-2 border-warning-subtle rounded-circle"></span>
+        {% endif %}
+        <h6 class="mb-0">{{ followup.title|escape|num_to_link }}</h6>
+        <span class="text-body-secondary ms-auto">
+          {% if helpdesk_settings.HELPDESK_ENABLE_TIME_SPENT_ON_TICKET and followup.time_spent_formated %}
+            <i class="fa-regular fa-clock fa-sm"></i>
+            <small>{{ followup.time_spent_formated }} ·</small>
+          {% endif %}
+          {% if followup.direction == "internal" %}
+            <span class="badge bg-light-subtle text-light-emphasis">
+              <i class="fa-solid fa-lock fa-sm me-1"></i>{% translate "Private" %}
+            </span>
+          {% elif followup.direction == "outbound" %}
+            <span class="badge bg-success-subtle text-success-emphasis">
+              <i class="fa-solid fa-arrow-right fa-sm me-1"></i>{% translate "To submitter" %}
+            </span>
+          {% else %}
+            <span class="badge bg-warning-subtle text-warning-emphasis">
+              <i class="fa-solid fa-arrow-left fa-sm me-1"></i>{% translate "From submitter" %}
+            </span>
+          {% endif %}
+        </span>
+        {# Quick actions dropdown #}
+        {% if followup|can_edit_followup:request.user or followup|can_delete_followup:request.user %}
+          <div class="dropdown ms-2">
+            <a class="btn bg-body-tertiary btn-sm"
+               href="#"
+               role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </a>
+            <ul class="dropdown-menu">
+              {% if followup|can_edit_followup:request.user %}
+                <li>
+                  <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class="dropdown-item small">
+                    <i class="fa-regular fa-edit me-1"></i>
+                    {% translate "Edit" %}
+                  </a>
+                </li>
+              {% endif %}
+              {% if followup|can_delete_followup:request.user %}
+                <li>
+                  <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}"
+                     class="dropdown-item link-danger text-sm">
+                    <i class="fa-regular fa-trash-can me-1"></i>
+                    {% translate "Delete" %}
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+      <small class="text-body-secondary">
+        <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span> {% if followup.user %}· {{ followup.user }}{% endif %}
+      </small>
+      {% if followup.email_recipients is not None %}
+        <small class="text-body-secondary d-block">
+          <i class="fa-regular fa-envelope fa-sm me-1"></i>
+          {% if followup.email_recipients %}
+            {% blocktranslate with recipients=followup.email_recipients|join:", " %}Emailed: {{ recipients }}{% endblocktranslate %}
+          {% else %}
+            {% translate "Emailed: no one" %}
+          {% endif %}
+        </small>
+      {% endif %}
+      {# Ticket comments #}
+      {% if followup.comment %}
+        <div class="mt-3">{{ followup.get_markdown|urlizetrunc:50|num_to_link }}</div>
+      {% endif %}
+      {# Changes to ticket #}
+      {% if followup.ticketchange_set.all %}
+        <ul class="mt-3">
+          {% for change in followup.ticketchange_set.all %}
+            <li class="small">
+              {% blocktranslate with change.field as field and change.old_value as old_value and change.new_value as new_value %}
+                  Changed {{ field }} from {{ old_value }} to {{ new_value }}.
+          {% endblocktranslate %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {# Attachments #}
+      {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS and followup.followupattachment_set.all %}
+        <h6 class="mt-3">{% translate "Attachments" %}</h6>
+        <ul>
+          {% for attachment in followup.followupattachment_set.all %}
+            <li>
+              <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.filename }}</a>
+              <small class="text-body-secondary">({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</small>
+              {% if followup.user and request.user == followup.user %}
+                <a href="{% url 'helpdesk:attachment_del' ticket.id attachment.id %}" class="text-body-secondary">
+                  <i class="fa-regular fa-trash-can fa-sm ms-2"></i>
+                </a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>

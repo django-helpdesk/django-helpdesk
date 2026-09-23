@@ -19,6 +19,7 @@ DEFAULT_USER_SETTINGS = {
     "email_on_ticket_assign": True,
     "tickets_per_page": 25,
     "use_email_as_submitter": True,
+    "ticket_respond_layout": "tabs",
 }
 
 try:
