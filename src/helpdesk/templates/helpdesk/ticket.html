@@ -5,14 +5,11 @@
 {% block helpdesk_title %}
   {{ ticket.queue.slug }}-{{ ticket.id }}: {% translate "View Ticket Details" %}
 {% endblock helpdesk_title %}
-
 {% block h1_title %}{{ ticket.ticket_for_url }}{% endblock h1_title %}
-
 {% block helpdesk_breadcrumb %}
   <li class="breadcrumb-item"><a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a></li>
   <li class="breadcrumb-item active" aria-current="page">{{ ticket.queue.slug }}-{{ ticket.id }}</li>
 {% endblock helpdesk_breadcrumb %}
-
 {% block helpdesk_body %}
   {% if form.errors %}
     {{ form.errors }}
@@ -205,7 +202,6 @@
                   {% csrf_token %}
                   <div class="row">
                     <div class="col-12 col-md-8 col-lg-5">
-
                       {% if preset_replies %}
                         <div class="mb-3">
                           <label class="form-label"
@@ -428,12 +424,10 @@
                   {% endif %}
                   <button class="btn btn-success" type="submit">{% translate "Save" %}</button>
                 </form>
-
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </div>
     <div class="modal fade"
@@ -466,7 +460,6 @@
     </div>
   {% endif %}
 {% endblock %}
-
 {% block helpdesk_js %}
   <script language='javascript'>
     $(function() {
@@ -475,7 +468,6 @@
       });
     });
   </script>
-
   <script language='javascript'>
     $(document).ready(function() {
       $('#id_preset').change(function() {
@@ -500,9 +492,6 @@
         alert('{% translate 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
       })
 
-      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-        new bootstrap.Tooltip(el);
-      });
 
       $('#ticketTab button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
         var $sortBtn = $('#followup-sort-toggle');
