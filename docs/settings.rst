@@ -34,8 +34,11 @@ If you want to override the default settings for your users, create ``HELPDESK_D
         'email_on_ticket_assign': True,
         'email_on_ticket_change': True,
         'login_view_ticketlist': True,
-        'tickets_per_page': 25
+        'tickets_per_page': 25,
+        'ticket_respond_layout': 'tabs'
     }
+
+``ticket_respond_layout`` controls where the respond form sits on the ticket page: ``'tabs'`` puts follow ups and the respond form in a tabbed card, ``'bottom'`` places the respond form below the follow ups, and ``'top'`` places it between the ticket details and the follow ups.
 
 
 Access control & Security

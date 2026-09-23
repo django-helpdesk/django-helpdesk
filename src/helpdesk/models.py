@@ -1701,6 +1701,10 @@ def use_email_as_submitter_default():
     return get_default_setting("use_email_as_submitter")
 
 
+def ticket_respond_layout_default():
+    return get_default_setting("ticket_respond_layout")
+
+
 class UserSettings(models.Model):
     """
     A bunch of user-specific settings that we want to be able to define, such
@@ -1709,6 +1713,15 @@ class UserSettings(models.Model):
     """
 
     PAGE_SIZES = ((10, "10"), (25, "25"), (50, "50"), (100, "100"))
+
+    RESPOND_LAYOUT_TABS = "tabs"
+    RESPOND_LAYOUT_BOTTOM = "bottom"
+    RESPOND_LAYOUT_TOP = "top"
+    RESPOND_LAYOUTS = (
+        (RESPOND_LAYOUT_TABS, _("Tabs: follow ups and respond share a tabbed card")),
+        (RESPOND_LAYOUT_BOTTOM, _("Respond form below the follow ups")),
+        (RESPOND_LAYOUT_TOP, _("Respond form above the follow ups")),
+    )
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -1767,6 +1780,14 @@ class UserSettings(models.Model):
             "ticket if needed, this option only changes the default."
         ),
         default=use_email_as_submitter_default,
+    )
+
+    ticket_respond_layout = models.CharField(
+        verbose_name=_("Ticket respond form layout"),
+        help_text=_("Where should the respond form appear when viewing a ticket?"),
+        max_length=16,
+        choices=RESPOND_LAYOUTS,
+        default=ticket_respond_layout_default,
     )
 
     def __str__(self):
