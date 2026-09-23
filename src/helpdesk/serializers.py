@@ -22,6 +22,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     submitter = serializers.SerializerMethodField()
     last_followup = serializers.SerializerMethodField()
     created = serializers.SerializerMethodField()
+    created_actual = serializers.DateTimeField(source="created", read_only=True)
     due_date = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     status_badge_class = serializers.SerializerMethodField()
@@ -44,6 +45,7 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
             "status",
             "status_badge_class",
             "created",
+            "created_actual",
             "due_date",
             "assigned_to",
             "submitter",

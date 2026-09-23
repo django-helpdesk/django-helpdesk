@@ -449,7 +449,12 @@
             },
           }, {
             data: "created",
-            render: renderDateTime
+            render: function(data, type, row, meta) {
+              if (type === 'display') {
+                return `<span class="small text-body-secondary" title="${htmlEntities(row.created_actual)}">${htmlEntities(data)}</span>`;
+              }
+              return data;
+            }
           }, {
             data: "due_date",
             render: renderDateTime,
