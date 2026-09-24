@@ -77,8 +77,7 @@ class QueryTests(TestCase):
                         "queue": {"title": "Test queue", "id": 1},
                         "status": "Open",
                         "status_badge_class": "danger",
-                        "created": resp_json["data"][0]["created"],
-                        "created_actual": self.ticket1.created.isoformat().replace(
+                        "created": self.ticket1.created.isoformat().replace(
                             "+00:00", "Z"
                         ),
                         "due_date": None,
@@ -98,8 +97,7 @@ class QueryTests(TestCase):
                         "queue": {"title": "Test queue", "id": 1},
                         "status": "Open",
                         "status_badge_class": "danger",
-                        "created": resp_json["data"][1]["created"],
-                        "created_actual": self.ticket2.created.isoformat().replace(
+                        "created": self.ticket2.created.isoformat().replace(
                             "+00:00", "Z"
                         ),
                         "due_date": None,
@@ -138,9 +136,6 @@ class QueryTests(TestCase):
                         "status": "Open",
                         "status_badge_class": "danger",
                         "created": resp_json["data"][0]["created"],
-                        "created_actual": self.ticket2.created.isoformat().replace(
-                            "+00:00", "Z"
-                        ),
                         "due_date": None,
                         "assigned_to": "None",
                         "submitter": None,
@@ -177,9 +172,6 @@ class QueryTests(TestCase):
                         "status": "Open",
                         "status_badge_class": "danger",
                         "created": resp_json["data"][0]["created"],
-                        "created_actual": self.ticket1.created.isoformat().replace(
-                            "+00:00", "Z"
-                        ),
                         "due_date": None,
                         "assigned_to": "None",
                         "submitter": None,

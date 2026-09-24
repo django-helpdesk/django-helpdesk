@@ -42,7 +42,9 @@
   <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.bootstrap5.min.js' %}"></script>
   <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.buttons.min.js' %}"></script>
   <script src="{% static 'helpdesk/vendor/datatables/js/buttons.colVis.min.js' %}"></script>
+  <script src="{% static 'helpdesk/js/relative_dates.js' %}"></script>
   <script>
+
     window.addEventListener('load', function() {
       const table = $('#ticketsTable').DataTable({
         paging: true,
@@ -59,7 +61,8 @@
         }, {
           data: 'status'
         }, {
-          data: 'created'
+          data: 'created',
+          render: renderDateTime
         }]
       });
 

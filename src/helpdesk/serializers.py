@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model, password_validation
-from django.contrib.humanize.templatetags import humanize
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -21,9 +20,8 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     assigned_to = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
     last_followup = serializers.SerializerMethodField()
-    created = serializers.SerializerMethodField()
-    created_actual = serializers.DateTimeField(source="created", read_only=True)
-    due_date = serializers.SerializerMethodField()
+    created = serializers.DateTimeField(format="iso-8601", read_only=True)
+    due_date = serializers.DateTimeField(format="iso-8601", read_only=True)
     status = serializers.SerializerMethodField()
     status_badge_class = serializers.SerializerMethodField()
     row_class = serializers.SerializerMethodField()
@@ -45,7 +43,6 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
             "status",
             "status_badge_class",
             "created",
-            "created_actual",
             "due_date",
             "assigned_to",
             "submitter",
@@ -69,12 +66,6 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_priority_badge_class(self, obj):
         return obj.get_priority_badge_class
-
-    def get_created(self, obj):
-        return humanize.naturaltime(obj.created)
-
-    def get_due_date(self, obj):
-        return humanize.naturaltime(obj.due_date)
 
     def get_assigned_to(self, obj):
         if obj.assigned_to:
@@ -218,8 +209,8 @@ class PublicTicketListingSerializer(BaseTicketSerializer):
 
     ticket = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
-    created = serializers.SerializerMethodField()
-    due_date = serializers.SerializerMethodField()
+    created = serializers.DateTimeField(format="iso-8601", read_only=True)
+    due_date = serializers.DateTimeField(format="iso-8601", read_only=True)
     status = serializers.SerializerMethodField()
     queue = serializers.SerializerMethodField()
     kbitem = serializers.SerializerMethodField()
@@ -249,12 +240,6 @@ class PublicTicketListingSerializer(BaseTicketSerializer):
 
     def get_status(self, obj):
         return obj.get_status
-
-    def get_created(self, obj):
-        return humanize.naturaltime(obj.created)
-
-    def get_due_date(self, obj):
-        return humanize.naturaltime(obj.due_date)
 
     def get_submitter(self, obj):
         return obj.submitter_email

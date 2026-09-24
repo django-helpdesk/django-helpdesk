@@ -432,7 +432,10 @@ class UserTicketTest(APITestCase):
     def test_get_user_tickets(self):
         user = User.objects.create_user(username="test2", email="foo@example.com")
         ticket_1 = Ticket.objects.create(
-            queue=self.queue, title="Test 1", submitter_email="foo@example.com"
+            queue=self.queue,
+            title="Test 1",
+            submitter_email="foo@example.com",
+            due_date=timezone.now() + timedelta(days=2),
         )
         Ticket.objects.create(
             queue=self.queue, title="Test 2", submitter_email="bar@example.com"
@@ -446,6 +449,15 @@ class UserTicketTest(APITestCase):
         self.assertEqual(len(response.data["results"]), 2)
         self.assertEqual(response.data["results"][0]["id"], ticket_3.id)
         self.assertEqual(response.data["results"][1]["id"], ticket_1.id)
+        self.assertEqual(
+            response.data["results"][1]["created"],
+            ticket_1.created.isoformat().replace("+00:00", "Z"),
+        )
+        self.assertEqual(
+            response.data["results"][1]["due_date"],
+            ticket_1.due_date.isoformat().replace("+00:00", "Z"),
+        )
+        self.assertIsNone(response.data["results"][0]["due_date"])
 
     def test_staff_user(self):
         staff_user = User.objects.create_user(
