@@ -135,8 +135,10 @@
 {% endblock %}
 
 {% block helpdesk_js %}
+  <script src="{% static 'helpdesk/js/relative_dates.js' %}"></script>
   <script language='javascript'>
     $(function() {
+      renderRelativeDates();
       $("#id_due_date").datepicker({
         dateFormat: 'yy-mm-dd'
       });

@@ -337,6 +337,7 @@
   <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.bootstrap5.min.js' %}"></script>
   <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.buttons.min.js' %}"></script>
   <script src="{% static 'helpdesk/vendor/datatables/js/buttons.colVis.min.js' %}"></script>
+  <script src="{% static 'helpdesk/js/relative_dates.js' %}"></script>
   <script>
     window.helpdesk_settings = {
       LANGUAGE_CODE: "{{ helpdesk_settings.LANGUAGE_CODE|default:'en-US' }}",
@@ -351,7 +352,6 @@
       return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    const renderDateTime = (data, type, row, meta) => `<span class="small text-body-secondary">${data}</span>`
 
     $(document).ready(function() {
       // Ticket DataTable Initialization
