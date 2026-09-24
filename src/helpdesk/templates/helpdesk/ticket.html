@@ -160,7 +160,7 @@
                     {% endif %}
                     {# Ticket comments #}
                     {% if followup.comment %}
-                      <div class="mt-3">{{ followup.get_markdown|urlizetrunc:50|num_to_link }}</div>
+                      <div class="mt-3">{{ followup.get_markdown|num_to_link }}</div>
                     {% endif %}
                     {# Changes to ticket #}
                     {% if followup.ticketchange_set.all %}

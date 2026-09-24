@@ -45,11 +45,11 @@
       </div>
     </div>
     {# Resolution #}
-    {{ ticket.get_markdown|urlizetrunc:50|num_to_link }}
+    {{ ticket.get_markdown|num_to_link }}
     {% if ticket.resolution %}
       <div class="alert alert-success" role="alert">
         <h4 class="alert-heading">{% translate "Resolution" %}</h4>
-        <p>{{ ticket.get_resolution_markdown|urlizetrunc:50|linebreaksbr }}</p>
+        <p>{{ ticket.get_resolution_markdown|linebreaksbr }}</p>
         <hr />
         <p class="mb-0">
           {% if "Resolved" == ticket.get_status_display %}
