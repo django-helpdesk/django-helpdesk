@@ -25,4 +25,15 @@ class Migration(migrations.Migration):
                 verbose_name="Ticket respond form layout",
             ),
         ),
+        migrations.AlterField(
+            model_name="queue",
+            name="logging_dir",
+            field=models.CharField(
+                blank=True,
+                help_text="If logging is enabled, what directory should we use to store log files for this queue? The standard logging mechanisms are used if no directory is set",
+                max_length=200,
+                null=True,
+                verbose_name="Logging Directory",
+            ),
+        ),
     ]
