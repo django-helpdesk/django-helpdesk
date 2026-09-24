@@ -1,4 +1,9 @@
 /* Shared relative date rendering for ticket lists and follow-ups. */
+const tooltipDateFormatter = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric',
+});
+
 function humanizeDate(date, now = new Date()) {
     const elapsed = now.getTime() - date.getTime();
     let remaining = Math.floor(Math.abs(elapsed) / 60000);
@@ -35,7 +40,7 @@ function renderDateTime(data, type) {
     const element = document.createElement('time');
     element.className = 'small text-body-secondary';
     element.dateTime = data;
-    element.title = date.toLocaleString();
+    element.title = tooltipDateFormatter.format(date);
     element.textContent = label;
     return element.outerHTML;
 }
@@ -46,6 +51,6 @@ function renderRelativeDates(root = document) {
         const date = new Date(element.dateTime);
         if (Number.isNaN(date.getTime())) return;
         element.textContent = humanizeDate(date, now);
-        element.title = date.toLocaleString();
+        element.title = tooltipDateFormatter.format(date);
     });
 }
