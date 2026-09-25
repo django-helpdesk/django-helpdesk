@@ -64,6 +64,24 @@ class UserTicketsIdentityTestCase(APITestCase):
         )
         self.assertEqual(self.titles_for(self.owner), ["mine"])
 
+    def test_the_match_stays_case_sensitive(self):
+        """Deliberately exact. An address differing only in case identifies a
+        different mailbox as far as this endpoint can tell, since nothing
+        verifies either side. Switching to __iexact would look like a usability
+        fix and would widen the same bug: more accounts matching tickets they
+        did not submit."""
+        Ticket.objects.create(
+            title="lower case submitter",
+            queue=self.queue,
+            description="d",
+            submitter_email="owner@example.com",
+        )
+        User = get_user_model()
+        mixed_case = User.objects.create(
+            username="mixed-case", email="Owner@Example.com"
+        )
+        self.assertEqual(self.titles_for(mixed_case), [])
+
 
 class SubmitterEmailStorageTestCase(TestCase):
     """Pins the premise of the test above: a blank field is stored as "" rather
