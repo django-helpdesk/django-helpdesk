@@ -1,0 +1,35 @@
+{% extends "helpdesk/base.html" %}{% load i18n %}
+{% block helpdesk_title %}{% translate "Copy follow-up" %}{% endblock %}
+{% block helpdesk_breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a></li>
+<li class="breadcrumb-item"><a href="{{ ticket.get_absolute_url }}">{{ ticket.queue.slug }}-{{ ticket.id }}</a></li>
+<li class="breadcrumb-item active">{% translate "Copy follow-up" %}</li>
+{% endblock %}
+{% block helpdesk_body %}
+<div class="card mb-3">
+  <div class="card-header">{% translate "Copy to another ticket" %}</div>
+  <div class="card-body">
+    <p>{% translate "Copy this comment and its attachments to an open ticket. The original follow-up stays here. Ticket changes and time spent are not copied, and no email is sent." %}</p>
+    <blockquote class="border-start border-3 ps-3 mb-4">
+      <h6>{{ followup.title }}</h6>
+      <div>{{ followup.comment|linebreaksbr }}</div>
+    </blockquote>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.ticket.id_for_label }}">{{ form.ticket.label }}</label>
+        {{ form.ticket }}
+        {{ form.ticket.errors }}
+      </div>
+      <div class="form-check mb-3">
+        {{ form.public }}
+        <label class="form-check-label" for="{{ form.public.id_for_label }}">{{ form.public.label }}</label>
+      </div>
+      <p class="text-body-secondary small">{% translate "The copy is private unless you choose to share it with the destination ticket submitter. Check that the comment and attachments are suitable for that audience." %}</p>
+      <button class="btn btn-primary" type="submit">{% translate "Copy follow-up" %}</button>
+      <a class="btn btn-outline-secondary" href="{{ ticket.get_absolute_url }}">{% translate "Cancel" %}</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

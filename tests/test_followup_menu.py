@@ -45,17 +45,24 @@ class FollowUpMenuTests(TestCase):
             reverse("helpdesk:followup_edit", args=[self.ticket.id, self._pk()]),
         )
 
-    def test_no_menu_on_a_colleagues_followup(self):
+    def test_copy_without_edit_on_a_colleagues_followup(self):
         author = get_user(username="author", is_staff=True)
         self._login("viewer")
         self._followup(user=author)
 
         response = self.client.get(self.url)
 
-        # Not the author and not a superuser: nothing to offer, so no toggle.
-        self.assertNotContains(response, MENU_TOGGLE)
+        self.assertContains(response, MENU_TOGGLE)
+        self.assertContains(
+            response,
+            reverse("helpdesk:followup_copy", args=[self.ticket.id, self._pk()]),
+        )
+        self.assertNotContains(
+            response,
+            reverse("helpdesk:followup_edit", args=[self.ticket.id, self._pk()]),
+        )
 
-    def test_no_menu_on_a_followup_without_an_author(self):
+    def test_copy_without_edit_on_a_followup_without_an_author(self):
         # E-mailed replies and publicly submitted tickets have no author, and
         # editing those is not offered to anyone, superuser included.
         self._login("boss", is_superuser=True)
@@ -63,7 +70,15 @@ class FollowUpMenuTests(TestCase):
 
         response = self.client.get(self.url)
 
-        self.assertNotContains(response, MENU_TOGGLE)
+        self.assertContains(response, MENU_TOGGLE)
+        self.assertContains(
+            response,
+            reverse("helpdesk:followup_copy", args=[self.ticket.id, self._pk()]),
+        )
+        self.assertNotContains(
+            response,
+            reverse("helpdesk:followup_edit", args=[self.ticket.id, self._pk()]),
+        )
 
     def test_superuser_is_offered_the_menu_on_a_colleagues_followup(self):
         author = get_user(username="author", is_staff=True)
@@ -93,7 +108,7 @@ class FollowUpMenuTests(TestCase):
             reverse("helpdesk:followup_edit", args=[self.ticket.id, self._pk()]),
         )
 
-    def test_no_menu_when_the_edit_button_is_turned_off(self):
+    def test_copy_when_the_edit_button_is_turned_off(self):
         user = self._login("owner")
         self._followup(user=user)
 
@@ -102,7 +117,15 @@ class FollowUpMenuTests(TestCase):
         ):
             response = self.client.get(self.url)
 
-        self.assertNotContains(response, MENU_TOGGLE)
+        self.assertContains(response, MENU_TOGGLE)
+        self.assertContains(
+            response,
+            reverse("helpdesk:followup_copy", args=[self.ticket.id, self._pk()]),
+        )
+        self.assertNotContains(
+            response,
+            reverse("helpdesk:followup_edit", args=[self.ticket.id, self._pk()]),
+        )
 
     def _pk(self):
         return self.ticket.followup_set.get().id
