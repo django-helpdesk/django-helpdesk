@@ -36,3 +36,11 @@ def can_delete_followup(followup, user):
         helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP
         and user.is_superuser
     )
+
+
+@register.filter(name="can_copy_followup")
+def can_copy_followup(followup, user):
+    """Staff may copy visible follow-ups, including incoming messages."""
+    from helpdesk.decorators import is_helpdesk_staff
+
+    return is_helpdesk_staff(user)

@@ -73,6 +73,11 @@ if helpdesk_settings.HELPDESK_UI_ENABLED:
         path("tickets/merge", staff.merge_tickets, name="merge_tickets"),
         path("tickets/<int:ticket_id>/", staff.view_ticket, name="view"),
         path(
+            "tickets/<int:ticket_id>/followup_copy/<int:followup_id>/",
+            staff.followup_copy,
+            name="followup_copy",
+        ),
+        path(
             "tickets/<int:ticket_id>/followup_edit/<int:followup_id>/",
             staff.followup_edit,
             name="followup_edit",

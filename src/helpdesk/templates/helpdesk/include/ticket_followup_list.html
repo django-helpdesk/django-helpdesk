@@ -30,7 +30,7 @@
           {% endif %}
         </span>
         {# Quick actions dropdown #}
-        {% if followup|can_edit_followup:request.user or followup|can_delete_followup:request.user %}
+        {% if followup|can_edit_followup:request.user or followup|can_delete_followup:request.user or followup|can_copy_followup:request.user %}
           <div class="dropdown ms-2">
             <a class="btn bg-body-tertiary btn-sm"
                href="#"
@@ -40,6 +40,14 @@
               <i class="fa-solid fa-ellipsis-vertical"></i>
             </a>
             <ul class="dropdown-menu">
+              {% if followup|can_copy_followup:request.user %}
+                <li>
+                  <a href="{% url 'helpdesk:followup_copy' ticket.id followup.id %}" class="dropdown-item small">
+                    <i class="fa-regular fa-copy me-1"></i>
+                    {% translate "Copy to another ticket" %}
+                  </a>
+                </li>
+              {% endif %}
               {% if followup|can_edit_followup:request.user %}
                 <li>
                   <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class="dropdown-item small">

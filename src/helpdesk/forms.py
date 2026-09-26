@@ -267,6 +267,19 @@ class EditTicketCustomFieldForm(EditTicketForm):
         )
 
 
+class CopyFollowUpForm(forms.Form):
+    ticket = forms.ModelChoiceField(
+        queryset=Ticket.objects.none(),
+        label=_("Destination ticket"),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    public = forms.BooleanField(
+        required=False,
+        label=_("Visible to the destination ticket submitter"),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+
+
 class EditFollowUpForm(forms.ModelForm):
     class Meta:
         model = FollowUp
