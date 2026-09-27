@@ -62,6 +62,27 @@ def sanitize_email_html(html: str) -> str:
     return nh3.clean(html, attributes=_allowed_attributes())
 
 
+def sanitize_markdown_html(html: str) -> str:
+    """Enforce ALLOWED_URL_SCHEMES on every link and image of rendered markdown.
+
+    Fails closed, like sanitize_email_html(), if nh3 is missing.
+    """
+    if nh3 is None:  # pragma: no cover - nh3 is a declared dependency
+        raise RuntimeError("nh3 is required to render markdown and is not installed.")
+    attributes = {tag: set(attrs) for tag, attrs in nh3.ALLOWED_ATTRIBUTES.items()}
+    # Emitted by markdown and dropped by nh3's defaults.
+    attributes.setdefault("a", set()).add("title")
+    attributes.setdefault("img", set()).add("title")
+    attributes.setdefault("code", set()).add("class")
+    return nh3.clean(
+        html,
+        attributes=attributes,
+        url_schemes=set(helpdesk_settings.ALLOWED_URL_SCHEMES),
+        # Markdown never emits target="_blank", so rel is not needed.
+        link_rel=None,
+    )
+
+
 def preview_csp() -> str:
     """The Content-Security-Policy sent with a rendered preview.
 
