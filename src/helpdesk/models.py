@@ -40,6 +40,7 @@ from .lib import (
     daily_time_spent_calculation,
     format_time_spent,
 )
+from .sanitize import sanitize_markdown_html
 from .templated_email import send_templated_mail
 from .validators import validate_file_extension
 
@@ -78,16 +79,16 @@ def get_markdown(text):
             text = text.replace(m.group(0), f"{m.group(1)}({m.group(3)})")
             has_illegal_scheme = True
         rerun_scheme_check = has_illegal_scheme
-    return mark_safe(
-        markdown(
-            text,
-            extensions=[
-                EscapeHtml(),
-                "markdown.extensions.nl2br",
-                "markdown.extensions.fenced_code",
-            ],
-        )
+    rendered = markdown(
+        text,
+        extensions=[
+            EscapeHtml(),
+            "markdown.extensions.nl2br",
+            "markdown.extensions.fenced_code",
+        ],
     )
+    # The loop above only covers inline links; the output check covers all.
+    return mark_safe(sanitize_markdown_html(rendered))
 
 
 class Queue(models.Model):
