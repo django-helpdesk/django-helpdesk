@@ -9,11 +9,16 @@ views/staff.py - The bulk of the application - provides most business logic and
 
 from __future__ import annotations
 
+import ipaddress
 import json
 import re
+import socket
+import urllib.request
 from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime, timedelta
+from urllib.error import URLError
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib import messages
@@ -113,6 +118,18 @@ if helpdesk_settings.HELPDESK_KB_ENABLED:
 
 DATE_RE: re.Pattern = re.compile(
     r"(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})$"
+)
+
+IMAGE_PROXY_MAX_SIZE = 10 * 1024 * 1024
+IMAGE_PROXY_ALLOWED_TYPES = frozenset(
+    {
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/webp",
+        "image/bmp",
+        "image/svg+xml",
+    }
 )
 
 User = get_user_model()
@@ -2273,6 +2290,37 @@ def attachment_del(request, ticket_id, attachment_id):
             "filename": attachment.filename,
         },
     )
+
+
+@helpdesk_staff_member_required
+def image_proxy(request):
+    if request.method != "GET":
+        return HttpResponse(status=405)
+
+    url = request.GET.get("url", "")
+    if not url or not url.startswith(("http://", "https://")):
+        return HttpResponse(status=400)
+
+    parsed = urlparse(url)
+    try:
+        addr = socket.getaddrinfo(parsed.hostname, None)[0][4][0]
+        if ipaddress.ip_address(addr).is_private:
+            return HttpResponse(status=400)
+    except (OSError, ValueError):
+        return HttpResponse(status=400)
+
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "django-helpdesk"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            content_type = resp.headers.get("Content-Type", "").split(";")[0].strip()
+            if content_type not in IMAGE_PROXY_ALLOWED_TYPES:
+                return HttpResponse(status=400)
+            data = resp.read(IMAGE_PROXY_MAX_SIZE + 1)
+            if len(data) > IMAGE_PROXY_MAX_SIZE:
+                return HttpResponse(status=413)
+            return HttpResponse(data, content_type=content_type)
+    except (URLError, OSError):
+        return HttpResponse(status=502)
 
 
 def calc_average_nbr_days_until_ticket_resolved(Tickets):

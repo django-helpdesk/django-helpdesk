@@ -203,6 +203,114 @@
         e.preventDefault();
         $(wrapper).append("<div class='mb-3'><input class='form-control' type='file' name='attachment' id='file" + x + "' multiple /></div>"); //add input box
       });
+
+      var respondForm = document.getElementById('ticket-respond-form');
+      var dropZone = document.getElementById('attachment-drop-zone');
+      if (respondForm && dropZone) {
+        var dragCounter = 0;
+
+        function showDropHighlight() {
+          dropZone.style.borderColor = '#0d6efd';
+          dropZone.style.backgroundColor = 'rgba(13, 110, 253, 0.05)';
+        }
+
+        function hideDropHighlight() {
+          dropZone.style.borderColor = '';
+          dropZone.style.backgroundColor = '';
+        }
+
+        function ensureAttachmentsVisible() {
+          var el = document.getElementById('collapseAttachments');
+          if (el && !el.classList.contains('show')) {
+            new bootstrap.Collapse(el, {show: true});
+          }
+        }
+
+        function appendFileInput(files) {
+          if (!files.length) return;
+          ensureAttachmentsVisible();
+          x++;
+          var dt = new DataTransfer();
+          for (var i = 0; i < files.length; i++) {
+            dt.items.add(files[i]);
+          }
+          var input = document.createElement('input');
+          input.className = 'form-control';
+          input.type = 'file';
+          input.name = 'attachment';
+          input.id = 'file' + x;
+          input.multiple = true;
+          input.files = dt.files;
+          var div = document.createElement('div');
+          div.className = 'mb-3';
+          div.appendChild(input);
+          wrapper.append(div);
+        }
+
+        function extractImageUrl(dataTransfer) {
+          var html = dataTransfer.getData('text/html');
+          if (html) {
+            var match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+            if (match) return match[1];
+          }
+          var uri = dataTransfer.getData('text/uri-list') || dataTransfer.getData('text/plain');
+          if (uri && uri.match(/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i)) {
+            return uri;
+          }
+          return null;
+        }
+
+        function fetchAndAttachImage(url) {
+          var filename = url.split('/').pop().split('?')[0] || 'image.png';
+          var proxyUrl = '{% url "helpdesk:image_proxy" %}?url=' + encodeURIComponent(url);
+          fetch(proxyUrl)
+            .then(function(resp) {
+              if (!resp.ok) throw new Error('Failed to fetch image');
+              return resp.blob();
+            })
+            .then(function(blob) {
+              appendFileInput([new File([blob], filename, {type: blob.type})]);
+            })
+            .catch(function() {});
+        }
+
+        respondForm.addEventListener('dragenter', function(e) {
+          e.preventDefault();
+          dragCounter++;
+          showDropHighlight();
+        });
+
+        respondForm.addEventListener('dragover', function(e) {
+          e.preventDefault();
+        });
+
+        respondForm.addEventListener('dragleave', function(e) {
+          e.preventDefault();
+          if (--dragCounter === 0) hideDropHighlight();
+        });
+
+        respondForm.addEventListener('drop', function(e) {
+          e.preventDefault();
+          dragCounter = 0;
+          hideDropHighlight();
+          if (e.dataTransfer.files.length > 0) {
+            appendFileInput(e.dataTransfer.files);
+          } else {
+            var imageUrl = extractImageUrl(e.dataTransfer);
+            if (imageUrl) fetchAndAttachImage(imageUrl);
+          }
+        });
+
+        document.addEventListener('paste', function(e) {
+          var items = e.clipboardData && e.clipboardData.items;
+          if (!items) return;
+          var files = [];
+          for (var i = 0; i < items.length; i++) {
+            if (items[i].kind === 'file') files.push(items[i].getAsFile());
+          }
+          if (files.length) appendFileInput(files);
+        });
+      }
       {% endif %}
     });
     {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}

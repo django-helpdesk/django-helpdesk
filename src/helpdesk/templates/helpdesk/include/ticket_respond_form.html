@@ -1,6 +1,6 @@
 {% load i18n %}
 
-<form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype="multipart/form-data">
+<form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype="multipart/form-data" id="ticket-respond-form">
   {% csrf_token %}
   <div class="row">
     <div class="col-12 col-md-8 col-lg-5">
@@ -208,14 +208,20 @@
     <div class="collapse mb-3" id="collapseAttachments">
       <div class="row">
         <div class="col-12 col-md-8 col-lg-5">
-          <div class="add_file_fields_wrap">
-            <div class="mb-3">
-              <label class="form-label" for="file0">{% translate "Browse..." %}</label>
-              <input class="form-control" type="file" name="attachment" id="file0" multiple />
+          <div id="attachment-drop-zone"
+               style="border: 2px dashed #ccc; border-radius: 6px; padding: 1rem; transition: border-color 0.2s, background-color 0.2s;">
+            <div class="add_file_fields_wrap">
+              <div class="mb-3">
+                <label class="form-label" for="file0">{% translate "Browse..." %}</label>
+                <input class="form-control" type="file" name="attachment" id="file0" multiple />
+              </div>
             </div>
+            <button class="add_file_field_button btn btn-link btn-sm"
+                    type="button">{% translate "Add Another File" %}</button>
+            <p class="text-muted small mt-2 mb-0">
+              {% translate "You can also drag and drop files here, or paste images from your clipboard." %}
+            </p>
           </div>
-          <button class="add_file_field_button btn btn-link btn-sm"
-                  type="button">{% translate "Add Another File" %}</button>
         </div>
       </div>
     </div>
