@@ -8,19 +8,19 @@ from django.utils.translation import gettext as _
 from helpdesk.models import FollowUp, FollowUpAttachment
 
 
-def copy_followup(source, ticket, user, *, public=False):
+def copy_followup(source, ticket, user, *, title, comment, public):
     """The caller must authorize access to both source and destination tickets."""
     saved_files = []
     try:
         with transaction.atomic():
             title = _("Copied from ticket #%(ticket)s: %(title)s") % {
                 "ticket": source.ticket_id,
-                "title": source.title,
+                "title": title,
             }
             copied = FollowUp.objects.create(
                 ticket=ticket,
                 title=title[:200],
-                comment=source.comment,
+                comment=comment,
                 user=user,
                 public=public,
                 email_recipients=[],
@@ -40,7 +40,7 @@ def copy_followup(source, ticket, user, *, public=False):
                     duplicate.file.save(
                         PurePath(attachment.file.name).name, content, save=False
                     )
-                saved_files.append((duplicate.file.storage, duplicate.file.name))
+                    saved_files.append((duplicate.file.storage, duplicate.file.name))
                 duplicate.save()
             return copied
     except Exception:

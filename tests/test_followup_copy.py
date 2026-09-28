@@ -40,23 +40,33 @@ class FollowUpCopyTests(TestCase):
             email_recipients=["customer@example.com"],
         )
         self.url = reverse(
-            "helpdesk:followup_copy", args=[self.source.pk, self.followup.pk]
+            "helpdesk:followup_edit", args=[self.source.pk, self.followup.pk]
         )
 
     def post(self, **data):
-        return self.client.post(self.url, {"ticket": self.target.pk, **data})
+        return self.client.post(
+            self.url,
+            {
+                "ticket": self.target.pk,
+                "title": self.followup.title,
+                "comment": self.followup.comment,
+                "copy_to_ticket": "on",
+                **data,
+            },
+        )
 
-    def test_get_does_not_copy_and_offers_other_open_tickets(self):
+    def test_get_keeps_existing_ticket_choices_and_does_not_copy(self):
         closed = Ticket.objects.create(
             title="Closed", queue=self.queue, status=Ticket.CLOSED_STATUS
         )
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertQuerySetEqual(
-            response.context["form"].fields["ticket"].queryset, [self.target]
+            response.context["form"].fields["ticket"].queryset,
+            [self.target, self.source],
         )
         self.assertEqual(FollowUp.objects.count(), 1)
-        self.assertNotContains(response, f'value="{closed.pk}"')
+        self.assertNotIn(closed, response.context["form"].fields["ticket"].queryset)
 
     def test_copy_keeps_source_and_does_not_replay_history(self):
         TicketChange.objects.create(
@@ -82,7 +92,7 @@ class FollowUpCopyTests(TestCase):
         self.target.refresh_from_db()
         self.assertEqual(self.target.status, Ticket.OPEN_STATUS)
 
-    def test_public_copy_requires_explicit_selection(self):
+    def test_copy_respects_public_field(self):
         self.post(public="on")
         self.assertTrue(self.target.followup_set.get().public)
 
@@ -130,7 +140,7 @@ class FollowUpCopyTests(TestCase):
         self.assertEqual(FollowUp.objects.count(), 1)
 
     def test_followup_must_belong_to_source_ticket(self):
-        url = reverse("helpdesk:followup_copy", args=[self.target.pk, self.followup.pk])
+        url = reverse("helpdesk:followup_edit", args=[self.target.pk, self.followup.pk])
         self.assertEqual(
             self.client.post(url, {"ticket": self.source.pk}).status_code, 404
         )
@@ -167,6 +177,19 @@ class FollowUpCopyTests(TestCase):
             self.post()
         self.assertIsNone(self.target.followup_set.get().time_spent)
 
-    def test_other_http_methods_cannot_copy(self):
-        self.assertEqual(self.client.delete(self.url).status_code, 405)
+    def test_unchecked_copy_preserves_existing_move_behavior(self):
+        response = self.post(copy_to_ticket="")
+        self.assertEqual(response.status_code, 302)
+        self.followup.refresh_from_db()
+        self.assertEqual(self.followup.ticket, self.target)
         self.assertEqual(FollowUp.objects.count(), 1)
+        self.assertEqual(self.followup.message_id, "<original@example.com>")
+
+    def test_copy_uses_edited_content_without_modifying_source(self):
+        self.post(title="Updated title", comment="Updated comment")
+        copied = self.target.followup_set.get()
+        self.assertIn("Updated title", copied.title)
+        self.assertEqual(copied.comment, "Updated comment")
+        self.followup.refresh_from_db()
+        self.assertEqual(self.followup.title, "Investigation")
+        self.assertEqual(self.followup.comment, "Restart the device.")

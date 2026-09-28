@@ -40,7 +40,6 @@ from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
-from django.views.decorators.http import require_http_methods
 from django.views.generic.edit import FormView, UpdateView
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -56,7 +55,6 @@ from helpdesk.forms import (
     CUSTOMFIELD_DATE_FORMAT,
     ChecklistForm,
     ChecklistTemplateForm,
-    CopyFollowUpForm,
     CreateChecklistForm,
     EditFollowUpForm,
     EditTicketCustomFieldForm,
@@ -380,52 +378,6 @@ delete_ticket = staff_member_required(delete_ticket)
 
 
 @helpdesk_staff_member_required
-@require_http_methods(["GET", "POST"])
-def followup_copy(request, ticket_id, followup_id):
-    """Copy content without replaying ticket changes."""
-    ticket = get_object_or_404(Ticket, pk=ticket_id)
-    ticket_perm_check(request, ticket)
-    followup = get_object_or_404(FollowUp, pk=followup_id, ticket=ticket)
-    form = CopyFollowUpForm(request.POST if request.method == "POST" else None)
-    form.fields["ticket"].queryset = (
-        HelpdeskUser(request.user)
-        .accessible_tickets()
-        .filter(status__in=Ticket.OPEN_STATUSES)
-        .exclude(pk=ticket.pk)
-        .order_by("-id")
-    )
-    if request.method == "POST" and form.is_valid():
-        try:
-            copied = copy_followup(
-                followup,
-                form.cleaned_data["ticket"],
-                request.user,
-                public=form.cleaned_data["public"],
-            )
-        except OSError:
-            form.add_error(
-                None,
-                _(
-                    "Unable to copy the attachments. No copy was created. Please try again or contact an administrator."
-                ),
-            )
-        else:
-            return HttpResponseRedirect(copied.get_absolute_url())
-    return render(
-        request,
-        "helpdesk/followup_copy.html",
-        {
-            "ticket": ticket,
-            "followup": followup,
-            "form": form,
-        },
-    )
-
-
-followup_copy = staff_member_required(followup_copy)
-
-
-@helpdesk_staff_member_required
 def followup_edit(request, ticket_id, followup_id):
     """Edit followup options with an ability to change the ticket."""
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -492,7 +444,27 @@ def followup_edit(request, ticket_id, followup_id):
             .distinct()
         )
 
-        if form.is_valid():
+        if form.is_valid() and form.cleaned_data["copy_to_ticket"]:
+            destination = form.cleaned_data["ticket"]
+            if destination.pk == ticket.pk:
+                form.add_error("ticket", _("Choose another ticket for the copy."))
+            else:
+                try:
+                    copied = copy_followup(
+                        followup,
+                        destination,
+                        request.user,
+                        title=form.cleaned_data["title"],
+                        comment=form.cleaned_data["comment"],
+                        public=form.cleaned_data["public"],
+                    )
+                except OSError:
+                    form.add_error(
+                        None, _("Unable to copy the attachments. No copy was created.")
+                    )
+                else:
+                    return HttpResponseRedirect(copied.get_absolute_url())
+        elif form.is_valid():
             # Edit in place: a copy would lose the message ID and the
             # TicketChange rows, which cascade away with the old row.
             followup.title = form.cleaned_data["title"]
