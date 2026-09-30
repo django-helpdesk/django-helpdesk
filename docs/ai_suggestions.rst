@@ -20,7 +20,6 @@ Set these Django settings in the host project:
    HELPDESK_AI_MODEL = "your-model"
    HELPDESK_AI_API_KEY = os.environ["HELPDESK_AI_API_KEY"]
    HELPDESK_AI_TIMEOUT_SECONDS = 30
-   HELPDESK_AI_REASONING_EFFORT = "none"
 
 The demo project reads the same values from environment variables. For example,
 in PowerShell:
