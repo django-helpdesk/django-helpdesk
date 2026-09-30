@@ -93,6 +93,21 @@ class AISuggestionTests(TestCase):
     @override_settings(
         HELPDESK_AI_CHAT_COMPLETIONS_URL="http://model.local/v1/chat/completions",
         HELPDESK_AI_MODEL="test-model",
+        HELPDESK_AI_REASONING_EFFORT="none",
+        HELPDESK_AI_TIMEOUT_SECONDS=30,
+    )
+    def test_optional_provider_controls_are_forwarded(self, post):
+        post.return_value = Mock(
+            json=lambda: {"choices": [{"message": {"content": "Review evidence."}}]}
+        )
+        self.client.post(self.url)
+        self.assertEqual(post.call_args.kwargs["timeout"], 30)
+        self.assertEqual(post.call_args.kwargs["json"]["reasoning_effort"], "none")
+
+    @patch("helpdesk.ai_suggestions.requests.post")
+    @override_settings(
+        HELPDESK_AI_CHAT_COMPLETIONS_URL="http://model.local/v1/chat/completions",
+        HELPDESK_AI_MODEL="test-model",
     )
     def test_foreign_ticket_is_rejected_before_model_call(self, post):
         url = reverse("helpdesk:ai_suggest", args=[self.foreign.id])

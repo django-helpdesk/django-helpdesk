@@ -95,12 +95,18 @@ def generate_suggestion(ticket, related):
             },
         ],
     }
+    reasoning_effort = getattr(settings, "HELPDESK_AI_REASONING_EFFORT", "")
+    if reasoning_effort:
+        payload["reasoning_effort"] = reasoning_effort
+    timeout = getattr(settings, "HELPDESK_AI_TIMEOUT_SECONDS", 8)
     headers = {"Content-Type": "application/json"}
     api_key = getattr(settings, "HELPDESK_AI_API_KEY", "")
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
     try:
-        response = requests.post(endpoint, json=payload, headers=headers, timeout=8)
+        response = requests.post(
+            endpoint, json=payload, headers=headers, timeout=timeout
+        )
         response.raise_for_status()
         content = response.json()["choices"][0]["message"]["content"]
         if not isinstance(content, str) or not content.strip():
