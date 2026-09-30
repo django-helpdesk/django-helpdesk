@@ -122,6 +122,15 @@ HELPDESK_KANBAN_DEFAULT_RENDER_CLOSED_TICKETS_WEEKS = 6
 
 HELPDESK_TICKETS_TIMELINE_ENABLED = True
 
+# AI 建议由工作人员手动触发，默认禁用；只配置可信的模型服务。
+HELPDESK_AI_ENABLED = os.getenv("HELPDESK_AI_ENABLED", "false").lower() == "true"
+HELPDESK_AI_CHAT_COMPLETIONS_URL = os.getenv(
+    "HELPDESK_AI_CHAT_COMPLETIONS_URL", ""
+)
+HELPDESK_AI_MODEL = os.getenv("HELPDESK_AI_MODEL", "")
+HELPDESK_AI_API_KEY = os.getenv("HELPDESK_AI_API_KEY", "")
+
+
 # Instead of showing the public web portal first,
 # we can instead redirect users straight to the login page.
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = False

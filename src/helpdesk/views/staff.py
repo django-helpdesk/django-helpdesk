@@ -40,11 +40,17 @@ from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
+from django.views.decorators.http import require_POST
 from django.views.generic.edit import FormView, UpdateView
 from rest_framework import status
 from rest_framework.decorators import api_view
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk.ai_suggestions import (
+    AISuggestionError,
+    find_related_tickets,
+    generate_suggestion,
+)
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
     is_helpdesk_staff,
@@ -613,6 +619,7 @@ def view_ticket(request, ticket_id):
         "helpdesk/ticket.html",
         {
             "ticket": ticket,
+            "ai_suggestions_enabled": getattr(settings, "HELPDESK_AI_ENABLED", False),
             "followups": get_followups_for_ticket(ticket),
             "dependencies": dependencies,
             "resolves": resolves,
@@ -726,6 +733,34 @@ def get_ticket_from_request_with_authorisation(
     # an update cannot reach further than its GET side.
     return get_object_or_404(
         HelpdeskUser(request.user).accessible_tickets(), id=ticket_id
+    )
+
+
+@helpdesk_staff_member_required
+@require_POST
+def ai_suggest_ticket(request, ticket_id):
+    """展示待人工审核的建议，不修改工单或操作历史。"""
+    if not getattr(settings, "HELPDESK_AI_ENABLED", False):
+        raise Http404
+    ticket = get_object_or_404(
+        HelpdeskUser(request.user).accessible_tickets(), pk=ticket_id
+    )
+    related = find_related_tickets(ticket, request.user)
+    try:
+        suggestion = generate_suggestion(ticket, related)
+        error = None
+    except AISuggestionError:
+        suggestion = None
+        error = _("The AI provider is unavailable. The ticket was not changed.")
+    return render(
+        request,
+        "helpdesk/ai_suggestion.html",
+        {
+            "ticket": ticket,
+            "related": related,
+            "suggestion": suggestion,
+            "error": error,
+        },
     )
 
 
