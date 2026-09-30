@@ -43,9 +43,10 @@ How it works
 
 The service considers at most 300 recent resolved or closed tickets that the
 staff member is authorized to read. It ranks title and description overlap
-using character pairs, then sends at most three examples to the provider. This
-retrieval is a small, dependency-free baseline, not a semantic embedding
-search. Prior ticket IDs remain visible in the result so staff can inspect the
+using character pairs. Candidates below a conservative 0.35 overlap score
+are withheld, then at most three examples are sent to the provider. This
+retrieval is a small, dependency-free baseline, not a semantic embedding search.
+Prior ticket IDs remain visible in the result so staff can inspect the
 evidence. Unavailable or malformed provider responses display an error without
 changing the ticket.
 

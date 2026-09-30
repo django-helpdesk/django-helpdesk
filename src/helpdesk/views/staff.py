@@ -40,7 +40,6 @@ from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django.views.decorators.csrf import requires_csrf_token
-from django.views.decorators.http import require_POST
 from django.views.generic.edit import FormView, UpdateView
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -560,6 +559,19 @@ def view_ticket(request, ticket_id):
         )
         return return_to_ticket(request.user, ticket)
 
+    ai_requested = request.method == "POST" and "ai_suggest" in request.POST
+    ai_related = []
+    ai_suggestion = None
+    ai_error = None
+    if ai_requested:
+        if not getattr(settings, "HELPDESK_AI_ENABLED", False):
+            raise Http404
+        ai_related = find_related_tickets(ticket, request.user)
+        try:
+            ai_suggestion = generate_suggestion(ticket, ai_related)
+        except AISuggestionError:
+            ai_error = _("The AI provider is unavailable. The ticket was not changed.")
+
     extra_context_kwargs = get_form_extra_kwargs(request.user)
     form = TicketForm(
         initial={"due_date": ticket.due_date},
@@ -581,7 +593,7 @@ def view_ticket(request, ticket_id):
     else:
         submitter_userprofile_url = None
 
-    checklist_form = CreateChecklistForm(request.POST or None)
+    checklist_form = CreateChecklistForm(None if ai_requested else request.POST or None)
     if checklist_form.is_valid():
         checklist = checklist_form.save(commit=False)
         checklist.ticket = ticket
@@ -620,6 +632,10 @@ def view_ticket(request, ticket_id):
         {
             "ticket": ticket,
             "ai_suggestions_enabled": getattr(settings, "HELPDESK_AI_ENABLED", False),
+            "ai_requested": ai_requested,
+            "ai_related": ai_related,
+            "ai_suggestion": ai_suggestion,
+            "ai_error": ai_error,
             "followups": get_followups_for_ticket(ticket),
             "dependencies": dependencies,
             "resolves": resolves,
@@ -733,34 +749,6 @@ def get_ticket_from_request_with_authorisation(
     # an update cannot reach further than its GET side.
     return get_object_or_404(
         HelpdeskUser(request.user).accessible_tickets(), id=ticket_id
-    )
-
-
-@helpdesk_staff_member_required
-@require_POST
-def ai_suggest_ticket(request, ticket_id):
-    """展示待人工审核的建议，不修改工单或操作历史。"""
-    if not getattr(settings, "HELPDESK_AI_ENABLED", False):
-        raise Http404
-    ticket = get_object_or_404(
-        HelpdeskUser(request.user).accessible_tickets(), pk=ticket_id
-    )
-    related = find_related_tickets(ticket, request.user)
-    try:
-        suggestion = generate_suggestion(ticket, related)
-        error = None
-    except AISuggestionError:
-        suggestion = None
-        error = _("The AI provider is unavailable. The ticket was not changed.")
-    return render(
-        request,
-        "helpdesk/ai_suggestion.html",
-        {
-            "ticket": ticket,
-            "related": related,
-            "suggestion": suggestion,
-            "error": error,
-        },
     )
 
 

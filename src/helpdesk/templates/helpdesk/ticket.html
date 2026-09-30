@@ -26,10 +26,23 @@
   {% if ai_suggestions_enabled %}
     <div class="card mb-3">
       <div class="card-body">
-        <form method="post" action="{% url 'helpdesk:ai_suggest' ticket.id %}">
+        <form method="post" action="{% url 'helpdesk:view' ticket.id %}">
           {% csrf_token %}
-          <button class="btn btn-outline-primary" type="submit">{% translate "Generate AI handling suggestion" %}</button>
+          <button class="btn btn-outline-primary" type="submit" name="ai_suggest" value="1">{% translate "Generate AI handling suggestion" %}</button>
         </form>
+        {% if ai_requested %}
+          <p class="text-body-secondary mt-3">{% translate "Review this draft before using it. No ticket fields were changed." %}</p>
+          {% if ai_error %}<div class="alert alert-warning" role="alert">{{ ai_error }}</div>{% endif %}
+          {% if ai_suggestion %}<div class="alert alert-info" role="status">{{ ai_suggestion|linebreaksbr }}</div>{% endif %}
+          <h2 class="h5">{% translate "Related resolved tickets" %}</h2>
+          <ul>
+            {% for item in ai_related %}
+              <li><a href="{% url 'helpdesk:view' item.ticket.id %}">#{{ item.ticket.id }} {{ item.ticket.title }}</a></li>
+            {% empty %}
+              <li>{% translate "No related resolved tickets found." %}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
       </div>
     </div>
   {% endif %}

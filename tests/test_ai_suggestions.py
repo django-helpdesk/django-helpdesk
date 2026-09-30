@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.ai_suggestions import find_related_tickets
-from helpdesk.models import Queue, Ticket
+from helpdesk.models import Checklist, Queue, Ticket
 
 
 @override_settings(HELPDESK_AI_ENABLED=True)
@@ -46,7 +46,7 @@ class AISuggestionTests(TestCase):
             status=Ticket.RESOLVED_STATUS,
             queue=self.foreign_queue,
         )
-        self.url = reverse("helpdesk:ai_suggest", args=[self.ticket.id])
+        self.url = reverse("helpdesk:view", args=[self.ticket.id])
         self.client.force_login(self.user)
 
     def restore_queue_setting(self):
@@ -58,12 +58,37 @@ class AISuggestionTests(TestCase):
         results = find_related_tickets(self.ticket, self.user)
         self.assertEqual([item.ticket.id for item in results], [self.related.id])
 
-    def test_endpoint_requires_post(self):
-        self.assertEqual(self.client.get(self.url).status_code, 405)
+    def test_weak_overlap_does_not_appear_as_related(self):
+        unrelated = Ticket.objects.create(
+            title="办公区空调无法制冷",
+            description="空调启动后没有冷风",
+            resolution="检查制冷设备",
+            status=Ticket.RESOLVED_STATUS,
+            queue=self.queue,
+        )
+        results = find_related_tickets(self.ticket, self.user)
+        self.assertNotIn(unrelated.id, [item.ticket.id for item in results])
+
+    @patch("helpdesk.views.staff.generate_suggestion")
+    def test_get_does_not_call_provider(self, generate):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        generate.assert_not_called()
 
     @override_settings(HELPDESK_AI_ENABLED=False)
     def test_feature_is_disabled_by_default(self):
-        self.assertEqual(self.client.post(self.url).status_code, 404)
+        self.assertEqual(
+            self.client.post(self.url, {"ai_suggest": "1"}).status_code, 404
+        )
+
+    @patch("helpdesk.views.staff.generate_suggestion")
+    def test_existing_checklist_post_still_works(self, generate):
+        response = self.client.post(self.url, {"name": "Review"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            Checklist.objects.filter(ticket=self.ticket, name="Review").exists()
+        )
+        generate.assert_not_called()
 
     @patch("helpdesk.ai_suggestions.requests.post")
     @override_settings(
@@ -75,7 +100,7 @@ class AISuggestionTests(TestCase):
             json=lambda: {"choices": [{"message": {"content": "先检查网络连接。"}}]}
         )
         before = (self.ticket.status, self.ticket.priority, self.ticket.assigned_to_id)
-        response = self.client.post(self.url)
+        response = self.client.post(self.url, {"ai_suggest": "1", "name": "Review"})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "先检查网络连接。")
         self.assertContains(response, self.related.title)
@@ -88,6 +113,7 @@ class AISuggestionTests(TestCase):
             (self.ticket.status, self.ticket.priority, self.ticket.assigned_to_id),
             before,
         )
+        self.assertEqual(Checklist.objects.count(), 0)
 
     @patch("helpdesk.ai_suggestions.requests.post")
     @override_settings(
@@ -100,7 +126,7 @@ class AISuggestionTests(TestCase):
         post.return_value = Mock(
             json=lambda: {"choices": [{"message": {"content": "Review evidence."}}]}
         )
-        self.client.post(self.url)
+        self.client.post(self.url, {"ai_suggest": "1"})
         self.assertEqual(post.call_args.kwargs["timeout"], 30)
         self.assertEqual(post.call_args.kwargs["json"]["reasoning_effort"], "none")
 
@@ -110,12 +136,12 @@ class AISuggestionTests(TestCase):
         HELPDESK_AI_MODEL="test-model",
     )
     def test_foreign_ticket_is_rejected_before_model_call(self, post):
-        url = reverse("helpdesk:ai_suggest", args=[self.foreign.id])
-        self.assertEqual(self.client.post(url).status_code, 404)
+        url = reverse("helpdesk:view", args=[self.foreign.id])
+        self.assertEqual(self.client.post(url, {"ai_suggest": "1"}).status_code, 302)
         post.assert_not_called()
 
     def test_unconfigured_provider_preserves_retrieval_and_ticket(self):
-        response = self.client.post(self.url)
+        response = self.client.post(self.url, {"ai_suggest": "1"})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "provider is unavailable")
         self.assertContains(response, self.related.title)
@@ -131,13 +157,13 @@ class AISuggestionTests(TestCase):
                 "choices": [{"message": {"content": "<script>alert(1)</script>"}}]
             }
         )
-        response = self.client.post(self.url)
+        response = self.client.post(self.url, {"ai_suggest": "1"})
         self.assertNotContains(response, "<script>alert(1)</script>")
         self.assertContains(response, "&lt;script&gt;")
 
     def test_anonymous_user_cannot_request_suggestion(self):
         self.client.logout()
-        response = self.client.post(self.url)
+        response = self.client.post(self.url, {"ai_suggest": "1"})
         self.assertNotEqual(response.status_code, 200)
 
     @patch("helpdesk.ai_suggestions.requests.post")
@@ -147,7 +173,7 @@ class AISuggestionTests(TestCase):
     )
     def test_model_failure_does_not_change_ticket(self, post):
         post.side_effect = __import__("requests").Timeout()
-        response = self.client.post(self.url)
+        response = self.client.post(self.url, {"ai_suggest": "1"})
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "provider is unavailable")
         self.ticket.refresh_from_db()

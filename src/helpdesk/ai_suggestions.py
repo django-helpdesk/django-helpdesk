@@ -9,6 +9,8 @@ from django.conf import settings
 from helpdesk.models import Ticket
 from helpdesk.user import HelpdeskUser
 
+MIN_RELATED_SCORE = 0.35
+
 
 class AISuggestionError(Exception):
     """模型服务无法返回可用建议。"""
@@ -50,7 +52,7 @@ def find_related_tickets(ticket, user, limit=3):
         if not target:
             continue
         score = 2 * len(source & target) / (len(source) + len(target))
-        if score > 0:
+        if score >= MIN_RELATED_SCORE:
             ranked.append(RelatedTicket(candidate, score))
     return sorted(ranked, key=lambda item: item.score, reverse=True)[:limit]
 
