@@ -295,6 +295,11 @@ These options only change display of items on public-facing pages, not staff pag
 
    Show 'View a Ticket' section on public page?
 
+   This setting only controls the display of the lookup form. Anonymous
+   access to a ticket always requires the ticket's secret key (the ``key``
+   parameter included in the links emailed to the submitter), in addition
+   to the ticket ID and the submitter's email address.
+
 .. setting:: HELPDESK_SUBMIT_A_TICKET_PUBLIC
 
    *Default:* ``True``

@@ -29,7 +29,64 @@ class TestTicketLookupPublicEnabled(TestCase):
         # Instead of using the ticket_for_url link,
         # we will exercise 'reverse' to lookup/build the URL
         # from the ticket info we have
-        # http://example.com/helpdesk/view/?ticket=q1-1&email=None
+        # http://example.com/helpdesk/view/?ticket=q1-1&email=None&key=...
+        response = self.client.get(
+            reverse("helpdesk:public_view"),
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": self.ticket.submitter_email,
+                "key": self.ticket.secret_key,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "helpdesk/public_view_ticket.html")
+
+    def test_anonymous_lookup_without_key_is_refused(self):
+        """An anonymous request without the ticket secret key must not
+        expose the ticket, even when the public lookup form is enabled."""
+        response = self.client.get(
+            reverse("helpdesk:public_view"),
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": self.ticket.submitter_email,
+            },
+        )
+        self.assertTemplateNotUsed(response, "helpdesk/public_view_ticket.html")
+        self.assertTemplateUsed(response, "helpdesk/public_view_form.html")
+        self.assertNotContains(response, self.ticket.title)
+
+    def test_anonymous_lookup_with_wrong_key_is_refused(self):
+        response = self.client.get(
+            reverse("helpdesk:public_view"),
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": self.ticket.submitter_email,
+                "key": "wrong-key",
+            },
+        )
+        self.assertTemplateNotUsed(response, "helpdesk/public_view_ticket.html")
+        self.assertTemplateUsed(response, "helpdesk/public_view_form.html")
+        self.assertNotContains(response, self.ticket.title)
+
+    def test_anonymous_close_without_key_leaves_ticket_resolved(self):
+        self.ticket.status = Ticket.RESOLVED_STATUS
+        self.ticket.save()
+        self.client.get(
+            reverse("helpdesk:public_view"),
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": self.ticket.submitter_email,
+                "close": "1",
+            },
+        )
+        self.ticket.refresh_from_db()
+        self.assertEqual(self.ticket.status, Ticket.RESOLVED_STATUS)
+
+    def test_authenticated_submitter_can_view_without_key(self):
+        user = User.objects.create_user(
+            username="submitter", email=self.ticket.submitter_email
+        )
+        self.client.force_login(user)
         response = self.client.get(
             reverse("helpdesk:public_view"),
             {
@@ -38,6 +95,7 @@ class TestTicketLookupPublicEnabled(TestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "helpdesk/public_view_ticket.html")
 
     def test_ticket_with_changed_queue(self):
         # Make a ticket (already done in setup() )
@@ -49,6 +107,7 @@ class TestTicketLookupPublicEnabled(TestCase):
         params = {
             "ticket": self.ticket.ticket_for_url,
             "email": self.ticket.submitter_email,
+            "key": self.ticket.secret_key,
         }
         # Pickup the ticket created in setup() and change its queue
         self.ticket.queue = q2

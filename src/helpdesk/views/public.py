@@ -228,14 +228,7 @@ class ViewTicket(TemplateView):
 
         try:
             _queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
-            if (
-                request.user.is_authenticated
-                and request.user.email == email
-                or (
-                    hasattr(settings, "HELPDESK_VIEW_A_TICKET_PUBLIC")
-                    and settings.HELPDESK_VIEW_A_TICKET_PUBLIC
-                )
-            ):
+            if request.user.is_authenticated and request.user.email == email:
                 ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
             else:
                 ticket = Ticket.objects.get(
