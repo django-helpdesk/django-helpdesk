@@ -6,8 +6,8 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.ai_suggestions import find_related_tickets
-from helpdesk.models import Checklist, Queue, Ticket
+from helpdesk.ai_suggestions import AISuggestionError, find_related_tickets
+from helpdesk.models import Checklist, FollowUp, Queue, Ticket, TicketCC, TicketChange
 
 
 @override_settings(HELPDESK_AI_ENABLED=True)
@@ -178,3 +178,75 @@ class AISuggestionTests(TestCase):
         self.assertContains(response, "provider is unavailable")
         self.ticket.refresh_from_db()
         self.assertEqual(self.ticket.status, Ticket.OPEN_STATUS)
+
+    def assert_mixed_ai_requests_are_read_only(self, generate, expected_status):
+        self.user.email = "agent@example.com"
+        self.user.save()
+        models = (FollowUp, TicketChange, TicketCC, Checklist)
+        for query in (
+            "take=1",
+            "subscribe=1",
+            "close=1",
+            "take=1&subscribe=1&close=1",
+        ):
+            with self.subTest(query=query):
+                ticket = Ticket.objects.create(
+                    title=self.ticket.title,
+                    description=self.ticket.description,
+                    queue=self.queue,
+                    status=Ticket.RESOLVED_STATUS,
+                )
+                url = reverse("helpdesk:view", args=[ticket.id])
+                before = Ticket.objects.filter(pk=ticket.pk).values().get()
+                counts = [model.objects.count() for model in models]
+                generate.reset_mock()
+                response = self.client.post(
+                    f"{url}?{query}", {"ai_suggest": "1", "name": "Review"}
+                )
+                self.assertEqual(response.status_code, expected_status)
+                self.assertEqual(
+                    Ticket.objects.filter(pk=ticket.pk).values().get(), before
+                )
+                self.assertEqual([model.objects.count() for model in models], counts)
+                if expected_status == 200:
+                    generate.assert_called_once()
+                    self.assertTrue(response.context["ai_requested"])
+                else:
+                    generate.assert_not_called()
+
+    @patch("helpdesk.views.staff.generate_suggestion", return_value="Draft suggestion")
+    def test_ai_post_ignores_mutating_query_parameters(self, generate):
+        self.assert_mixed_ai_requests_are_read_only(generate, 200)
+
+    @patch("helpdesk.views.staff.generate_suggestion")
+    def test_failed_ai_post_ignores_mutating_query_parameters(self, generate):
+        generate.side_effect = AISuggestionError("Provider unavailable")
+        self.assert_mixed_ai_requests_are_read_only(generate, 200)
+
+    @override_settings(HELPDESK_AI_ENABLED=False)
+    @patch("helpdesk.views.staff.generate_suggestion")
+    def test_disabled_ai_post_cannot_trigger_ticket_actions(self, generate):
+        self.assert_mixed_ai_requests_are_read_only(generate, 404)
+
+    @patch("helpdesk.views.staff.generate_suggestion")
+    def test_existing_ticket_actions_still_work(self, generate):
+        self.user.email = "agent@example.com"
+        self.user.save()
+        for action in ("take", "subscribe", "close"):
+            with self.subTest(action=action):
+                ticket = Ticket.objects.create(
+                    title="Existing ticket action",
+                    queue=self.queue,
+                    status=Ticket.RESOLVED_STATUS,
+                )
+                url = reverse("helpdesk:view", args=[ticket.id])
+                response = self.client.get(f"{url}?{action}=1")
+                self.assertEqual(response.status_code, 302)
+                ticket.refresh_from_db()
+                if action == "take":
+                    self.assertEqual(ticket.assigned_to_id, self.user.id)
+                elif action == "subscribe":
+                    self.assertTrue(ticket.ticketcc_set.filter(user=self.user).exists())
+                else:
+                    self.assertEqual(ticket.followup_set.count(), 1)
+        generate.assert_not_called()

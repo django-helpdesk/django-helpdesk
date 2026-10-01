@@ -530,11 +530,14 @@ def view_ticket(request, ticket_id):
         )
         return HttpResponseRedirect(reverse("helpdesk:list"))
 
-    if "take" in request.GET:
+    # AI 建议请求优先处理，避免混合查询参数触发工单写入。
+    ai_requested = request.method == "POST" and "ai_suggest" in request.POST
+
+    if not ai_requested and "take" in request.GET:
         update_ticket(request.user, ticket, owner=request.user.id)
         return return_to_ticket(request.user, ticket)
 
-    if "subscribe" in request.GET:
+    if not ai_requested and "subscribe" in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing
         # it.
         show_subscribe = return_ticketccstring_and_show_subscribe(request.user, ticket)[
@@ -545,7 +548,11 @@ def view_ticket(request, ticket_id):
             subscribe_to_ticket_updates(ticket, request.user.id)
             return HttpResponseRedirect(reverse("helpdesk:view", args=[ticket.id]))
 
-    if "close" in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
+    if (
+        not ai_requested
+        and "close" in request.GET
+        and ticket.status == Ticket.RESOLVED_STATUS
+    ):
         if not ticket.assigned_to:
             owner = 0
         else:
@@ -559,7 +566,6 @@ def view_ticket(request, ticket_id):
         )
         return return_to_ticket(request.user, ticket)
 
-    ai_requested = request.method == "POST" and "ai_suggest" in request.POST
     ai_related = []
     ai_suggestion = None
     ai_error = None
