@@ -139,7 +139,9 @@ if helpdesk_settings.HELPDESK_UI_ENABLED:
         path("ignore/", staff.email_ignore, name="email_ignore"),
         path("ignore/add/", staff.email_ignore_add, name="email_ignore_add"),
         path(
-            "ignore/delete/<int:id>/", staff.email_ignore_del, name="email_ignore_del"
+            "ignore/delete/<int:item_id>/",
+            staff.email_ignore_del,
+            name="email_ignore_del",
         ),
         path(
             "checklist-templates/",

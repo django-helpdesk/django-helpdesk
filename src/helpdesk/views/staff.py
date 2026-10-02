@@ -47,7 +47,6 @@ from rest_framework.decorators import api_view
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
-    helpdesk_superuser_required,
     is_helpdesk_staff,
     superuser_required,
 )
@@ -564,6 +563,8 @@ def view_ticket(request, ticket_id):
         request.user, ticket
     )
 
+    notification_recipients = ticket.get_notification_recipients(user=request.user)
+
     submitter_userprofile = ticket.get_submitter_userprofile()
     if submitter_userprofile is not None:
         content_type = ContentType.objects.get_for_model(submitter_userprofile)
@@ -622,6 +623,7 @@ def view_ticket(request, ticket_id):
                 Q(queues=ticket.queue) | Q(queues__isnull=True)
             ),
             "ticketcc_string": ticketcc_string,
+            "notification_recipients": notification_recipients,
             "SHOW_SUBSCRIBE": show_subscribe,
             "checklist_form": checklist_form,
             "customfields_form": customfields_form,
@@ -1977,26 +1979,23 @@ class EditUserSettingsView(MustBeStaffMixin, UpdateView):
         return UserSettings.objects.get_or_create(user=self.request.user)[0]
 
 
-@helpdesk_superuser_required
-def email_ignore(request):
-    return render(
-        request,
-        "helpdesk/email_ignore_list.html",
-        {
-            "ignore_list": IgnoreEmail.objects.all(),
-        },
-    )
+@superuser_required
+def email_ignore(request: HttpRequest) -> HttpResponse:
+    """Displays a tabular list of ignored emails to manage."""
+
+    ctx = {"ignore_list": IgnoreEmail.objects.prefetch_related("queues")}
+    return render(request, "helpdesk/email_ignore_list.html", ctx)
 
 
-email_ignore = superuser_required(email_ignore)
+@superuser_required
+def email_ignore_add(request: HttpRequest) -> HttpResponse:
+    """Show a form to add an email to ignore list."""
 
-
-@helpdesk_superuser_required
-def email_ignore_add(request):
     if request.method == "POST":
         form = EmailIgnoreForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, _("Email added to ignore list successfully."))
             return HttpResponseRedirect(reverse("helpdesk:email_ignore"))
     else:
         form = EmailIgnoreForm(request.GET)
@@ -2004,20 +2003,18 @@ def email_ignore_add(request):
     return render(request, "helpdesk/email_ignore_add.html", {"form": form})
 
 
-email_ignore_add = superuser_required(email_ignore_add)
+@superuser_required
+def email_ignore_del(request: HttpRequest, item_id: int) -> HttpResponse:
+    """Remove an email from the ignore list."""
 
+    ignore = get_object_or_404(IgnoreEmail, id=item_id)
 
-@helpdesk_superuser_required
-def email_ignore_del(request, pk):
-    ignore = get_object_or_404(IgnoreEmail, id=pk)
     if request.method == "POST":
         ignore.delete()
+        messages.success(request, _("Email removed from ignore list successfully."))
         return HttpResponseRedirect(reverse("helpdesk:email_ignore"))
-    else:
-        return render(request, "helpdesk/email_ignore_del.html", {"ignore": ignore})
 
-
-email_ignore_del = superuser_required(email_ignore_del)
+    return render(request, "helpdesk/email_ignore_del.html", {"ignore": ignore})
 
 
 @helpdesk_staff_member_required

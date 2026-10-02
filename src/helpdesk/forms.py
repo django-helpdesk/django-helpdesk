@@ -46,6 +46,7 @@ from helpdesk.settings import (
     HELPDESK_SHOW_CUSTOM_FIELDS_FOLLOW_UP_LIST,
 )
 from helpdesk.signals import new_ticket_done
+from helpdesk.update_ticket import create_ticket_backlinks
 from helpdesk.user import HelpdeskUser
 from helpdesk.validators import validate_file_extension
 
@@ -545,6 +546,8 @@ class TicketForm(AbstractTicketForm):
             ticket=ticket, queue=queue, followup=followup, files=files, user=user
         )
 
+        create_ticket_backlinks(ticket, followup, user=user)
+
         # emit signal when the TicketForm.save is done
         new_ticket_done.send(sender="TicketForm", ticket=ticket)
 
@@ -639,6 +642,8 @@ class PublicTicketForm(AbstractTicketForm):
 
         self._send_messages(ticket=ticket, queue=queue, followup=followup, files=files)
 
+        create_ticket_backlinks(ticket, followup, user=user)
+
         # emit signal when the PublicTicketForm.save is done
         new_ticket_done.send(sender="PublicTicketForm", ticket=ticket)
 
@@ -654,7 +659,13 @@ class UserSettingsForm(forms.ModelForm):
 class EmailIgnoreForm(forms.ModelForm):
     class Meta:
         model = IgnoreEmail
-        exclude: ClassVar[list] = []
+        fields = ("queues", "name", "email_address", "keep_in_mailbox")
+        widgets: ClassVar[dict[str, forms.Widget]] = {
+            "queues": forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            "email_address": forms.EmailInput(attrs={"class": "form-control"}),
+            "keep_in_mailbox": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        }
 
 
 class TicketCCForm(forms.ModelForm):

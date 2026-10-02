@@ -19,6 +19,7 @@ DEFAULT_USER_SETTINGS = {
     "email_on_ticket_assign": True,
     "tickets_per_page": 25,
     "use_email_as_submitter": True,
+    "ticket_respond_layout": "tabs",
 }
 
 try:
@@ -70,6 +71,9 @@ HELPDESK_STAFF_VIEW_PROTECTOR = getattr(
 #   the uploaded files. Otherwise anyone on the Internet will be
 #   able to download your ticket attachments.
 HELPDESK_ENABLE_ATTACHMENTS = getattr(settings, "HELPDESK_ENABLE_ATTACHMENTS", True)
+
+# Create a backlink followup when a ticket references another ticket
+HELPDESK_ENABLE_BACKLINKS = getattr(settings, "HELPDESK_ENABLE_BACKLINKS", True)
 
 # Enable the Dependencies field on ticket view
 HELPDESK_ENABLE_DEPENDENCIES_ON_TICKET = getattr(

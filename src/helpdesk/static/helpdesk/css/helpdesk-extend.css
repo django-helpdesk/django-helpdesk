@@ -128,3 +128,15 @@ table .tickettitle {
   float: none;
   display: block;
 }
+
+[data-bs-theme="dark"] .dt-button-collection {
+  background-color: var(--bs-body-bg);
+}
+
+[data-bs-theme="dark"] .dt-button-collection .dt-button {
+  color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .dt-button-collection .dt-button:hover {
+  background-color: var(--bs-tertiary-bg);
+}

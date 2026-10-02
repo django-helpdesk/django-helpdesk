@@ -1,34 +1,43 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/base.html" %}
 
-{% block helpdesk_title %}{% translate "Ignore E-Mail Address" %}{% endblock %}
+{% load i18n bootstrap5_form %}
+
+{% block helpdesk_title %}
+  {% translate "Ignore E-Mail Address" %}
+{% endblock helpdesk_title %}
 
 {% block helpdesk_breadcrumb %}
-<li class="breadcrumb-item">
+  <li class="breadcrumb-item">
     <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
-</li>
-<li class="breadcrumb-item active">{% translate "Ignore E-Mail Address" %}</li>
-{% endblock %}
+  </li>
+  <li class="breadcrumb-item">
+    <a href="{% url 'helpdesk:email_ignore' %}">{% translate "Ignore E-Mail Address" %}</a>
+  </li>
+  <li class="breadcrumb-item active">{% translate "Add" %}</li>
+{% endblock helpdesk_breadcrumb %}
 
 {% block helpdesk_body %}
-<h2>{% translate "Ignore E-Mail Address" %}</h2>
-
-<p>{% blocktranslate %}To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.{% endblocktranslate %}</p>
-
-<p>{% blocktranslate %}You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.{% endblocktranslate %}</p>
-
-<form method='post' action='./'>
-
-<fieldset>
-    <dl>{% for field in form %}
-        <dt><label for='id_{{ field.name }}'>{{ field.label }}</label></dt>
-        <dd>{{ field }}</dd>
-        {% if field.errors %}<dd class='error'>{{ field.errors }}</dd>{% endif %}
-        {% if field.help_text %}<dd class='form_help_text'>{{ field.help_text }}</dd>{% endif %}
-    {% endfor %}</dl>
-</fieldset>
-
-<input class="btn btn-primary" type='submit' value='{% translate "Ignore E-Mail Address" %}' />
-
-{% csrf_token %}</form>
-
-{% endblock %}
+  <h2>{% translate "Ignore E-Mail Address" %}</h2>
+  <p class="text-body-secondary lead">
+    {% translate "To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below." %}
+  </p>
+  <p class="text-body-secondary">{% blocktranslate %}You can either enter a whole e-mail address such as <em>email@domain.com</em> or a portion of an e-mail address with a wildcard, such as <em>*@domain.com</em> or <em>user@*</em>.{% endblocktranslate %}</p>
+  <div class="row">
+    <div class="col-12 col-md-8 col-lg-4 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% bootstrap5_form form %}
+            <div class="d-flex justify-content-end">
+              <a class="btn bg-body-tertiary border me-2"
+                 type="button"
+                 href="{% url 'helpdesk:email_ignore' %}">{% translate "Cancel" %}</a>
+              <button type="submit" class="btn btn-success">{% translate "Save" %}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock helpdesk_body %}

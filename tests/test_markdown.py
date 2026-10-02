@@ -14,7 +14,7 @@ class MarkDown(SimpleTestCase):
 
     def test_markdown_nl2br(self):
         """warning, after Line 1 - two withespace, else did't work"""
-        expected_value = "<p>Line 1<br />\n                    Line 2</p>"
+        expected_value = "<p>Line 1<br>\n                    Line 2</p>"
         input_value = """Line 1  
                     Line 2"""
         output_value = get_markdown(input_value)

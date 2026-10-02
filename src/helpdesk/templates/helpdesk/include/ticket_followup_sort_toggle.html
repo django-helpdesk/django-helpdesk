@@ -1,0 +1,15 @@
+{% load i18n %}
+
+<button type="button"
+        id="followup-sort-toggle"
+        class="btn bg-light-subtle text-light-emphasis btn-sm ms-auto"
+        data-order="{% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}newest_first{% else %}oldest_first{% endif %}">
+  <i class="fa-solid fa-arrow-down-short-wide me-1"></i>
+  <span id="followup-sort-toggle-label">
+    {% if helpdesk_settings.HELPDESK_FOLLOWUP_NEWEST_FIRST %}
+      {% translate "Newest first" %}
+    {% else %}
+      {% translate "Oldest first" %}
+    {% endif %}
+  </span>
+</button>
