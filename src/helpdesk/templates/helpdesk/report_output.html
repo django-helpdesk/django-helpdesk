@@ -194,6 +194,10 @@
 
 {% block helpdesk_js %}
   {{ chart_data|json_script:"chartData" }}
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  {% else %}
+    <script src="{% static 'helpdesk/vendor/chart.js/chart.umd.min.js' %}"></script>
+  {% endif %}
   <script src="{% static 'helpdesk/js/report_output.js' %}"></script>
 {% endblock helpdesk_js %}
