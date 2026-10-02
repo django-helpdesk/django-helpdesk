@@ -1,15 +1,13 @@
+/* global Chart */
 (() => {
   'use strict'
 
   const ctx = document.getElementById('myChart')
   const data = JSON.parse(document.getElementById('chartData').textContent)
-  const params = new URLSearchParams(window.location.search)
-  console.info(`params:${params}`)
-
   const options = {
     responsive: true,
     maintainAspectRatio: true,
-    indexAxis: params.get('indexAxis') || 'x',
+    datalabels: { display: true },
     elements: {
       bar: {
         borderWidth: 2
@@ -40,5 +38,14 @@
     }
   }
 
-  new Chart(ctx, { type: data.charttype, data, options })
+  const myChart = new Chart(ctx, { type: data.charttype, data, options })
+
+  // Download chart to image
+  document.getElementById('chartToPng').addEventListener('click', () => {
+    const image = myChart.toBase64Image()
+    const link = document.createElement('a')
+    link.href = image
+    link.download = 'chart.png'
+    link.click()
+  })
 })()
