@@ -1633,23 +1633,29 @@ rss_list = staff_member_required(rss_list)
 
 
 @helpdesk_staff_member_required
-def report_index(request):
-    number_tickets = Ticket.objects.all().count()
+@staff_member_required
+def report_index(request: HttpRequest) -> HttpResponse:
+    """Index page to generate or explore various kinds of reports based on either
+    a user or a queue."""
+
+    qs = Ticket.objects.select_related("queue", "assigned_to")
+
+    number_tickets = qs.count()
     saved_query = request.GET.get("saved_query", None)
 
     user_queues = HelpdeskUser(request.user).get_queues()
-    Tickets = Ticket.objects.filter(queue__in=user_queues)
-    basic_ticket_stats = calc_basic_ticket_stats(Tickets)
+    tickets = qs.filter(queue__in=user_queues)
+    basic_ticket_stats = calc_basic_ticket_stats(tickets)
+    customers = qs.values("submitter_email").distinct().count()
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
     #          Open  Resolved
     # Queue 1    10     4
     # Queue 2     4    12
-    Queues = user_queues if user_queues else Queue.objects.all()
-
     dash_tickets = []
-    for queue in Queues:
+    queues = user_queues or Queue.objects.all()
+    for queue in queues:
         dash_ticket = {
             "queue": queue.id,
             "name": queue.title,
@@ -1661,48 +1667,20 @@ def report_index(request):
         }
         dash_tickets.append(dash_ticket)
 
-    return render(
-        request,
-        "helpdesk/report_index.html",
-        {
-            "number_tickets": number_tickets,
-            "saved_query": saved_query,
-            "basic_ticket_stats": basic_ticket_stats,
-            "dash_tickets": dash_tickets,
-        },
-    )
+    ctx = {
+        "number_tickets": number_tickets,
+        "saved_query": saved_query,
+        "basic_ticket_stats": basic_ticket_stats,
+        "dash_tickets": dash_tickets,
+        "customers": customers,
+    }
+
+    return render(request, "helpdesk/report_index.html", ctx)
 
 
-report_index = staff_member_required(report_index)
-
-
-def get_report_queryset_or_redirect(request, report):
-    if Ticket.objects.all().count() == 0 or report not in (
-        "queuemonth",
-        "usermonth",
-        "queuestatus",
-        "queuepriority",
-        "userstatus",
-        "userpriority",
-        "userqueue",
-        "daysuntilticketclosedbymonth",
-    ):
-        return None, None, HttpResponseRedirect(reverse("helpdesk:report_index"))
-
-    report_queryset = (
-        Ticket.objects.all()
-        .select_related()
-        .filter(queue__in=HelpdeskUser(request.user).get_queues())
-    )
-
-    try:
-        saved_query, query_params = load_saved_query(request)
-    except QueryLoadError:
-        return None, HttpResponseRedirect(reverse("helpdesk:report_index"))
-    return report_queryset, query_params, saved_query, None
-
-
-def get_report_table_and_totals(header1, summarytable, possible_options):
+def get_report_table_and_totals(
+    header1: list[str], summarytable: defaultdict, possible_options: list[str]
+) -> tuple[list, dict]:
     table = []
     totals = {}
     for item in header1:
@@ -1763,15 +1741,41 @@ def update_summary_tables(report_queryset, report, summarytable, summarytable2):
 
 
 @helpdesk_staff_member_required
-def run_report(request, report):
-    report_queryset, query_params, saved_query, redirect = (
-        get_report_queryset_or_redirect(request, report)
+@staff_member_required
+def run_report(request: HttpRequest, report: str) -> HttpResponse:
+    """
+    Generic view to generate reports for a specific user or queue.
+    """
+    ALLOWED_REPORTS = (
+        "userstatus",
+        "userpriority",
+        "userqueue",
+        "usermonth",
+        "queuemonth",
+        "queuestatus",
+        "queuepriority",
+        "daysuntilticketclosedbymonth",
     )
-    if redirect:
-        return redirect
+
+    index_url = reverse("helpdesk:report_index")
+    qs = Ticket.objects.select_related("assigned_to", "queue")
+
+    # Validate report type and save query
+    if not qs.exists() or report not in ALLOWED_REPORTS:
+        return HttpResponseRedirect(index_url)
+
+    try:
+        saved_query, query_params = load_saved_query(request)
+    except QueryLoadError:
+        return HttpResponseRedirect(index_url)
+
+    queues = HelpdeskUser(request.user).get_queues()
+    report_queryset = qs.filter(queue__in=queues)
+
     if request.GET.get("saved_query", None):
         Query(report_queryset, query_to_base64(query_params))
 
+    # Prepare data
     summarytable = defaultdict(int)
     # a second table for more complex queries
     summarytable2 = defaultdict(int)
@@ -1784,6 +1788,7 @@ def run_report(request, report):
     last_month = last_ticket.created.month
     last_year = last_ticket.created.year
 
+    # Build periods
     periods = []
     year, month = first_year, first_month
     working = True
@@ -1798,54 +1803,65 @@ def run_report(request, report):
             working = False
         periods.append(f"{year}-{month}")
 
+    priority_choices = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+    status_choices = [s[1].title() for s in Ticket.STATUS_CHOICES]
+
     if report == "userpriority":
         title = _("User by Priority")
+        desc = _("Total tickets assigned to each user segmented by priority")
         col1heading = _("User")
-        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+        possible_options = priority_choices
         charttype = "bar"
 
     elif report == "userqueue":
         title = _("User by Queue")
+        desc = _("Queue wise count of each ticket assigned to each user")
         col1heading = _("User")
-        queue_options = HelpdeskUser(request.user).get_queues()
-        possible_options = [q.title for q in queue_options]
+        possible_options = [q.title for q in queues]
         charttype = "bar"
 
     elif report == "userstatus":
         title = _("User by Status")
+        desc = _("Count of tickets assigned to each user segmented by status")
         col1heading = _("User")
-        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
+        possible_options = status_choices
         charttype = "bar"
 
     elif report == "usermonth":
         title = _("User by Month")
+        desc = _("Monthwise count of tickets handled by each user")
         col1heading = _("User")
         possible_options = periods
-        charttype = "date"
+        charttype = "line"
 
     elif report == "queuepriority":
         title = _("Queue by Priority")
+        desc = _("Count of tickets in each queue segmented by priority")
         col1heading = _("Queue")
-        possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+        possible_options = priority_choices
         charttype = "bar"
 
     elif report == "queuestatus":
         title = _("Queue by Status")
+        desc = _("Count of tickets in each queue segmented by status")
         col1heading = _("Queue")
-        possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
+        possible_options = status_choices
         charttype = "bar"
 
     elif report == "queuemonth":
         title = _("Queue by Month")
+        desc = _("Count of tickets in each queue segmented by status")
         col1heading = _("Queue")
         possible_options = periods
-        charttype = "date"
+        charttype = "line"
 
     elif report == "daysuntilticketclosedbymonth":
         title = _("Days until ticket closed by Month")
+        desc = _("Average number of days it took to close a ticket monthwise")
         col1heading = _("Queue")
         possible_options = periods
-        charttype = "date"
+        charttype = "line"
+
     update_summary_tables(report_queryset, report, summarytable, summarytable2)
     if report == "daysuntilticketclosedbymonth":
         for key in summarytable2:
@@ -1860,19 +1876,6 @@ def run_report(request, report):
     # Pivot the data so that 'header1' fields are always first column
     # in the row, and 'possible_options' are always the 2nd - nth columns.
 
-    # Zip data and headers together in one list for Morris.js charts
-    # will get a list like [(Header1, Data1), (Header2, Data2)...]
-    morrisjs_data = []
-    for seriesnum, label in enumerate(column_headings[1:], start=1):
-        datadict = {"x": label}
-        for n in range(len(table)):
-            datadict[n] = table[n][seriesnum]
-        morrisjs_data.append(datadict)
-
-    series_names = []
-    for series in table:
-        series_names.append(series[0])
-
     # Add total row to table
     total_data = ["Total"]
     for hdr in possible_options:
@@ -1881,24 +1884,30 @@ def run_report(request, report):
             val = round(val, 2)
         total_data.append(str(val))
 
-    return render(
-        request,
-        "helpdesk/report_output.html",
-        {
-            "title": title,
-            "charttype": charttype,
-            "data": table,
-            "total_data": total_data,
-            "headings": column_headings,
-            "series_names": series_names,
-            "morrisjs_data": morrisjs_data,
-            "from_saved_query": saved_query is not None,
-            "saved_query": saved_query,
-        },
-    )
+    # Chart.js data
+    y_label = _("Number of tickets")
+    labels = possible_options
+    datasets = [{"label": row[0], "data": row[1:]} for row in table]
+    chart_data = {
+        "labels": labels,
+        "datasets": datasets,
+        "charttype": charttype,
+        "y_label": y_label,
+    }
 
+    ctx = {
+        "title": title,
+        "desc": desc,
+        "charttype": charttype,
+        "headings": column_headings,
+        "data": table,
+        "total_data": total_data,
+        "from_saved_query": saved_query is not None,
+        "saved_query": saved_query,
+        "chart_data": chart_data,
+    }
 
-run_report = staff_member_required(run_report)
+    return render(request, "helpdesk/report_output.html", ctx)
 
 
 @helpdesk_staff_member_required
