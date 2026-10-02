@@ -5,6 +5,7 @@
 {% block helpdesk_title %}
   {% translate "Reports & Statistics" %}
 {% endblock helpdesk_title %}
+
 {% block helpdesk_body %}
   {% if number_tickets == 0 %}
     <p>{% translate "You haven't created any tickets yet, so you cannot run any reports." %}</p>
@@ -12,15 +13,18 @@
     {# Page header row #}
     <div class="row align-items-center mx-2 g-3 mb-3">
       <div class="col">
-        <p class="text-uppercase mb-0 text-body-secondary">{% translate "Overview" %}</p>
-        <h1 class="fs-3">{% translate "Reports & Statistics" %}</h1>
+        <p class="text-uppercase mb-0 text-body-secondary small">{% translate "Overview" %}</p>
+        <h1 class="fs-4">{% translate "Reports & Statistics" %}</h1>
       </div>
       <div class="col-auto">
         <div class="dropdown">
           <button class="btn bg-body-tertiary border dropdown-toggle"
                   type="button"
                   data-bs-toggle="dropdown"
-                  aria-expanded="false">{% translate "Create new report" %}</button>
+                  aria-expanded="false">
+            <i class="fas fa-chart-line me-1"></i>
+            {% translate "Create new report" %}
+          </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li>
               <h6 class="dropdown-header">{% translate "Reports for User" %}</h6>
@@ -91,7 +95,7 @@
         </div>
       </div>
     </div>
-    {# Top KPI stats #}
+    {# Top header stats #}
     <div class="row row-cols-1 row-cols-lg-4 g-3 mb-3 mx-2">
       <div class="col">
         <div class="card card-body h-100">
@@ -121,7 +125,7 @@
         </div>
       {% endfor %}
     </div>
-    {# User stats #}
+    {# Kpi stats #}
     <div class="row row-cols-1 row-cols-lg-4 g-3 mb-3 mx-2">
       <div class="col">
         <div class="card">
@@ -176,16 +180,17 @@
         <div class="card">
           <div class="card-body d-flex align-items-center">
             <div class="bg-success-subtle text-success-emphasis rounded-2 px-3 py-2">
-              <i class="fa-regular fa-circle-check fs-4"></i>
+              <i class="fa-regular fa-user fs-4"></i>
             </div>
             <div class="ms-3">
-              <span class="d-block">{{ closed_tickets.paginator.count }}</span>
-              <span class="text-secondary">{% translate "Resolved or Closed" %}</span>
+              <span class="d-block">{{ customers }}</span>
+              <span class="text-secondary">{% translate "Unique Customers" %}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
+    {# Queue table #}
     <div class="row row-cols-1 row-cols-md-2 g-3 mx-2">
       <div class="col">
         <div class="card mb-3">
