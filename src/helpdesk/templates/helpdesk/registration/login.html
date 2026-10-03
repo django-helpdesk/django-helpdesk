@@ -61,6 +61,12 @@
                 <input type="hidden" name="next" value="{{ next }}" />
               {% endif %}
             </form>
+            {% url 'set_language' as set_language_url %}
+            {% if set_language_url %}
+              <div class="text-center">
+                <a href="{% url 'helpdesk:public_change_language' %}?return_to={{ request.get_full_path|urlencode }}">{% translate "Change the display language" %}</a>
+              </div>
+            {% endif %}
           </div>
         </div>
         <div class="d-flex justify-content-center text-sm py-3">
