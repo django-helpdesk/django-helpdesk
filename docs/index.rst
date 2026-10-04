@@ -14,7 +14,6 @@ Contents
    install
    upgrade
    configuration
-   ai_suggestions
    settings
    spam
    custom_fields

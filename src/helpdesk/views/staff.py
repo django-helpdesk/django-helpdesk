@@ -45,11 +45,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 
 from helpdesk import settings as helpdesk_settings
-from helpdesk.ai_suggestions import (
-    AISuggestionError,
-    find_related_tickets,
-    generate_suggestion,
-)
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
     is_helpdesk_staff,
@@ -530,14 +525,11 @@ def view_ticket(request, ticket_id):
         )
         return HttpResponseRedirect(reverse("helpdesk:list"))
 
-    # AI 建议请求优先处理，避免混合查询参数触发工单写入。
-    ai_requested = request.method == "POST" and "ai_suggest" in request.POST
-
-    if not ai_requested and "take" in request.GET:
+    if "take" in request.GET:
         update_ticket(request.user, ticket, owner=request.user.id)
         return return_to_ticket(request.user, ticket)
 
-    if not ai_requested and "subscribe" in request.GET:
+    if "subscribe" in request.GET:
         # Allow the user to subscribe him/herself to the ticket whilst viewing
         # it.
         show_subscribe = return_ticketccstring_and_show_subscribe(request.user, ticket)[
@@ -548,11 +540,7 @@ def view_ticket(request, ticket_id):
             subscribe_to_ticket_updates(ticket, request.user.id)
             return HttpResponseRedirect(reverse("helpdesk:view", args=[ticket.id]))
 
-    if (
-        not ai_requested
-        and "close" in request.GET
-        and ticket.status == Ticket.RESOLVED_STATUS
-    ):
+    if "close" in request.GET and ticket.status == Ticket.RESOLVED_STATUS:
         if not ticket.assigned_to:
             owner = 0
         else:
@@ -565,18 +553,6 @@ def view_ticket(request, ticket_id):
             comment=_("Accepted resolution and closed ticket"),
         )
         return return_to_ticket(request.user, ticket)
-
-    ai_related = []
-    ai_suggestion = None
-    ai_error = None
-    if ai_requested:
-        if not getattr(settings, "HELPDESK_AI_ENABLED", False):
-            raise Http404
-        ai_related = find_related_tickets(ticket, request.user)
-        try:
-            ai_suggestion = generate_suggestion(ticket, ai_related)
-        except AISuggestionError:
-            ai_error = _("The AI provider is unavailable. The ticket was not changed.")
 
     extra_context_kwargs = get_form_extra_kwargs(request.user)
     form = TicketForm(
@@ -599,7 +575,7 @@ def view_ticket(request, ticket_id):
     else:
         submitter_userprofile_url = None
 
-    checklist_form = CreateChecklistForm(None if ai_requested else request.POST or None)
+    checklist_form = CreateChecklistForm(request.POST or None)
     if checklist_form.is_valid():
         checklist = checklist_form.save(commit=False)
         checklist.ticket = ticket
@@ -637,11 +613,6 @@ def view_ticket(request, ticket_id):
         "helpdesk/ticket.html",
         {
             "ticket": ticket,
-            "ai_suggestions_enabled": getattr(settings, "HELPDESK_AI_ENABLED", False),
-            "ai_requested": ai_requested,
-            "ai_related": ai_related,
-            "ai_suggestion": ai_suggestion,
-            "ai_error": ai_error,
             "followups": get_followups_for_ticket(ticket),
             "dependencies": dependencies,
             "resolves": resolves,
