@@ -10,7 +10,7 @@ In general, entire HTML and CSS templates may be overridden by including a file 
 Additional ticket panels
 ------------------------
 
-The staff ticket template provides an empty ``ticket_additional_panels`` block
+The staff ticket template provides an empty ``helpdesk_ticket_panels`` block
 immediately after the ticket description table and before the response controls.
 Use it to add a project-specific panel without copying the full ticket template.
 The default block is empty and does not change the ticket view's behavior.
@@ -20,7 +20,7 @@ in ``TEMPLATES[0]['DIRS']``::
 
     {% extends "helpdesk/ticket.html" %}
 
-    {% block ticket_additional_panels %}
+    {% block helpdesk_ticket_panels %}
       {{ block.super }}
       <section aria-label="Internal reference">
         <p>Reference for ticket #{{ ticket.id }}</p>
@@ -30,11 +30,10 @@ in ``TEMPLATES[0]['DIRS']``::
 An installed app can also provide this override when it precedes ``helpdesk``
 in ``INSTALLED_APPS`` and the app-directory template loader is enabled. See
 `Django's template override documentation
-<https://docs.djangoproject.com/en/5.2/howto/overriding-templates/>`_.
+<https://docs.djangoproject.com/en/stable/howto/overriding-templates/>`_.
 
-This block is a presentation extension point. Any extra endpoints or external
-services belong to the integration and must enforce their own authentication,
-ticket permissions and CSRF protection; displaying a panel does not grant access.
+Any endpoint called by the panel must enforce its own authentication, ticket
+permissions and CSRF protection.
 
 Follow-up colors
 -----------------
