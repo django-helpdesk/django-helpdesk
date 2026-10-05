@@ -14,12 +14,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"datatables.net-bs5@npm:^3.1, datatables.net-bs5@npm:^3.1.2":
+"datatables.net-bs5@npm:^3.1":
   version: 3.1.2
   resolution: "datatables.net-bs5@npm:3.1.2"
   dependencies:
     datatables.net: "npm:3.1.2"
   checksum: 10c0/2c1db632e04e7af266de832e153bcf635df724dd9d82cbf6b4a08f7a4c56125aee5d9de8b21908757e2a37c16753ce038782d5f9560e67ee009cf44cf568a265
+  languageName: node
+  linkType: hard
+
+"datatables.net-bs5@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "datatables.net-bs5@npm:3.1.3"
+  dependencies:
+    datatables.net: "npm:3.1.3"
+  checksum: 10c0/df064c445558756e8aebe1de05b5765eac96e454d29c1aafbc862b1ad4568bea60f8816d534daba8270b4580bdfb5c2d04c61786d1a7c49a3af3fe01a58e57d3
   languageName: node
   linkType: hard
 
@@ -61,10 +70,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"datatables.net@npm:3.1.2, datatables.net@npm:^3.1, datatables.net@npm:^3.1.2":
+"datatables.net@npm:3.1.2, datatables.net@npm:^3.1":
   version: 3.1.2
   resolution: "datatables.net@npm:3.1.2"
   checksum: 10c0/f63d420b5dd56e0f32b88f1704e56ebf5cf8039d6d7b3a19863d4c2bfd463f8bc2091cfa1b6a4dc7340521dde61b04e6fb1c40068c53c6d328b1681bd5bef095
+  languageName: node
+  linkType: hard
+
+"datatables.net@npm:3.1.3, datatables.net@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "datatables.net@npm:3.1.3"
+  checksum: 10c0/0166cb0275211392a6b00367141726de30be7d6dadf0da1ff88c66b09129ee71936b515f3851ed865aa82ed8c16ace38915d5be5065c040425b35c2cf14890ce
   languageName: node
   linkType: hard
 
@@ -73,8 +89,8 @@ __metadata:
   resolution: "django-helpdesk@workspace:."
   dependencies:
     bootstrap: "npm:5.3.8"
-    datatables.net: "npm:^3.1.2"
-    datatables.net-bs5: "npm:^3.1.2"
+    datatables.net: "npm:^3.1.3"
+    datatables.net-bs5: "npm:^3.1.3"
     datatables.net-buttons: "npm:^4.1.2"
     datatables.net-buttons-bs5: "npm:^4.1.2"
     datatables.net-buttons-dt: "npm:^4.1.2"
