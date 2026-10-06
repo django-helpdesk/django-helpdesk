@@ -67,9 +67,18 @@ class UserTicketViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes: ClassVar[list] = [IsAuthenticated]
 
     def get_queryset(self):
-        tickets = Ticket.objects.filter(
-            submitter_email=self.request.user.email
-        ).order_by("-created")
+        # submitter_email and User.email are both unverified and both default to
+        # an empty value, so matching one against the other made every account
+        # without an address the submitter of every ticket without one. An
+        # address identifies nobody until it is non-empty on both sides.
+        email = self.request.user.email
+        if not email:
+            return Ticket.objects.none()
+        tickets = (
+            Ticket.objects.filter(submitter_email=email)
+            .exclude(submitter_email="")
+            .order_by("-created")
+        )
         for ticket in tickets:
             ticket.set_custom_field_values()
         return tickets

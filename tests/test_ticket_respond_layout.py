@@ -75,6 +75,13 @@ class TicketRespondLayoutTests(TestCase):
         page = self.get_page()
         self.assertIn('id="respond-tab-pane"', page)
 
+    def test_unknown_layout_falls_back_to_tabs(self):
+        """if a typo in setting ticket_respond_layout fallback to tabs"""
+        self.set_layout("TYPO")
+        page = self.get_page()
+        self.assertIn('id="respond-tab-pane"', page)
+        self.assertIn('id="followup-tab-pane"', page)
+
     def test_user_settings_form_saves_layout(self):
         settings = self.user.usersettings_helpdesk
         form = UserSettingsForm(
