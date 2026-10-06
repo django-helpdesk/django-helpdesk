@@ -290,6 +290,15 @@ class EditFollowUpForm(forms.ModelForm):
             status__in=Ticket.OPEN_STATUSES
         )
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            cleaned_data.get("copy_to_ticket")
+            and not helpdesk_settings.HELPDESK_ENABLE_FOLLOWUP_COPY
+        ):
+            raise forms.ValidationError(_("Copying follow-ups is disabled."))
+        return cleaned_data
+
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
     """

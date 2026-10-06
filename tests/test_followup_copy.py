@@ -17,6 +17,11 @@ from .helpers import get_user
 
 class FollowUpCopyTests(TestCase):
     def setUp(self):
+        enabled = mock.patch.object(
+            helpdesk_settings, "HELPDESK_ENABLE_FOLLOWUP_COPY", True
+        )
+        enabled.start()
+        self.addCleanup(enabled.stop)
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
         self.media_root = Path(directory.name)
@@ -193,3 +198,27 @@ class FollowUpCopyTests(TestCase):
         self.followup.refresh_from_db()
         self.assertEqual(self.followup.title, "Investigation")
         self.assertEqual(self.followup.comment, "Restart the device.")
+
+    def test_disabled_hides_copy_option(self):
+        with mock.patch.object(
+            helpdesk_settings, "HELPDESK_ENABLE_FOLLOWUP_COPY", False
+        ):
+            response = self.client.get(self.url)
+        self.assertNotContains(response, 'name="copy_to_ticket"')
+
+    def test_disabled_rejects_copy_without_moving_original(self):
+        with mock.patch.object(
+            helpdesk_settings, "HELPDESK_ENABLE_FOLLOWUP_COPY", False
+        ):
+            response = self.post()
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["form"].errors)
+        self.followup.refresh_from_db()
+        self.assertEqual(self.followup.ticket, self.source)
+        self.assertEqual(FollowUp.objects.count(), 1)
+
+    def test_disabled_preserves_normal_move(self):
+        with mock.patch.object(
+            helpdesk_settings, "HELPDESK_ENABLE_FOLLOWUP_COPY", False
+        ):
+            self.test_unchecked_copy_preserves_existing_move_behavior()

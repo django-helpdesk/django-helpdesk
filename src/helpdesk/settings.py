@@ -582,3 +582,8 @@ LOG_WARN_WHEN_CC_EMAIL_LINKED_TO_MORE_THAN_1_USER = getattr(
 )
 HELPDESK_API_ENABLED = getattr(settings, "HELPDESK_API_ENABLED", True)
 HELPDESK_UI_ENABLED = getattr(settings, "HELPDESK_UI_ENABLED", True)
+
+# Enable copying through the existing follow-up editor per deployment.
+HELPDESK_ENABLE_FOLLOWUP_COPY = getattr(
+    settings, "HELPDESK_ENABLE_FOLLOWUP_COPY", False
+)
