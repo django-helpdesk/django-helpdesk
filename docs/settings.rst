@@ -767,4 +767,3 @@ The following settings were defined in previous versions and are no longer suppo
 .. setting:: HELPDESK_ENABLE_PER_QUEUE_MEMBERSHIP
 
    Discontinued in favor of :setting:`HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION`.
-
