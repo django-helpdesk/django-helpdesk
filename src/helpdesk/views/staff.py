@@ -45,6 +45,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 
 from helpdesk import settings as helpdesk_settings
+from helpdesk.copy_followup import copy_followup
 from helpdesk.decorators import (
     helpdesk_staff_member_required,
     is_helpdesk_staff,
@@ -443,7 +444,27 @@ def followup_edit(request, ticket_id, followup_id):
             .distinct()
         )
 
-        if form.is_valid():
+        if form.is_valid() and form.cleaned_data["copy_to_ticket"]:
+            destination = form.cleaned_data["ticket"]
+            if destination.pk == ticket.pk:
+                form.add_error("ticket", _("Choose another ticket for the copy."))
+            else:
+                try:
+                    copied = copy_followup(
+                        followup,
+                        destination,
+                        request.user,
+                        title=form.cleaned_data["title"],
+                        comment=form.cleaned_data["comment"],
+                        public=form.cleaned_data["public"],
+                    )
+                except OSError:
+                    form.add_error(
+                        None, _("Unable to copy the attachments. No copy was created.")
+                    )
+                else:
+                    return HttpResponseRedirect(copied.get_absolute_url())
+        elif form.is_valid():
             # Edit in place: a copy would lose the message ID and the
             # TicketChange rows, which cascade away with the old row.
             followup.title = form.cleaned_data["title"]

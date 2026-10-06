@@ -37,7 +37,13 @@
             <fieldset>
             <dl>
                 <dt><label for='id_ticket'>{% translate "Reassign ticket:" %}</label></dt>
-                <dd>{{ form.ticket }}</dd>
+                <dd>{{ form.ticket }}{{ form.ticket.errors }}</dd>
+                {% if helpdesk_settings.HELPDESK_ENABLE_FOLLOWUP_COPY %}
+                <dd>
+                    <label for="{{ form.copy_to_ticket.id_for_label }}">{{ form.copy_to_ticket }} {{ form.copy_to_ticket.label }}</label>
+                    <p class="text-body-secondary small">{{ form.copy_to_ticket.help_text }}</p>
+                </dd>
+                {% endif %}
                 <dt><label for="id_title">{% translate "Title:" %}</label></dt>
                 <dd>{{ form.title }}</dd>
                 <dt><label for="id_comment">{% translate "Comment:" %}</label></dt>

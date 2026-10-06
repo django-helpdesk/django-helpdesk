@@ -567,6 +567,20 @@ Options that change ticket properties
    class is empty.
 
 
+.. setting:: HELPDESK_ENABLE_FOLLOWUP_COPY
+
+   *Default:* ``False``
+
+   Set ``HELPDESK_ENABLE_FOLLOWUP_COPY = True`` in your Django ``settings.py``
+   to enable the **Copy instead of moving** option on the existing follow-up
+   edit page. This is a deployment-wide setting, not a user preference.
+   Existing staff and ticket access checks still apply.
+
+   When disabled, the option is hidden and copy submissions are rejected
+   without changing the original follow-up. Normal editing and moving remain
+   available.
+
+
 Time Tracking Options
 ---------------------
 
