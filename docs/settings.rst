@@ -469,6 +469,25 @@ Options that change ticket properties
                                       HELPDESK_TICKET_REOPENED_STATUS,
                                       HELPDESK_TICKET_FORKED_STATUS)
 
+.. setting:: HELPDESK_EMAIL_REOPEN_STATUSES
+
+   *Default:* ``(HELPDESK_TICKET_CLOSED_STATUS,)``
+
+   Define the statuses that an incoming e-mail reply moves back to
+   ``HELPDESK_TICKET_REOPENED_STATUS``. By default only closed tickets are
+   reopened; a reply to a resolved ticket is attached as a follow-up but the
+   ticket stays resolved.
+
+   To reopen resolved tickets as well, so that a submitter disputing a
+   resolution puts the ticket back in front of staff::
+
+     HELPDESK_EMAIL_REOPEN_STATUSES = (HELPDESK_TICKET_CLOSED_STATUS,
+                                       HELPDESK_TICKET_RESOLVED_STATUS)
+
+   Automatic responses such as out-of-office replies, detected from their
+   ``Auto-Submitted`` or ``X-Auto-Response-Suppress`` headers, are attached as
+   follow-ups but never change the ticket status.
+
 .. setting:: HELPDESK_TICKET_STATUS_CHOICES_FLOW
 
    Customize the allowed state changes depending on the current state.
