@@ -63,3 +63,15 @@ class EmailReopenTests(TestCase):
 
         self.assertEqual(self.ticket.status, Ticket.RESOLVED_STATUS)
         self.assertIsNone(followup.new_status)
+
+    def test_should_reopen_resolved_ticket_when_status_is_in_reopen_setting(self):
+        self.set_status(Ticket.RESOLVED_STATUS)
+        with mock.patch.object(
+            helpdesk_settings,
+            "EMAIL_REOPEN_STATUSES",
+            (Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS),
+        ):
+            followup = self.reply()
+
+        self.assertEqual(self.ticket.status, Ticket.REOPENED_STATUS)
+        self.assertEqual(followup.new_status, Ticket.REOPENED_STATUS)

@@ -650,7 +650,7 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
             )
             return None
     # Old issue being re-opened
-    elif ticket.status == Ticket.CLOSED_STATUS:
+    elif ticket.status in helpdesk_settings.EMAIL_REOPEN_STATUSES:
         ticket.status = Ticket.REOPENED_STATUS
         ticket.save()
 
