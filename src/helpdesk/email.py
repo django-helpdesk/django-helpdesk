@@ -629,6 +629,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 logger.info(f"Ticket has been merged to {ticket.merged_to.ticket}")
                 # Use the ticket in which it was merged to for next operations
                 ticket = ticket.merged_to
+
+    autoreply = is_autoreply(message)
+
     # New issue, create a new <Ticket> instance
     if ticket is None:
         if not getattr(settings, "QUEUE_EMAIL_BOX_UPDATE_ONLY", False):
@@ -649,8 +652,9 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
                 "The QUEUE_EMAIL_BOX_UPDATE_ONLY setting is True so new ticket not created."
             )
             return None
-    # Old issue being re-opened
-    elif ticket.status in helpdesk_settings.EMAIL_REOPEN_STATUSES:
+    # Old issue being re-opened, unless the reply is an out-of-office or
+    # similar automatic response, which must not change the ticket status
+    elif ticket.status in helpdesk_settings.EMAIL_REOPEN_STATUSES and not autoreply:
         ticket.status = Ticket.REOPENED_STATUS
         ticket.save()
 
@@ -694,7 +698,6 @@ def create_object_from_email_message(message, ticket_id, payload, files, logger)
     new_ticket_ccs = []
     new_ticket_ccs.append(create_ticket_cc(ticket, to_list + cc_list, logger))
 
-    autoreply = is_autoreply(message)
     if autoreply:
         logger.info(
             "Message seems to be auto-reply, not sending any emails back to the sender"

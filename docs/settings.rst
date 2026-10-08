@@ -484,6 +484,10 @@ Options that change ticket properties
      HELPDESK_EMAIL_REOPEN_STATUSES = (HELPDESK_TICKET_CLOSED_STATUS,
                                        HELPDESK_TICKET_RESOLVED_STATUS)
 
+   Automatic responses such as out-of-office replies, detected from their
+   ``Auto-Submitted`` or ``X-Auto-Response-Suppress`` headers, are attached as
+   follow-ups but never change the ticket status.
+
 .. setting:: HELPDESK_TICKET_STATUS_CHOICES_FLOW
 
    Customize the allowed state changes depending on the current state.

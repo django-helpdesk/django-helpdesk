@@ -75,3 +75,12 @@ class EmailReopenTests(TestCase):
 
         self.assertEqual(self.ticket.status, Ticket.REOPENED_STATUS)
         self.assertEqual(followup.new_status, Ticket.REOPENED_STATUS)
+
+    def test_should_not_reopen_ticket_when_reply_is_an_autoreply(self):
+        self.set_status(Ticket.CLOSED_STATUS)
+
+        followup = self.reply(**{"Auto-Submitted": "auto-replied"})
+
+        self.assertEqual(self.ticket.status, Ticket.CLOSED_STATUS)
+        self.assertIsNone(followup.new_status)
+        self.assertEqual(followup.comment, "Still broken")
