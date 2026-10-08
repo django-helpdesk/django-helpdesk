@@ -268,6 +268,14 @@ class EditTicketCustomFieldForm(EditTicketForm):
 
 
 class EditFollowUpForm(forms.ModelForm):
+    copy_to_ticket = forms.BooleanField(
+        required=False,
+        label=_("Copy instead of moving"),
+        help_text=_(
+            "Keep the original follow-up and copy the title, comment and attachments to the selected ticket. No email is sent; status changes and time spent are not copied. Check Public before sharing with the destination submitter."
+        ),
+    )
+
     class Meta:
         model = FollowUp
         exclude = (
@@ -281,6 +289,15 @@ class EditFollowUpForm(forms.ModelForm):
         self.fields["ticket"].queryset = Ticket.objects.filter(
             status__in=Ticket.OPEN_STATUSES
         )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            cleaned_data.get("copy_to_ticket")
+            and not helpdesk_settings.HELPDESK_ENABLE_FOLLOWUP_COPY
+        ):
+            raise forms.ValidationError(_("Copying follow-ups is disabled."))
+        return cleaned_data
 
 
 class AbstractTicketForm(CustomFieldMixin, forms.Form):
