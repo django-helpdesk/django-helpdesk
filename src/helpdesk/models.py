@@ -549,7 +549,7 @@ class Ticket(models.Model):
 
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="assigned_to",
         blank=True,
         null=True,
@@ -625,7 +625,7 @@ class Ticket(models.Model):
         "self",
         verbose_name=_("merged to"),
         related_name="merged_tickets",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
@@ -999,7 +999,7 @@ class FollowUp(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         blank=True,
         null=True,
         verbose_name=_("User"),
@@ -1573,7 +1573,7 @@ class KBItem(models.Model):
 
     team = models.ForeignKey(
         helpdesk_settings.HELPDESK_TEAMS_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Team"),
         blank=True,
         null=True,
