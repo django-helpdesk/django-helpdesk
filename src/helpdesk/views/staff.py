@@ -1656,7 +1656,6 @@ rss_list = staff_member_required(rss_list)
 
 
 @helpdesk_staff_member_required
-@staff_member_required
 def report_index(request: HttpRequest) -> HttpResponse:
     """Index page to generate or explore various kinds of reports based on either
     a user or a queue."""
@@ -1764,7 +1763,6 @@ def update_summary_tables(report_queryset, report, summarytable, summarytable2):
 
 
 @helpdesk_staff_member_required
-@staff_member_required
 def run_report(request: HttpRequest, report: str) -> HttpResponse:
     """
     Generic view to generate reports for a specific user or queue.
@@ -1873,7 +1871,7 @@ def run_report(request: HttpRequest, report: str) -> HttpResponse:
 
     elif report == "queuemonth":
         title = _("Queue by Month")
-        desc = _("Count of tickets in each queue segmented by status")
+        desc = _("Count of tickets in each queue shown monthwise")
         col1heading = _("Queue")
         possible_options = periods
         charttype = "line"
