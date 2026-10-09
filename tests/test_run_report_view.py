@@ -10,8 +10,7 @@ from .helpers import get_staff_user
 
 class RunReportViewTests(TestCase):
     """
-    Test suite for the run report view which can render any type (in all 7 types)
-    of reports.
+    Test suite for the run report view which can render different types of reports.
     """
 
     @classmethod
