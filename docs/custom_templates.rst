@@ -7,6 +7,34 @@ In particular, users can include a file named ``helpdesk-customize.css`` in thei
 
 In general, entire HTML and CSS templates may be overridden by including a file of the same name in the project directory. Django automatically searches the project directory before searching for default templates included with django-helpdesk.
 
+Additional ticket panels
+------------------------
+
+The staff ticket template provides an empty ``helpdesk_ticket_panels`` block
+immediately after the ticket description table and before the response controls.
+Use it to add a project-specific panel without copying the full ticket template.
+The default block is empty and does not change the ticket view's behavior.
+
+Create ``helpdesk/ticket.html`` in your project's template directory, configured
+in ``TEMPLATES[0]['DIRS']``::
+
+    {% extends "helpdesk/ticket.html" %}
+
+    {% block helpdesk_ticket_panels %}
+      {{ block.super }}
+      <section aria-label="Internal reference">
+        <p>Reference for ticket #{{ ticket.id }}</p>
+      </section>
+    {% endblock %}
+
+An installed app can also provide this override when it precedes ``helpdesk``
+in ``INSTALLED_APPS`` and the app-directory template loader is enabled. See
+`Django's template override documentation
+<https://docs.djangoproject.com/en/stable/howto/overriding-templates/>`_.
+
+Any endpoint called by the panel must enforce its own authentication, ticket
+permissions and CSRF protection.
+
 Follow-up colors
 -----------------
 
