@@ -14,6 +14,37 @@ repository is available at:
 
 https://github.com/django-helpdesk/django-helpdesk
 
+AI policy
+---------
+
+Like any tool, generative AI should be used with critical thinking and good judgement. Here are our expectations for everyone wanting to contribute to django-helpdesk.
+
+
+- Review and test all AI-generated code. You are expected to understand the code, and take final accountability for it.
+- Include a disclosure if you use generative AI for your code contribution.
+- Always write pull request descriptions manually
+
+In addition, we recommend to:
+
+- Avoid all AI use in messages (GitHub issues, discussions, proposal) with other contributors, participants, mentors. Use your own words, share your own ideas.
+- Avoid sharing research from AI tools as-is. AI use for research is ok. Be critical of its results and share only the information you can confirm to be correct.
+
+When this policy isn’t followed, we may resort to a ban from the project or close your contribution without feedback.
+
+AI-assited Contributions
+------------------------
+
+Here are acceptable uses of AI for code and documentation contributions:
+
+- Generate test cases or demo implementations as part of testing a feature or a bug.
+- Improve writing for documentation (grammar, style guide).
+- Research a problem and explore possible solutions.
+
+Here are unacceptable uses:
+
+- Unacceptable: create a contribution from an existing issue with no further direction.
+- Unacceptable: triage issues such as reproducing bugs or discussing features based on the input of AI alone.
+
 
 Testing
 -------
@@ -38,7 +69,7 @@ have been passed.
 If for some reason you are forced to stay on an older version and need a patch that may apply to others with the same road
 block preventing upgrading to the latest release,
 then you can check out that versions code using the version tag and push your patch to a branch that we can then tag with a
-patch release - it will not be merged to the `main` branch. 
+patch release - it will not be merged to the `main` branch.
 
 We reserve the right to decline a pull request raised against the `main` branch if it does not contain adequate unit tests.
 
