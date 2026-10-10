@@ -136,6 +136,10 @@
 {% endblock %}
 
 {% block helpdesk_js %}
+  {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+  {{ helpdesk_settings.HELPDESK_VALID_EXTENSIONS|json_script:"helpdesk-valid-extensions" }}
+  {{ helpdesk_settings.HELPDESK_VALIDATE_ATTACHMENT_TYPES|json_script:"helpdesk-validate-attachment-types" }}
+  {% endif %}
   <script language='javascript'>
     $(function() {
       $("#id_due_date").datepicker({
@@ -204,6 +208,245 @@
         e.preventDefault();
         $(wrapper).append("<div class='mb-3'><input class='form-control' type='file' name='attachment' id='file" + x + "' multiple /></div>"); //add input box
       });
+
+      var respondForm = document.getElementById('ticket-respond-form');
+      var dropZone = document.getElementById('attachment-drop-zone');
+      if (respondForm && dropZone) {
+        var dragCounter = 0;
+
+        function showDropHighlight() {
+          respondForm.style.outline = '2px dashed #0d6efd';
+          respondForm.style.outlineOffset = '4px';
+          respondForm.style.backgroundColor = 'rgba(13, 110, 253, 0.05)';
+          dropZone.style.borderColor = '#0d6efd';
+        }
+
+        function hideDropHighlight() {
+          respondForm.style.outline = '';
+          respondForm.style.outlineOffset = '';
+          respondForm.style.backgroundColor = '';
+          dropZone.style.borderColor = '';
+        }
+
+        var dropStatus = document.getElementById('attachment-drop-status');
+        var validExtensions = JSON.parse(document.getElementById('helpdesk-valid-extensions').textContent)
+          .map(function(ext) { return ext.toLowerCase(); });
+        var validateAttachmentTypes = JSON.parse(document.getElementById('helpdesk-validate-attachment-types').textContent);
+        var maxFetchedImageSize = 10 * 1024 * 1024;
+        var imageExtensions = {
+          'image/png': ['.png'],
+          'image/jpeg': ['.jpg', '.jpeg'],
+          'image/gif': ['.gif'],
+          'image/webp': ['.webp'],
+          'image/bmp': ['.bmp']
+        };
+        var dropMessages = {
+          fetching: '{% filter escapejs %}{% translate "Fetching image…" %}{% endfilter %}',
+          attached: '{% filter escapejs %}{% translate "Attached:" %}{% endfilter %}',
+          unsupported: '{% filter escapejs %}{% translate "Unsupported file type:" %}{% endfilter %}',
+          allowed: '{% filter escapejs %}{% translate "Allowed types:" %}{% endfilter %}',
+          notImage: '{% filter escapejs %}{% translate "The dropped item is not a supported image." %}{% endfilter %}',
+          tooLarge: '{% filter escapejs %}{% translate "The image is too large to attach." %}{% endfilter %}',
+          noAddress: '{% filter escapejs %}{% translate "Couldn't determine the image's address. Save the image and drop the file here instead." %}{% endfilter %}',
+          fetchFailed: '{% filter escapejs %}{% translate "Couldn't fetch this image, the site may not allow it. Right-click the image, choose Copy image and paste it here, or save it and drop the file here instead." %}{% endfilter %}'
+        };
+
+        function hasType(dataTransfer, type) {
+          return Array.prototype.indexOf.call(dataTransfer.types, type) !== -1;
+        }
+
+        function setStatus(message, isError) {
+          dropStatus.textContent = message;
+          dropStatus.className = 'small mt-2 mb-0 ' + (isError ? 'text-danger' : 'text-muted');
+          ensureAttachmentsVisible();
+        }
+
+        function ensureAttachmentsVisible() {
+          var el = document.getElementById('collapseAttachments');
+          if (el && !el.classList.contains('show')) {
+            new bootstrap.Collapse(el, {show: true});
+          }
+        }
+
+        function splitExtension(name) {
+          var i = name.lastIndexOf('.');
+          return i > 0 ? [name.slice(0, i), name.slice(i).toLowerCase()] : [name, ''];
+        }
+
+        function extensionAllowed(ext) {
+          return !validateAttachmentTypes || ext === '' || validExtensions.indexOf(ext) !== -1;
+        }
+
+        function normalizeFile(file) {
+          var parts = splitExtension(file.name);
+          var candidates = imageExtensions[file.type] || [];
+          if (extensionAllowed(parts[1]) && (parts[1] !== '' || !candidates.length)) return file;
+          for (var i = 0; i < candidates.length; i++) {
+            if (extensionAllowed(candidates[i])) {
+              return new File([file], (parts[0] || 'image') + candidates[i], {type: file.type});
+            }
+          }
+          return extensionAllowed(parts[1]) ? file : null;
+        }
+
+        function appendFileInput(files) {
+          var dt = new DataTransfer();
+          var attached = [];
+          var rejected = [];
+          for (var i = 0; i < files.length; i++) {
+            var file = normalizeFile(files[i]);
+            if (file) {
+              dt.items.add(file);
+              attached.push(file.name);
+            } else {
+              rejected.push(files[i].name);
+            }
+          }
+          if (rejected.length) {
+            setStatus(dropMessages.unsupported + ' ' + rejected.join(', ') + '. ' +
+              dropMessages.allowed + ' ' + validExtensions.join(', '), true);
+          } else if (attached.length) {
+            setStatus(dropMessages.attached + ' ' + attached.join(', '), false);
+          }
+          if (!attached.length) return;
+          x++;
+          var input = document.createElement('input');
+          input.className = 'form-control';
+          input.type = 'file';
+          input.name = 'attachment';
+          input.id = 'file' + x;
+          input.multiple = true;
+          input.files = dt.files;
+          var div = document.createElement('div');
+          div.className = 'mb-3';
+          div.appendChild(input);
+          wrapper.append(div);
+        }
+
+        function looksLikeImageUrl(value) {
+          try {
+            return /\.(png|jpe?g|gif|webp|bmp)$/i.test(new URL(value).pathname);
+          } catch (err) {
+            return false;
+          }
+        }
+
+        function extractImageUrl(dataTransfer) {
+          var uris = dataTransfer.getData('text/uri-list').split(/\r?\n/).filter(function(line) {
+            line = line.trim();
+            return line && line.charAt(0) !== '#';
+          }).map(function(line) { return line.trim(); });
+          for (var i = 0; i < uris.length; i++) {
+            if (looksLikeImageUrl(uris[i])) return uris[i];
+          }
+          var html = dataTransfer.getData('text/html');
+          if (html) {
+            var img = new DOMParser().parseFromString(html, 'text/html').querySelector('img[src]');
+            if (img) return img.getAttribute('src');
+          }
+          var text = dataTransfer.getData('text/plain').trim();
+          if (looksLikeImageUrl(text)) return text;
+          return null;
+        }
+
+        function fetchAndAttachImage(src) {
+          var url;
+          try {
+            url = new URL(src);
+          } catch (err) {
+            setStatus(dropMessages.noAddress, true);
+            return;
+          }
+          if (['https:', 'http:', 'data:'].indexOf(url.protocol) === -1) {
+            setStatus(dropMessages.notImage, true);
+            return;
+          }
+          setStatus(dropMessages.fetching, false);
+          fetch(url.href, {mode: 'cors', credentials: 'omit'})
+            .then(function(resp) {
+              if (!resp.ok) throw new Error(resp.status);
+              return resp.blob();
+            })
+            .then(function(blob) {
+              var type = blob.type.split(';')[0].trim().toLowerCase();
+              if (!imageExtensions[type]) {
+                setStatus(dropMessages.notImage, true);
+                return;
+              }
+              if (blob.size > maxFetchedImageSize) {
+                setStatus(dropMessages.tooLarge, true);
+                return;
+              }
+              var name = 'image';
+              if (url.protocol !== 'data:') {
+                try {
+                  name = decodeURIComponent(url.pathname.split('/').pop()) || name;
+                } catch (err) {}
+              }
+              appendFileInput([new File([blob], name, {type: type})]);
+            })
+            .catch(function() {
+              setStatus(dropMessages.fetchFailed, true);
+            });
+        }
+
+        function isFileDrag(e) {
+          return hasType(e.dataTransfer, 'Files');
+        }
+
+        function shouldHandleDrop(e) {
+          return isFileDrag(e) || hasType(e.dataTransfer, 'text/uri-list');
+        }
+
+        respondForm.addEventListener('dragenter', function(e) {
+          dragCounter++;
+          if (!shouldHandleDrop(e)) return;
+          e.preventDefault();
+          ensureAttachmentsVisible();
+          showDropHighlight();
+        });
+
+        respondForm.addEventListener('dragover', function(e) {
+          if (shouldHandleDrop(e)) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+          }
+        });
+
+        respondForm.addEventListener('dragleave', function() {
+          if (--dragCounter <= 0) {
+            dragCounter = 0;
+            hideDropHighlight();
+          }
+        });
+
+        respondForm.addEventListener('drop', function(e) {
+          dragCounter = 0;
+          hideDropHighlight();
+          if (e.dataTransfer.files.length > 0) {
+            e.preventDefault();
+            appendFileInput(e.dataTransfer.files);
+          } else if (shouldHandleDrop(e)) {
+            var imageUrl = extractImageUrl(e.dataTransfer);
+            if (imageUrl) {
+              e.preventDefault();
+              fetchAndAttachImage(imageUrl);
+            }
+          }
+        });
+
+        document.addEventListener('paste', function(e) {
+          var clipboard = e.clipboardData;
+          if (!clipboard || hasType(clipboard, 'text/plain')) return;
+          var files = [];
+          for (var i = 0; i < clipboard.items.length; i++) {
+            if (clipboard.items[i].kind === 'file') files.push(clipboard.items[i].getAsFile());
+          }
+          if (!files.length) return;
+          e.preventDefault();
+          appendFileInput(files);
+        });
+      }
       {% endif %}
     });
     {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
