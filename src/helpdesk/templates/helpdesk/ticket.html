@@ -168,9 +168,6 @@
         alert('{% translate 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
       })
 
-      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-        new bootstrap.Tooltip(el);
-      });
 
       $('#ticketTab button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
         var $sortBtn = $('#followup-sort-toggle');

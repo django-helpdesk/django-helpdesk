@@ -469,6 +469,25 @@ Options that change ticket properties
                                       HELPDESK_TICKET_REOPENED_STATUS,
                                       HELPDESK_TICKET_FORKED_STATUS)
 
+.. setting:: HELPDESK_EMAIL_REOPEN_STATUSES
+
+   *Default:* ``(HELPDESK_TICKET_CLOSED_STATUS,)``
+
+   Define the statuses that an incoming e-mail reply moves back to
+   ``HELPDESK_TICKET_REOPENED_STATUS``. By default only closed tickets are
+   reopened; a reply to a resolved ticket is attached as a follow-up but the
+   ticket stays resolved.
+
+   To reopen resolved tickets as well, so that a submitter disputing a
+   resolution puts the ticket back in front of staff::
+
+     HELPDESK_EMAIL_REOPEN_STATUSES = (HELPDESK_TICKET_CLOSED_STATUS,
+                                       HELPDESK_TICKET_RESOLVED_STATUS)
+
+   Automatic responses such as out-of-office replies, detected from their
+   ``Auto-Submitted`` or ``X-Auto-Response-Suppress`` headers, are attached as
+   follow-ups but never change the ticket status.
+
 .. setting:: HELPDESK_TICKET_STATUS_CHOICES_FLOW
 
    Customize the allowed state changes depending on the current state.
@@ -565,6 +584,20 @@ Options that change ticket properties
    Priorities not present in the map return an empty string from the model; the
    ticket-list template applies ``secondary`` (gray) as the default when the
    class is empty.
+
+
+.. setting:: HELPDESK_ENABLE_FOLLOWUP_COPY
+
+   *Default:* ``False``
+
+   Set ``HELPDESK_ENABLE_FOLLOWUP_COPY = True`` in your Django ``settings.py``
+   to enable the **Copy instead of moving** option on the existing follow-up
+   edit page. This is a deployment-wide setting, not a user preference.
+   Existing staff and ticket access checks still apply.
+
+   When disabled, the option is hidden and copy submissions are rejected
+   without changing the original follow-up. Normal editing and moving remain
+   available.
 
 
 Time Tracking Options

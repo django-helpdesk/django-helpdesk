@@ -4,7 +4,8 @@
 {% with request|load_helpdesk_settings as helpdesk_settings %}
   {% with user|saved_queries as user_saved_queries_ %}
     <!DOCTYPE html>
-    <html lang="en">
+    {% get_current_language as LANGUAGE_CODE %}
+    <html lang="{{ LANGUAGE_CODE }}">
       <head>
         <title>
           {% block helpdesk_title %}Helpdesk{% endblock helpdesk_title %} :: {% translate "Powered by django-helpdesk" %}
