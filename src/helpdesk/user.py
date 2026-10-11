@@ -98,8 +98,13 @@ class HelpdeskUser:
             return True
         if helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
             return False
-        return self.user.is_staff or bool(
-            helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        if self.user.is_staff:
+            return True
+        allow_non_staff = helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
+        if callable(allow_non_staff):
+            return bool(allow_non_staff(self.user))
+        return (
+            bool(allow_non_staff) and self.user.is_authenticated and self.user.is_active
         )
 
     def can_access_queue(self, queue):
