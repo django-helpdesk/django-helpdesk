@@ -924,6 +924,12 @@ class Ticket(models.Model):
 
         return ticketcc
 
+    def public_custom_field_values(self):
+        """Custom field values that may be shown to the submitter."""
+        return self.ticketcustomfieldvalue_set.filter(
+            field__staff_only=False
+        ).select_related("field")
+
     def set_custom_field_values(self) -> None:
         for field in CustomField.objects.all():
             try:
@@ -1194,6 +1200,18 @@ class FollowUp(models.Model):
         return datetime.timedelta(seconds=time_spent_seconds)
 
 
+class TicketChangeQuerySet(models.QuerySet):
+    def public(self):
+        """Changes that may be shown to the submitter.
+
+        Changes to a custom field are recorded under the field's name, so
+        those whose field is a staff-only custom field are left out.
+        """
+        return self.exclude(
+            field__in=CustomField.objects.filter(staff_only=True).values("name")
+        )
+
+
 class TicketChange(models.Model):
     """
     For each FollowUp, any changes to the parent ticket (eg Title, Priority,
@@ -1222,6 +1240,8 @@ class TicketChange(models.Model):
         blank=True,
         null=True,
     )
+
+    objects = TicketChangeQuerySet.as_manager()
 
     def __str__(self):
         out = f"{self.field} "

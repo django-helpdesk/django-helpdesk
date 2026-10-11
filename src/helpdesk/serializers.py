@@ -194,11 +194,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BaseTicketSerializer(serializers.ModelSerializer):
+    # Every custom field is added as a `custom_<name>` field. Serializers
+    # whose output reaches non-staff users set this to False so that
+    # custom fields marked staff_only are left out.
+    include_staff_only_custom_fields = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Add custom fields
-        for field in CustomField.objects.all():
+        custom_fields = CustomField.objects.all()
+        if not self.include_staff_only_custom_fields:
+            custom_fields = custom_fields.filter(staff_only=False)
+        for field in custom_fields:
             self.fields[f"custom_{field.name}"] = field.build_api_field()
 
 
@@ -206,6 +214,8 @@ class PublicTicketListingSerializer(BaseTicketSerializer):
     """
     A serializer to be used by the public API for listing tickets. Don't expose private fields here!
     """
+
+    include_staff_only_custom_fields = False
 
     ticket = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
