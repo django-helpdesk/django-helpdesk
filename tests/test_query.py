@@ -77,7 +77,9 @@ class QueryTests(TestCase):
                         "queue": {"title": "Test queue", "id": 1},
                         "status": "Open",
                         "status_badge_class": "danger",
-                        "created": resp_json["data"][0]["created"],
+                        "created": self.ticket1.created.isoformat().replace(
+                            "+00:00", "Z"
+                        ),
                         "due_date": None,
                         "assigned_to": "None",
                         "submitter": None,
@@ -95,7 +97,9 @@ class QueryTests(TestCase):
                         "queue": {"title": "Test queue", "id": 1},
                         "status": "Open",
                         "status_badge_class": "danger",
-                        "created": resp_json["data"][1]["created"],
+                        "created": self.ticket2.created.isoformat().replace(
+                            "+00:00", "Z"
+                        ),
                         "due_date": None,
                         "assigned_to": "None",
                         "submitter": None,

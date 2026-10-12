@@ -1,7 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
 from helpdesk.models import KBCategory, KBItem, Queue, Ticket
+
+User = get_user_model()
 
 
 class KBItemModelTests(TestCase):
@@ -97,3 +100,16 @@ class KBItemModelTests(TestCase):
         unassigned_tickets = self.kbitem.unassigned_tickets()
         self.assertIn(self.open_ticket, unassigned_tickets)
         self.assertNotIn(self.closed_ticket, unassigned_tickets)
+
+    def test_deleting_team_keeps_kbitem(self):
+        team = User.objects.create_user(
+            username="support-team",
+            password="testpass123",
+        )
+        self.kbitem.team = team
+        self.kbitem.save()
+
+        team.delete()
+
+        self.kbitem.refresh_from_db()
+        self.assertIsNone(self.kbitem.team)

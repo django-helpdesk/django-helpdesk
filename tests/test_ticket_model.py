@@ -1,11 +1,12 @@
 import uuid
 
 from django.contrib.auth import get_user_model
+from django.db.models import ProtectedError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from helpdesk.models import Queue, Ticket, TicketCC, TicketDependency
+from helpdesk.models import FollowUp, Queue, Ticket, TicketCC, TicketDependency
 
 User = get_user_model()
 
@@ -359,3 +360,47 @@ class TicketModelTests(TestCase):
         TicketCC.objects.create(ticket=self.ticket, email="jules@example.com")
         recipients = self.ticket.get_notification_recipients()
         self.assertEqual(recipients, sorted(recipients))
+
+    def test_deleting_assigned_user_is_protected(self):
+        technician = User.objects.create_user(
+            username="technician",
+            password="testpass123",
+        )
+        self.ticket.assigned_to = technician
+        self.ticket.save()
+
+        with self.assertRaises(ProtectedError):
+            technician.delete()
+
+        self.assertTrue(Ticket.objects.filter(pk=self.ticket.pk).exists())
+
+    def test_deleting_followup_author_is_protected(self):
+        author = User.objects.create_user(
+            username="author",
+            password="testpass123",
+        )
+        followup = FollowUp.objects.create(
+            ticket=self.ticket,
+            user=author,
+            title="Reply",
+            comment="We are looking into it.",
+        )
+
+        with self.assertRaises(ProtectedError):
+            author.delete()
+
+        self.assertTrue(FollowUp.objects.filter(pk=followup.pk).exists())
+
+    def test_deleting_merge_target_keeps_merged_ticket(self):
+        target = Ticket.objects.create(
+            title="Product still not received",
+            submitter_email="bob@example.com",
+            queue=self.queue,
+        )
+        self.ticket.merged_to = target
+        self.ticket.save()
+
+        target.delete()
+
+        self.ticket.refresh_from_db()
+        self.assertIsNone(self.ticket.merged_to)

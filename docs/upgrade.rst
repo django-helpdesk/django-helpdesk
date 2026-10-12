@@ -10,6 +10,19 @@ Please consult the Installation instructions for general instructions and tips.
 The tips below are based on modifications of the original installation instructions.
 
 
+Public ticket listing API dates now use ISO 8601
+------------------------------------------------
+
+This is a breaking change for consumers of ``PublicTicketListingSerializer``.
+The ``created`` and ``due_date`` fields now return ISO 8601 timestamps, such as
+``2026-09-24T12:00:00Z``, instead of translated relative strings such as
+``2 days ago``. An unset ``due_date`` returns JSON ``null``.
+
+If you consume this API, you will need to parse the ISO 8601 and render
+human-readable dates in the user's language and timezone yourself,
+using e.g. ``Intl.RelativeTimeFormat``.
+
+
 Form rendering no longer needs django-bootstrap4-form
 -----------------------------------------------------
 

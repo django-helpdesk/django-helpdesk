@@ -206,6 +206,40 @@ version of django-helpdesk prior to migrations (ie pre-2011).
 
 You can continue to the 'Initial Configuration' area, if needed.
 
+Language selection
+------------------
+
+To enable translated pages and language selection at the login screen,
+add ``LocaleMiddleware`` to ``MIDDLEWARE`` in the host project's ``settings.py``,
+after ``SessionMiddleware`` and before ``CommonMiddleware``::
+
+    MIDDLEWARE = [
+        # ...
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        # ...
+    ]
+
+Include the i18n language selection URLs in your project's URLconf to enable
+the language selection page::
+
+    from django.urls import include, path
+
+    urlpatterns = [
+        # ...
+        path("i18n/", include("django.conf.urls.i18n")),
+    ]
+
+The login page links to the selector when the ``set_language`` route is available.
+The URL prefix can be changed because the form uses this named route.
+Selecting a language sets a cookie that overrides the browser's
+``Accept-Language`` header. For URLs without a language prefix, Django falls
+back to that header, then to ``LANGUAGE_CODE`` in the host project's settings.
+
+This functionality requires ``USE_I18N = True`` and compiled translations for
+the selected language. It does not translate user-entered ticket contents.
+
 Notes on database backends
 --------------------------
 

@@ -176,6 +176,12 @@ TICKET_OPEN_STATUSES = getattr(
     settings, "HELPDESK_TICKET_OPEN_STATUSES", DEFAULT_TICKET_OPEN_STATUSES
 )
 
+# Ticket statuses that an incoming e-mail reply moves back to REOPENED_STATUS
+DEFAULT_EMAIL_REOPEN_STATUSES = (CLOSED_STATUS,)
+EMAIL_REOPEN_STATUSES = getattr(
+    settings, "HELPDESK_EMAIL_REOPEN_STATUSES", DEFAULT_EMAIL_REOPEN_STATUSES
+)
+
 # New status list choices depending on current ticket status
 DEFAULT_TICKET_STATUS_CHOICES_FLOW = {
     OPEN_STATUS: (

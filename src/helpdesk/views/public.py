@@ -17,6 +17,7 @@ from django.core.exceptions import (
     ObjectDoesNotExist,
     PermissionDenied,
 )
+from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -29,7 +30,7 @@ from django.views.generic.edit import FormView
 from helpdesk import settings as helpdesk_settings
 from helpdesk.decorators import is_helpdesk_staff, protect_view
 from helpdesk.lib import text_is_spam
-from helpdesk.models import Queue, Ticket, UserSettings
+from helpdesk.models import Queue, Ticket, TicketChange, UserSettings
 from helpdesk.user import huser_from_request
 from helpdesk.views import abstract_views, staff
 
@@ -228,14 +229,7 @@ class ViewTicket(TemplateView):
 
         try:
             _queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
-            if (
-                request.user.is_authenticated
-                and request.user.email == email
-                or (
-                    hasattr(settings, "HELPDESK_VIEW_A_TICKET_PUBLIC")
-                    and settings.HELPDESK_VIEW_A_TICKET_PUBLIC
-                )
-            ):
+            if request.user.is_authenticated and request.user.email == email:
                 ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
             else:
                 ticket = Ticket.objects.get(
@@ -258,11 +252,25 @@ class ViewTicket(TemplateView):
             )
             return HttpResponseRedirect(ticket.ticket_url)
 
+        followups = (
+            ticket.followup_set.public_followups()
+            .select_related("user")
+            .prefetch_related(
+                Prefetch(
+                    "ticketchange_set",
+                    queryset=TicketChange.objects.public(),
+                    to_attr="public_changes",
+                ),
+                "followupattachment_set",
+            )
+        )
+
         # Prepare context for rendering
         context = {
             "key": key,
             "mail": email,
             "ticket": ticket,
+            "followups": followups,
             "helpdesk_settings": helpdesk_settings,
             "next": self.get_next_url(ticket_id),
         }

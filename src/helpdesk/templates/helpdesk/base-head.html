@@ -21,15 +21,7 @@
     {# Jquery UI CSS #}
     <link href="{% static 'helpdesk/vendor/jquery-ui/jquery-ui.min.css' %}" rel="stylesheet" />
     {# Font Awesome #}
-    <link href="{% static 'helpdesk/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css" />
-    {# MetisMenu CSS #}
-    <link href="{% static 'helpdesk/vendor/metisMenu/metisMenu.min.css' %}" rel="stylesheet" />
-    {# Morris Charts CSS #}
-    {% if helpdesk_settings.HELPDESK_USE_CDN %}
-      <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css" />
-    {% else %}
-      <link href="{% static 'helpdesk/vendor/morrisjs/morris.css' %}" rel="stylesheet" />
-    {% endif %}
+    <link href="{% static 'helpdesk/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" />
     {# Custom CSS #}
     <link href="{% static 'helpdesk/css/sb-admin.css' %}" rel="stylesheet" />
     <link href='{% static "helpdesk/css/helpdesk-extend.css" %}' rel="stylesheet" media="screen" />

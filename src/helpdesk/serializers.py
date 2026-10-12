@@ -1,5 +1,4 @@
 from django.contrib.auth import get_user_model, password_validation
-from django.contrib.humanize.templatetags import humanize
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -21,8 +20,8 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
     assigned_to = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
     last_followup = serializers.SerializerMethodField()
-    created = serializers.SerializerMethodField()
-    due_date = serializers.SerializerMethodField()
+    created = serializers.DateTimeField(format="iso-8601", read_only=True)
+    due_date = serializers.DateTimeField(format="iso-8601", read_only=True)
     status = serializers.SerializerMethodField()
     status_badge_class = serializers.SerializerMethodField()
     row_class = serializers.SerializerMethodField()
@@ -67,12 +66,6 @@ class DatatablesTicketSerializer(serializers.ModelSerializer):
 
     def get_priority_badge_class(self, obj):
         return obj.get_priority_badge_class
-
-    def get_created(self, obj):
-        return humanize.naturaltime(obj.created)
-
-    def get_due_date(self, obj):
-        return humanize.naturaltime(obj.due_date)
 
     def get_assigned_to(self, obj):
         if obj.assigned_to:
@@ -201,11 +194,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BaseTicketSerializer(serializers.ModelSerializer):
+    # Every custom field is added as a `custom_<name>` field. Serializers
+    # whose output reaches non-staff users set this to False so that
+    # custom fields marked staff_only are left out.
+    include_staff_only_custom_fields = True
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Add custom fields
-        for field in CustomField.objects.all():
+        custom_fields = CustomField.objects.all()
+        if not self.include_staff_only_custom_fields:
+            custom_fields = custom_fields.filter(staff_only=False)
+        for field in custom_fields:
             self.fields[f"custom_{field.name}"] = field.build_api_field()
 
 
@@ -214,10 +215,12 @@ class PublicTicketListingSerializer(BaseTicketSerializer):
     A serializer to be used by the public API for listing tickets. Don't expose private fields here!
     """
 
+    include_staff_only_custom_fields = False
+
     ticket = serializers.SerializerMethodField()
     submitter = serializers.SerializerMethodField()
-    created = serializers.SerializerMethodField()
-    due_date = serializers.SerializerMethodField()
+    created = serializers.DateTimeField(format="iso-8601", read_only=True)
+    due_date = serializers.DateTimeField(format="iso-8601", read_only=True)
     status = serializers.SerializerMethodField()
     queue = serializers.SerializerMethodField()
     kbitem = serializers.SerializerMethodField()
@@ -247,12 +250,6 @@ class PublicTicketListingSerializer(BaseTicketSerializer):
 
     def get_status(self, obj):
         return obj.get_status
-
-    def get_created(self, obj):
-        return humanize.naturaltime(obj.created)
-
-    def get_due_date(self, obj):
-        return humanize.naturaltime(obj.due_date)
 
     def get_submitter(self, obj):
         return obj.submitter_email

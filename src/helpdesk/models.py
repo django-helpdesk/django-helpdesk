@@ -549,7 +549,7 @@ class Ticket(models.Model):
 
     assigned_to = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="assigned_to",
         blank=True,
         null=True,
@@ -625,7 +625,7 @@ class Ticket(models.Model):
         "self",
         verbose_name=_("merged to"),
         related_name="merged_tickets",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )
@@ -924,6 +924,12 @@ class Ticket(models.Model):
 
         return ticketcc
 
+    def public_custom_field_values(self):
+        """Custom field values that may be shown to the submitter."""
+        return self.ticketcustomfieldvalue_set.filter(
+            field__staff_only=False
+        ).select_related("field")
+
     def set_custom_field_values(self) -> None:
         for field in CustomField.objects.all():
             try:
@@ -999,7 +1005,7 @@ class FollowUp(models.Model):
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         blank=True,
         null=True,
         verbose_name=_("User"),
@@ -1194,6 +1200,18 @@ class FollowUp(models.Model):
         return datetime.timedelta(seconds=time_spent_seconds)
 
 
+class TicketChangeQuerySet(models.QuerySet):
+    def public(self):
+        """Changes that may be shown to the submitter.
+
+        Changes to a custom field are recorded under the field's name, so
+        those whose field is a staff-only custom field are left out.
+        """
+        return self.exclude(
+            field__in=CustomField.objects.filter(staff_only=True).values("name")
+        )
+
+
 class TicketChange(models.Model):
     """
     For each FollowUp, any changes to the parent ticket (eg Title, Priority,
@@ -1222,6 +1240,8 @@ class TicketChange(models.Model):
         blank=True,
         null=True,
     )
+
+    objects = TicketChangeQuerySet.as_manager()
 
     def __str__(self):
         out = f"{self.field} "
@@ -1573,7 +1593,7 @@ class KBItem(models.Model):
 
     team = models.ForeignKey(
         helpdesk_settings.HELPDESK_TEAMS_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Team"),
         blank=True,
         null=True,

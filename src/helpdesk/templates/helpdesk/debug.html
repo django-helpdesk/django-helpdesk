@@ -1,30 +1,43 @@
-        {% if debug %}
-        <div id="debug" style='clear: both;padding-top: 200px'>
-            <h2>Queries</h2>
-            <p>
-                {{ sql_queries|length }} Quer{{ sql_queries|pluralize:"y,ies" }}
-                {% if sql_queries|length != 0 %}
-                (<span style="cursor: pointer;" onclick="var s=document.getElementById('debugQueryTable').style;s.display=s.display=='none'?'':'none';this.innerHTML=this.innerHTML=='Show'?'Hide':'Show';">Show</span>)
-                {% endif %}
-            </p>
-            <table id="debugQueryTable" style="display: none;">
-                <col width="1"></col>
-                <col></col>
-                <col width="1"></col>
-                <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">SQL</th>
-                    <th scope="col">Time</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for query in sql_queries %}<tr class="{% cycle 'odd' 'even' %}">
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ query.sql|escape }}</td>
-                    <td>{{ query.time }}</td>
-                </tr>{% endfor %}
-                </tbody>
-            </table>
+{% load i18n %}
+
+{% if debug %}
+  {# Debug modal button #}
+  <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#debugModal">
+    {{ sql_queries|length }} Quer{{ sql_queries|pluralize:"y,ies" }}
+  </button>
+  <div class="modal fade" id="debugModal" tabindex="-1" aria-labelledby="debugModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="debugModalLabel">{% translate "Queries" %}</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        {% endif %}
+        <div class="modal-body">
+          <table class="table text-uppercase small">
+            <thead>
+              <tr>
+                <th class="fw-medium"><span class="text-body-secondary">#</span></th>
+                <th class="fw-medium"><span class="text-body-secondary">{% translate "SQL" %}</span></th>
+                <th class="fw-medium"><span class="text-body-secondary">{% translate "Time" %}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for query in sql_queries %}
+                <tr class="{% cycle 'odd' 'even' %}">
+                  <td>{{ forloop.counter }}</td>
+                  <td>
+                    <code>{{ query.sql|escape }}</code>
+                  </td>
+                  <td>{{ query.time }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Close" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}

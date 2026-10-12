@@ -128,7 +128,7 @@
                     <small class="text-body-secondary me-2">{{ ticket.assigned_to.get_username|title }}</small>
                   {% endif %}
                   {% if ticket.due_date %}
-                    <small class="text-body-secondary">· {{ ticket.due_date|date:"M j" }}</small>
+                    <small class="text-body-secondary">· {{ ticket.due_date|date:"M j, Y" }}</small>
                   {% endif %}
                 </div>
               </div>
