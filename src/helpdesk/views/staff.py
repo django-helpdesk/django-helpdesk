@@ -525,7 +525,7 @@ def get_attachments_for_ticket(ticket):
     """Returns all of the ticket's attachments across its follow ups, most recent first."""
     return (
         FollowUpAttachment.objects.filter(followup__ticket=ticket)
-        .select_related("followup")
+        .annotate(followup_user_id=F("followup__user_id"))
         .order_by("-id")
     )
 

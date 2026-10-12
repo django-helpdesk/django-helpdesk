@@ -11,7 +11,7 @@
       <i class="fa-regular fa-eye fa-sm ms-2"></i>
     </a>
   {% endif %}
-  {% if attachment.followup.user and request.user == attachment.followup.user %}
+  {% if attachment.followup_user_id and request.user.id == attachment.followup_user_id %}
     <a href="{% url 'helpdesk:attachment_del' ticket.id attachment.id %}"
        class="text-secondary">
       <i class="fa-regular fa-trash-can fa-sm ms-2"></i>
