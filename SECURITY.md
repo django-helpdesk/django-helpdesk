@@ -29,6 +29,8 @@ It exists because the substance of a fix is the easy part: what goes wrong is th
 **Assign an owner as soon as a report arrives.**
 One named maintainer, responsible from intake through to publication.
 Everything below is theirs to drive, not to delegate and hope.
+IN OTHER WORDS: The maintainer who creates the advisory OR the first maintainer to respond to a draft advisory created by an non-maintainer in any way (and more especially if they create the private fork) then they are the owner.
+The owner can be swapped by explicit agreement through a comment or negotiation in the advisory. 
 
 1. **Start from a draft security advisory.**
    A report that came through private vulnerability reporting already created one, with the reporter as a collaborator, so there is nothing to open: take it over and credit them.
