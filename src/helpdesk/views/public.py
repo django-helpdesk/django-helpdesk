@@ -254,7 +254,7 @@ class ViewTicket(TemplateView):
 
         followups = (
             ticket.followup_set.public_followups()
-            .select_related("user")
+            .annotate(username="user__username")
             .prefetch_related(
                 Prefetch(
                     "ticketchange_set",
