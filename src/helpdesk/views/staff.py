@@ -25,6 +25,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Case, F, Q, When
+from django.db.models.functions import Coalesce
 from django.forms import HiddenInput, TextInput, inlineformset_factory
 from django.http import (
     Http404,
@@ -1102,8 +1103,10 @@ def redirect_from_chosen_ticket(
                 context=context,
                 recipients=[ticket.submitter_email],
                 bcc=[
-                    cc.email_address
-                    for cc in ticket.ticketcc_set.select_related("user")
+                    cc.cc_email
+                    for cc in ticket.ticketcc_set.values(
+                        cc_email=Coalesce("user__email", "email")
+                    )
                 ],
                 sender=ticket.queue.from_address,
                 fail_silently=True,
