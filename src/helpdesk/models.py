@@ -23,6 +23,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import QuerySet
+from django.db.models.expressions import OuterRef, Subquery
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import SafeString, mark_safe
@@ -1209,6 +1210,13 @@ class TicketChangeQuerySet(models.QuerySet):
         """
         return self.exclude(
             field__in=CustomField.objects.filter(staff_only=True).values("name")
+        )
+
+    def with_custom_field_label(self):
+        return self.annotate(
+            label=Subquery(
+                CustomField.objects.filter(name=OuterRef("field")).values("label")
+            )
         )
 
 

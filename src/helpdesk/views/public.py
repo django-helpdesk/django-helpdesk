@@ -17,7 +17,7 @@ from django.core.exceptions import (
     ObjectDoesNotExist,
     PermissionDenied,
 )
-from django.db.models import Prefetch
+from django.db.models import F, Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -252,17 +252,19 @@ class ViewTicket(TemplateView):
             )
             return HttpResponseRedirect(ticket.ticket_url)
 
+        prefetch_list = [
+            Prefetch(
+                "ticketchange_set",
+                queryset=TicketChange.objects.public().with_custom_field_label(),
+                to_attr="public_changes",
+            )
+        ]
+        if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
+            prefetch_list.append("followupattachment_set")
         followups = (
             ticket.followup_set.public_followups()
-            .annotate(username="user__username")
-            .prefetch_related(
-                Prefetch(
-                    "ticketchange_set",
-                    queryset=TicketChange.objects.public(),
-                    to_attr="public_changes",
-                ),
-                "followupattachment_set",
-            )
+            .annotate(username=F("user__username"))
+            .prefetch_related(*prefetch_list)
         )
 
         # Prepare context for rendering
