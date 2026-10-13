@@ -201,7 +201,14 @@ def process_email_notifications_for_ticket_update(
         public
         and (
             follow_up.comment
-            or (follow_up.new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS))
+            or (
+                follow_up.new_status
+                in (
+                    Ticket.REOPENED_STATUS,
+                    Ticket.RESOLVED_STATUS,
+                    Ticket.CLOSED_STATUS,
+                )
+            )
         )
     ):
         submitter_prefix = "updated_" if reassigned else template_prefix
@@ -247,6 +254,8 @@ def process_email_notifications_for_ticket_update(
 def get_email_template_prefix(reassigned, follow_up: FollowUp) -> str:
     if reassigned:
         return "assigned_"
+    elif follow_up.new_status == Ticket.REOPENED_STATUS:
+        return "reopened_"
     elif follow_up.new_status == Ticket.RESOLVED_STATUS:
         return "resolved_"
     elif follow_up.new_status == Ticket.CLOSED_STATUS:
