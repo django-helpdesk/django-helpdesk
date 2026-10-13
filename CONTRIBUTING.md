@@ -19,6 +19,34 @@ AI policy
 
 Like any tool, generative AI should be used with critical thinking and good judgement. Here are our expectations for everyone wanting to contribute to django-helpdesk.
 
+> [!CAUTION]
+> **TL;DR:**
+> - We take the responsibility for this project very seriously and we expect you to take your responsibility for your contributions seriously, too.
+>   This used to be a given, but it changed now that a pull request is just one prompt away.
+>
+> - Every contribution has to be backed by a human who unequivocally owns the copyright for all changes.
+>   No LLM bots in `Co-authored-by:`s.
+>
+> - Derived from the above policy, non-human in the loops pull requests leads to a permanent ban.
+>
+> - Absolutely **no** unsupervised agentic tools.
+>
+> - Do **not** trigger bots like Copilot on this repository.
+>   GitHub won't let us block Copilot, but it's a great way to tell you didn't read this.
+>
+> ---
+>
+> By submitting a pull request, you certify that:
+>
+> - You are the author of the contribution or have the legal right to submit it.
+>
+> - You either hold the copyright to the changes or have explicit legal authorization to contribute them under this project's license.
+>
+> - You understand the code.
+>
+> - You accept full responsibility for it.
+
+
 
 - Review and test all AI-generated code. You are expected to understand the code, and take final accountability for it.
 - Include a disclosure if you use generative AI for your code contribution.
@@ -31,7 +59,30 @@ In addition, we recommend to:
 
 When this policy isn’t followed, we may resort to a ban from the project or close your contribution without feedback.
 
-AI-assited Contributions
+### Summary
+
+In practice, this means:
+
+- Pull requests that have an LLM product listed as co-author can't be merged and will be closed without further discussion.
+  We cannot risk the copyright status of this project.
+
+  If you used LLM tools during development, you may still submit – but you must remove any LLM co-author tags and take full ownership of every line.
+
+- By submitting a pull request, **you** take full **technical and legal** responsibility for the contents of the pull request and promise that **you** hold the copyright for the changes submitted.
+
+  "An LLM wrote it" is **not** an acceptable response to questions or critique.
+  **If you cannot explain and defend the changes you submit, do not submit them** and open a high-quality bug report/feature request instead.
+
+- Accounts that exercise bot-like behavior – like automated mass pull requests – will be permanently banned, whether they belong to a human or not.
+
+- Do **not** post LLM-generated review comments – we can prompt LLMs ourselves should we desire their wisdom.
+  Do **not** post summaries unless you've fact-checked them and take responsibility for 100% of their content.
+  Remember that *all* LLM output *looks* **plausible**.
+  When using these tools, it's **your** responsibility to ensure that it's also **correct** and has a reasonable signal-to-noise ratio.
+
+  Inspired from [python-attrs AI policy](https://github.com/python-attrs/attrs/blob/main/.github/AI_POLICY.md)
+
+AI-assisted Contributions
 ------------------------
 
 Here are acceptable uses of AI for code and documentation contributions:
@@ -39,12 +90,36 @@ Here are acceptable uses of AI for code and documentation contributions:
 - Generate test cases or demo implementations as part of testing a feature or a bug.
 - Improve writing for documentation (grammar, style guide).
 - Research a problem and explore possible solutions.
+- Assistance with writing code that you fully understand and own (in compliance with the AI_Policy).
 
 Here are unacceptable uses:
 
 - Unacceptable: create a contribution from an existing issue with no further direction.
 - Unacceptable: triage issues such as reproducing bugs or discussing features based on the input of AI alone.
 
+  Inspired from [wagtail's contribution guidelines](https://github.com/wagtail/wagtail/blob/main/.github/CONTRIBUTING.md#generative-ai)
+
+
+## Legal
+
+There is ongoing legal uncertainty regarding the copyright status of LLM-generated works and their provenance.
+Since we do not have a formal [Contributor License Agreement](https://en.wikipedia.org/wiki/Contributor_license_agreement) (CLA), you retain your copyright to your changes to this project.
+
+Therefore, allowing contributions by LLMs has unpredictable consequences for the copyright status of this project – even when leaving aside possible copyright violations due to plagiarism.
+
+
+## Human
+
+As the makers of software and desire for high-quality maintenance, we take our responsibility to our users very seriously.
+We have to manually review every change before merging, because it's **our responsibility** to keep the project stable.
+
+Please understand that by opening low-quality pull requests you're not helping anyone.
+Worse, you're [poisoning the open source ecosystem](https://lwn.net/Articles/1058266/) that was precarious even before the arrival of LLM tools.
+Having to wade through plausible-looking-but-low-quality pull requests and trying to determine which ones are legit is extremely demoralizing and has already burned out many good maintainers.
+
+Unfortunately, our volunteer maintainers are becoming overwhelmed by pull requests that misinterpret or poorly solve the presented problem. Additionally, if we wanted to make a pull request on an issue via LLM without a human in the loop we could do that more quickly ourselves since it would not require back and forth. Therefore we will not be accepting pull requests in this form.
+
+This dynamic is especially pernicious because it poisons the well for mentoring new contributors which we are committed to.
 
 Testing
 -------
