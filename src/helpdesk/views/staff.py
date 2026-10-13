@@ -1103,7 +1103,7 @@ def redirect_from_chosen_ticket(
                 context=context,
                 recipients=[ticket.submitter_email],
                 bcc=[
-                    cc.cc_email
+                    cc["cc_email"]
                     for cc in ticket.ticketcc_set.values(
                         cc_email=Coalesce("user__email", "email")
                     )

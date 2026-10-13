@@ -136,7 +136,7 @@ class TicketActionsTestCase(TestCase):
             post_data,
             follow=True,
         )
-        self.assertContains(response, "Changed Owner from User_1 to User_2")
+        self.assertContains(response, 'Changed "Owner" from "User_1" to "User_2"')
 
         # change status with users email assigned and submitter email assigned,
         # which triggers emails being sent
@@ -160,7 +160,7 @@ class TicketActionsTestCase(TestCase):
             post_data,
             follow=True,
         )
-        self.assertContains(response, "Changed Status from Open to Closed")
+        self.assertContains(response, 'Changed "Status" from "Open" to "Closed"')
         post_data = {
             "new_status": Ticket.OPEN_STATUS,
             "owner": self.user2.id,
@@ -172,7 +172,7 @@ class TicketActionsTestCase(TestCase):
             post_data,
             follow=True,
         )
-        self.assertContains(response, "Changed Status from Open to Closed")
+        self.assertContains(response, 'Changed "Status" from "Open" to "Closed"')
 
     def test_can_access_ticket(self):
         """Tests whether non-staff but assigned user still counts as owner"""

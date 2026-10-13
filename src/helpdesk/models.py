@@ -24,6 +24,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import QuerySet
 from django.db.models.expressions import OuterRef, Subquery
+from django.db.models.functions import Coalesce
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import SafeString, mark_safe
@@ -1214,8 +1215,11 @@ class TicketChangeQuerySet(models.QuerySet):
 
     def with_custom_field_label(self):
         return self.annotate(
-            label=Subquery(
-                CustomField.objects.filter(name=OuterRef("field")).values("label")
+            field_title=Coalesce(
+                Subquery(
+                    CustomField.objects.filter(name=OuterRef("field")).values("label")
+                ),
+                "field",
             )
         )
 
