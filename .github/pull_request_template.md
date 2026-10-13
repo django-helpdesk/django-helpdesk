@@ -1,5 +1,5 @@
 #### Issue
-<!-- Replace XXXXX with the corresponding Issue number. -->
+<!-- Replace XXXXX with the corresponding Issue number is applicable -->
 Issue-XXXXX
 
 #### Brief Summary
