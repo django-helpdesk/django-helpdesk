@@ -78,7 +78,7 @@
     {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
     {% if followup.public_changes %}<div class='changes'><ul>
 	    {% for change in followup.public_changes %}
-	    <li>{% blocktranslate with change.field_title as label and change.old_value as old_value and change.new_value as new_value %}Changed "{{ label }}" from "{{ old_value }}" to "{{ new_value }}".{% endblocktranslate %}</li>
+	    <li>{% blocktranslate with change.field_title as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktranslate %}</li>
 	    {% endfor %}
     </ul></div>{% endif %}
 

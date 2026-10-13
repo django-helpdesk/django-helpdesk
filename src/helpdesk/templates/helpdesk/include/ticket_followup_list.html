@@ -83,8 +83,8 @@
         <ul class="mt-3">
           {% for change in followup.ticketchange_set.with_custom_field_label %}
             <li class="small">
-              {% blocktranslate with change.field_title as label and change.old_value as old_value and change.new_value as new_value %}
-                  Changed "{{ label }}" from "{{ old_value }}" to "{{ new_value }}".
+              {% blocktranslate with change.field_title as field and change.old_value as old_value and change.new_value as new_value %}
+                  Changed {{ field }} from {{ old_value }} to {{ new_value }}.
           {% endblocktranslate %}
             </li>
           {% endfor %}
