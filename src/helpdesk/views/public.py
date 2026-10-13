@@ -12,6 +12,7 @@ from importlib import import_module
 from urllib.parse import quote
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import (
     ImproperlyConfigured,
     ObjectDoesNotExist,
@@ -35,6 +36,8 @@ from helpdesk.user import huser_from_request
 from helpdesk.views import abstract_views, staff
 
 logger = logging.getLogger(__name__)
+
+USERNAME_FIELD = get_user_model().USERNAME_FIELD
 
 
 def create_ticket(request, *args, **kwargs):
@@ -263,7 +266,7 @@ class ViewTicket(TemplateView):
             prefetch_list.append("followupattachment_set")
         followups = (
             ticket.followup_set.public_followups()
-            .annotate(username=F("user__username"))
+            .annotate(username=F(f"user__{USERNAME_FIELD}"))
             .prefetch_related(*prefetch_list)
         )
 
