@@ -18,7 +18,6 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.views import redirect_to_login
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
@@ -117,16 +116,6 @@ DATE_RE: re.Pattern = re.compile(
 
 User = get_user_model()
 Query = get_query_class()
-
-if helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
-    # treat 'normal' users like 'staff'
-    staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated and u.is_active
-    )
-else:
-    staff_member_required = user_passes_test(
-        lambda u: u.is_authenticated and u.is_active and u.is_staff
-    )
 
 
 def _get_queue_choices(queues):
@@ -343,9 +332,6 @@ def dashboard(request):
     )
 
 
-dashboard = staff_member_required(dashboard)
-
-
 def ticket_perm_check(request, ticket):
     # can_access_ticket() only. Testing can_access_queue() first denied before
     # the assignment branch could ever apply, which made a ticket assigned to
@@ -372,9 +358,6 @@ def delete_ticket(request, ticket_id):
         if request.POST.get("next") == "dashboard":
             redirect_to = "helpdesk:dashboard"
         return HttpResponseRedirect(reverse(redirect_to))
-
-
-delete_ticket = staff_member_required(delete_ticket)
 
 
 @helpdesk_staff_member_required
@@ -496,9 +479,6 @@ def followup_edit(request, ticket_id, followup_id):
         )
 
 
-followup_edit = staff_member_required(followup_edit)
-
-
 @helpdesk_staff_member_required
 def followup_delete(request, ticket_id, followup_id):
     """followup delete for superuser"""
@@ -510,9 +490,6 @@ def followup_delete(request, ticket_id, followup_id):
     followup = get_object_or_404(FollowUp, id=followup_id)
     followup.delete()
     return HttpResponseRedirect(reverse("helpdesk:view", args=[ticket.id]))
-
-
-followup_delete = staff_member_required(followup_delete)
 
 
 def get_followups_for_ticket(ticket):
@@ -989,9 +966,6 @@ def mass_update(request):
     return HttpResponseRedirect(reverse("helpdesk:list"))
 
 
-mass_update = staff_member_required(mass_update)
-
-
 # Prepare ticket attributes which will be displayed in the table to choose
 # which value to keep when merging
 TICKET_ATTRIBUTES = (
@@ -1220,7 +1194,6 @@ def check_redirect_on_user_query(request, huser):
     return None
 
 
-@staff_member_required
 @helpdesk_staff_member_required
 def ticket_list(request: HttpRequest) -> HttpResponse:
     """
@@ -1463,9 +1436,6 @@ def edit_ticket(request, ticket_id):
     )
 
 
-edit_ticket = staff_member_required(edit_ticket)
-
-
 class CreateTicketView(
     MustBeStaffMixin, abstract_views.AbstractCreateTicketMixin, FormView
 ):
@@ -1599,9 +1569,6 @@ def raw_details(request, type_):
     raise Http404
 
 
-raw_details = staff_member_required(raw_details)
-
-
 @helpdesk_staff_member_required
 @requires_csrf_token
 def hold_ticket(request, ticket_id, unhold=False):
@@ -1635,24 +1602,15 @@ def hold_ticket(request, ticket_id, unhold=False):
     return HttpResponseRedirect(ticket.get_absolute_url())
 
 
-hold_ticket = staff_member_required(hold_ticket)
-
-
 @helpdesk_staff_member_required
 @requires_csrf_token
 def unhold_ticket(request, ticket_id):
     return hold_ticket(request, ticket_id, unhold=True)
 
 
-unhold_ticket = staff_member_required(unhold_ticket)
-
-
 @helpdesk_staff_member_required
 def rss_list(request):
     return render(request, "helpdesk/rss_list.html", {"queues": Queue.objects.all()})
-
-
-rss_list = staff_member_required(rss_list)
 
 
 @helpdesk_staff_member_required
@@ -1945,9 +1903,6 @@ def saved_searches_list(request):
     )
 
 
-saved_searches_list = staff_member_required(saved_searches_list)
-
-
 @helpdesk_staff_member_required
 def save_query(request):
     title = request.POST.get("title", None)
@@ -1969,9 +1924,6 @@ def save_query(request):
     )
 
 
-save_query = staff_member_required(save_query)
-
-
 @helpdesk_staff_member_required
 def delete_saved_query(request, pk):
     query = get_object_or_404(SavedSearch, id=pk, user=request.user)
@@ -1983,9 +1935,6 @@ def delete_saved_query(request, pk):
         return render(
             request, "helpdesk/confirm_delete_saved_query.html", {"query": query}
         )
-
-
-delete_saved_query = staff_member_required(delete_saved_query)
 
 
 class EditUserSettingsView(MustBeStaffMixin, UpdateView):
@@ -2052,9 +2001,6 @@ def ticket_cc(request, ticket_id):
     )
 
 
-ticket_cc = staff_member_required(ticket_cc)
-
-
 @helpdesk_staff_member_required
 def ticket_cc_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -2092,9 +2038,6 @@ def ticket_cc_add(request, ticket_id):
     )
 
 
-ticket_cc_add = staff_member_required(ticket_cc_add)
-
-
 @helpdesk_staff_member_required
 def ticket_cc_del(request, ticket_id, cc_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -2108,9 +2051,6 @@ def ticket_cc_del(request, ticket_id, cc_id):
         )
 
     return render(request, "helpdesk/ticket_cc_del.html", {"ticket": ticket, "cc": cc})
-
-
-ticket_cc_del = staff_member_required(ticket_cc_del)
 
 
 @helpdesk_staff_member_required
@@ -2137,9 +2077,6 @@ def ticket_dependency_add(request, ticket_id):
     )
 
 
-ticket_dependency_add = staff_member_required(ticket_dependency_add)
-
-
 @helpdesk_staff_member_required
 def ticket_dependency_del(request, ticket_id, dependency_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -2153,9 +2090,6 @@ def ticket_dependency_del(request, ticket_id, dependency_id):
     return render(
         request, "helpdesk/ticket_dependency_del.html", {"dependency": dependency}
     )
-
-
-ticket_dependency_del = staff_member_required(ticket_dependency_del)
 
 
 @helpdesk_staff_member_required
@@ -2182,9 +2116,6 @@ def ticket_resolves_add(request, ticket_id):
     )
 
 
-ticket_resolves_add = staff_member_required(ticket_resolves_add)
-
-
 @helpdesk_staff_member_required
 def ticket_resolves_del(request, ticket_id, dependency_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -2199,9 +2130,6 @@ def ticket_resolves_del(request, ticket_id, dependency_id):
     return render(
         request, "helpdesk/ticket_dependency_del.html", {"dependency": dependency}
     )
-
-
-ticket_resolves_del = staff_member_required(ticket_resolves_del)
 
 
 @helpdesk_staff_member_required
