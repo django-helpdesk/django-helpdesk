@@ -79,10 +79,10 @@
         <div class="mt-3">{{ followup.get_markdown|num_to_link }}</div>
       {% endif %}
       {# Changes to ticket #}
-      {% with ticket_changes = followup.ticketchange_set.with_custom_field_label %}
+      {% with ticket_changes=followup.ticketchange_set.with_custom_field_label %}
 	      {% if ticket_changes %}
 	        <ul class="mt-3">
-	          {% for ticket_changes %}
+	          {% for change in ticket_changes %}
 	            <li class="small">
 	              {% blocktranslate with change.field_title as field and change.old_value as old_value and change.new_value as new_value %}
 	                  Changed {{ field }} from {{ old_value }} to {{ new_value }}.
