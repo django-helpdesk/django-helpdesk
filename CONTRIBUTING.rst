@@ -27,7 +27,7 @@ Like any tool, generative AI should be used with critical thinking and good judg
      This used to be a given, but it changed now that a pull request is just one prompt away.
 
    - Every contribution has to be backed by a human who unequivocally owns the copyright for all changes.
-     No LLM bots in ``Co-authored-by:``s.
+     No LLM bots in ``Co-authored-by:`` trailers.
 
    - Pull requests with no human in the loop lead to a permanent ban.
 
@@ -36,17 +36,16 @@ Like any tool, generative AI should be used with critical thinking and good judg
    - Do **not** trigger bots like Copilot on this repository.
      GitHub won't let us block Copilot, but it's a great way to tell you didn't read this.
 
-   ----
 
-   By submitting a pull request, you certify that:
+By submitting a pull request, you certify that:
 
-   - You are the author of the contribution or have the legal right to submit it.
+- You are the author of the contribution or have the legal right to submit it.
 
-   - You either hold the copyright to the changes or have explicit legal authorization to contribute them under this project's license.
+- You either hold the copyright to the changes or have explicit legal authorization to contribute them under this project's license.
 
-   - You understand the code.
+- You understand the code.
 
-   - You accept full responsibility for it.
+- You accept full responsibility for it.
 
 
 - Review and test all AI-generated code. You are expected to understand the code, and take final accountability for it.
@@ -89,7 +88,7 @@ Legal
 -----
 
 There is ongoing legal uncertainty regarding the copyright status of LLM-generated works and their provenance.
-Since we do not have a formal `Contributor License Agreement <https://en.wikipedia.org/wiki/Contributor_license_agreement>_` (CLA), you retain your copyright to your changes to this project.
+Since we do not have a formal `Contributor License Agreement <https://en.wikipedia.org/wiki/Contributor_license_agreement>`_ (CLA), you retain your copyright to your changes to this project.
 
 Therefore, allowing contributions by LLMs has unpredictable consequences for the copyright status of this project – even when leaving aside possible copyright violations due to plagiarism.
 

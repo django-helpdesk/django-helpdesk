@@ -13,7 +13,7 @@
 - [ ] This PR **does not** disclose a security vulnerability (see [vulnerability reporting](https://github.com/django-helpdesk/django-helpdesk/security/policy)).
 - [ ] This PR targets the `main` branch.
 - [ ] The commit message is written in past tense, mentions the issue number (if applicable), and ends with a period.
-- [ ] I have not requested, and will not request, an automated AI review for this PR. <!-- You are welcome to do so in your own fork. -->
+- [ ] I did not trigger automated AI review bots (e.g. Copilot) on this PR. <!-- You are welcome to do so in your own fork. -->
 - [ ] I acknowledge this project's [**AI policy**](CONTRIBUTING.rst)
 
 <!-- Leave the following items unchecked if not applicable. -->
