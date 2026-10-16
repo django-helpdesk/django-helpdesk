@@ -252,7 +252,9 @@ class TicketEmailNotificationTests(TestCase):
         self.existing_ticket.refresh_from_db()
         self.assertEqual(self.existing_ticket.resolution, "Updated resolution")
         submitter_email = next(
-            email for email in self.outbox if self.existing_ticket.submitter_email in email.to
+            email
+            for email in self.outbox
+            if self.existing_ticket.submitter_email in email.to
         )
         self.assertIn("Updated resolution", submitter_email.body)
 
