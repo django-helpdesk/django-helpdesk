@@ -74,11 +74,11 @@
 {% load ticket_to_link %}
 {% for followup in followups %}
 <div class='followup well card'>
-    <p><b>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span></span></b></p>
+    <p><b>{{ followup.title }} <span class='byline text-info'>{% if followup.username %}by {{ followup.username }}{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span></span></b></p>
     {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
     {% if followup.public_changes %}<div class='changes'><ul>
 	    {% for change in followup.public_changes %}
-	    <li>{% blocktranslate with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktranslate %}</li>
+	    <li>{% blocktranslate with change.field_title as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktranslate %}</li>
 	    {% endfor %}
     </ul></div>{% endif %}
 

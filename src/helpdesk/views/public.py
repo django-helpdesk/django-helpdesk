@@ -12,12 +12,13 @@ from importlib import import_module
 from urllib.parse import quote
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import (
     ImproperlyConfigured,
     ObjectDoesNotExist,
     PermissionDenied,
 )
-from django.db.models import Prefetch
+from django.db.models import F, Prefetch
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -35,6 +36,8 @@ from helpdesk.user import huser_from_request
 from helpdesk.views import abstract_views, staff
 
 logger = logging.getLogger(__name__)
+
+USERNAME_FIELD = get_user_model().USERNAME_FIELD
 
 
 def create_ticket(request, *args, **kwargs):
@@ -252,17 +255,19 @@ class ViewTicket(TemplateView):
             )
             return HttpResponseRedirect(ticket.ticket_url)
 
+        prefetch_list = [
+            Prefetch(
+                "ticketchange_set",
+                queryset=TicketChange.objects.public().with_custom_field_label(),
+                to_attr="public_changes",
+            )
+        ]
+        if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
+            prefetch_list.append("followupattachment_set")
         followups = (
             ticket.followup_set.public_followups()
-            .select_related("user")
-            .prefetch_related(
-                Prefetch(
-                    "ticketchange_set",
-                    queryset=TicketChange.objects.public(),
-                    to_attr="public_changes",
-                ),
-                "followupattachment_set",
-            )
+            .annotate(username=F(f"user__{USERNAME_FIELD}"))
+            .prefetch_related(*prefetch_list)
         )
 
         # Prepare context for rendering
