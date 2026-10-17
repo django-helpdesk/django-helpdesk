@@ -417,7 +417,13 @@ def update_ticket(
                 )
 
     if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS) and (
-        new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None
+        new_status == Ticket.RESOLVED_STATUS
+        or ticket.resolution is None
+        or (
+            new_status == Ticket.CLOSED_STATUS
+            and old_status == Ticket.REOPENED_STATUS
+            and comment
+        )
     ):
         ticket.resolution = comment
 
