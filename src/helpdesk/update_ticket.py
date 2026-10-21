@@ -416,15 +416,14 @@ def update_ticket(
                     new_value=_("Completed") if changed == "completed" else _("To do"),
                 )
 
-    if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS) and (
-        new_status == Ticket.RESOLVED_STATUS
-        or ticket.resolution is None
-        or (
-            new_status == Ticket.CLOSED_STATUS
-            and old_status == Ticket.REOPENED_STATUS
-            and comment
+    should_update_resolution = new_status == Ticket.RESOLVED_STATUS or (
+        new_status == Ticket.CLOSED_STATUS
+        and (
+            ticket.resolution is None
+            or (old_status == Ticket.REOPENED_STATUS and bool(comment))
         )
-    ):
+    )
+    if should_update_resolution:
         ticket.resolution = comment
 
     # ticket might have changed above, so we re-instantiate context with the
