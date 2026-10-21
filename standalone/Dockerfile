@@ -15,7 +15,7 @@ COPY . .
 RUN yarn build:static
 
 # --- Stage 2: Main Django image ---
-FROM python:3.13-slim-bookworm AS app
+FROM python:3.15-slim-bookworm AS app
 LABEL src=https://github.com/django-helpdesk/django-helpdesk
 RUN apt-get update && apt-get install -yqq \
    postgresql-common \
