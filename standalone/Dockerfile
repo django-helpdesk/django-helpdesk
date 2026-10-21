@@ -15,14 +15,14 @@ COPY . .
 RUN yarn build:static
 
 # --- Stage 2: Main Django image ---
-FROM python:3.13-slim-bullseye AS app
+FROM python:3.13-slim-bookworm AS app
 LABEL src=https://github.com/django-helpdesk/django-helpdesk
-RUN apt-get update
-RUN apt-get install -yqq \
+RUN apt-get update && apt-get install -yqq \
    postgresql-common \
    postgresql-client \
    cron \
-   git
+   git \
+   && rm -rf /var/lib/apt/lists/* 
 
 # Copy directories
 COPY django-helpdesk/src/ /opt/django-helpdesk/src/

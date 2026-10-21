@@ -33,17 +33,32 @@ You will need to install the `uv` package manager to simplify setting up the dem
 If you have not already created a virtual environment then run this command:
     uv venv
 
-To start up a demo project server, run this command:
+**Standalone** To start up a demo project server, run this command:
 
     make rundemo
 
-or with docker::
-
-    docker build --file standalone/Dockerfile -t demodesk ..
-    docker run --rm -v "$PWD:/app" -p 8080:8080 demodesk
-
 then pointing your web browser at http://localhost:8080 (log in as user
 `admin` with password `Pa33w0rd`, defined in the `demo.json` fixture file).
+
+**Docker compose** or with docker compose::
+
+    cd standalone
+    ./setup.sh
+    docker compose up
+
+**Raw docker** or with docker::
+
+    docker run -d --name helpdesk-db -e POSTGRES_PASSWORD=changeme -p 5432:5432 postgres:17
+    docker build --file standalone/Dockerfile -t demodesk ..
+    docker run --rm --network host \
+        -e DJANGO_HELPDESK_SECRET_KEY=changeme \
+        -e POSTGRES_HOST=localhost \
+        -e POSTGRES_PASSWORD=changeme \
+        demodesk
+
+See `standalone documentation <./docs/standalone.rst>`_ for instructions on creating your first superuser.
+Login at http://localhost:8080 for raw docker or https://localhost for compose. 
+
 
 For more information and options, please read the `demo/README.rst` file.
 
