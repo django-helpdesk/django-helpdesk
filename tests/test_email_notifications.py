@@ -225,6 +225,39 @@ class TicketEmailNotificationTests(TestCase):
             "Ticket assigned user email not found in email notifications sent.",
         )
 
+    def test_closing_reopened_ticket_uses_latest_resolution(self):
+        update_ticket(
+            self.update_user,
+            self.existing_ticket,
+            comment="Initial resolution",
+            new_status=Ticket.CLOSED_STATUS,
+            public=True,
+        )
+        update_ticket(
+            self.update_user,
+            self.existing_ticket,
+            new_status=Ticket.REOPENED_STATUS,
+            public=True,
+        )
+        self.outbox.clear()
+
+        update_ticket(
+            self.update_user,
+            self.existing_ticket,
+            comment="Updated resolution",
+            new_status=Ticket.CLOSED_STATUS,
+            public=True,
+        )
+
+        self.existing_ticket.refresh_from_db()
+        self.assertEqual(self.existing_ticket.resolution, "Updated resolution")
+        submitter_email = next(
+            email
+            for email in self.outbox
+            if self.existing_ticket.submitter_email in email.to
+        )
+        self.assertIn("Updated resolution", submitter_email.body)
+
     def test_update_ticket_always_notify_submitter(self):
         """
         Ticket is initially unassigned so should not get assigned email until assigned.
