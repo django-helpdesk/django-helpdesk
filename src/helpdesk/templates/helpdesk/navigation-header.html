@@ -60,8 +60,12 @@
                 <label class="form-label small text-body-secondary">{% translate "Change language" %}</label>
                 <select name="language" class="form-select">
                   {% get_available_languages as LANGUAGES %}
-                  {% for code, name in LANGUAGES %}
-                    <option value="{{ code }}"{% if code == LANGUAGE_CODE %} selected{% endif %}>{{ name }}</option>
+                  {% get_current_language as LANGUAGE_CODE %}
+                  {% get_language_info_list for LANGUAGES as languages %}
+                  {% for language in languages %}
+                    <option value="{{ language.code }}"
+                            {% if language.code == LANGUAGE_CODE %}
+                              selected{% endif %}>{{ language.name_local }} ({{ language.code }})</option>
                   {% endfor %}
                 </select>
               </div>
@@ -70,7 +74,6 @@
           </li>
         </ul>
       </div>
-
       {# Theme switcher #}
       <div class="dropdown me-3 me-lg-2">
         <button class="btn nav-link dropdown-toggle"
