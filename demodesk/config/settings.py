@@ -215,6 +215,8 @@ LANGUAGES = [
     ("de", _("German")),
     ("fr", _("French")),
     ("pt", _("Portuguese")),
+    ("pl", _("Polish")),
+    ("tr", _("Turkish")),
     ("zh-hans", _("Chinese")),
     ("sr", _("Serbian")),
     ("cs", _("Czech")),
