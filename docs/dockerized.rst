@@ -1,9 +1,9 @@
-Standalone Installation
+Dockerized Installation
 =======================================
 
 You can find standalone docker images at `djangohelpdesk/standalone:latest <https://hub.docker.com/r/djangohelpdesk/standalone/tags>`_.
 
-You will also find an alternative `standalone-extras <https://hub.docker.com/r/djangohelpdesk/standalone-extras>`_ image with extra libraries needed to use the standalone image on cloud platforms such as AWS. You can find a full list of extra packages included in the extra's image `here <https://github.com/django-helpdesk/django-helpdesk/blob/main/standalone/requirements-extras.txt>`_.
+You will also find an alternative `standalone-extras <https://hub.docker.com/r/djangohelpdesk/standalone-extras>`_ image with extra libraries needed to use the standalone image on cloud platforms such as AWS. You can find a full list of extra packages included in the extra's image `here <https://github.com/django-helpdesk/django-helpdesk/blob/main/dockerized/requirements-extras.txt>`_.
 
 Installation using docker compose
 ---------------------------------
@@ -14,11 +14,11 @@ Installation using docker compose
 
     git clone git@github.com:django-helpdesk/django-helpdesk.git
 
-2. Go to the standalone helpdesk installation directory:
+2. Go to the dockerized helpdesk installation directory:
 
    .. code-block:: bash
 
-    cd django-helpdesk/standalone
+    cd django-helpdesk/dockerized
 
 3. Execute the installation script:
 
@@ -48,17 +48,17 @@ Creating an Admin User
 
     docker ps
 
-2. Execute into the ``standalone-django-helpdesk-1`` container:
+2. Execute into the ``dockerized-django-helpdesk-1`` container:
 
    .. code-block:: bash
 
-    docker exec -it standalone-django-helpdesk-1 bash
+    docker exec -it dockerized-django-helpdesk-1 bash
 
 3. Change directory to the application's root:
 
    .. code-block:: bash
 
-    cd /opt/django-helpdesk/standalone
+    cd /opt/django-helpdesk/dockerized
 
 4. Create a superuser:
 
@@ -73,7 +73,7 @@ Configuration for Production Use
 
 1. Update the ``Caddyfile`` to replace the ``localhost`` URL with your desired production URL.
 
-2. For custom configurations, bindmount a ``local_settings.py`` into ``/opt/django-helpdesk/standalone/config/local_settings.py``.
+2. For custom configurations, bindmount a ``local_settings.py`` into ``/opt/django-helpdesk/dockerized/config/local_settings.py``.
 
    See :ref:`production-hardening` for what django-helpdesk leaves to the deployer, in particular rate limiting the login page.
 

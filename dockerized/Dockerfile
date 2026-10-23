@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -yqq \
 
 # Copy directories
 COPY django-helpdesk/src/ /opt/django-helpdesk/src/
-COPY django-helpdesk/standalone/ /opt/django-helpdesk/standalone/
+COPY django-helpdesk/dockerized/ /opt/django-helpdesk/dockerized/
 COPY --from=frontend-builder /app/src/helpdesk/static/helpdesk/vendor /opt/django-helpdesk/src/helpdesk/static/helpdesk/vendor
 
 # Copy files
@@ -40,16 +40,16 @@ WORKDIR /opt/django-helpdesk
 
 ENV UV_SYSTEM_PYTHON=1
 RUN uv sync
-RUN uv pip install -r /opt/django-helpdesk/standalone/requirements.txt
+RUN uv pip install -r /opt/django-helpdesk/dockerized/requirements.txt
 
-WORKDIR /opt/django-helpdesk/standalone
-ENV DJANGO_SETTINGS_MODULE=standalone.config.settings
+WORKDIR /opt/django-helpdesk/dockerized
+ENV DJANGO_SETTINGS_MODULE=dockerized.config.settings
 ENV PYTHONPATH=/opt/django-helpdesk/src:/opt/django-helpdesk
 
 RUN DJANGO_HELPDESK_SECRET_KEY=foo python3 manage.py collectstatic --noinput
 
-RUN echo "* * * * * root . /etc/env && /usr/local/bin/python3 /opt/django-helpdesk/standalone/manage.py get_email >> /var/log/cron.log 2>&1" > /etc/crontab
+RUN echo "* * * * * root . /etc/env && /usr/local/bin/python3 /opt/django-helpdesk/dockerized/manage.py get_email >> /var/log/cron.log 2>&1" > /etc/crontab
 RUN chmod 0644 /etc/crontab
 # Make sure entrypoint script is executable
-RUN chmod +x /opt/django-helpdesk/standalone/entrypoint.sh
-ENTRYPOINT [ "/opt/django-helpdesk/standalone/entrypoint.sh" ]
+RUN chmod +x /opt/django-helpdesk/dockerized/entrypoint.sh
+ENTRYPOINT [ "/opt/django-helpdesk/dockerized/entrypoint.sh" ]

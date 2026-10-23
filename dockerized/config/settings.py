@@ -79,7 +79,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
-ROOT_URLCONF = "standalone.config.urls"
+ROOT_URLCONF = "dockerized.config.urls"
 
 TEMPLATES = [
     {
@@ -98,7 +98,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "standalone.config.wsgi.application"
+WSGI_APPLICATION = "dockerized.config.wsgi.application"
 
 
 # django-helpdesk configuration settings

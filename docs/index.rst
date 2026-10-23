@@ -10,7 +10,7 @@ Contents
    :maxdepth: 1
    :glob:
 
-   standalone
+   dockerized
    install
    upgrade
    configuration
