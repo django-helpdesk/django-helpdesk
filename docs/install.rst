@@ -3,7 +3,7 @@ Installation/integration into an existing Django application
 
 .. note::
 
-    For standalone installation, refer to the :doc:`standalone installation docs <standalone>`.
+    For dockerized installation, refer to the :doc:`dockerized installation docs <dockerized>`.
 
 ``django-helpdesk`` installation isn't difficult, but it requires you have a bit
 of existing know-how about Django.

@@ -26,11 +26,11 @@ from django.test import SimpleTestCase
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PACKAGE = REPO_ROOT / "src" / "helpdesk"
 EXAMPLE_CONFIGS = (
-    REPO_ROOT / "standalone" / "config" / "settings.py",
+    REPO_ROOT / "dockerized" / "config" / "settings.py",
     REPO_ROOT / "demodesk" / "config" / "settings.py",
 )
-STANDALONE_CONFIG = EXAMPLE_CONFIGS[0]
-STANDALONE_DOCS = REPO_ROOT / "docs" / "standalone.rst"
+DOCKERIZED_CONFIG = EXAMPLE_CONFIGS[0]
+DOCKERIZED_DOCS = REPO_ROOT / "docs" / "dockerized.rst"
 
 HELPDESK_SETTING = re.compile(r"^(HELPDESK|QUEUE)_")
 
@@ -125,7 +125,7 @@ class SettingsDriftTests(SimpleTestCase):
         )
 
     @requires_checkout
-    def test_documented_standalone_variables_are_read_by_the_image(self):
+    def test_documented_dockerized_variables_are_read_by_the_image(self):
         """Every variable the standalone docs promise is read by its settings file.
 
         This is the check that HELPDESK_KANBAN_ENABLED failed: the tables listed
@@ -133,21 +133,21 @@ class SettingsDriftTests(SimpleTestCase):
         environment for it.
         """
         documented = set(
-            re.findall(r"^   ``(\w+)``,", STANDALONE_DOCS.read_text(), re.MULTILINE)
+            re.findall(r"^   ``(\w+)``,", DOCKERIZED_DOCS.read_text(), re.MULTILINE)
         )
-        self.assertTrue(documented, "no variables found in the standalone tables")
+        self.assertTrue(documented, "no variables found in the dockerized tables")
 
         # Read from the environment, specifically: a name hardcoded in the
         # configuration would satisfy a plain text search while still ignoring
         # whatever the operator puts in docker.env.
-        from_environment = _environment_variables_read(STANDALONE_CONFIG)
+        from_environment = _environment_variables_read(DOCKERIZED_CONFIG)
         unread = sorted(documented - from_environment)
 
         self.assertEqual(
             unread,
             [],
-            "docs/standalone.rst documents these environment variables but "
-            "standalone/config/settings.py never reads them",
+            "docs/dockerized.rst documents these environment variables but "
+            "dockerized/config/settings.py never reads them",
         )
 
     @requires_checkout

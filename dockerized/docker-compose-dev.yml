@@ -14,7 +14,7 @@ services:
  django-helpdesk:
    build:
     context: ..
-    dockerfile: standalone/Dockerfile
+    dockerfile: dockerized/Dockerfile
    user: root
    volumes:
     - /tmp/django-helpdesk-data:/data/

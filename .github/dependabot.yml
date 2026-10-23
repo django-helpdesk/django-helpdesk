@@ -34,13 +34,13 @@ updates:
           - "version-update:semver-major"
 
   - package-ecosystem: "pip"
-    directory: "/standalone"
+    directory: "/dockerized"
     schedule:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
     groups:
-      standalone-minor-patch:
+      dockerized-minor-patch:
         patterns:
           - "*"
         update-types:
@@ -63,7 +63,7 @@ updates:
 
   - package-ecosystem: "docker"
     directories:
-      - "/standalone"
+      - "/dockerized"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -71,7 +71,7 @@ updates:
 
   - package-ecosystem: "docker-compose"
     directories:
-      - "/standalone"
+      - "/dockerized"
     schedule:
       interval: "weekly"
       day: "monday"
