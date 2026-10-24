@@ -43,6 +43,37 @@
       </form>
     {% endif %}
     <div class="d-flex align-items-center">
+      {# Language switcher #}
+      <div class="dropdown me-3">
+        <button class="btn nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <svg width="20" height="20" fill="currentColor" aria-hidden="true">
+            <use xlink:href="{% static 'helpdesk/icons/icons.svg' %}#translate" />
+          </svg>
+          <span class="visually-hidden">{% translate "Change language" %}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end p-2">
+          <li>
+            <form action="{% url 'set_language' %}" method="post">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ redirect_to }}" />
+              <div class="mb-3">
+                <label class="form-label small text-body-secondary">{% translate "Change language" %}</label>
+                <select name="language" class="form-select">
+                  {% get_available_languages as LANGUAGES %}
+                  {% get_current_language as LANGUAGE_CODE %}
+                  {% get_language_info_list for LANGUAGES as languages %}
+                  {% for language in languages %}
+                    <option value="{{ language.code }}"
+                            {% if language.code == LANGUAGE_CODE %}
+                              selected{% endif %}>{{ language.name_local }} ({{ language.code }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <button type="submit" class="btn btn-sm btn-primary w-100">{% translate "Go" %}</button>
+            </form>
+          </li>
+        </ul>
+      </div>
       {# Theme switcher #}
       <div class="dropdown me-3 me-lg-2">
         <button class="btn nav-link dropdown-toggle"
@@ -118,7 +149,7 @@
               <form action="{% url 'helpdesk:logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="dropdown-item">
-                  <i class="fas fa-fw fa-sign-out-alt"></i>{% translate "Logout" %}
+                  <i class="fas fa-fw fa-sign-out-alt me-2"></i>{% translate "Logout" %}
                 </button>
               </form>
             </div>
@@ -159,7 +190,7 @@
                   </button>
                 </form>
               {% else %}
-                <a class="btn btn-outline-secondary"
+                <a class="btn border"
                    href="{% url 'helpdesk:login' %}?next={% if next %}{{ next|escape }}{% else %}{% url 'helpdesk:home' %}{% endif %}">
                   <i class="fas fa-fw fa-sign-in-alt"></i> {% translate "Log In" %}
                 </a>
