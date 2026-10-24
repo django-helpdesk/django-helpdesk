@@ -1,84 +1,82 @@
-{% extends "helpdesk/public_base.html" %}
-{% load i18n %}
+{% extends "helpdesk/base.html" %}
 
-{% block helpdesk_title %}{% translate "Welcome to Helpdesk" %}{% endblock %}
+{% load static i18n %}
 
-{% block helpdesk_breadcrumb %}
-    <li class="breadcrumb-item">
-        <a href="#">Public</a>
-    </li>
-    <li class="breadcrumb-item active">Homepage</li>
-{% endblock %}
+{% block helpdesk_title %}
+  {% translate "Helpdesk Support" %}
+{% endblock helpdesk_title %}
+
+{% block helpdesk_head %}
+  <style>
+    .hero {
+      fill: var(--bs-primary);
+      ;
+    }
+  </style>
+{% endblock helpdesk_head %}
+
+{% block sidebar %}
+{% endblock sidebar %}
 
 {% block helpdesk_body %}
-    <div class="container-fluid">
-        <div class="row">
-            {% if kb_categories %}
-                <div class="col-sm">
-                    <h2>{% translate "Knowledgebase Articles" %}</h2>
-                    {% for category in kb_categories %}
-                        <div class="card" style="margin-top: 15px">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ category.title }}</h5>
-                                <p class="card-text">{{ category.description }}</p>
-                                <p class="card-text">
-                                    <small class="text-muted">
-                                        <a href='{{ category.get_absolute_url }}'>
-                                            {% translate 'View articles' %} <i class="fa fa-arrow-right"></i>
-                                        </a>
-                                    </small>
-                                </p>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            <div class="col-sm">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <h2>{% translate "Submit a Ticket" %}</h2>
-                        {% include 'helpdesk/public_create_ticket_base.html' %}
-                    </div>
-                </div>
-            </div>
-
-            {% if not helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-                <h2>{% translate "Please use button at upper right to login first." %}</h2>
-            {% endif %}
-
-            {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC %}
-                <div class="col-sm">
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <h2>{% translate "View a Ticket" %}</h2>
-                            <form method='get' action="{% url 'helpdesk:public_view' %}">
-                                <fieldset>
-                                    <div class="mb-3 {% if field.errors %}has-error{% endif %}">
-                                        <label for='id_ticket'>{% translate "Ticket" %}</label>
-                                        <div class="input-group">
-                                            <input type='text' name='ticket' class='form-control'/>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3 {% if field.errors %}has-error{% endif %}">
-                                        <label for='id_email'>{% translate "Your E-mail Address" %}</label>
-                                        <div class="input-group">
-                                            <input type='text' name='email' class='form-control'/>
-                                        </div>
-                                    </div>
-                                    <div class='buttons mb-3'>
-                                        <input type='submit' class="btn btn-primary" value='{% translate "View Ticket" %}'/>
-                                    </div>
-                                </fieldset>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
+  <div class="container-fluid">
+    {# Page hero #}
+    <div class="px-4 py-5 my-5 text-center">
+      <svg class="display-1 mb-5 hero" width="84" height="84" fill="currentColor" aria-hidden="true">
+        <use width="1em" height="1em" xlink:href="{% static 'helpdesk/icons/icons.svg' %}#info-circle-fill" />
+      </svg>
+      <h1 class="display-5 fw-bold text-body-emphasis">{% translate "Helpdesk Support" %}</h1>
+      <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">{% translate "Need help? Start here" %}</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+          <a href="{% url 'helpdesk:submit' %}"
+             class="btn btn-primary btn-lg bg-gradient px-4 gap3">{% translate "Create a ticket" %}</a>
+          {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC %}
+            <a href="{% url 'helpdesk:public_view' %}"
+               class="btn bg-body-tertiary border btn-lg px-4"
+               type="button">{% translate "Search" %}</a>
+          {% endif %}
         </div>
+      </div>
     </div>
-{% endblock %}
+    <div class="container">
+      {# KB category cards #}
+      {% if kb_categories %}
+        <h2 class="text-center mb-4">{% translate "Explore" %}</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-3">
+          {% for category in kb_categories %}
+            <div class="col">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">{{ category.title }}</h5>
+                  <p class="text-body-secondary">{{ category.description|truncatechars:80 }}</p>
+                  <a class="stretched-link" href="{{ category.get_absolute_url }}">
+                    {% translate "Learn more" %}<i class="fa fa-chevron-right fa-xs ms-2"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+    {# REMOVE THIS LATER #}
+    <div class="row mt-5">
+      <div class="col-4 mx-auto">
+        <div class="card">
+          <div class="card-body">
+            <h2>{% translate "Create a Ticket" %}</h2>
+            {% include "helpdesk/public_create_ticket_base.html" %}
+          </div>
+        </div>
+      </div>
+      {% if not helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
+        <h2>{% translate "Please use button at upper right to login first." %}</h2>
+      {% endif %}
+    </div>
+  </div>
+{% endblock helpdesk_body %}
 
 {% block helpdesk_js %}
-    {{ form.media.js }}
-{% endblock %}
+  {{ form.media.js }}
+{% endblock helpdesk_js %}
