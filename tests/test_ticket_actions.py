@@ -17,6 +17,9 @@ try:  # python 3
 except ImportError:  # python 2
     from urlparse import urlparse
 
+changed_field_msg_format = "Changed {0} from {1} to {2}."
+status_value_to_title = {i[0]: i[1] for i in helpdesk_settings.TICKET_STATUS_CHOICES}
+
 
 class TicketActionsTestCase(TestCase):
     fixtures: ClassVar[list] = ["emailtemplate.json"]
@@ -57,6 +60,18 @@ class TicketActionsTestCase(TestCase):
         self.user.set_password("pass")
         self.user.save()
         self.client.login(username="User_1", password="pass")
+
+    def get_public_view_response(self, ticket):
+        response = self.client.get(
+            reverse("helpdesk:public_view"),
+            {
+                "ticket": ticket.ticket_for_url,
+                "email": ticket.submitter_email,
+                "key": ticket.secret_key,
+            },
+        )
+        self.assertTemplateUsed(response, "helpdesk/public_view_ticket.html")
+        return response
 
     def test_ticket_markdown(self):
         ticket_data = {
@@ -136,7 +151,12 @@ class TicketActionsTestCase(TestCase):
             post_data,
             follow=True,
         )
-        self.assertContains(response, "Changed Owner from User_1 to User_2")
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                "Owner", self.user.username, self.user2.username
+            ),
+        )
 
         # change status with users email assigned and submitter email assigned,
         # which triggers emails being sent
@@ -160,7 +180,14 @@ class TicketActionsTestCase(TestCase):
             post_data,
             follow=True,
         )
-        self.assertContains(response, "Changed Status from Open to Closed")
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                "Status",
+                status_value_to_title[Ticket.OPEN_STATUS],
+                status_value_to_title[Ticket.CLOSED_STATUS],
+            ),
+        )
         post_data = {
             "new_status": Ticket.OPEN_STATUS,
             "owner": self.user2.id,
@@ -172,7 +199,14 @@ class TicketActionsTestCase(TestCase):
             post_data,
             follow=True,
         )
-        self.assertContains(response, "Changed Status from Open to Closed")
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                "Status",
+                status_value_to_title[Ticket.OPEN_STATUS],
+                status_value_to_title[Ticket.CLOSED_STATUS],
+            ),
+        )
 
     def test_can_access_ticket(self):
         """Tests whether non-staff but assigned user still counts as owner"""
@@ -265,27 +299,27 @@ class TicketActionsTestCase(TestCase):
         ticket_2_cc = ticket_2.ticketcc_set.create(email="random@mail.com")
 
         # Create custom fields and set values for tickets
-        custom_field_1 = CustomField.objects.create(
+        public_cf = CustomField.objects.create(
             name="test",
             label="Test",
             data_type="varchar",
         )
         ticket_1_field_1 = "This is for the test field"
         ticket_1.ticketcustomfieldvalue_set.create(
-            field=custom_field_1, value=ticket_1_field_1
+            field=public_cf, value=ticket_1_field_1
         )
         ticket_2_field_1 = "Another test text"
         ticket_2.ticketcustomfieldvalue_set.create(
-            field=custom_field_1, value=ticket_2_field_1
+            field=public_cf, value=ticket_2_field_1
         )
-        custom_field_2 = CustomField.objects.create(
+        staff_only_cf = CustomField.objects.create(
             name="number",
             label="Number",
             data_type="integer",
         )
         ticket_2_field_2 = "444"
         ticket_2.ticketcustomfieldvalue_set.create(
-            field=custom_field_2, value=ticket_2_field_2
+            field=staff_only_cf, value=ticket_2_field_2
         )
 
         # Check that it correctly redirects to the intermediate page
@@ -319,8 +353,8 @@ class TicketActionsTestCase(TestCase):
                 "submitter_email": str(ticket_2.id),
                 "description": str(ticket_2.id),
                 "assigned_to": str(ticket_2.id),
-                custom_field_1.name: str(ticket_1.id),
-                custom_field_2.name: str(ticket_2.id),
+                public_cf.name: str(ticket_1.id),
+                staff_only_cf.name: str(ticket_2.id),
             },
             follow=True,
         )
@@ -337,11 +371,11 @@ class TicketActionsTestCase(TestCase):
         self.assertEqual(ticket_1.description, ticket_2.description)
         self.assertEqual(ticket_1.assigned_to, ticket_2.assigned_to)
         self.assertEqual(
-            ticket_1.ticketcustomfieldvalue_set.get(field=custom_field_1).value,
+            ticket_1.ticketcustomfieldvalue_set.get(field=public_cf).value,
             ticket_1_field_1,
         )
         self.assertEqual(
-            ticket_1.ticketcustomfieldvalue_set.get(field=custom_field_2).value,
+            ticket_1.ticketcustomfieldvalue_set.get(field=staff_only_cf).value,
             ticket_2_field_2,
         )
         self.assertEqual(
@@ -412,13 +446,13 @@ class TicketActionsTestCase(TestCase):
         ticket = Ticket.objects.create(**initial_data)
         ticket_id = ticket.id
         # Create custom fields and set values for tickets
-        custom_field_1 = CustomField.objects.create(
+        public_cf = CustomField.objects.create(
             name="my_custom_field",
             label="My Custom Field",
             data_type="varchar",
             required=True,
         )
-        custom_field_1_value = "This is my custom field value"
+        public_cf_value = "This is my custom field value"
 
         comment_string = "FollowUp.comment field string"
         post_data = {
@@ -426,7 +460,7 @@ class TicketActionsTestCase(TestCase):
             "priority": ticket.priority,
             "comment": comment_string,
             "queue": str(self.queue_public.id),
-            "custom_" + custom_field_1.name: custom_field_1_value,
+            "custom_" + public_cf.name: public_cf_value,
         }
         self.client.post(
             reverse("helpdesk:update", kwargs={"ticket_id": ticket_id}), post_data
@@ -440,6 +474,125 @@ class TicketActionsTestCase(TestCase):
         latest_fup = ticket.followup_set.latest("date")
         self.assertEqual(latest_fup.comment, comment_string)
         self.assertEqual(
-            ticket.ticketcustomfieldvalue_set.get(field=custom_field_1).value,
-            custom_field_1_value,
+            ticket.ticketcustomfieldvalue_set.get(field=public_cf).value,
+            public_cf_value,
+        )
+
+    def test_update_ticket_with_custom_fields_changes_displayed_in_ui(self):
+        """
+        Tests updating ticket details by staff and verifying that:
+        1. staff_only custom field changes are not visible in the public UI
+        2. The text displayed for the custom field name is the custom fields label
+        3. The "built-in" field changes show the fields template title
+        """
+
+        submitter_email = "submitter@example.com"
+        public_cf = CustomField.objects.create(
+            name="public_cf",
+            label="Custom Field 1",
+            data_type="varchar",
+        )
+        staff_only_cf = CustomField.objects.create(
+            name="staff_only_cf",
+            label="Custom Field 2",
+            data_type="varchar",
+            staff_only=True,
+        )
+        public_cf_field_values = {
+            "initial": "Initial custom field 1 value",
+            "next": "Next cf1 value",
+        }
+        staff_only_cf_field_values = {
+            "initial": "Initial custom field 2 value",
+            "next": "Next cf2 value",
+        }
+
+        self.loginUser()
+
+        initial_ticket_data = {
+            "title": "Test Ticket",
+            "queue": self.queue_public,
+            "assigned_to": self.user,
+            "status": Ticket.OPEN_STATUS,
+            "submitter_email": submitter_email,
+        }
+
+        # create ticket
+        ticket = Ticket.objects.create(**initial_ticket_data)
+        ticket_id = ticket.id
+        ticket.ticketcustomfieldvalue_set.create(
+            field=public_cf, value=public_cf_field_values["initial"]
+        )
+        ticket.ticketcustomfieldvalue_set.create(
+            field=staff_only_cf, value=staff_only_cf_field_values["initial"]
+        )
+
+        default_post_data = {
+            "title": ticket.title,
+            "priority": ticket.priority,
+            "queue": ticket.queue_id,
+        }
+        # assign new owner
+        post_data = {
+            "new_status": Ticket.CLOSED_STATUS,
+            "public": True,
+            **default_post_data,
+        }
+        post_data[f"custom_{public_cf.name}"] = public_cf_field_values["next"]
+        post_data[f"custom_{staff_only_cf.name}"] = staff_only_cf_field_values["next"]
+        response = self.client.post(
+            reverse("helpdesk:update", kwargs={"ticket_id": ticket_id}),
+            post_data,
+            follow=True,
+        )
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                "Status",
+                status_value_to_title[Ticket.OPEN_STATUS],
+                status_value_to_title[Ticket.CLOSED_STATUS],
+            ),
+        )
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                public_cf.label,
+                public_cf_field_values["initial"],
+                public_cf_field_values["next"],
+            ),
+        )
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                staff_only_cf.label,
+                staff_only_cf_field_values["initial"],
+                staff_only_cf_field_values["next"],
+            ),
+        )
+
+        # Check public response excludes staff_only custom fields
+        response = self.get_public_view_response(ticket)
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                "Status",
+                status_value_to_title[Ticket.OPEN_STATUS],
+                status_value_to_title[Ticket.CLOSED_STATUS],
+            ),
+        )
+        self.assertContains(
+            response,
+            changed_field_msg_format.format(
+                public_cf.label,
+                public_cf_field_values["initial"],
+                public_cf_field_values["next"],
+            ),
+        )
+        self.assertNotContains(
+            response,
+            changed_field_msg_format.format(
+                staff_only_cf.label,
+                staff_only_cf_field_values["initial"],
+                staff_only_cf_field_values["next"],
+            ),
         )
