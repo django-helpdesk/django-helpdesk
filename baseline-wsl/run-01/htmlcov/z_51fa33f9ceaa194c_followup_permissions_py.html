@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/helpdesk/templatetags/followup_permissions.py: 100%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script type="text/javascript">
+        contexts = {
+  "a": "(empty)",
+  "b": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_valid_extension",
+  "c": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_done",
+  "d": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_undone",
+  "e": "tests.test_followup_copy.FollowUpCopyTests.test_copy_keeps_source_and_does_not_replay_history",
+  "f": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_inbound_followup_is_labeled_from_submitter",
+  "g": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_internal_followup_is_labeled_private",
+  "h": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_outbound_followup_is_labeled_to_submitter",
+  "i": "tests.test_followup_edit.FollowUpEditTests.test_edit_applies_the_submitted_values",
+  "j": "tests.test_followup_menu.FollowUpMenuTests.test_menu_is_offered_on_own_followup",
+  "k": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_colleagues_followup",
+  "l": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_followup_without_an_author",
+  "m": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_can_delete_a_followup_without_an_author",
+  "n": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_is_offered_the_menu_on_a_colleagues_followup",
+  "o": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_empty_recipients_say_so_explicitly",
+  "p": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_recorded_recipients_are_listed",
+  "q": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_unrecorded_recipients_render_nothing",
+  "r": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_followup_comment_cannot_inject_an_event_handler",
+  "s": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_api_and_ui_agree_on_a_ticket_assigned_outside_the_user_queues",
+  "t": "tests.test_staff_ticket_view.StaffTicketViewTests.test_few_attachments_shown_without_collapse",
+  "u": "tests.test_staff_ticket_view.StaffTicketViewTests.test_many_attachments_are_collapsed",
+  "v": "tests.test_staff_ticket_view.StaffTicketViewTests.test_staff_user_can_assign_ticket_to_herself",
+  "w": "tests.test_ticket_actions.TicketActionsTestCase.test_merge_tickets",
+  "x": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_staff",
+  "y": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_bottom_layout_places_respond_after_followups",
+  "z": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_default_layout_is_tabs",
+  "A": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_missing_user_settings_falls_back_to_tabs",
+  "B": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_top_layout_places_respond_before_followups",
+  "C": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_unknown_layout_falls_back_to_tabs",
+  "D": "tests.test_user_tickets_api.SubmitterEmailStorageTestCase.test_the_submit_form_stores_an_empty_string",
+  "E": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_when_the_edit_button_is_turned_off"
+}
+    </script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>helpdesk<span class="sep">/</span>templatetags<span class="sep">/</span>followup_permissions.py</b>:
+            <span class="pc_cov">100%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">13 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">13<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">0<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_51fa33f9ceaa194c_bootstrap5_form_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_51fa33f9ceaa194c_helpdesk_staff_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="str">django-helpdesk - A Django powered ticket tracker for small enterprise.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="str">Which actions a given user may take on a given follow-up. Kept here rather</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="str">than spelled out in the template so the menu and its entries agree on who</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="str">gets to see what.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="str">templatetags/followup_permissions.py</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">template</span> <span class="key">import</span> <span class="nam">Library</span>&nbsp;</span><span class="r"><label for="ctxs10" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">from</span> <span class="nam">helpdesk</span> <span class="key">import</span> <span class="nam">settings</span> <span class="key">as</span> <span class="nam">helpdesk_settings</span>&nbsp;</span><span class="r"><label for="ctxs11" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="nam">register</span> <span class="op">=</span> <span class="nam">Library</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs14" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="op">@</span><span class="nam">register</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">name</span><span class="op">=</span><span class="str">&quot;can_edit_followup&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs17" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="key">def</span> <span class="nam">can_edit_followup</span><span class="op">(</span><span class="nam">followup</span><span class="op">,</span> <span class="nam">user</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs18" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">    <span class="str">&quot;&quot;&quot;Whether ``user`` may edit ``followup``.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="str">    A follow-up with no author was not written by a staff member -- it was</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t"><span class="str">    received by e-mail, submitted from the public form or raised by the</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="str">    helpdesk itself -- and editing those is not offered to anyone.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs25"><span class="r"><label for="ctxs25" class="ctx">30 ctx</label></span><span class="ctxs">1bcdefghijklEmnopqrstuvwxyzABCD</span></p>
+    <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><input type="checkbox" id="ctxs26"><span class="r"><label for="ctxs26" class="ctx">1 ctx</label></span><span class="ctxs">1E</span></p>
+    <p class="run"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">    <span class="key">if</span> <span class="key">not</span> <span class="nam">followup</span><span class="op">.</span><span class="nam">user</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs27"><span class="r"><label for="ctxs27" class="ctx">29 ctx</label></span><span class="ctxs">1bcdefghijklmnopqrstuvwxyzABCD</span></p>
+    <p class="run"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">        <span class="key">return</span> <span class="key">False</span>&nbsp;</span><input type="checkbox" id="ctxs28"><span class="r"><label for="ctxs28" class="ctx">16 ctx</label></span><span class="ctxs">1flmopqrstuwyzABC</span></p>
+    <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">    <span class="key">return</span> <span class="nam">user</span> <span class="op">==</span> <span class="nam">followup</span><span class="op">.</span><span class="nam">user</span> <span class="key">or</span> <span class="nam">user</span><span class="op">.</span><span class="nam">is_superuser</span>&nbsp;</span><input type="checkbox" id="ctxs29"><span class="r"><label for="ctxs29" class="ctx">13 ctx</label></span><span class="ctxs">1bcdeghijknvxD</span></p>
+    <p class="pln"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t"><span class="op">@</span><span class="nam">register</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">name</span><span class="op">=</span><span class="str">&quot;can_delete_followup&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs32" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t"><span class="key">def</span> <span class="nam">can_delete_followup</span><span class="op">(</span><span class="nam">followup</span><span class="op">,</span> <span class="nam">user</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs33" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">    <span class="str">&quot;&quot;&quot;Whether ``user`` may delete ``followup``.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="key">return</span> <span class="nam">bool</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs35"><span class="r"><label for="ctxs35" class="ctx">30 ctx</label></span><span class="ctxs">1bcdefghijklEmnopqrstuvwxyzABCD</span></p>
+    <p class="run run2"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">        <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">        <span class="key">and</span> <span class="nam">user</span><span class="op">.</span><span class="nam">is_superuser</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_51fa33f9ceaa194c_bootstrap5_form_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_51fa33f9ceaa194c_helpdesk_staff_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+    </div>
+</footer>
+</body>
+</html>

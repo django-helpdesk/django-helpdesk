@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/helpdesk/templatetags/helpdesk_staff.py: 82%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script type="text/javascript">
+        contexts = {
+  "a": "(empty)",
+  "b": "tests.test_attachment_html_xss.PublicFormAttachmentTestCase.test_anonymous_user_cannot_attach_html",
+  "c": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_invalid_extension",
+  "d": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_valid_extension",
+  "e": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment",
+  "f": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment_utf8",
+  "g": "tests.test_checklist.TicketChecklistTestCase.test_create_checklist",
+  "h": "tests.test_checklist.TicketChecklistTestCase.test_create_checklist_from_template",
+  "i": "tests.test_checklist.TicketChecklistTestCase.test_create_checklist_template",
+  "j": "tests.test_checklist.TicketChecklistTestCase.test_delete_checklist",
+  "k": "tests.test_checklist.TicketChecklistTestCase.test_delete_checklist_template",
+  "l": "tests.test_checklist.TicketChecklistTestCase.test_display_checklist_templates",
+  "m": "tests.test_checklist.TicketChecklistTestCase.test_edit_checklist",
+  "n": "tests.test_checklist.TicketChecklistTestCase.test_edit_checklist_template",
+  "o": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_done",
+  "p": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_undone",
+  "q": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_allowed_sort_fields_are_kept",
+  "r": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_default_sort_when_no_parameter_given",
+  "s": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_injected_sort_field_is_ignored",
+  "t": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_injected_sort_field_never_reaches_the_orm",
+  "u": "tests.test_email_ignore.EmailIgnoreAddTests.test_email_ignore_creation_via_post_works",
+  "v": "tests.test_email_ignore.EmailIgnoreAddTests.test_privileged_user_can_access",
+  "w": "tests.test_email_ignore.EmailIgnoreDeleteTests.test_deletion_of_ignored_email_works_via_post",
+  "x": "tests.test_email_ignore.EmailIgnoreDeleteTests.test_privileged_user_can_access",
+  "y": "tests.test_email_ignore.EmailIgnoreListTests.test_super_user_can_access",
+  "z": "tests.test_followup_copy.FollowUpCopyTests.test_copy_keeps_source_and_does_not_replay_history",
+  "A": "tests.test_followup_copy.FollowUpCopyTests.test_disabled_hides_copy_option",
+  "B": "tests.test_followup_copy.FollowUpCopyTests.test_disabled_rejects_copy_without_moving_original",
+  "C": "tests.test_followup_copy.FollowUpCopyTests.test_get_keeps_existing_ticket_choices_and_does_not_copy",
+  "D": "tests.test_followup_copy.FollowUpCopyTests.test_partial_attachment_failure_rolls_back_rows_and_files",
+  "E": "tests.test_followup_copy.FollowUpCopyTests.test_queue_permissions_apply_to_source_and_target",
+  "F": "tests.test_followup_copy.FollowUpCopyTests.test_rejects_self_closed_and_missing_target",
+  "G": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_inbound_followup_is_labeled_from_submitter",
+  "H": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_internal_followup_is_labeled_private",
+  "I": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_outbound_followup_is_labeled_to_submitter",
+  "J": "tests.test_followup_edit.FollowUpEditTests.test_edit_applies_the_submitted_values",
+  "K": "tests.test_followup_menu.FollowUpMenuTests.test_menu_is_offered_on_own_followup",
+  "L": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_colleagues_followup",
+  "M": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_followup_without_an_author",
+  "N": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_when_the_edit_button_is_turned_off",
+  "O": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_can_delete_a_followup_without_an_author",
+  "P": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_is_offered_the_menu_on_a_colleagues_followup",
+  "Q": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_empty_recipients_say_so_explicitly",
+  "R": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_public_view_never_lists_recipients",
+  "S": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_recorded_recipients_are_listed",
+  "T": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_unrecorded_recipients_render_nothing",
+  "U": "tests.test_form_rendering.RealPagesTestCase.test_public_ticket_form",
+  "V": "tests.test_form_rendering.RealPagesTestCase.test_user_settings_form",
+  "W": "tests.test_help_context_view.HelpContextTests.test_template_is_accessible",
+  "X": "tests.test_kanban.KanbanClosedTicketFilterTests.test_disabled_filter_shows_stale_closed_ticket",
+  "Y": "tests.test_kanban.KanbanClosedTicketFilterTests.test_recent_closed_ticket_is_shown",
+  "Z": "tests.test_kanban.KanbanClosedTicketFilterTests.test_stale_closed_ticket_is_hidden",
+  "0": "tests.test_kanban.KanbanClosedTicketFilterTests.test_stale_duplicate_ticket_is_hidden",
+  "1": "tests.test_kb_category_view.KBCategoryViewTests.test_kb_category_page_for_anonymous_user",
+  "2": "tests.test_kb_category_view.KBCategoryViewTests.test_kb_category_page_for_staff_user",
+  "3": "tests.test_kb_index_view.KBIndexViewTests.test_anonymous_user_can_access",
+  "4": "tests.test_kb_vote_view.KBVoteViewTests.test_downvoted_earlier_now_wants_to_upvote",
+  "5": "tests.test_kb_vote_view.KBVoteViewTests.test_never_downvoted_now_wants_to_downvote",
+  "6": "tests.test_kb_vote_view.KBVoteViewTests.test_never_upvoted_now_wants_to_upvote",
+  "7": "tests.test_kb_vote_view.KBVoteViewTests.test_upvoted_earlier_now_wants_to_downvote",
+  "8": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_a_plain_url_is_still_rendered_as_a_link",
+  "9": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_description_cannot_inject_an_event_handler",
+  "!": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_followup_comment_cannot_inject_an_event_handler",
+  "#": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_resolution_cannot_inject_an_event_handler",
+  "$": "tests.test_navigation.CustomStaffUserTestCase.test_custom_staff_pass",
+  "%": "tests.test_navigation.HomePageTestCase.test_no_user_settings_redirect_to_dashboard",
+  "'": "tests.test_navigation.HomePageTestCase.test_redirect_to_dashboard",
+  "(": "tests.test_navigation.HomePageTestCase.test_redirect_to_ticket_list",
+  ")": "tests.test_navigation.KBDisabledTestCase.test_navigation",
+  "*": "tests.test_navigation.NonStaffUsersAllowedTestCase.test_non_staff_allowed",
+  "+": "tests.test_navigation.StaffUsersOnlyTestCase.test_staff_can_access_dashboard",
+  ",": "tests.test_non_staff_full_access.PrivateKBCategoryTests.test_designated_user_can_read_private_category",
+  "-": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_an_unassigned_ticket_outside_the_user_queues_is_still_refused",
+  ".": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_api_and_ui_agree_on_a_public_submission_queue",
+  "/": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_api_and_ui_agree_on_a_ticket_assigned_outside_the_user_queues",
+  ":": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_merge_tickets_blocked_for_inaccessible_queue",
+  ";": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_view_ticket_allowed_for_accessible_queue",
+  "=": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_view_ticket_redirects_with_error_for_inaccessible_queue",
+  "?": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_dashboard_ticket_counts",
+  "@": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_public_submission_queue_does_not_expose_unassigned_tickets",
+  "[": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_report_ticket_counts",
+  "]": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_ticket_list_per_queue_user_restrictions",
+  "^": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_ticket_reports_per_queue_user_restrictions",
+  "_": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_forged_relation_is_rejected_with_a_response",
+  "`": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_accepts_a_foreign_child_under_a_permitted_ticket",
+  "{": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_mutates_a_foreign_ticket",
+  "|": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_serves_foreign_queue_content",
+  "}": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_without_a_ticket_id_serves_foreign_content",
+  "~": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_permitted_queue_still_works",
+  "ab": "tests.test_public_actions.PublicActionsTestCase.test_public_view_ticket",
+  "bb": "tests.test_report_index_view.ReportIndexViewTests.test_report_index_url_works",
+  "cb": "tests.test_run_report_view.RunReportViewTests.test_report_generation_works",
+  "db": "tests.test_single_queue_hiding.TicketDetailQueueFieldTestCase.test_queue_select_hidden_with_single_queue",
+  "eb": "tests.test_single_queue_hiding.TicketDetailQueueFieldTestCase.test_queue_select_shown_with_multiple_queues",
+  "fb": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_public_field_value_and_history_are_still_shown",
+  "gb": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_query_count_does_not_grow_with_follow_ups",
+  "hb": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_staff_only_change_history_is_not_shown",
+  "ib": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_staff_only_value_is_not_shown",
+  "jb": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_knowledge_base_items_and_queues_in_context",
+  "kb": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_knowledge_base_items_not_in_context_if_setting_is_disabled",
+  "lb": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_sort_last_followup_is_accepted_and_selected",
+  "mb": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_sorting_dropdown_hides_kbitem_when_kb_disabled",
+  "nb": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_sorting_dropdown_lists_all_sortable_columns",
+  "ob": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_staff_user_can_access_ticket_list_page",
+  "pb": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_user_saved_queries_executed_correctly",
+  "qb": "tests.test_staff_ticket_view.StaffTicketViewTests.test_few_attachments_shown_without_collapse",
+  "rb": "tests.test_staff_ticket_view.StaffTicketViewTests.test_many_attachments_are_collapsed",
+  "sb": "tests.test_staff_ticket_view.StaffTicketViewTests.test_staff_user_can_access_ticket_details",
+  "tb": "tests.test_staff_ticket_view.StaffTicketViewTests.test_staff_user_can_assign_ticket_to_herself",
+  "ub": "tests.test_ticket_actions.TicketActionsTestCase.test_create_ticket_getform",
+  "vb": "tests.test_ticket_actions.TicketActionsTestCase.test_delete_ticket_staff",
+  "wb": "tests.test_ticket_actions.TicketActionsTestCase.test_merge_tickets",
+  "xb": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_staff",
+  "yb": "tests.test_ticket_lookup.TestTicketLookupPublicEnabled.test_anonymous_close_without_key_leaves_ticket_resolved",
+  "zb": "tests.test_ticket_lookup.TestTicketLookupPublicEnabled.test_anonymous_lookup_with_wrong_key_is_refused",
+  "Ab": "tests.test_ticket_lookup.TestTicketLookupPublicEnabled.test_anonymous_lookup_without_key_is_refused",
+  "Bb": "tests.test_ticket_lookup.TestTicketLookupPublicEnabled.test_authenticated_submitter_can_view_without_key",
+  "Cb": "tests.test_ticket_lookup.TestTicketLookupPublicEnabled.test_ticket_by_link",
+  "Db": "tests.test_ticket_lookup.TestTicketLookupPublicEnabled.test_ticket_with_changed_queue",
+  "Eb": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_bottom_layout_places_respond_after_followups",
+  "Fb": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_default_layout_is_tabs",
+  "Gb": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_missing_user_settings_falls_back_to_tabs",
+  "Hb": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_respond_form_shown_without_followups",
+  "Ib": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_top_layout_places_respond_before_followups",
+  "Jb": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_unknown_layout_falls_back_to_tabs",
+  "Kb": "tests.test_ticket_submission.EmailInteractionsTestCase.test_ticket_field_autofill",
+  "Lb": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_authorized",
+  "Mb": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_customfields",
+  "Nb": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_private",
+  "Ob": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public",
+  "Pb": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_no_loopback",
+  "Qb": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_with_hidden_fields",
+  "Rb": "tests.test_ticket_template_extension.TicketTemplateExtensionTests.test_same_name_override_adds_panel_and_inherits_existing_page",
+  "Sb": "tests.test_update_ticket_view.UpdateTicketCustomFieldsTests.test_custom_field_persists_after_invalid_post",
+  "Tb": "tests.test_update_ticket_view.UpdateTicketViewTests.test_redirect_after_login_does_not_crash",
+  "Ub": "tests.test_user_tickets_api.SubmitterEmailStorageTestCase.test_the_submit_form_stores_an_empty_string",
+  "Vb": "tests.test_usersettings.TicketActionsTestCase.test_get_user_settings",
+  "Wb": "tests.test_view_access_guards.StaffViewGuardTests.test_staff_user_gets_the_view"
+}
+    </script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>helpdesk<span class="sep">/</span>templatetags<span class="sep">/</span>helpdesk_staff.py</b>:
+            <span class="pc_cov">82%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">11 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">9<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">0<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_51fa33f9ceaa194c_followup_permissions_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_51fa33f9ceaa194c_helpdesk_util_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="str">django-helpdesk - A Django powered ticket tracker for small enterprise.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="str">The is_helpdesk_staff template filter returns True if the user qualifies as Helpdesk staff.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="str">templatetags/helpdesk_staff.py</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">template</span> <span class="key">import</span> <span class="nam">Library</span>&nbsp;</span><span class="r"><label for="ctxs8" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">decorators</span> <span class="key">import</span> <span class="nam">is_helpdesk_staff</span>&nbsp;</span><span class="r"><label for="ctxs9" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">import</span> <span class="nam">logging</span>&nbsp;</span><span class="r"><label for="ctxs10" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="nam">logger</span> <span class="op">=</span> <span class="nam">logging</span><span class="op">.</span><span class="nam">getLogger</span><span class="op">(</span><span class="nam">__name__</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs13" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="nam">register</span> <span class="op">=</span> <span class="nam">Library</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs14" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="op">@</span><span class="nam">register</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">name</span><span class="op">=</span><span class="str">&quot;is_helpdesk_staff&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs17" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="key">def</span> <span class="nam">helpdesk_staff</span><span class="op">(</span><span class="nam">user</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs18" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">    <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs19"><span class="r"><label for="ctxs19" class="ctx">137 ctx</label></span><span class="ctxs">2b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 ! # $ % ' ( ) * + , - . / : ; = ? @ [ ] ^ _ ` { | } ~ abbbcbdbebfbgbhbibjbkblbmbnbobpbqbrbsbtbubvbwbxbybzbAbBbCbDbEbFbGbHbIbJbKbLbMbNbObPbQbRbSbTbUbVbWb</span></p>
+    <p class="run"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">        <span class="key">return</span> <span class="nam">is_helpdesk_staff</span><span class="op">(</span><span class="nam">user</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs20"><span class="r"><label for="ctxs20" class="ctx">137 ctx</label></span><span class="ctxs">2b c d e f g h i j k l m n o p q r s t u v w x y z A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0 1 2 3 4 5 6 7 8 9 ! # $ % ' ( ) * + , - . / : ; = ? @ [ ] ^ _ ` { | } ~ abbbcbdbebfbgbhbibjbkblbmbnbobpbqbrbsbtbubvbwbxbybzbAbBbCbDbEbFbGbHbIbJbKbLbMbNbObPbQbRbSbTbUbVbWb</span></p>
+    <p class="mis show_mis"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">    <span class="key">except</span> <span class="nam">Exception</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">        <span class="nam">logger</span><span class="op">.</span><span class="nam">exception</span><span class="op">(</span><span class="str">&quot;&#x27;helpdesk_staff&#x27; template tag (django-helpdesk) crashed&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_51fa33f9ceaa194c_followup_permissions_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_51fa33f9ceaa194c_helpdesk_util_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+    </div>
+</footer>
+</body>
+</html>

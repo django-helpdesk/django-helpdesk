@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/helpdesk/copy_followup.py: 100%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script type="text/javascript">
+        contexts = {
+  "a": "tests.test_followup_copy.FollowUpCopyTests.test_partial_attachment_failure_rolls_back_rows_and_files",
+  "b": "tests.test_followup_copy.FollowUpCopyTests.test_attachments_are_independent_files",
+  "c": "tests.test_followup_copy.FollowUpCopyTests.test_copy_keeps_source_and_does_not_replay_history",
+  "d": "tests.test_followup_copy.FollowUpCopyTests.test_copy_respects_public_field",
+  "e": "tests.test_followup_copy.FollowUpCopyTests.test_copy_uses_edited_content_without_modifying_source",
+  "f": "tests.test_followup_copy.FollowUpCopyTests.test_does_not_duplicate_automatically_calculated_time",
+  "g": "(empty)"
+}
+    </script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>helpdesk<span class="sep">/</span>copy_followup.py</b>:
+            <span class="pc_cov">100%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">23 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">23<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">0<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_72a8051a633181ae_apps_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_72a8051a633181ae_decorators_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">&quot;&quot;&quot;Copy follow-up content without duplicating ticket history or work logs.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="key">from</span> <span class="nam">pathlib</span> <span class="key">import</span> <span class="nam">PurePath</span>&nbsp;</span><span class="r"><label for="ctxs3" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">db</span> <span class="key">import</span> <span class="nam">transaction</span>&nbsp;</span><span class="r"><label for="ctxs5" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">utils</span><span class="op">.</span><span class="nam">translation</span> <span class="key">import</span> <span class="nam">gettext</span> <span class="key">as</span> <span class="nam">_</span>&nbsp;</span><span class="r"><label for="ctxs6" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">FollowUp</span><span class="op">,</span> <span class="nam">FollowUpAttachment</span>&nbsp;</span><span class="r"><label for="ctxs8" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">def</span> <span class="nam">copy_followup</span><span class="op">(</span><span class="nam">source</span><span class="op">,</span> <span class="nam">ticket</span><span class="op">,</span> <span class="nam">user</span><span class="op">,</span> <span class="op">*</span><span class="op">,</span> <span class="nam">title</span><span class="op">,</span> <span class="nam">comment</span><span class="op">,</span> <span class="nam">public</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs11" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">    <span class="str">&quot;&quot;&quot;The caller must authorize access to both source and destination tickets.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="nam">saved_files</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs13"><span class="r"><label for="ctxs13" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">    <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs14"><span class="r"><label for="ctxs14" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">        <span class="key">with</span> <span class="nam">transaction</span><span class="op">.</span><span class="nam">atomic</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs15"><span class="r"><label for="ctxs15" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">            <span class="nam">title</span> <span class="op">=</span> <span class="nam">_</span><span class="op">(</span><span class="str">&quot;Copied from ticket #%(ticket)s: %(title)s&quot;</span><span class="op">)</span> <span class="op">%</span> <span class="op">{</span>&nbsp;</span><input type="checkbox" id="ctxs16"><span class="r"><label for="ctxs16" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run run2"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">                <span class="str">&quot;ticket&quot;</span><span class="op">:</span> <span class="nam">source</span><span class="op">.</span><span class="nam">ticket_id</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">                <span class="str">&quot;title&quot;</span><span class="op">:</span> <span class="nam">title</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">            <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">            <span class="nam">copied</span> <span class="op">=</span> <span class="nam">FollowUp</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">create</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs20"><span class="r"><label for="ctxs20" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run run2"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">                <span class="nam">ticket</span><span class="op">=</span><span class="nam">ticket</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">                <span class="nam">title</span><span class="op">=</span><span class="nam">title</span><span class="op">[</span><span class="op">:</span><span class="num">200</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">                <span class="nam">comment</span><span class="op">=</span><span class="nam">comment</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">                <span class="nam">user</span><span class="op">=</span><span class="nam">user</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">                <span class="nam">public</span><span class="op">=</span><span class="nam">public</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">                <span class="nam">email_recipients</span><span class="op">=</span><span class="op">[</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">            <span class="com"># Saving a follow-up may calculate work time automatically. Copying</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">            <span class="com"># existing content is not additional work to bill to this ticket.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">            <span class="nam">FollowUp</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">pk</span><span class="op">=</span><span class="nam">copied</span><span class="op">.</span><span class="nam">pk</span><span class="op">)</span><span class="op">.</span><span class="nam">update</span><span class="op">(</span><span class="nam">time_spent</span><span class="op">=</span><span class="key">None</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs30"><span class="r"><label for="ctxs30" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">            <span class="nam">copied</span><span class="op">.</span><span class="nam">time_spent</span> <span class="op">=</span> <span class="key">None</span>&nbsp;</span><input type="checkbox" id="ctxs31"><span class="r"><label for="ctxs31" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">            <span class="key">for</span> <span class="nam">attachment</span> <span class="key">in</span> <span class="nam">source</span><span class="op">.</span><span class="nam">followupattachment_set</span><span class="op">.</span><span class="nam">all</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs32"><span class="r"><label for="ctxs32" class="ctx">6 ctx</label></span><span class="ctxs">1bcdefa</span></p>
+    <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">                <span class="nam">duplicate</span> <span class="op">=</span> <span class="nam">FollowUpAttachment</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs33"><span class="r"><label for="ctxs33" class="ctx">2 ctx</label></span><span class="ctxs">1ba</span></p>
+    <p class="run run2"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">                    <span class="nam">followup</span><span class="op">=</span><span class="nam">copied</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">                    <span class="nam">filename</span><span class="op">=</span><span class="nam">attachment</span><span class="op">.</span><span class="nam">filename</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">                    <span class="nam">mime_type</span><span class="op">=</span><span class="nam">attachment</span><span class="op">.</span><span class="nam">mime_type</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">                    <span class="nam">size</span><span class="op">=</span><span class="nam">attachment</span><span class="op">.</span><span class="nam">size</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">                <span class="key">with</span> <span class="nam">attachment</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">open</span><span class="op">(</span><span class="str">&quot;rb&quot;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">content</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs39"><span class="r"><label for="ctxs39" class="ctx">2 ctx</label></span><span class="ctxs">1ba</span></p>
+    <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">                    <span class="nam">duplicate</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">save</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs40"><span class="r"><label for="ctxs40" class="ctx">2 ctx</label></span><span class="ctxs">1ba</span></p>
+    <p class="run run2"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">                        <span class="nam">PurePath</span><span class="op">(</span><span class="nam">attachment</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">name</span><span class="op">)</span><span class="op">.</span><span class="nam">name</span><span class="op">,</span> <span class="nam">content</span><span class="op">,</span> <span class="nam">save</span><span class="op">=</span><span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">                    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">                    <span class="nam">saved_files</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="op">(</span><span class="nam">duplicate</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">storage</span><span class="op">,</span> <span class="nam">duplicate</span><span class="op">.</span><span class="nam">file</span><span class="op">.</span><span class="nam">name</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs43"><span class="r"><label for="ctxs43" class="ctx">2 ctx</label></span><span class="ctxs">1ba</span></p>
+    <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">                <span class="nam">duplicate</span><span class="op">.</span><span class="nam">save</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs44"><span class="r"><label for="ctxs44" class="ctx">2 ctx</label></span><span class="ctxs">1ba</span></p>
+    <p class="run"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">            <span class="key">return</span> <span class="nam">copied</span>&nbsp;</span><input type="checkbox" id="ctxs45"><span class="r"><label for="ctxs45" class="ctx">5 ctx</label></span><span class="ctxs">1bcdef</span></p>
+    <p class="run"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">    <span class="key">except</span> <span class="nam">Exception</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs46"><span class="r"><label for="ctxs46" class="ctx">1 ctx</label></span><span class="ctxs">1a</span></p>
+    <p class="pln"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">        <span class="com"># Storage writes are not rolled back by the database transaction.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">        <span class="key">for</span> <span class="nam">storage</span><span class="op">,</span> <span class="nam">name</span> <span class="key">in</span> <span class="nam">saved_files</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs48"><span class="r"><label for="ctxs48" class="ctx">1 ctx</label></span><span class="ctxs">1a</span></p>
+    <p class="run"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">            <span class="nam">storage</span><span class="op">.</span><span class="nam">delete</span><span class="op">(</span><span class="nam">name</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs49"><span class="r"><label for="ctxs49" class="ctx">1 ctx</label></span><span class="ctxs">1a</span></p>
+    <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">        <span class="key">raise</span>&nbsp;</span><input type="checkbox" id="ctxs50"><span class="r"><label for="ctxs50" class="ctx">1 ctx</label></span><span class="ctxs">1a</span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_72a8051a633181ae_apps_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_72a8051a633181ae_decorators_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+    </div>
+</footer>
+</body>
+</html>

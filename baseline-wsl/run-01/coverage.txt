@@ -1,0 +1,52 @@
+Name                                                               Stmts   Miss Branch BrPart  Cover   Missing
+--------------------------------------------------------------------------------------------------------------
+src/helpdesk/__init__.py                                               0      0      0      0   100%
+src/helpdesk/admin.py                                                 89     15     14      3    75%   24->28, 34-39, 42-43, 62-68, 71, 105, 108->125, 118->125
+src/helpdesk/apps.py                                                   7      0      0      0   100%
+src/helpdesk/copy_followup.py                                         23      0      4      0   100%
+src/helpdesk/decorators.py                                            55     11     24      1    77%   24, 77-90
+src/helpdesk/email.py                                                537    115    182     39    79%   100, 101->105, 106, 113-116, 119->121, 123->139, 133->139, 141-143, 146-148, 157-158, 169-173, 182, 189-195, 203, 214-215, 223-236, 240->279, 251-262, 270-274, 320-330, 334->379, 347-359, 369-374, 390-409, 451, 453, 462->exit, 478-484, 496-497, 501, 510-513, 547, 568, 572->581, 586-587, 617-618, 623-624, 629-631, 683->696, 794, 806-809, 814, 820-823, 831->837, 835-836, 838, 939, 968-969, 976, 1022, 1094->1101, 1102->1101, 1162, 1167, 1170->1173
+src/helpdesk/exceptions.py                                             2      0      0      0   100%
+src/helpdesk/forms.py                                                342     34    106     20    87%   53->56, 110-112, 177, 181, 185, 191, 237-244, 249->260, 352->366, 407, 515->523, 542-543, 560, 597, 611, 616, 620->exit, 629-637, 648, 696-697, 706-707, 723, 741-744, 760-763, 797, 799, 802
+src/helpdesk/lib.py                                                  127     25     48      6    77%   66, 107-149, 160->159, 180->159, 235, 273, 289
+src/helpdesk/management/__init__.py                                    0      0      0      0   100%
+src/helpdesk/management/commands/__init__.py                           0      0      0      0   100%
+src/helpdesk/management/commands/create_escalation_exclusions.py      37     37     18      0     0%   11-96
+src/helpdesk/management/commands/create_queue_permissions.py          28     28      6      0     0%   15-74
+src/helpdesk/management/commands/create_usersettings.py               10     10      2      0     0%   10-32
+src/helpdesk/management/commands/escalate_tickets.py                  43     43     16      0     0%   10-114
+src/helpdesk/management/commands/get_email.py                         11      0      0      0   100%
+src/helpdesk/models.py                                               786     67    170     21    89%   407, 427, 443-446, 453, 455, 457, 459, 475-484, 748->746, 809, 812, 830, 950-951, 956, 1054, 1135, 1140->1144, 1247-1257, 1301, 1328, 1353, 1371, 1419, 1453, 1517, 1623, 1689-1692, 1815, 1890, 1893->1895, 1901-1905, 1981, 1996, 1999-2000, 2122, 2130, 2133, 2171-2172, 2191, 2195, 2230, 2235, 2238, 2240, 2254, 2280
+src/helpdesk/query.py                                                132     35     44      6    66%   30, 37-58, 186-206, 256, 282, 298-318, 325
+src/helpdesk/sanitize.py                                              20      0      0      0   100%
+src/helpdesk/serializers.py                                          152      7     20      4    91%   72-77, 133, 167->175, 305
+src/helpdesk/settings.py                                             134     10     14      5    90%   38-41, 331, 384, 455-459, 516
+src/helpdesk/signals.py                                                3      0      0      0   100%
+src/helpdesk/tasks.py                                                  5      4      0      0    20%   3-8
+src/helpdesk/templated_email.py                                       50      6     14      2    84%   104->109, 107, 129-135
+src/helpdesk/templatetags/__init__.py                                  0      0      0      0   100%
+src/helpdesk/templatetags/bootstrap5_form.py                          38      1     14      1    96%   46
+src/helpdesk/templatetags/followup_permissions.py                     13      0      4      0   100%
+src/helpdesk/templatetags/helpdesk_staff.py                           11      2      0      0    82%   21-22
+src/helpdesk/templatetags/helpdesk_util.py                            22     11      0      0    50%   27-46
+src/helpdesk/templatetags/in_list.py                                   5      0      0      0   100%
+src/helpdesk/templatetags/load_helpdesk_settings.py                   12      5      0      0    58%   15-23
+src/helpdesk/templatetags/saved_queries.py                            17      5      2      0    74%   25-33
+src/helpdesk/templatetags/ticket_to_link.py                           24      2      8      1    91%   34-35, 37->29
+src/helpdesk/templatetags/user_admin_url.py                           11      6      0      0    45%   17-23
+src/helpdesk/update_ticket.py                                        202     18    102     12    89%   40-41, 87, 97-98, 133->exit, 141, 170, 173-176, 251, 337-338, 367-372, 383-388, 396, 406->411, 411->398
+src/helpdesk/urls.py                                                  52      7     20      5    75%   53-60, 68->214, 191->200, 200->214, 254->268, 293->296
+src/helpdesk/user.py                                                  69      2     34      3    93%   6->10, 40->44, 50-51
+src/helpdesk/validators.py                                            10      1      4      1    86%   24
+src/helpdesk/views/__init__.py                                         0      0      0      0   100%
+src/helpdesk/views/abstract_views.py                                  27      2      6      0    94%   41-42
+src/helpdesk/views/api.py                                             95      9     20      1    84%   107-115
+src/helpdesk/views/auth.py                                            23      0      2      0   100%
+src/helpdesk/views/feeds.py                                           96     21     22      7    71%   37-39, 51, 62, 75, 92, 96, 99-102, 124, 157, 160, 165, 170, 176, 179, 182-185
+src/helpdesk/views/kb.py                                              61      0     16      2    97%   104->110, 116->121
+src/helpdesk/views/permissions.py                                      5      0      0      0   100%
+src/helpdesk/views/public.py                                         157     25     38      9    81%   55-56, 67, 88-98, 100, 102, 120, 134-136, 145, 148-149, 157, 223-226, 284, 286, 295, 304-305
+src/helpdesk/views/staff.py                                         1104    296    314     61    69%   109->113, 243->248, 283-286, 292-295, 303-306, 312-315, 359, 388, 418->exit, 490-492, 533-539, 542-553, 683, 714-721, 735->750, 745-749, 755-756, 787->780, 811, 852-854, 856, 858-860, 864->873, 889-964, 1018->1016, 1027, 1035->1033, 1038-1039, 1047-1048, 1073->1088, 1099, 1125, 1135-1136, 1166-1193, 1270, 1274-1275, 1287-1302, 1306, 1310, 1334, 1386-1387, 1393, 1397-1398, 1427-1432, 1465, 1528-1529, 1542, 1569, 1578-1602, 1690-1691, 1694-1695, 1698-1699, 1705-1716, 1720, 1744, 1748-1749, 1755, 1779-1780, 1781->1783, 1803-1807, 1810-1814, 1817-1821, 1830-1842, 1846-1847, 1863, 1910->1912, 1915, 1929-1935, 1964->1971, 1993-1994, 2009-2029, 2047-2053, 2060-2070, 2087-2090, 2099-2109, 2126-2130, 2162, 2193-2196, 2212-2215, 2218, 2299-2306, 2310, 2349, 2383-2388, 2390->2400, 2449-2459
+src/helpdesk/webhooks.py                                              40      4      8      0    92%   35-36, 61-62
+--------------------------------------------------------------------------------------------------------------
+TOTAL                                                               4687    864   1296    210    78%
