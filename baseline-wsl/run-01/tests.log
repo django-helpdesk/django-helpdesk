@@ -1,0 +1,92 @@
+Creating test database for alias 'default'...
+.....................................['Unsupported file extension: .html']
+.........ss........../home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1671: RuntimeWarning: DateTimeField Ticket.created received a naive datetime (2026-09-26 00:00:00) while time zone support is active.
+  warnings.warn(
+/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1671: RuntimeWarning: DateTimeField Ticket.created received a naive datetime (2026-08-27 00:00:00) while time zone support is active.
+  warnings.warn(
+...........................................................................template "updated_submitter" does not exist, no mail sent
+................Queue processing failed: test2
+Traceback (most recent call last):
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/src/helpdesk/email.py", line 124, in process_email
+    process_queue(q, logger=logger)
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1190, in __call__
+    return _mock_self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1194, in _mock_call
+    return _mock_self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1255, in _execute_mock_call
+    raise result
+Exception: Error Q2;
+Queue processing failed: test4
+Traceback (most recent call last):
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/src/helpdesk/email.py", line 124, in process_email
+    process_queue(q, logger=logger)
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1190, in __call__
+    return _mock_self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1194, in _mock_call
+    return _mock_self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1255, in _execute_mock_call
+    raise result
+Exception: Error Q4;
+....................................................................................................................................................................................................................................................................................................................................................127.0.0.1 - - [26/Oct/2026 19:11:16] "POST /new-ticket HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "POST /new-ticket-1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "GET /get-past-requests HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "POST /followup HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "POST /followup-1 HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "GET /get-past-requests HTTP/1.1" 200 -
+.127.0.0.1 - - [26/Oct/2026 19:11:16] "POST /new-ticket HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "GET /get-past-requests HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "POST /followup HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "GET /get-past-requests HTTP/1.1" 200 -
+.127.0.0.1 - - [26/Oct/2026 19:11:16] "POST /new-ticket HTTP/1.1" 200 -
+127.0.0.1 - - [26/Oct/2026 19:11:16] "GET /get-past-requests HTTP/1.1" 200 -
+............
+----------------------------------------------------------------------
+Ran 503 tests in 17.812s
+
+OK (skipped=2)
+Destroying test database for alias 'default'...
+Running tests using Django version 5.2.18...
+Found 503 test(s).
+System check identified no issues (0 silenced).
+Extracting email into queues...
+Processing queue: test1 Email address: None...
+Queue successfully processed: test1
+Processing queue: test2 Email address: None...
+Queue processing failed: test2
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/src/helpdesk/email.py", line 124, in process_email
+    process_queue(q, logger=logger)
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1190, in __call__
+    return _mock_self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1194, in _mock_call
+    return _mock_self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1255, in _execute_mock_call
+    raise result
+Exception: Error Q2;
+Processing queue: test3 Email address: None...
+Queue successfully processed: test3
+Processing queue: test4 Email address: None...
+Queue processing failed: test4
+------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/src/helpdesk/email.py", line 124, in process_email
+    process_queue(q, logger=logger)
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1190, in __call__
+    return _mock_self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1194, in _mock_call
+    return _mock_self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ocatania/code/university/fourth-year/django-helpdesk-CICD/.venv/lib/python3.12/site-packages/mock/mock.py", line 1255, in _execute_mock_call
+    raise result
+Exception: Error Q4;
+Processing queue: test5 Email address: None...
+Queue successfully processed: test5
+Email extraction into queues completed.

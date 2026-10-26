@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/helpdesk/user.py: 93%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script type="text/javascript">
+        contexts = {
+  "a": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_without_a_ticket_id_serves_foreign_content",
+  "b": "(empty)",
+  "c": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_an_unassigned_ticket_outside_the_user_queues_is_still_refused",
+  "d": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_api_and_ui_agree_on_a_public_submission_queue",
+  "e": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_api_and_ui_agree_on_a_ticket_assigned_outside_the_user_queues",
+  "f": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_view_ticket_allowed_for_accessible_queue",
+  "g": "tests.test_per_queue_view_sweep.AccessibleTicketsParityTestCase.test_the_queryset_matches_the_predicate",
+  "h": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_accepts_a_foreign_child_under_a_permitted_ticket",
+  "i": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_mutates_a_foreign_ticket",
+  "j": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_serves_foreign_queue_content",
+  "k": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_permitted_queue_still_works",
+  "l": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_dashboard_ticket_counts",
+  "m": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_ticket_list_per_queue_user_restrictions",
+  "n": "tests.test_kb_index_view.KBIndexViewTests.test_anonymous_user_can_access",
+  "o": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_permitted_queue_is_still_reachable",
+  "p": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_ticket_can_be_merged_into_a_permitted_ticket",
+  "q": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_ticket_cannot_be_merged_into_a_foreign_ticket",
+  "r": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_ticket_creation_in_a_foreign_queue_is_rejected_by_the_serializer",
+  "s": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_ticket_list_only_shows_permitted_queues",
+  "t": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_public_submission_queue_does_not_expose_unassigned_tickets",
+  "u": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_valid_extension",
+  "v": "tests.test_checklist.TicketChecklistTestCase.test_delete_checklist",
+  "w": "tests.test_checklist.TicketChecklistTestCase.test_edit_checklist",
+  "x": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_done",
+  "y": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_undone",
+  "z": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_allowed_sort_fields_are_kept",
+  "A": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_default_sort_when_no_parameter_given",
+  "B": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_injected_sort_field_is_ignored",
+  "C": "tests.test_dashboard_sorting.DashboardSortingTestCase.test_injected_sort_field_never_reaches_the_orm",
+  "D": "tests.test_followup_copy.FollowUpCopyTests.test_copy_keeps_source_and_does_not_replay_history",
+  "E": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_inbound_followup_is_labeled_from_submitter",
+  "F": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_internal_followup_is_labeled_private",
+  "G": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_outbound_followup_is_labeled_to_submitter",
+  "H": "tests.test_followup_edit.FollowUpEditTests.test_edit_applies_the_submitted_values",
+  "I": "tests.test_followup_menu.FollowUpMenuTests.test_menu_is_offered_on_own_followup",
+  "J": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_colleagues_followup",
+  "K": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_when_the_edit_button_is_turned_off",
+  "L": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_empty_recipients_say_so_explicitly",
+  "M": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_recorded_recipients_are_listed",
+  "N": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_unrecorded_recipients_render_nothing",
+  "O": "tests.test_single_queue_hiding.TicketDetailQueueFieldTestCase.test_queue_select_hidden_with_single_queue",
+  "P": "tests.test_single_queue_hiding.TicketDetailQueueFieldTestCase.test_queue_select_shown_with_multiple_queues",
+  "Q": "tests.test_staff_ticket_view.StaffTicketViewTests.test_few_attachments_shown_without_collapse",
+  "R": "tests.test_staff_ticket_view.StaffTicketViewTests.test_many_attachments_are_collapsed",
+  "S": "tests.test_staff_ticket_view.StaffTicketViewTests.test_staff_user_can_access_ticket_details",
+  "T": "tests.test_staff_ticket_view.StaffTicketViewTests.test_staff_user_can_assign_ticket_to_herself",
+  "U": "tests.test_ticket_actions.TicketActionsTestCase.test_merge_tickets",
+  "V": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_staff",
+  "W": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_bottom_layout_places_respond_after_followups",
+  "X": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_default_layout_is_tabs",
+  "Y": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_missing_user_settings_falls_back_to_tabs",
+  "Z": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_respond_form_shown_without_followups",
+  "0": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_top_layout_places_respond_before_followups",
+  "1": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_unknown_layout_falls_back_to_tabs",
+  "2": "tests.test_ticket_template_extension.TicketTemplateExtensionTests.test_same_name_override_adds_panel_and_inherits_existing_page",
+  "3": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_followup_without_an_author",
+  "4": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_can_delete_a_followup_without_an_author",
+  "5": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_is_offered_the_menu_on_a_colleagues_followup",
+  "6": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_a_plain_url_is_still_rendered_as_a_link",
+  "7": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_description_cannot_inject_an_event_handler",
+  "8": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_followup_comment_cannot_inject_an_event_handler",
+  "9": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_resolution_cannot_inject_an_event_handler",
+  "!": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_view_ticket_redirects_with_error_for_inaccessible_queue",
+  "#": "tests.test_user_tickets_api.SubmitterEmailStorageTestCase.test_the_submit_form_stores_an_empty_string",
+  "$": "tests.test_checklist.TicketChecklistTestCase.test_create_checklist",
+  "%": "tests.test_checklist.TicketChecklistTestCase.test_create_checklist_from_template",
+  "'": "tests.test_followup_copy.FollowUpCopyTests.test_queue_permissions_apply_to_source_and_target",
+  "(": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_forged_relation_is_rejected_with_a_response",
+  ")": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_body_is_not_served_as_html",
+  "*": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_non_numeric_id_returns_404",
+  "+": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_preset_of_a_public_submission_queue_is_not_disclosed",
+  ",": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_preset_of_an_accessible_queue_is_served",
+  "-": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_preset_of_an_inaccessible_queue_is_not_disclosed",
+  ".": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_preset_shared_between_queues_is_served_once",
+  "/": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_preset_without_queue_is_served",
+  ":": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_unknown_preset_returns_404",
+  ";": "tests.test_ticket_actions.TicketActionsTestCase.test_delete_ticket_staff",
+  "=": "tests.test_api.TicketTest.test_create_api_ticket_authenticated_staff_user",
+  "?": "tests.test_api.TicketTest.test_create_api_ticket_no_data",
+  "@": "tests.test_api.TicketTest.test_create_api_ticket_with_attachment",
+  "[": "tests.test_api.TicketTest.test_create_api_ticket_with_basic_auth",
+  "]": "tests.test_api.TicketTest.test_create_api_ticket_with_custom_fields",
+  "^": "tests.test_api.TicketTest.test_create_api_ticket_wrong_date_format",
+  "_": "tests.test_api.TicketTest.test_edit_api_ticket",
+  "`": "tests.test_api.TicketTest.test_partial_edit_api_ticket",
+  "{": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_invalid_extension",
+  "|": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_nothing_changes_when_per_queue_permissions_are_disabled",
+  "}": "tests.test_raw_details_view.RawDetailsPreSetReplyTestCase.test_every_preset_is_served_without_per_queue_permission",
+  "~": "tests.test_staff_only_custom_fields.UserTicketsApiTestCase.test_staff_still_get_staff_only_field",
+  "ab": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_queue",
+  "bb": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_with_custom_fields",
+  "cb": "tests.test_time_spent_auto.TimeSpentAutoTestCase.test_http_followup_time_spent_auto_exclude_queues",
+  "db": "tests.test_update_ticket_view.UpdateTicketCustomFieldsTests.test_custom_field_persists_after_invalid_post",
+  "eb": "tests.test_update_ticket_view.UpdateTicketViewTests.test_redirect_after_login_does_not_crash",
+  "fb": "tests.test_webhooks.WebhookTest.test_create_ticket_and_followup_via_api",
+  "gb": "tests.test_followup_copy.FollowUpCopyTests.test_attachments_are_independent_files",
+  "hb": "tests.test_followup_copy.FollowUpCopyTests.test_copy_respects_public_field",
+  "ib": "tests.test_followup_copy.FollowUpCopyTests.test_copy_uses_edited_content_without_modifying_source",
+  "jb": "tests.test_followup_copy.FollowUpCopyTests.test_disabled_hides_copy_option",
+  "kb": "tests.test_followup_copy.FollowUpCopyTests.test_disabled_preserves_normal_move",
+  "lb": "tests.test_followup_copy.FollowUpCopyTests.test_disabled_rejects_copy_without_moving_original",
+  "mb": "tests.test_followup_copy.FollowUpCopyTests.test_does_not_duplicate_automatically_calculated_time",
+  "nb": "tests.test_followup_copy.FollowUpCopyTests.test_get_keeps_existing_ticket_choices_and_does_not_copy",
+  "ob": "tests.test_followup_copy.FollowUpCopyTests.test_partial_attachment_failure_rolls_back_rows_and_files",
+  "pb": "tests.test_followup_copy.FollowUpCopyTests.test_rejects_self_closed_and_missing_target",
+  "qb": "tests.test_followup_copy.FollowUpCopyTests.test_unchecked_copy_preserves_existing_move_behavior",
+  "rb": "tests.test_followup_edit.FollowUpEditTests.test_edit_can_reassign_the_followup_to_another_ticket",
+  "sb": "tests.test_followup_edit.FollowUpEditTests.test_edit_keeps_attachments",
+  "tb": "tests.test_followup_edit.FollowUpEditTests.test_edit_keeps_the_message_id",
+  "ub": "tests.test_followup_edit.FollowUpEditTests.test_edit_keeps_the_recorded_ticket_changes",
+  "vb": "tests.test_followup_edit.FollowUpEditTests.test_edit_keeps_the_same_row",
+  "wb": "tests.test_navigation.CustomStaffUserTestCase.test_custom_staff_pass",
+  "xb": "tests.test_navigation.HomePageTestCase.test_no_user_settings_redirect_to_dashboard",
+  "yb": "tests.test_navigation.HomePageTestCase.test_redirect_to_dashboard",
+  "zb": "tests.test_navigation.NonStaffUsersAllowedTestCase.test_non_staff_allowed",
+  "Ab": "tests.test_navigation.StaffUsersOnlyTestCase.test_staff_can_access_dashboard",
+  "Bb": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_superuser_sees_every_queue",
+  "Cb": "tests.test_navigation.KBDisabledTestCase.test_navigation",
+  "Db": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_followup_can_be_created_on_a_permitted_ticket",
+  "Eb": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_followup_cannot_be_created_against_a_foreign_ticket",
+  "Fb": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_foreign_attachment_cannot_be_retrieved",
+  "Gb": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_foreign_internal_followup_cannot_be_retrieved",
+  "Hb": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_foreign_ticket_cannot_be_modified",
+  "Ib": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_foreign_ticket_cannot_be_retrieved",
+  "Jb": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_merge_tickets_blocked_for_inaccessible_queue",
+  "Kb": "tests.test_view_access_guards.AnonymousTicketAccessTests.test_anonymous_user_can_access_no_ticket",
+  "Lb": "tests.test_kb_category_view.KBCategoryViewTests.test_anonymous_user_cannot_access_private_kb_category",
+  "Mb": "tests.test_non_staff_full_access.PrivateKBCategoryTests.test_anonymous_user_cannot_read_private_category_with_callable",
+  "Nb": "tests.test_non_staff_full_access.PrivateKBCategoryTests.test_anonymous_user_cannot_read_private_category_with_true",
+  "Ob": "tests.test_non_staff_full_access.PrivateKBCategoryTests.test_designated_user_can_read_private_category",
+  "Pb": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_report_ticket_counts",
+  "Qb": "tests.test_per_queue_staff_permission.PerQueueStaffMembershipTestCase.test_ticket_reports_per_queue_user_restrictions",
+  "Rb": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_the_query_class_applies_the_boundary_itself",
+  "Sb": "tests.test_attachment_html_preview.HTMLPreviewTestCase.test_attachment_id_must_belong_to_the_ticket",
+  "Tb": "tests.test_attachment_html_preview.HTMLPreviewTestCase.test_preview_is_sandboxed_and_locked_down",
+  "Ub": "tests.test_attachment_html_preview.HTMLPreviewTestCase.test_preview_keeps_the_message_readable",
+  "Vb": "tests.test_attachment_html_preview.HTMLPreviewTestCase.test_preview_refuses_non_html_attachments",
+  "Wb": "tests.test_attachment_html_preview.HTMLPreviewTestCase.test_preview_strips_everything_executable",
+  "Xb": "tests.test_followup_copy.FollowUpCopyTests.test_followup_must_belong_to_source_ticket",
+  "Yb": "tests.test_ticket_backlinks.BacklinkCreationTests.test_backlink_created_on_referenced_ticket",
+  "Zb": "tests.test_ticket_backlinks.BacklinkCreationTests.test_backlinks_from_different_tickets_are_separate",
+  "0b": "tests.test_ticket_backlinks.BacklinkCreationTests.test_duplicate_reference_creates_one_backlink",
+  "1b": "tests.test_ticket_backlinks.BacklinkCreationTests.test_reference_in_multiple_followups_creates_one_backlink",
+  "2b": "tests.test_ticket_backlinks.BacklinkCreationTests.test_update_ticket_creates_backlinks",
+  "3b": "tests.test_ticket_backlinks.BacklinkPermissionTests.test_email_backlink_created_for_staff_sender",
+  "4b": "tests.test_api.TicketTest.test_create_follow_up_with_attachments",
+  "5b": "tests.test_api.TicketTest.test_delete_api_ticket",
+  "6b": "tests.test_attachment_html_preview.HTMLPreviewTestCase.test_preview_enforces_queue_permissions",
+  "7b": "tests.test_navigation.StaffUsersOnlyTestCase.test_staff_rss",
+  "8b": "tests.test_non_staff_full_access.HasFullAccessTests.test_false_keeps_full_access_to_staff",
+  "9b": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_attachment_del_idor_blocked",
+  "!b": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_ticket_cc_del_blocked",
+  "#b": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_ticket_dependency_del_blocked",
+  "$b": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_ticket_resolves_del_blocked",
+  "%b": "tests.test_ticket_actions.TicketActionsTestCase.test_can_access_ticket",
+  "'b": "tests.test_ticket_backlinks.BacklinkPermissionTests.test_no_backlink_without_queue_access",
+  "(b": "tests.test_kanban.KanbanClosedTicketFilterTests.test_disabled_filter_shows_stale_closed_ticket",
+  ")b": "tests.test_kanban.KanbanClosedTicketFilterTests.test_recent_closed_ticket_is_shown",
+  "*b": "tests.test_kanban.KanbanClosedTicketFilterTests.test_stale_closed_ticket_is_hidden",
+  "+b": "tests.test_kanban.KanbanClosedTicketFilterTests.test_stale_duplicate_ticket_is_hidden",
+  ",b": "tests.test_navigation.HomePageTestCase.test_redirect_to_ticket_list",
+  "-b": "tests.test_non_staff_full_access.HasFullAccessTests.test_callable_is_asked_for_each_user",
+  ".b": "tests.test_non_staff_full_access.HasFullAccessTests.test_true_excludes_anonymous_users",
+  "/b": "tests.test_query.QueryTests.test_query_allows_known_sorting_key_on_timeline",
+  ":b": "tests.test_query.QueryTests.test_query_allows_new_sorting_keys_on_timeline",
+  ";b": "tests.test_query.QueryTests.test_query_basic",
+  "=b": "tests.test_query.QueryTests.test_query_by_kbitem",
+  "?b": "tests.test_query.QueryTests.test_query_by_no_kbitem",
+  "@b": "tests.test_query.QueryTests.test_query_rejects_unallowed_sorting_key_on_datatables",
+  "[b": "tests.test_query.QueryTests.test_query_rejects_unallowed_sorting_key_on_timeline",
+  "]b": "tests.test_query.QueryTests.test_query_sorts_datatables_by_last_followup",
+  "^b": "tests.test_report_index_view.ReportIndexViewTests.test_report_index_url_works",
+  "_b": "tests.test_run_report_view.RunReportViewTests.test_report_generation_works",
+  "`b": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_knowledge_base_items_and_queues_in_context",
+  "{b": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_knowledge_base_items_not_in_context_if_setting_is_disabled",
+  "|b": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_sort_last_followup_is_accepted_and_selected",
+  "}b": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_sorting_dropdown_hides_kbitem_when_kb_disabled",
+  "~b": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_sorting_dropdown_lists_all_sortable_columns",
+  "ac": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_staff_user_can_access_ticket_list_page",
+  "bc": "tests.test_staff_ticket_list_view.StaffTicketListViewTests.test_user_saved_queries_executed_correctly",
+  "cc": "tests.test_status_css_classes.DatatablesTicketListBadgeClassTests.test_endpoint_exposes_badge_classes",
+  "dc": "tests.test_ticket_actions.TicketActionsTestCase.test_create_ticket_getform",
+  "ec": "tests.test_view_access_guards.StaffViewGuardTests.test_staff_user_gets_the_view",
+  "fc": "tests.test_attachment_html_xss.PublicFormAttachmentTestCase.test_anonymous_user_cannot_attach_html",
+  "gc": "tests.test_form_rendering.RealPagesTestCase.test_public_ticket_form",
+  "hc": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_authorized",
+  "ic": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_private",
+  "jc": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public",
+  "kc": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_with_hidden_fields",
+  "lc": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_superuser_can_retrieve_the_followup_and_attachment",
+  "mc": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_rss_queue_blocked_for_inaccessible_queue",
+  "nc": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_kanban_update_checks_the_authorization_helper",
+  "oc": "tests.test_view_access_guards.MassUpdateQueueGuardTests.test_restricted_staff_only_updates_tickets_in_granted_queues",
+  "pc": "tests.test_kb_category_view.KBCategoryViewTests.test_kb_category_iframe_render",
+  "qc": "tests.test_kb_category_view.KBCategoryViewTests.test_kb_category_page_for_anonymous_user",
+  "rc": "tests.test_kb_category_view.KBCategoryViewTests.test_kb_category_page_for_staff_user",
+  "sc": "tests.test_kb_vote_view.KBVoteViewTests.test_downvoted_earlier_now_wants_to_upvote",
+  "tc": "tests.test_kb_vote_view.KBVoteViewTests.test_never_downvoted_now_wants_to_downvote",
+  "uc": "tests.test_kb_vote_view.KBVoteViewTests.test_never_upvoted_now_wants_to_upvote",
+  "vc": "tests.test_kb_vote_view.KBVoteViewTests.test_upvoted_earlier_now_wants_to_downvote",
+  "wc": "tests.test_query.QueryTests.test_query_rejects_unallowed_filtering_key",
+  "xc": "tests.test_query.QueryTests.test_query_rejects_unallowed_filtering_null_key",
+  "yc": "tests.test_ticket_backlinks.BacklinkCreationTests.test_no_backlink_for_nonexistent_ticket"
+}
+    </script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>helpdesk<span class="sep">/</span>user.py</b>:
+            <span class="pc_cov">93%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">69 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">67<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">3<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_72a8051a633181ae_urls_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_72a8051a633181ae_validators_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="run"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">db</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">Q</span>&nbsp;</span><span class="r"><label for="ctxs1" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="key">from</span> <span class="nam">helpdesk</span> <span class="key">import</span> <span class="nam">settings</span> <span class="key">as</span> <span class="nam">helpdesk_settings</span>&nbsp;</span><span class="r"><label for="ctxs3" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">Queue</span><span class="op">,</span> <span class="nam">Ticket</span>&nbsp;</span><span class="r"><label for="ctxs4" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="key">if</span> <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_KB_ENABLED</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">6&#x202F;&#x219B;&#x202F;10</span><span class="annotate long">line 6 didn't jump to line 10 because the condition on line 6 was always true</span><label for="ctxs6" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">    <span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">KBCategory</span><span class="op">,</span> <span class="nam">KBItem</span>&nbsp;</span><span class="r"><label for="ctxs7" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">def</span> <span class="nam">huser_from_request</span><span class="op">(</span><span class="nam">req</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs10" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">    <span class="key">return</span> <span class="nam">HelpdeskUser</span><span class="op">(</span><span class="nam">req</span><span class="op">.</span><span class="nam">user</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs11"><span class="r"><label for="ctxs11" class="ctx">18 ctx</label></span><span class="ctxs">2fcgcLbpcqcrcn sctcucvcMbNbObhcicjckc</span></p>
+    <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="key">class</span> <span class="nam">HelpdeskUser</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs14" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">user</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs15" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">user</span> <span class="op">=</span> <span class="nam">user</span>&nbsp;</span><input type="checkbox" id="ctxs16"><span class="r"><label for="ctxs16" class="ctx">203 ctx</label></span><span class="ctxs">2b = ? @ [ ] ^ 4b5b_ ` Sb6bTbUbVbWbfc{ u $ % v w x y z A B C gbD hbibjbkblbmbXbnbob' pbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N gc(b)b*b+bLbpcqcrcn sctcucvc6 7 8 9 wbxbyb,bCbzbAb7b-b8b.bMbNbObc d e DbEbFbGbHbIb| o lcBbp q r s 9bJbmc!b#b$bf ! l t Pbm Qbg ( nch i j a k Rb/b:b;b=b?bwcxc@b[b]b) } * + , - . / : ^b_bO P ~ `b{b|b}b~bacbcQ R S T cc%bdc; U abV bbYbZb0byc1b2b3b'bW X Y Z 0 1 hcicjckc2 cbdbeb# Kbocecfb</span></p>
+    <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_queues</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs18" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">        <span class="str">&quot;&quot;&quot;Return the list of Queues the user can access.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="str">        :param user: The User (the class should have the has_perm method)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t"><span class="str">        :return: A Python list of Queues</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="str">        &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">        <span class="nam">user</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span>&nbsp;</span><input type="checkbox" id="ctxs24"><span class="r"><label for="ctxs24" class="ctx">116 ctx</label></span><span class="ctxs">2b = ? @ [ ] ^ _ ` { u $ % v w x y z A B C D E F G H I J 3 K 4 5 L M N (b)b*b+b6 7 8 9 wbxbyb,bCbzbAbc d e | o Bbp q r s f ! l t Pbm Qbh i j a k ) } * + , - . / : ^b_bO P ~ `b{b|b}b~bacbcQ R S T dc; U abV bbW X Y Z 0 1 2 cbdbeb# ecfb</span></p>
+    <p class="run"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">        <span class="nam">all_queues</span> <span class="op">=</span> <span class="nam">Queue</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">all</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs25"><span class="r"><label for="ctxs25" class="ctx">116 ctx</label></span><span class="ctxs">2b = ? @ [ ] ^ _ ` { u $ % v w x y z A B C D E F G H I J 3 K 4 5 L M N (b)b*b+b6 7 8 9 wbxbyb,bCbzbAbc d e | o Bbp q r s f ! l t Pbm Qbh i j a k ) } * + , - . / : ^b_bO P ~ `b{b|b}b~bacbcQ R S T dc; U abV bbW X Y Z 0 1 2 cbdbeb# ecfb</span></p>
+    <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">        <span class="nam">public_ids</span> <span class="op">=</span> <span class="op">[</span><span class="nam">q</span><span class="op">.</span><span class="nam">pk</span> <span class="key">for</span> <span class="nam">q</span> <span class="key">in</span> <span class="nam">Queue</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">allow_public_submission</span><span class="op">=</span><span class="key">True</span><span class="op">)</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs26"><span class="r"><label for="ctxs26" class="ctx">116 ctx</label></span><span class="ctxs">2b = ? @ [ ] ^ _ ` { u $ % v w x y z A B C D E F G H I J 3 K 4 5 L M N (b)b*b+b6 7 8 9 wbxbyb,bCbzbAbc d e | o Bbp q r s f ! l t Pbm Qbh i j a k ) } * + , - . / : ^b_bO P ~ `b{b|b}b~bacbcQ R S T dc; U abV bbW X Y Z 0 1 2 cbdbeb# ecfb</span></p>
+    <p class="run"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">        <span class="nam">limit_queues_by_user</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs27"><span class="r"><label for="ctxs27" class="ctx">116 ctx</label></span><span class="ctxs">2b = ? @ [ ] ^ _ ` { u $ % v w x y z A B C D E F G H I J 3 K 4 5 L M N (b)b*b+b6 7 8 9 wbxbyb,bCbzbAbc d e | o Bbp q r s f ! l t Pbm Qbh i j a k ) } * + , - . / : ^b_bO P ~ `b{b|b}b~bacbcQ R S T dc; U abV bbW X Y Z 0 1 2 cbdbeb# ecfb</span></p>
+    <p class="run run2"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">            <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">            <span class="key">and</span> <span class="key">not</span> <span class="nam">user</span><span class="op">.</span><span class="nam">is_superuser</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">        <span class="key">if</span> <span class="nam">limit_queues_by_user</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs31"><span class="r"><label for="ctxs31" class="ctx">116 ctx</label></span><span class="ctxs">2b = ? @ [ ] ^ _ ` { u $ % v w x y z A B C D E F G H I J 3 K 4 5 L M N (b)b*b+b6 7 8 9 wbxbyb,bCbzbAbc d e | o Bbp q r s f ! l t Pbm Qbh i j a k ) } * + , - . / : ^b_bO P ~ `b{b|b}b~bacbcQ R S T dc; U abV bbW X Y Z 0 1 2 cbdbeb# ecfb</span></p>
+    <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">            <span class="nam">id_list</span> <span class="op">=</span> <span class="op">[</span><span class="nam">q</span><span class="op">.</span><span class="nam">pk</span> <span class="key">for</span> <span class="nam">q</span> <span class="key">in</span> <span class="nam">all_queues</span> <span class="key">if</span> <span class="nam">user</span><span class="op">.</span><span class="nam">has_perm</span><span class="op">(</span><span class="nam">q</span><span class="op">.</span><span class="nam">permission_name</span><span class="op">)</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs32"><span class="r"><label for="ctxs32" class="ctx">28 ctx</label></span><span class="ctxs">2c d e o p q r s f ! l t Pbm Qbh i j a k ) * + , - . / : </span></p>
+    <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">            <span class="nam">id_list</span> <span class="op">+=</span> <span class="nam">public_ids</span>&nbsp;</span><input type="checkbox" id="ctxs33"><span class="r"><label for="ctxs33" class="ctx">28 ctx</label></span><span class="ctxs">2c d e o p q r s f ! l t Pbm Qbh i j a k ) * + , - . / : </span></p>
+    <p class="run"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">            <span class="key">return</span> <span class="nam">all_queues</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">pk__in</span><span class="op">=</span><span class="nam">id_list</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs34"><span class="r"><label for="ctxs34" class="ctx">28 ctx</label></span><span class="ctxs">2c d e o p q r s f ! l t Pbm Qbh i j a k ) * + , - . / : </span></p>
+    <p class="pln"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">            <span class="key">return</span> <span class="nam">all_queues</span>&nbsp;</span><input type="checkbox" id="ctxs36"><span class="r"><label for="ctxs36" class="ctx">92 ctx</label></span><span class="ctxs">2b = ? @ [ ] ^ _ ` { u $ % v w x y z A B C D E F G H I J 3 K 4 5 L M N (b)b*b+b6 7 8 9 wbxbyb,bCbzbAb| Bbl Pbm Qb} ^b_bO P ~ `b{b|b}b~bacbcQ R S T dc; U abV bbW X Y Z 0 1 2 cbdbeb# ecfb</span></p>
+    <p class="pln"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_allowed_kb_categories</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs38" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">        <span class="nam">categories</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs39"><span class="r"><label for="ctxs39" class="ctx">7 ctx</label></span><span class="ctxs">2fcgcn hcicjckc</span></p>
+    <p class="par run show_par"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">        <span class="key">if</span> <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_KB_ENABLED</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs40"><span class="r"><span class="annotate short">40&#x202F;&#x219B;&#x202F;44</span><span class="annotate long">line 40 didn't jump to line 44 because the condition on line 40 was always true</span><label for="ctxs40" class="ctx">7 ctx</label></span><span class="ctxs">2fcgcn hcicjckc</span></p>
+    <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">            <span class="key">for</span> <span class="nam">cat</span> <span class="key">in</span> <span class="nam">KBCategory</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">all</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs41"><span class="r"><label for="ctxs41" class="ctx">7 ctx</label></span><span class="ctxs">2fcgcn hcicjckc</span></p>
+    <p class="run"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">can_access_kbcategory</span><span class="op">(</span><span class="nam">cat</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs42"><span class="r"><label for="ctxs42" class="ctx">1 ctx</label></span><span class="ctxs">1n</span></p>
+    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">                    <span class="nam">categories</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">cat</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs43"><span class="r"><label for="ctxs43" class="ctx">1 ctx</label></span><span class="ctxs">1n</span></p>
+    <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">        <span class="key">return</span> <span class="nam">categories</span>&nbsp;</span><input type="checkbox" id="ctxs44"><span class="r"><label for="ctxs44" class="ctx">7 ctx</label></span><span class="ctxs">2fcgcn hcicjckc</span></p>
+    <p class="pln"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_assigned_kb_items</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs46" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">        <span class="nam">kbitems</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs47"><span class="r"><label for="ctxs47" class="ctx">13 ctx</label></span><span class="ctxs">2z A B C wbxbybCbzbAbl t a </span></p>
+    <p class="run"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">        <span class="key">if</span> <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_KB_ENABLED</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs48"><span class="r"><label for="ctxs48" class="ctx">13 ctx</label></span><span class="ctxs">2z A B C wbxbybCbzbAbl t a </span></p>
+    <p class="par run show_par"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">            <span class="key">for</span> <span class="nam">item</span> <span class="key">in</span> <span class="nam">KBItem</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">all</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs49"><span class="r"><span class="annotate short">49&#x202F;&#x219B;&#x202F;50</span><span class="annotate long">line 49 didn't jump to line 50 because the loop on line 49 never started</span><label for="ctxs49" class="ctx">12 ctx</label></span><span class="ctxs">2z A B C wbxbybzbAbl t a </span></p>
+    <p class="mis show_mis"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">                <span class="key">if</span> <span class="nam">item</span><span class="op">.</span><span class="nam">get_team</span><span class="op">(</span><span class="op">)</span> <span class="key">and</span> <span class="nam">item</span><span class="op">.</span><span class="nam">get_team</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">is_member</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">                    <span class="nam">kbitems</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">item</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">        <span class="key">return</span> <span class="nam">kbitems</span>&nbsp;</span><input type="checkbox" id="ctxs52"><span class="r"><label for="ctxs52" class="ctx">13 ctx</label></span><span class="ctxs">2z A B C wbxbybCbzbAbl t a </span></p>
+    <p class="pln"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">    <span class="key">def</span> <span class="nam">accessible_queues</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs54" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">        <span class="str">&quot;&quot;&quot;Queues this user may actually open a ticket in.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t"><span class="str">        Narrower than get_queues(), which also returns every queue accepting</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t"><span class="str">        public submissions so that they appear in the queue pickers.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t"><span class="str">        &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">        <span class="key">return</span> <span class="op">[</span><span class="nam">q</span> <span class="key">for</span> <span class="nam">q</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">get_queues</span><span class="op">(</span><span class="op">)</span> <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">can_access_queue</span><span class="op">(</span><span class="nam">q</span><span class="op">)</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs60"><span class="r"><label for="ctxs60" class="ctx">22 ctx</label></span><span class="ctxs">2z A B C wbxbybCbzbAbl t a ) } * + , - . / : </span></p>
+    <p class="pln"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">    <span class="key">def</span> <span class="nam">accessible_tickets_q</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs62" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">        <span class="str">&quot;&quot;&quot;can_access_ticket() as a Q, to apply to any Ticket queryset.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t"><span class="str">        Expressed as a Q rather than a queryset so a caller that already has one</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t"><span class="str">        can narrow it in the same query instead of joining against a subquery.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t"><span class="str">        Matching can_access_ticket() means a granted queue or a ticket assigned</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t"><span class="str">        to this user, whatever queue that ticket lives in.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t"><span class="str">        Queue permissions are read with get_all_permissions() rather than</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t"><span class="str">        get_user_permissions(): the latter omits permissions held through a</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t"><span class="str">        group, which is how installations of any size grant queue access.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t"><span class="str">        &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">has_full_access</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs74"><span class="r"><label for="ctxs74" class="ctx">113 ctx</label></span><span class="ctxs">2= ? @ [ ] ^ 4b5b_ ` { u v w x y gbD hbibjbkblbmbnbob' pbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N 6 7 8 9 7bc d e DbEbFbGbHbIb| o lcBbp q r s Jbf m g ( h i j a k Rb/b:b;b=b?b@b[b]bO P ~ Q R S T ccU abV bbW X Y Z 0 1 2 cbdbeb# Kbfb</span></p>
+    <p class="run"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">            <span class="key">return</span> <span class="nam">Q</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs75"><span class="r"><label for="ctxs75" class="ctx">88 ctx</label></span><span class="ctxs">2= ? @ [ ] ^ 4b5b_ ` { u v w x y gbD hbibjbkblbmbnbobpbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N 6 7 8 9 7b| lcBbm g /b:b;b=b?b@b[b]bO P ~ Q R S T ccU abV bbW X Y Z 0 1 2 cbdbeb# fb</span></p>
+    <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">.</span><span class="nam">is_authenticated</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs76"><span class="r"><label for="ctxs76" class="ctx">27 ctx</label></span><span class="ctxs">2' c d e DbEbFbGbHbIbo p q r s Jbf m g ( h i j a k RbKb</span></p>
+    <p class="run"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">            <span class="key">return</span> <span class="nam">Q</span><span class="op">(</span><span class="nam">pk__in</span><span class="op">=</span><span class="op">[</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs77"><span class="r"><label for="ctxs77" class="ctx">1 ctx</label></span><span class="ctxs">2Kb</span></p>
+    <p class="run"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">        <span class="nam">reachable</span> <span class="op">=</span> <span class="nam">Q</span><span class="op">(</span><span class="nam">assigned_to</span><span class="op">=</span><span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs78"><span class="r"><label for="ctxs78" class="ctx">26 ctx</label></span><span class="ctxs">2' c d e DbEbFbGbHbIbo p q r s Jbf m g ( h i j a k Rb</span></p>
+    <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">        <span class="key">if</span> <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs79"><span class="r"><label for="ctxs79" class="ctx">26 ctx</label></span><span class="ctxs">2' c d e DbEbFbGbHbIbo p q r s Jbf m g ( h i j a k Rb</span></p>
+    <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">            <span class="com"># Guarded on the setting for the same reason can_access_queue() is:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">            <span class="com"># with per-queue mode off, a queue permission grants nothing, and</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">            <span class="com"># the two must not disagree about that.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">            <span class="nam">reachable</span> <span class="op">|=</span> <span class="nam">Q</span><span class="op">(</span><span class="nam">queue__permission_name__in</span><span class="op">=</span><span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">.</span><span class="nam">get_all_permissions</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs83"><span class="r"><label for="ctxs83" class="ctx">26 ctx</label></span><span class="ctxs">2' c d e DbEbFbGbHbIbo p q r s Jbf m g ( h i j a k Rb</span></p>
+    <p class="run"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">        <span class="key">return</span> <span class="nam">reachable</span>&nbsp;</span><input type="checkbox" id="ctxs84"><span class="r"><label for="ctxs84" class="ctx">26 ctx</label></span><span class="ctxs">2' c d e DbEbFbGbHbIbo p q r s Jbf m g ( h i j a k Rb</span></p>
+    <p class="pln"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">    <span class="key">def</span> <span class="nam">accessible_tickets</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs86" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">        <span class="str">&quot;&quot;&quot;The queryset form of can_access_ticket(), for views and viewsets that</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t"><span class="str">        resolve a ticket from a caller-supplied id.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t"><span class="str">        Single place where the rule lives: every path that serves or mutates a</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t"><span class="str">        ticket should start from this rather than from Ticket.objects, so that</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t"><span class="str">        forgetting the check is not the default.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t"><span class="str">        &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">        <span class="key">return</span> <span class="nam">Ticket</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">accessible_tickets_q</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs94"><span class="r"><label for="ctxs94" class="ctx">102 ctx</label></span><span class="ctxs">2= ? @ [ ] ^ 4b5b_ ` { u v w x y gbD hbibjbkblbmbnbob' pbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N 6 7 8 9 7bc d e DbEbFbGbHbIb| o lcBbp q r s Jbf g ( h i j a k O P ~ Q R S T U abV bbW X Y Z 0 1 2 cbdbeb# Kbfb</span></p>
+    <p class="pln"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">    <span class="key">def</span> <span class="nam">has_full_access</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs96" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">.</span><span class="nam">is_superuser</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs97"><span class="r"><label for="ctxs97" class="ctx">162 ctx</label></span><span class="ctxs">2= ? @ [ ] ^ 4b5b_ ` Sb6bTbUbVbWb{ u $ % v w x y z A B C gbD hbibjbkblbmbXbnbob' pbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N Lbn 6 7 8 9 7b-b8b.bMbNbObc d e DbEbFbGbHbIb| o lcBbp q r s 9bJbmc!b#b$bf ! l t m g ( nch i j a k Rb/b:b;b=b?b@b[b]b) } * + , - . / : O P ~ Q R S T cc%b; U abV bbYbZb0b1b2b3b'bW X Y Z 0 1 2 cbdbeb# Kbocfb</span></p>
+    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><input type="checkbox" id="ctxs98"><span class="r"><label for="ctxs98" class="ctx">13 ctx</label></span><span class="ctxs">23 4 5 6 7 8 9 lcBbl m g # </span></p>
+    <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">        <span class="key">if</span> <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs99"><span class="r"><label for="ctxs99" class="ctx">152 ctx</label></span><span class="ctxs">2= ? @ [ ] ^ 4b5b_ ` Sb6bTbUbVbWb{ u $ % v w x y z A B C gbD hbibjbkblbmbXbnbob' pbqbE F G H rbsbtbubvbI J K L M N Lbn 7b-b8b.bMbNbObc d e DbEbFbGbHbIb| o p q r s 9bJbmc!b#b$bf ! l t m g ( nch i j a k Rb/b:b;b=b?b@b[b]b) } * + , - . / : O P ~ Q R S T cc%b; U abV bbYbZb0b1b2b3b'bW X Y Z 0 1 2 cbdbebKbocfb</span></p>
+    <p class="run"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><input type="checkbox" id="ctxs100"><span class="r"><label for="ctxs100" class="ctx">47 ctx</label></span><span class="ctxs">26b' c d e DbEbFbGbHbIbo p q r s 9bJbmc!b#b$bf ! l t m g ( nch i j a k Rb) * + , - . / : %b'boc</span></p>
+    <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">.</span><span class="nam">is_staff</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs101"><span class="r"><label for="ctxs101" class="ctx">106 ctx</label></span><span class="ctxs">2= ? @ [ ] ^ 4b5b_ ` SbTbUbVbWb{ u $ % v w x y z A B C gbD hbibjbkblbmbXbnbobpbqbE F G H rbsbtbubvbI J K L M N Lbn 7b-b8b.bMbNbOb| g /b:b;b=b?b@b[b]b} O P ~ Q R S T cc; U abV bbYbZb0b1b2b3bW X Y Z 0 1 2 cbdbebKbfb</span></p>
+    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><input type="checkbox" id="ctxs102"><span class="r"><label for="ctxs102" class="ctx">98 ctx</label></span><span class="ctxs">2= ? @ [ ] ^ 4b5b_ ` SbTbUbVbWb{ u $ % v w x y z A B C gbD hbibjbkblbmbXbnbobpbqbE F G H rbsbtbubvbI J K L M N 7b8b| g /b:b;b=b?b@b[b]b} O P ~ Q R S T cc; U abV bbYbZb0b1b2b3bW X Y Z 0 1 2 cbdbebfb</span></p>
+    <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">        <span class="nam">allow_non_staff</span> <span class="op">=</span> <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE</span>&nbsp;</span><input type="checkbox" id="ctxs103"><span class="r"><label for="ctxs103" class="ctx">10 ctx</label></span><span class="ctxs">2Lbn -b8b.bMbNbObg Kb</span></p>
+    <p class="run"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">        <span class="key">if</span> <span class="nam">callable</span><span class="op">(</span><span class="nam">allow_non_staff</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs104"><span class="r"><label for="ctxs104" class="ctx">10 ctx</label></span><span class="ctxs">2Lbn -b8b.bMbNbObg Kb</span></p>
+    <p class="run"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">            <span class="key">return</span> <span class="nam">bool</span><span class="op">(</span><span class="nam">allow_non_staff</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs105"><span class="r"><label for="ctxs105" class="ctx">3 ctx</label></span><span class="ctxs">2-bMbOb</span></p>
+    <p class="run"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">        <span class="key">return</span> <span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs106"><span class="r"><label for="ctxs106" class="ctx">7 ctx</label></span><span class="ctxs">2Lbn 8b.bNbg Kb</span></p>
+    <p class="run run2"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t">            <span class="nam">bool</span><span class="op">(</span><span class="nam">allow_non_staff</span><span class="op">)</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">.</span><span class="nam">is_authenticated</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">.</span><span class="nam">is_active</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">    <span class="key">def</span> <span class="nam">can_access_queue</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">queue</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs110" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">        <span class="str">&quot;&quot;&quot;Check if a certain user can access a certain queue.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t"><span class="str">        :param user: The User (the class should have the has_perm method)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t"><span class="str">        :param queue: The django-helpdesk Queue instance</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t"><span class="str">        :return: True if the user has permission (either by default or explicitly), false otherwise</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t"><span class="str">        &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">has_full_access</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs117"><span class="r"><label for="ctxs117" class="ctx">109 ctx</label></span><span class="ctxs">2Sb6bTbUbVbWbu $ % v w x y z A B C gbD hbibjbkblbmbXbnbob' pbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N n 6 7 8 9 c d e 9bmc!b#b$bf ! l t g ( nch i j a k ) } * + , - . / : O P Q R S T %b; U V YbZb0b1b2b3b'bW X Y Z 0 1 2 # oc</span></p>
+    <p class="run"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><input type="checkbox" id="ctxs118"><span class="r"><label for="ctxs118" class="ctx">77 ctx</label></span><span class="ctxs">2SbTbUbVbWbu $ % v w x y z A B C gbD hbibjbkblbmbXbnbobpbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N 6 7 8 9 l g } O P Q R S T ; U V YbZb0b1b2b3bW X Y Z 0 1 2 # </span></p>
+    <p class="pln"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">            <span class="key">return</span> <span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs120"><span class="r"><label for="ctxs120" class="ctx">34 ctx</label></span><span class="ctxs">26b' n c d e 9bmc!b#b$bf ! l t g ( nch i j a k ) * + , - . / : %b'boc</span></p>
+    <p class="run run2"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">                <span class="nam">helpdesk_settings</span><span class="op">.</span><span class="nam">HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">                <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span><span class="op">.</span><span class="nam">has_perm</span><span class="op">(</span><span class="nam">queue</span><span class="op">.</span><span class="nam">permission_name</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">    <span class="key">def</span> <span class="nam">can_access_ticket</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">ticket</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs125" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">        <span class="str">&quot;&quot;&quot;Check to see if the user has permission to access</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t"><span class="str">        a ticket. If not then deny access.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="nam">user</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">user</span>&nbsp;</span><input type="checkbox" id="ctxs128"><span class="r"><label for="ctxs128" class="ctx">89 ctx</label></span><span class="ctxs">2Sb6bTbUbVbWbu $ % v w x y gbD hbibjbkblbmbXbnbob' pbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N 6 7 8 9 c d e 9b!b#b$bf ! g ( h i j k O P Q R S T %b; U V YbZb0b1b2b3b'bW X Y Z 0 1 2 # </span></p>
+    <p class="run"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">        <span class="key">return</span> <span class="nam">bool</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs129"><span class="r"><label for="ctxs129" class="ctx">89 ctx</label></span><span class="ctxs">2Sb6bTbUbVbWbu $ % v w x y gbD hbibjbkblbmbXbnbob' pbqbE F G H rbsbtbubvbI J 3 K 4 5 L M N 6 7 8 9 c d e 9b!b#b$bf ! g ( h i j k O P Q R S T %b; U V YbZb0b1b2b3b'bW X Y Z 0 1 2 # </span></p>
+    <p class="run run2"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">can_access_queue</span><span class="op">(</span><span class="nam">ticket</span><span class="op">.</span><span class="nam">queue</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">            <span class="key">or</span> <span class="nam">self</span><span class="op">.</span><span class="nam">has_full_access</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">            <span class="key">or</span> <span class="nam">ticket</span><span class="op">.</span><span class="nam">assigned_to</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">            <span class="key">and</span> <span class="nam">user</span><span class="op">.</span><span class="nam">id</span> <span class="op">==</span> <span class="nam">ticket</span><span class="op">.</span><span class="nam">assigned_to</span><span class="op">.</span><span class="nam">id</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t136" href="#t136">136</a></span><span class="t">    <span class="key">def</span> <span class="nam">can_access_kbcategory</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">category</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs136" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t137" href="#t137">137</a></span><span class="t">        <span class="key">if</span> <span class="nam">category</span><span class="op">.</span><span class="nam">public</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs137"><span class="r"><label for="ctxs137" class="ctx">12 ctx</label></span><span class="ctxs">2Lbpcqcrcn sctcucvcMbNbOb</span></p>
+    <p class="run"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><input type="checkbox" id="ctxs138"><span class="r"><label for="ctxs138" class="ctx">8 ctx</label></span><span class="ctxs">2pcqcrcn sctcucvc</span></p>
+    <p class="run"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">has_full_access</span><span class="op">(</span><span class="op">)</span> <span class="key">or</span> <span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs139"><span class="r"><label for="ctxs139" class="ctx">5 ctx</label></span><span class="ctxs">2Lbn MbNbOb</span></p>
+    <p class="run run2"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">            <span class="nam">category</span><span class="op">.</span><span class="nam">queue</span> <span class="key">and</span> <span class="nam">self</span><span class="op">.</span><span class="nam">can_access_queue</span><span class="op">(</span><span class="nam">category</span><span class="op">.</span><span class="nam">queue</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_72a8051a633181ae_urls_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_72a8051a633181ae_validators_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+    </div>
+</footer>
+</body>
+</html>

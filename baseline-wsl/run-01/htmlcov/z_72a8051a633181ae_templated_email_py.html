@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/helpdesk/templated_email.py: 84%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script type="text/javascript">
+        contexts = {
+  "a": "(empty)",
+  "b": "tests.test_followup_recipients.FollowUpRecipientsTests.test_undeliverable_address_is_not_recorded",
+  "c": "tests.test_api.TicketTest.test_create_api_ticket_with_attachment",
+  "d": "tests.test_attachment_html_xss.PublicFormAttachmentTestCase.test_anonymous_user_can_still_attach_a_text_file",
+  "e": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment",
+  "f": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment_utf8",
+  "g": "tests.test_api.TicketTest.test_create_api_ticket_authenticated_staff_user",
+  "h": "tests.test_api.TicketTest.test_create_api_ticket_with_basic_auth",
+  "i": "tests.test_api.TicketTest.test_create_api_ticket_with_custom_fields",
+  "j": "tests.test_email_notifications.TicketEmailNotificationTests.test_closing_reopened_ticket_uses_latest_resolution",
+  "k": "tests.test_email_notifications.TicketEmailNotificationTests.test_create_ticket_assigned",
+  "l": "tests.test_email_notifications.TicketEmailNotificationTests.test_create_ticket_not_assigned",
+  "m": "tests.test_email_notifications.TicketEmailNotificationTests.test_private_followup_setting_blocks_assigned_user_emails",
+  "n": "tests.test_email_notifications.TicketEmailNotificationTests.test_private_followup_setting_does_not_affect_public_followups",
+  "o": "tests.test_email_notifications.TicketEmailNotificationTests.test_ticket_notifiy_cc",
+  "p": "tests.test_email_notifications.TicketEmailNotificationTests.test_update_ticket_always_notify_submitter",
+  "q": "tests.test_email_notifications.TicketEmailNotificationTests.test_update_ticket_default_behaviour",
+  "r": "tests.test_email_reopen.EmailReopenTests.test_should_leave_resolved_ticket_resolved_when_reply_received_by_default",
+  "s": "tests.test_email_reopen.EmailReopenTests.test_should_reopen_closed_ticket_when_reply_received",
+  "t": "tests.test_email_reopen.EmailReopenTests.test_should_reopen_resolved_ticket_when_status_is_in_reopen_setting",
+  "u": "tests.test_followup_recipients.FollowUpRecipientsTests.test_acting_user_and_queue_address_are_not_recorded",
+  "v": "tests.test_followup_recipients.FollowUpRecipientsTests.test_inbound_reply_records_who_the_acknowledgement_went_to",
+  "w": "tests.test_followup_recipients.FollowUpRecipientsTests.test_public_update_records_everyone_that_was_mailed",
+  "x": "tests.test_get_email.GetEmailCCHandling.test_read_email_cc",
+  "y": "tests.test_public_actions.PublicActionsTestCase.test_public_close",
+  "z": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_staff",
+  "A": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_with_custom_fields",
+  "B": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_followup_from_email_to_a_notification_disabled_queue",
+  "C": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_followup_from_email_to_a_notification_enabled_queue",
+  "D": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_followup_from_email_with_valid_message_id_with_expected_cc",
+  "E": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_followup_from_email_with_valid_message_id_with_no_initial_cc_list",
+  "F": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_followup_from_email_with_valid_message_id_with_original_cc_list_included",
+  "G": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_authorized",
+  "H": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_customfields",
+  "I": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public",
+  "J": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_no_loopback",
+  "K": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_with_hidden_fields",
+  "L": "tests.test_webhooks.WebhookTest.test_create_ticket_and_followup_via_api",
+  "M": "tests.test_webhooks.WebhookTest.test_create_ticket_and_followup_via_email",
+  "N": "tests.test_attachment_html_xss.InboundEmailAttachmentTestCase.test_html_body_is_stored_as_plain_text",
+  "O": "tests.test_attachment_html_xss.InboundEmailAttachmentTestCase.test_html_named_mime_attachment_is_dropped_but_ticket_survives",
+  "P": "tests.test_get_email.GetEmailCommonTests.test_email_for_new_ticket_when_setting_allows_create",
+  "Q": "tests.test_get_email.GetEmailCommonTests.test_email_with_8bit_encoding_and_utf_8",
+  "R": "tests.test_get_email.GetEmailCommonTests.test_email_with_blank_body_and_attachment",
+  "S": "tests.test_get_email.GetEmailCommonTests.test_email_with_forwarded_message_chained_messages_stored",
+  "T": "tests.test_get_email.GetEmailCommonTests.test_email_with_forwarded_message_just_message_stored",
+  "U": "tests.test_get_email.GetEmailCommonTests.test_email_with_inline_and_multipart_as_attachments",
+  "V": "tests.test_get_email.GetEmailCommonTests.test_email_with_multipart_as_attachment",
+  "W": "tests.test_get_email.GetEmailCommonTests.test_email_with_quoted_printable_body",
+  "X": "tests.test_get_email.GetEmailCommonTests.test_email_with_txt_as_attachment_with_simple_alternative_message",
+  "Y": "tests.test_get_email.GetEmailCommonTests.test_email_with_utf_8_non_decodable_sequences",
+  "Z": "tests.test_get_email.GetEmailCommonTests.test_multiple_attachments",
+  "0": "tests.test_get_email.GetEmailCommonTests.test_multiple_attachments_with_wrong_extension",
+  "1": "tests.test_get_email.GetEmailCommonTests.test_with_attachment_but_empty_body",
+  "2": "tests.test_get_email.GetEmailCommonTests.test_with_attachment_but_no_body_part",
+  "3": "tests.test_get_email.GetEmailCommonTests.test_wrong_extension_attachment",
+  "4": "tests.test_get_email.GetEmailParametricTemplate.test_commas_in_mail_headers",
+  "5": "tests.test_get_email.GetEmailParametricTemplate.test_read_email_with_template_tag",
+  "6": "tests.test_get_email.GetEmailParametricTemplate.test_read_html_multipart_email",
+  "7": "tests.test_get_email.GetEmailParametricTemplate.test_read_pgp_signed_email",
+  "8": "tests.test_get_email.GetEmailParametricTemplate.test_read_plain_email",
+  "9": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_followup_from_email_with_invalid_message_id",
+  "!": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_to_a_notification_disabled_queue",
+  "#": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_to_a_notification_enabled_queue",
+  "$": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_to_multiple_emails",
+  "%": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_with_carbon_copy",
+  "'": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_with_cc_duplicate_users_same_email",
+  "(": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_with_invalid_carbon_copy",
+  ")": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_with_message_id",
+  "*": "tests.test_ticket_submission.EmailInteractionsTestCase.test_create_ticket_from_email_without_message_id",
+  "+": "tests.test_ticket_actions.TicketActionsTestCase.test_merge_tickets"
+}
+    </script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>helpdesk<span class="sep">/</span>templated_email.py</b>:
+            <span class="pc_cov">84%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">50 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">44<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">6<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">2<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_72a8051a633181ae_tasks_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_51fa33f9ceaa194c___init___py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="run"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">conf</span> <span class="key">import</span> <span class="nam">settings</span>&nbsp;</span><span class="r"><label for="ctxs1" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">utils</span><span class="op">.</span><span class="nam">safestring</span> <span class="key">import</span> <span class="nam">mark_safe</span>&nbsp;</span><span class="r"><label for="ctxs2" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="key">import</span> <span class="nam">logging</span>&nbsp;</span><span class="r"><label for="ctxs3" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="key">import</span> <span class="nam">os</span>&nbsp;</span><span class="r"><label for="ctxs4" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">from</span> <span class="nam">smtplib</span> <span class="key">import</span> <span class="nam">SMTPException</span>&nbsp;</span><span class="r"><label for="ctxs5" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="nam">logger</span> <span class="op">=</span> <span class="nam">logging</span><span class="op">.</span><span class="nam">getLogger</span><span class="op">(</span><span class="str">&quot;helpdesk&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs8" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">def</span> <span class="nam">send_templated_mail</span><span class="op">(</span>&nbsp;</span><span class="r"><label for="ctxs11" class="ctx">(empty)</label></span></p>
+    <p class="run run2"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">    <span class="nam">template_name</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="nam">context</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">    <span class="nam">recipients</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="nam">sender</span><span class="op">=</span><span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="nam">bcc</span><span class="op">=</span><span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">    <span class="nam">fail_silently</span><span class="op">=</span><span class="key">False</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">    <span class="nam">files</span><span class="op">=</span><span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">    <span class="nam">extra_headers</span><span class="op">=</span><span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">    <span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t"><span class="str">    send_templated_mail() is a wrapper around Django&#x27;s e-mail routines that</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="str">    allows us to easily send multipart (text/plain &amp; text/html) e-mails using</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t"><span class="str">    templates that are stored in the database. This lets the admin provide</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t"><span class="str">    both a text and a HTML template for each message.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t"><span class="str">    template_name is the slug of the template to use for this message (see</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t"><span class="str">        models.EmailTemplate)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t"><span class="str">    context is a dictionary to be used when rendering the template</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t"><span class="str">    recipients can be either a string, eg &#x27;a@b.com&#x27;, or a list of strings.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t"><span class="str">    sender should contain a string, eg &#x27;My Site &lt;me@z.com&gt;&#x27;. If you leave it</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t"><span class="str">        blank, it&#x27;ll use settings.DEFAULT_FROM_EMAIL as a fallback.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t"><span class="str">    bcc is an optional list of addresses that will receive this message as a</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t"><span class="str">        blind carbon copy.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t"><span class="str">    fail_silently is passed to Django&#x27;s mail routine. Set to &#x27;True&#x27; to ignore</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t"><span class="str">        any errors at send time.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t"><span class="str">    files can be a list of tuples. Each tuple should be a filename to attach,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t"><span class="str">        along with the File objects to be read. files can be blank.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t"><span class="str">    extra_headers is a dictionary of extra email headers, needed to process</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t"><span class="str">        email replies and keep proper threading.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">    <span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">core</span><span class="op">.</span><span class="nam">mail</span> <span class="key">import</span> <span class="nam">EmailMultiAlternatives</span>&nbsp;</span><input type="checkbox" id="ctxs50"><span class="r"><label for="ctxs50" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">    <span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">template</span> <span class="key">import</span> <span class="nam">engines</span>&nbsp;</span><input type="checkbox" id="ctxs51"><span class="r"><label for="ctxs51" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">    <span class="nam">from_string</span> <span class="op">=</span> <span class="nam">engines</span><span class="op">[</span><span class="str">&quot;django&quot;</span><span class="op">]</span><span class="op">.</span><span class="nam">from_string</span>&nbsp;</span><input type="checkbox" id="ctxs53"><span class="r"><label for="ctxs53" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">    <span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">EmailTemplate</span>&nbsp;</span><input type="checkbox" id="ctxs55"><span class="r"><label for="ctxs55" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">    <span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">settings</span> <span class="key">import</span> <span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs56"><span class="r"><label for="ctxs56" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run run2"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">        <span class="nam">HELPDESK_EMAIL_FALLBACK_LOCALE</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">        <span class="nam">HELPDESK_EMAIL_SUBJECT_TEMPLATE</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">    <span class="nam">headers</span> <span class="op">=</span> <span class="nam">extra_headers</span> <span class="key">or</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><input type="checkbox" id="ctxs61"><span class="r"><label for="ctxs61" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">    <span class="nam">locale</span> <span class="op">=</span> <span class="nam">context</span><span class="op">[</span><span class="str">&quot;queue&quot;</span><span class="op">]</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">&quot;locale&quot;</span><span class="op">)</span> <span class="key">or</span> <span class="nam">HELPDESK_EMAIL_FALLBACK_LOCALE</span>&nbsp;</span><input type="checkbox" id="ctxs63"><span class="r"><label for="ctxs63" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">    <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs65"><span class="r"><label for="ctxs65" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">        <span class="nam">t</span> <span class="op">=</span> <span class="nam">EmailTemplate</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs66"><span class="r"><label for="ctxs66" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run run2"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">            <span class="nam">template_name__iexact</span><span class="op">=</span><span class="nam">template_name</span><span class="op">,</span> <span class="nam">locale</span><span class="op">=</span><span class="nam">locale</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">    <span class="key">except</span> <span class="nam">EmailTemplate</span><span class="op">.</span><span class="nam">DoesNotExist</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs69"><span class="r"><label for="ctxs69" class="ctx">1 ctx</label></span><span class="ctxs">1b</span></p>
+    <p class="run"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs70"><span class="r"><label for="ctxs70" class="ctx">1 ctx</label></span><span class="ctxs">1b</span></p>
+    <p class="run"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">            <span class="nam">t</span> <span class="op">=</span> <span class="nam">EmailTemplate</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs71"><span class="r"><label for="ctxs71" class="ctx">1 ctx</label></span><span class="ctxs">1b</span></p>
+    <p class="run run2"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">                <span class="nam">template_name__iexact</span><span class="op">=</span><span class="nam">template_name</span><span class="op">,</span> <span class="nam">locale__isnull</span><span class="op">=</span><span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">        <span class="key">except</span> <span class="nam">EmailTemplate</span><span class="op">.</span><span class="nam">DoesNotExist</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs74"><span class="r"><label for="ctxs74" class="ctx">1 ctx</label></span><span class="ctxs">1b</span></p>
+    <p class="run"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">            <span class="nam">logger</span><span class="op">.</span><span class="nam">warning</span><span class="op">(</span><span class="str">&#x27;template &quot;%s&quot; does not exist, no mail sent&#x27;</span><span class="op">,</span> <span class="nam">template_name</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs75"><span class="r"><label for="ctxs75" class="ctx">1 ctx</label></span><span class="ctxs">1b</span></p>
+    <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">            <span class="key">return</span>  <span class="com"># just ignore if template doesn&#x27;t exist</span>&nbsp;</span><input type="checkbox" id="ctxs76"><span class="r"><label for="ctxs76" class="ctx">1 ctx</label></span><span class="ctxs">1b</span></p>
+    <p class="pln"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">    <span class="nam">subject_part</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs78"><span class="r"><label for="ctxs78" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run run2"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">        <span class="nam">from_string</span><span class="op">(</span><span class="nam">HELPDESK_EMAIL_SUBJECT_TEMPLATE</span> <span class="op">%</span> <span class="op">{</span><span class="str">&quot;subject&quot;</span><span class="op">:</span> <span class="nam">t</span><span class="op">.</span><span class="nam">subject</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">        <span class="op">.</span><span class="nam">render</span><span class="op">(</span><span class="nam">context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">        <span class="op">.</span><span class="nam">replace</span><span class="op">(</span><span class="str">&quot;\n&quot;</span><span class="op">,</span> <span class="str">&quot;&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">        <span class="op">.</span><span class="nam">replace</span><span class="op">(</span><span class="str">&quot;\r&quot;</span><span class="op">,</span> <span class="str">&quot;&quot;</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">    <span class="nam">footer_file</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="str">&quot;helpdesk&quot;</span><span class="op">,</span> <span class="nam">locale</span><span class="op">,</span> <span class="str">&quot;email_text_footer.txt&quot;</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs85"><span class="r"><label for="ctxs85" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">    <span class="nam">text_part</span> <span class="op">=</span> <span class="nam">from_string</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs87"><span class="r"><label for="ctxs87" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run run2"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">        <span class="str">&quot;%s\n\n{%% include &#x27;%s&#x27; %%}&quot;</span> <span class="op">%</span> <span class="op">(</span><span class="nam">t</span><span class="op">.</span><span class="nam">plain_text</span><span class="op">,</span> <span class="nam">footer_file</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">    <span class="op">)</span><span class="op">.</span><span class="nam">render</span><span class="op">(</span><span class="nam">context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">    <span class="nam">email_html_base_file</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="str">&quot;helpdesk&quot;</span><span class="op">,</span> <span class="nam">locale</span><span class="op">,</span> <span class="str">&quot;email_html_base.html&quot;</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs91"><span class="r"><label for="ctxs91" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">    <span class="com"># keep new lines in html emails</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">    <span class="key">if</span> <span class="str">&quot;comment&quot;</span> <span class="key">in</span> <span class="nam">context</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs93"><span class="r"><label for="ctxs93" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">        <span class="nam">context</span><span class="op">[</span><span class="str">&quot;comment&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="nam">mark_safe</span><span class="op">(</span><span class="nam">context</span><span class="op">[</span><span class="str">&quot;comment&quot;</span><span class="op">]</span><span class="op">.</span><span class="nam">replace</span><span class="op">(</span><span class="str">&quot;\r\n&quot;</span><span class="op">,</span> <span class="str">&quot;&lt;br&gt;&quot;</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs94"><span class="r"><label for="ctxs94" class="ctx">39 ctx</label></span><span class="ctxs">1agchidefjklmnopqrstuvwbxyzABCDEFGHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">    <span class="nam">html_part</span> <span class="op">=</span> <span class="nam">from_string</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs96"><span class="r"><label for="ctxs96" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run run2"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">        <span class="str">&quot;{%% extends &#x27;%s&#x27; %%}&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">        <span class="str">&quot;{%% block title %%}%s{%% endblock %%}&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">        <span class="str">&quot;{%% block content %%}%s{%% endblock %%}&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">        <span class="op">%</span> <span class="op">(</span><span class="nam">email_html_base_file</span><span class="op">,</span> <span class="nam">t</span><span class="op">.</span><span class="nam">heading</span><span class="op">,</span> <span class="nam">t</span><span class="op">.</span><span class="nam">html</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="op">)</span><span class="op">.</span><span class="nam">render</span><span class="op">(</span><span class="nam">context</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">    <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">recipients</span><span class="op">,</span> <span class="nam">str</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs103"><span class="r"><label for="ctxs103" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="par run show_par"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">        <span class="key">if</span> <span class="nam">recipients</span><span class="op">.</span><span class="nam">find</span><span class="op">(</span><span class="str">&quot;,&quot;</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs104"><span class="r"><span class="annotate short">104&#x202F;&#x219B;&#x202F;109</span><span class="annotate long">line 104 didn't jump to line 109 because the condition on line 104 was always true</span><label for="ctxs104" class="ctx">70 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678yzABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">            <span class="nam">recipients</span> <span class="op">=</span> <span class="nam">recipients</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="str">&quot;,&quot;</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs105"><span class="r"><label for="ctxs105" class="ctx">70 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678yzABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="par run show_par"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">    <span class="key">elif</span> <span class="nam">type</span><span class="op">(</span><span class="nam">recipients</span><span class="op">)</span> <span class="key">is</span> <span class="key">not</span> <span class="nam">list</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs106"><span class="r"><span class="annotate short">106&#x202F;&#x219B;&#x202F;107</span><span class="annotate long">line 106 didn't jump to line 107 because the condition on line 106 was never true</span><label for="ctxs106" class="ctx">1 ctx</label></span><span class="ctxs">1+</span></p>
+    <p class="mis show_mis"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t">        <span class="nam">recipients</span> <span class="op">=</span> <span class="op">[</span><span class="nam">recipients</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t">    <span class="nam">msg</span> <span class="op">=</span> <span class="nam">EmailMultiAlternatives</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs109"><span class="r"><label for="ctxs109" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run run2"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t">        <span class="nam">subject_part</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t">        <span class="nam">text_part</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t112" href="#t112">112</a></span><span class="t">        <span class="nam">sender</span> <span class="key">or</span> <span class="nam">settings</span><span class="op">.</span><span class="nam">DEFAULT_FROM_EMAIL</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t113" href="#t113">113</a></span><span class="t">        <span class="nam">recipients</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t114" href="#t114">114</a></span><span class="t">        <span class="nam">bcc</span><span class="op">=</span><span class="nam">bcc</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">        <span class="nam">headers</span><span class="op">=</span><span class="nam">headers</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">    <span class="nam">msg</span><span class="op">.</span><span class="nam">attach_alternative</span><span class="op">(</span><span class="nam">html_part</span><span class="op">,</span> <span class="str">&quot;text/html&quot;</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs117"><span class="r"><label for="ctxs117" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">    <span class="key">if</span> <span class="nam">files</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs119"><span class="r"><label for="ctxs119" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">        <span class="key">for</span> <span class="nam">filename</span><span class="op">,</span> <span class="nam">filefield</span> <span class="key">in</span> <span class="nam">files</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs120"><span class="r"><label for="ctxs120" class="ctx">4 ctx</label></span><span class="ctxs">1cdef</span></p>
+    <p class="run"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">            <span class="nam">filefield</span><span class="op">.</span><span class="nam">open</span><span class="op">(</span><span class="str">&quot;rb&quot;</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs121"><span class="r"><label for="ctxs121" class="ctx">4 ctx</label></span><span class="ctxs">1cdef</span></p>
+    <p class="run"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">            <span class="nam">content</span> <span class="op">=</span> <span class="nam">filefield</span><span class="op">.</span><span class="nam">read</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs122"><span class="r"><label for="ctxs122" class="ctx">4 ctx</label></span><span class="ctxs">1cdef</span></p>
+    <p class="run"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">            <span class="nam">msg</span><span class="op">.</span><span class="nam">attach</span><span class="op">(</span><span class="nam">filename</span><span class="op">,</span> <span class="nam">content</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs123"><span class="r"><label for="ctxs123" class="ctx">4 ctx</label></span><span class="ctxs">1cdef</span></p>
+    <p class="run"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">            <span class="nam">filefield</span><span class="op">.</span><span class="nam">close</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs124"><span class="r"><label for="ctxs124" class="ctx">4 ctx</label></span><span class="ctxs">1cdef</span></p>
+    <p class="run"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">    <span class="nam">logger</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">&quot;Sending email to: {!r}&quot;</span><span class="op">.</span><span class="nam">format</span><span class="op">(</span><span class="nam">recipients</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs125"><span class="r"><label for="ctxs125" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="pln"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t">    <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs127"><span class="r"><label for="ctxs127" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="run"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t">        <span class="key">return</span> <span class="nam">msg</span><span class="op">.</span><span class="nam">send</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs128"><span class="r"><label for="ctxs128" class="ctx">71 ctx</label></span><span class="ctxs">1agchiNOdefjklmnopqrstuvwbxPQRSTUVWXYZ012345678y+zABC9DEF!#$%'()*GHIJKLM</span></p>
+    <p class="mis show_mis"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t">    <span class="key">except</span> <span class="nam">SMTPException</span> <span class="key">as</span> <span class="nam">e</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">        <span class="nam">logger</span><span class="op">.</span><span class="nam">exception</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">            <span class="str">&quot;SMTPException raised while sending email to {}&quot;</span><span class="op">.</span><span class="nam">format</span><span class="op">(</span><span class="nam">recipients</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">        <span class="key">if</span> <span class="key">not</span> <span class="nam">fail_silently</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">            <span class="key">raise</span> <span class="nam">e</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t135" href="#t135">135</a></span><span class="t">        <span class="key">return</span> <span class="num">0</span>&nbsp;</span><span class="r"></span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_72a8051a633181ae_tasks_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_51fa33f9ceaa194c___init___py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+    </div>
+</footer>
+</body>
+</html>

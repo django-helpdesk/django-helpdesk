@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/helpdesk/templatetags/ticket_to_link.py: 91%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script type="text/javascript">
+        contexts = {
+  "a": "tests.test_followup_copy.FollowUpCopyTests.test_copy_keeps_source_and_does_not_replay_history",
+  "b": "tests.test_ticket_actions.TicketActionsTestCase.test_num_to_link",
+  "c": "(empty)",
+  "d": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_valid_extension",
+  "e": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_done",
+  "f": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_undone",
+  "g": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_inbound_followup_is_labeled_from_submitter",
+  "h": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_internal_followup_is_labeled_private",
+  "i": "tests.test_followup_direction.FollowUpDirectionRenderingTests.test_outbound_followup_is_labeled_to_submitter",
+  "j": "tests.test_followup_edit.FollowUpEditTests.test_edit_applies_the_submitted_values",
+  "k": "tests.test_followup_menu.FollowUpMenuTests.test_menu_is_offered_on_own_followup",
+  "l": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_colleagues_followup",
+  "m": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_on_a_followup_without_an_author",
+  "n": "tests.test_followup_menu.FollowUpMenuTests.test_no_menu_when_the_edit_button_is_turned_off",
+  "o": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_can_delete_a_followup_without_an_author",
+  "p": "tests.test_followup_menu.FollowUpMenuTests.test_superuser_is_offered_the_menu_on_a_colleagues_followup",
+  "q": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_empty_recipients_say_so_explicitly",
+  "r": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_recorded_recipients_are_listed",
+  "s": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_unrecorded_recipients_render_nothing",
+  "t": "tests.test_staff_ticket_view.StaffTicketViewTests.test_few_attachments_shown_without_collapse",
+  "u": "tests.test_staff_ticket_view.StaffTicketViewTests.test_many_attachments_are_collapsed",
+  "v": "tests.test_staff_ticket_view.StaffTicketViewTests.test_staff_user_can_assign_ticket_to_herself",
+  "w": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_staff",
+  "x": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_bottom_layout_places_respond_after_followups",
+  "y": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_default_layout_is_tabs",
+  "z": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_missing_user_settings_falls_back_to_tabs",
+  "A": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_top_layout_places_respond_before_followups",
+  "B": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_unknown_layout_falls_back_to_tabs",
+  "C": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment",
+  "D": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment_utf8",
+  "E": "tests.test_followup_recipients.FollowUpRecipientsDisplayTests.test_public_view_never_lists_recipients",
+  "F": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_a_plain_url_is_still_rendered_as_a_link",
+  "G": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_description_cannot_inject_an_event_handler",
+  "H": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_followup_comment_cannot_inject_an_event_handler",
+  "I": "tests.test_markdown_injection.MarkdownInjectionTestCase.test_resolution_cannot_inject_an_event_handler",
+  "J": "tests.test_per_queue_staff_permission.PerQueueApiAuthorizationTestCase.test_api_and_ui_agree_on_a_ticket_assigned_outside_the_user_queues",
+  "K": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_public_field_value_and_history_are_still_shown",
+  "L": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_query_count_does_not_grow_with_follow_ups",
+  "M": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_staff_only_change_history_is_not_shown",
+  "N": "tests.test_staff_only_custom_fields.PublicTicketViewTestCase.test_staff_only_value_is_not_shown",
+  "O": "tests.test_ticket_actions.TicketActionsTestCase.test_merge_tickets",
+  "P": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_authorized",
+  "Q": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_customfields",
+  "R": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public",
+  "S": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_no_loopback",
+  "T": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_with_hidden_fields",
+  "U": "tests.test_user_tickets_api.SubmitterEmailStorageTestCase.test_the_submit_form_stores_an_empty_string",
+  "V": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_invalid_extension",
+  "W": "tests.test_checklist.TicketChecklistTestCase.test_delete_checklist",
+  "X": "tests.test_checklist.TicketChecklistTestCase.test_edit_checklist",
+  "Y": "tests.test_followup_copy.FollowUpCopyTests.test_disabled_hides_copy_option",
+  "Z": "tests.test_followup_copy.FollowUpCopyTests.test_disabled_rejects_copy_without_moving_original",
+  "0": "tests.test_followup_copy.FollowUpCopyTests.test_get_keeps_existing_ticket_choices_and_does_not_copy",
+  "1": "tests.test_followup_copy.FollowUpCopyTests.test_partial_attachment_failure_rolls_back_rows_and_files",
+  "2": "tests.test_followup_copy.FollowUpCopyTests.test_queue_permissions_apply_to_source_and_target",
+  "3": "tests.test_followup_copy.FollowUpCopyTests.test_rejects_self_closed_and_missing_target",
+  "4": "tests.test_per_queue_staff_permission.PerQueuePermissionSecurityTestCase.test_view_ticket_allowed_for_accessible_queue",
+  "5": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_forged_relation_is_rejected_with_a_response",
+  "6": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_no_route_accepts_a_foreign_child_under_a_permitted_ticket",
+  "7": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_permitted_queue_still_works",
+  "8": "tests.test_single_queue_hiding.TicketDetailQueueFieldTestCase.test_queue_select_hidden_with_single_queue",
+  "9": "tests.test_single_queue_hiding.TicketDetailQueueFieldTestCase.test_queue_select_shown_with_multiple_queues",
+  "!": "tests.test_staff_ticket_view.StaffTicketViewTests.test_staff_user_can_access_ticket_details",
+  "#": "tests.test_ticket_respond_layout.TicketRespondLayoutTests.test_respond_form_shown_without_followups",
+  "$": "tests.test_ticket_template_extension.TicketTemplateExtensionTests.test_same_name_override_adds_panel_and_inherits_existing_page",
+  "%": "tests.test_update_ticket_view.UpdateTicketCustomFieldsTests.test_custom_field_persists_after_invalid_post",
+  "'": "tests.test_update_ticket_view.UpdateTicketViewTests.test_redirect_after_login_does_not_crash"
+}
+    </script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>helpdesk<span class="sep">/</span>templatetags<span class="sep">/</span>ticket_to_link.py</b>:
+            <span class="pc_cov">91%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">24 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">22<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">1<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_51fa33f9ceaa194c_saved_queries_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_51fa33f9ceaa194c_user_admin_url_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="str">django-helpdesk - A Django powered ticket tracker for small enterprise.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="str">(c) Copyright 2008 Jutda. All Rights Reserved. See LICENSE for details.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="str">templatetags/ticket_to_link.py - Used in ticket comments to allow wiki-style</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="str">                                 linking to other tickets. Including text such</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="str">                                 as &#x27;#3180&#x27; in a comment automatically links</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="str">                                 that text to ticket number 3180, with styling</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="str">                                 to show the status of that ticket (eg a closed</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="str">                                 ticket would have a strikethrough).</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span> <span class="key">import</span> <span class="nam">template</span>&nbsp;</span><span class="r"><label for="ctxs14" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">urls</span> <span class="key">import</span> <span class="nam">reverse</span>&nbsp;</span><span class="r"><label for="ctxs15" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="key">from</span> <span class="nam">django</span><span class="op">.</span><span class="nam">utils</span><span class="op">.</span><span class="nam">safestring</span> <span class="key">import</span> <span class="nam">mark_safe</span>&nbsp;</span><span class="r"><label for="ctxs16" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">Ticket</span>&nbsp;</span><span class="r"><label for="ctxs17" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="key">import</span> <span class="nam">re</span>&nbsp;</span><span class="r"><label for="ctxs18" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="key">def</span> <span class="nam">num_to_link</span><span class="op">(</span><span class="nam">text</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs21" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">    <span class="key">if</span> <span class="nam">text</span> <span class="op">==</span> <span class="str">&quot;&quot;</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs22"><span class="r"><label for="ctxs22" class="ctx">66 ctx</label></span><span class="ctxs">1VdCDWXefaYZ0123ghijklmnopqErsFGHIJ456789KLMNtu!vObwxyz#ABPQRST$%'U</span></p>
+    <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">        <span class="key">return</span> <span class="nam">text</span>&nbsp;</span><input type="checkbox" id="ctxs23"><span class="r"><label for="ctxs23" class="ctx">46 ctx</label></span><span class="ctxs">1VdWXefaYZ0123ghijklmnopqrs456789tu!vwxyz#AB$%'</span></p>
+    <p class="pln"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">    <span class="nam">matches</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs25"><span class="r"><label for="ctxs25" class="ctx">46 ctx</label></span><span class="ctxs">1dCDefaghijklmnopqErsFGHIJKLMNtuvObwxyzABPQRSTU</span></p>
+    <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">    <span class="key">for</span> <span class="nam">match</span> <span class="key">in</span> <span class="nam">re</span><span class="op">.</span><span class="nam">finditer</span><span class="op">(</span><span class="str">r&quot;(?:[^&amp;]|\b|^)#(\d+)\b&quot;</span><span class="op">,</span> <span class="nam">text</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs26"><span class="r"><label for="ctxs26" class="ctx">46 ctx</label></span><span class="ctxs">1dCDefaghijklmnopqErsFGHIJKLMNtuvObwxyzABPQRSTU</span></p>
+    <p class="run"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">        <span class="nam">matches</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">match</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs27"><span class="r"><label for="ctxs27" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">    <span class="key">for</span> <span class="nam">match</span> <span class="key">in</span> <span class="nam">reversed</span><span class="op">(</span><span class="nam">matches</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs29"><span class="r"><label for="ctxs29" class="ctx">46 ctx</label></span><span class="ctxs">1dCDefaghijklmnopqErsFGHIJKLMNtuvObwxyzABPQRSTU</span></p>
+    <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">        <span class="nam">number</span> <span class="op">=</span> <span class="nam">match</span><span class="op">.</span><span class="nam">groups</span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs30"><span class="r"><label for="ctxs30" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">        <span class="nam">url</span> <span class="op">=</span> <span class="nam">reverse</span><span class="op">(</span><span class="str">&quot;helpdesk:view&quot;</span><span class="op">,</span> <span class="nam">args</span><span class="op">=</span><span class="op">[</span><span class="nam">number</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs31"><span class="r"><label for="ctxs31" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs32"><span class="r"><label for="ctxs32" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">            <span class="nam">ticket</span> <span class="op">=</span> <span class="nam">Ticket</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">id</span><span class="op">=</span><span class="nam">number</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs33"><span class="r"><label for="ctxs33" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="mis show_mis"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">        <span class="key">except</span> <span class="nam">Ticket</span><span class="op">.</span><span class="nam">DoesNotExist</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">            <span class="nam">ticket</span> <span class="op">=</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">        <span class="key">if</span> <span class="nam">ticket</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs37"><span class="r"><span class="annotate short">37&#x202F;&#x219B;&#x202F;29</span><span class="annotate long">line 37 didn't jump to line 29 because the condition on line 37 was always true</span><label for="ctxs37" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">            <span class="nam">style</span> <span class="op">=</span> <span class="nam">ticket</span><span class="op">.</span><span class="nam">get_status_display</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs38"><span class="r"><label for="ctxs38" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">            <span class="nam">text</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs39"><span class="r"><label for="ctxs39" class="ctx">2 ctx</label></span><span class="ctxs">1ab</span></p>
+    <p class="run run2"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">                <span class="str">&quot;%s &lt;a href=&#x27;%s&#x27; class=&#x27;ticket_link_status ticket_link_status_%s&#x27;&gt;#%s&lt;/a&gt;%s&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">                <span class="op">%</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">                    <span class="nam">text</span><span class="op">[</span><span class="op">:</span> <span class="nam">match</span><span class="op">.</span><span class="nam">start</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> <span class="num">1</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">                    <span class="nam">url</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">                    <span class="nam">style</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">                    <span class="nam">match</span><span class="op">.</span><span class="nam">groups</span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">                    <span class="nam">text</span><span class="op">[</span><span class="nam">match</span><span class="op">.</span><span class="nam">end</span><span class="op">(</span><span class="op">)</span> <span class="op">:</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">    <span class="key">return</span> <span class="nam">mark_safe</span><span class="op">(</span><span class="nam">text</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs49"><span class="r"><label for="ctxs49" class="ctx">46 ctx</label></span><span class="ctxs">1dCDefaghijklmnopqErsFGHIJKLMNtuvObwxyzABPQRSTU</span></p>
+    <p class="pln"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t"><span class="nam">register</span> <span class="op">=</span> <span class="nam">template</span><span class="op">.</span><span class="nam">Library</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs52" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t"><span class="nam">register</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">num_to_link</span><span class="op">)</span>&nbsp;</span><span class="r"><label for="ctxs53" class="ctx">(empty)</label></span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_51fa33f9ceaa194c_saved_queries_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_51fa33f9ceaa194c_user_admin_url_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+    </div>
+</footer>
+</body>
+</html>

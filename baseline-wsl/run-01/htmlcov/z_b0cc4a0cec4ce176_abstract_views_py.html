@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/helpdesk/views/abstract_views.py: 94%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script type="text/javascript">
+        contexts = {
+  "a": "tests.test_ticket_submission.EmailInteractionsTestCase.test_ticket_field_autofill",
+  "b": "tests.test_per_queue_view_sweep.ForeignQueueSweepTestCase.test_permitted_queue_still_works",
+  "c": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_staff",
+  "d": "tests.test_attachment_html_xss.PublicFormAttachmentTestCase.test_anonymous_user_can_still_attach_a_text_file",
+  "e": "tests.test_attachment_html_xss.PublicFormAttachmentTestCase.test_anonymous_user_cannot_attach_html",
+  "f": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_invalid_extension",
+  "g": "tests.test_attachments.AttachmentIntegrationStaffTests.test_update_ticket_with_attachment_valid_extension",
+  "h": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment",
+  "i": "tests.test_attachments.AttachmentIntegrationTests.test_create_pub_ticket_with_attachment_utf8",
+  "j": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_done",
+  "k": "tests.test_checklist.TicketChecklistTestCase.test_mark_task_as_undone",
+  "l": "tests.test_form_rendering.RealPagesTestCase.test_public_ticket_form",
+  "m": "tests.test_ticket_actions.TicketActionsTestCase.test_create_ticket_getform",
+  "n": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_queue",
+  "o": "tests.test_ticket_actions.TicketActionsTestCase.test_update_ticket_with_custom_fields",
+  "p": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_authorized",
+  "q": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_customfields",
+  "r": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_private",
+  "s": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public",
+  "t": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_no_loopback",
+  "u": "tests.test_ticket_submission.TicketBasicsTestCase.test_create_ticket_public_with_hidden_fields",
+  "v": "tests.test_time_spent_auto.TimeSpentAutoTestCase.test_http_followup_time_spent_auto_exclude_queues",
+  "w": "tests.test_update_ticket_view.UpdateTicketCustomFieldsTests.test_custom_field_persists_after_invalid_post",
+  "x": "tests.test_update_ticket_view.UpdateTicketViewTests.test_redirect_after_login_does_not_crash",
+  "y": "tests.test_user_tickets_api.SubmitterEmailStorageTestCase.test_the_submit_form_stores_an_empty_string",
+  "z": "(empty)"
+}
+    </script>
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>helpdesk<span class="sep">/</span>views<span class="sep">/</span>abstract_views.py</b>:
+            <span class="pc_cov">94%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">27 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">25<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">0<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_b0cc4a0cec4ce176___init___py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_b0cc4a0cec4ce176_api_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="run"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="key">from</span> <span class="nam">helpdesk</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">CustomField</span><span class="op">,</span> <span class="nam">KBItem</span><span class="op">,</span> <span class="nam">Queue</span>&nbsp;</span><span class="r"><label for="ctxs1" class="ctx">(empty)</label></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="key">class</span> <span class="nam">AbstractCreateTicketMixin</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs4" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_initial</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs5" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t">        <span class="nam">initial_data</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><input type="checkbox" id="ctxs6"><span class="r"><label for="ctxs6" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">        <span class="nam">request</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">request</span>&nbsp;</span><input type="checkbox" id="ctxs7"><span class="r"><label for="ctxs7" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs8"><span class="r"><label for="ctxs8" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">            <span class="nam">initial_data</span><span class="op">[</span><span class="str">&quot;queue&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="nam">Queue</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs9"><span class="r"><label for="ctxs9" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run run2"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">                <span class="nam">slug</span><span class="op">=</span><span class="nam">request</span><span class="op">.</span><span class="nam">GET</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">&quot;queue&quot;</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">            <span class="op">)</span><span class="op">.</span><span class="nam">id</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">        <span class="key">except</span> <span class="nam">Queue</span><span class="op">.</span><span class="nam">DoesNotExist</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs12"><span class="r"><label for="ctxs12" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">            <span class="key">pass</span>&nbsp;</span><input type="checkbox" id="ctxs13"><span class="r"><label for="ctxs13" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">        <span class="nam">u</span> <span class="op">=</span> <span class="nam">request</span><span class="op">.</span><span class="nam">user</span>&nbsp;</span><input type="checkbox" id="ctxs14"><span class="r"><label for="ctxs14" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">        <span class="key">if</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">            <span class="nam">u</span><span class="op">.</span><span class="nam">is_authenticated</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">            <span class="key">and</span> <span class="nam">u</span><span class="op">.</span><span class="nam">usersettings_helpdesk</span><span class="op">.</span><span class="nam">use_email_as_submitter</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">            <span class="key">and</span> <span class="nam">u</span><span class="op">.</span><span class="nam">email</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">        <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">            <span class="nam">initial_data</span><span class="op">[</span><span class="str">&quot;submitter_email&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="nam">u</span><span class="op">.</span><span class="nam">email</span>&nbsp;</span><input type="checkbox" id="ctxs20"><span class="r"><label for="ctxs20" class="ctx">2 ctx</label></span><span class="ctxs">1bc</span></p>
+    <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">        <span class="nam">query_param_fields</span> <span class="op">=</span> <span class="op">[</span><span class="str">&quot;submitter_email&quot;</span><span class="op">,</span> <span class="str">&quot;title&quot;</span><span class="op">,</span> <span class="str">&quot;body&quot;</span><span class="op">,</span> <span class="str">&quot;queue&quot;</span><span class="op">,</span> <span class="str">&quot;kbitem&quot;</span><span class="op">]</span>&nbsp;</span><input type="checkbox" id="ctxs22"><span class="r"><label for="ctxs22" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">        <span class="nam">custom_fields</span> <span class="op">=</span> <span class="op">[</span>&nbsp;</span><input type="checkbox" id="ctxs23"><span class="r"><label for="ctxs23" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run run2"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">            <span class="fst">f&quot;</span><span class="fst">custom_</span><span class="op">{</span><span class="nam">f</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst">&quot;</span> <span class="key">for</span> <span class="nam">f</span> <span class="key">in</span> <span class="nam">CustomField</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">filter</span><span class="op">(</span><span class="nam">staff_only</span><span class="op">=</span><span class="key">False</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">        <span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">        <span class="nam">query_param_fields</span> <span class="op">+=</span> <span class="nam">custom_fields</span>&nbsp;</span><input type="checkbox" id="ctxs26"><span class="r"><label for="ctxs26" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">        <span class="key">for</span> <span class="nam">qpf</span> <span class="key">in</span> <span class="nam">query_param_fields</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs27"><span class="r"><label for="ctxs27" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">            <span class="nam">initial_data</span><span class="op">[</span><span class="nam">qpf</span><span class="op">]</span> <span class="op">=</span> <span class="nam">request</span><span class="op">.</span><span class="nam">GET</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">qpf</span><span class="op">,</span> <span class="nam">initial_data</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">qpf</span><span class="op">,</span> <span class="str">&quot;&quot;</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs28"><span class="r"><label for="ctxs28" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">        <span class="key">return</span> <span class="nam">initial_data</span>&nbsp;</span><input type="checkbox" id="ctxs30"><span class="r"><label for="ctxs30" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_form_kwargs</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="op">*</span><span class="nam">args</span><span class="op">,</span> <span class="op">**</span><span class="nam">kwargs</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><label for="ctxs32" class="ctx">(empty)</label></span></p>
+    <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">        <span class="nam">kwargs</span> <span class="op">=</span> <span class="nam">super</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">get_form_kwargs</span><span class="op">(</span><span class="op">*</span><span class="nam">args</span><span class="op">,</span> <span class="op">**</span><span class="nam">kwargs</span><span class="op">)</span>&nbsp;</span><input type="checkbox" id="ctxs33"><span class="r"><label for="ctxs33" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">        <span class="nam">kbitem</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">request</span><span class="op">.</span><span class="nam">GET</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span>&nbsp;</span><input type="checkbox" id="ctxs34"><span class="r"><label for="ctxs34" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run run2"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">            <span class="str">&quot;kbitem&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">request</span><span class="op">.</span><span class="nam">POST</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="str">&quot;kbitem&quot;</span><span class="op">,</span> <span class="key">None</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">        <span class="key">if</span> <span class="nam">kbitem</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs38"><span class="r"><label for="ctxs38" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+    <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">            <span class="key">try</span><span class="op">:</span>&nbsp;</span><input type="checkbox" id="ctxs39"><span class="r"><label for="ctxs39" class="ctx">1 ctx</label></span><span class="ctxs">1a</span></p>
+    <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">                <span class="nam">kwargs</span><span class="op">[</span><span class="str">&quot;kbcategory&quot;</span><span class="op">]</span> <span class="op">=</span> <span class="nam">KBItem</span><span class="op">.</span><span class="nam">objects</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">pk</span><span class="op">=</span><span class="nam">int</span><span class="op">(</span><span class="nam">kbitem</span><span class="op">)</span><span class="op">)</span><span class="op">.</span><span class="nam">category</span>&nbsp;</span><input type="checkbox" id="ctxs40"><span class="r"><label for="ctxs40" class="ctx">1 ctx</label></span><span class="ctxs">1a</span></p>
+    <p class="mis show_mis"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">            <span class="key">except</span> <span class="op">(</span><span class="nam">ValueError</span><span class="op">,</span> <span class="nam">KBItem</span><span class="op">.</span><span class="nam">DoesNotExist</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">                <span class="key">pass</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">        <span class="key">return</span> <span class="nam">kwargs</span>&nbsp;</span><input type="checkbox" id="ctxs43"><span class="r"><label for="ctxs43" class="ctx">25 ctx</label></span><span class="ctxs">1defghijklbmncoapqrstuvwxy</span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_b0cc4a0cec4ce176___init___py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_b0cc4a0cec4ce176_api_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.0">coverage.py v7.17.0</a>,
+            created at 2026-10-26 15:11 -0400
+        </p>
+    </div>
+</footer>
+</body>
+</html>
