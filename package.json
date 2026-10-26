@@ -3,7 +3,7 @@
   "packageManager": "yarn@4.18.1",
   "dependencies": {
     "bootstrap": "5.3.8",
-    "chart.js": "^4.5.1",
+    "chart.js": "^4.6.1",
     "datatables.net": "^3.1.4",
     "datatables.net-bs5": "^3.1.4",
     "datatables.net-buttons": "^4.1.2",
