@@ -6,6 +6,7 @@ Django settings for django-helpdesk demodesk project.
 import os
 
 from django.contrib.messages import constants as messages
+from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -206,6 +207,27 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # Contribute to our translations via Transifex if you can!
 # See CONTRIBUTING.rst for more info.
 LANGUAGE_CODE = "en-US"
+
+LANGUAGES = [
+    ("en", _("English")),
+    ("es", _("Spanish")),
+    ("it", _("Italian")),
+    ("de", _("German")),
+    ("fr", _("French")),
+    ("pt", _("Portuguese")),
+    ("pl", _("Polish")),
+    ("tr", _("Turkish")),
+    ("zh-hans", _("Chinese")),
+    ("sr", _("Serbian")),
+    ("cs", _("Czech")),
+    ("ru", _("Russian")),
+    ("ca", _("Catalan")),
+    ("el", _("Greek")),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locale"),
+]
 
 TIME_ZONE = "UTC"
 
