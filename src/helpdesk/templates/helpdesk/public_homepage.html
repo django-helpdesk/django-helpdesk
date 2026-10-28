@@ -10,7 +10,6 @@
   <style>
     .hero {
       fill: var(--bs-primary);
-      ;
     }
   </style>
 {% endblock helpdesk_head %}
@@ -46,7 +45,7 @@
         <div class="row row-cols-1 row-cols-md-3 g-3">
           {% for category in kb_categories %}
             <div class="col">
-              <div class="card">
+              <div class="card h-100">
                 <div class="card-body">
                   <h5 class="card-title">{{ category.title }}</h5>
                   <p class="text-body-secondary">{{ category.description|truncatechars:80 }}</p>
@@ -57,26 +56,19 @@
               </div>
             </div>
           {% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    {# REMOVE THIS LATER #}
-    <div class="row mt-5">
-      <div class="col-4 mx-auto">
-        <div class="card">
-          <div class="card-body">
-            <h2>{% translate "Create a Ticket" %}</h2>
-            {% include "helpdesk/public_create_ticket_base.html" %}
+          <div class="col">
+            <div class="card bg-light-subtle text-light-emphasis border border-light-subtle h-100">
+              <div class="card-body">
+                <h5 class="card-title">{% translate "Knowledgebase" %}</h5>
+                <p class="text-body-secondary">{% translate "Can't find what you need? Explore the knowledge base here." %}</p>
+                <a class="stretched-link" href="{% url 'helpdesk:kb_index' %}">
+                  {% translate "Explore" %}<i class="fa fa-chevron-right fa-xs ms-2"></i>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      {% if not helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC and not helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-        <h2>{% translate "Please use button at upper right to login first." %}</h2>
       {% endif %}
     </div>
   </div>
 {% endblock helpdesk_body %}
-
-{% block helpdesk_js %}
-  {{ form.media.js }}
-{% endblock helpdesk_js %}
