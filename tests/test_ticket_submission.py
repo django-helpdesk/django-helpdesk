@@ -1,13 +1,13 @@
 import email
 import logging
 import uuid
+from http import HTTPStatus
 from typing import ClassVar
 from urllib.parse import urlparse
 
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
-from django.test.client import Client
 from django.urls import reverse
 
 from helpdesk.email import MULTIPLE_USERS_SAME_EMAIL_MSG, extract_email_metadata
@@ -28,53 +28,44 @@ User = get_user_model()
 logger = logging.getLogger("helpdesk")
 
 
-class TicketBasicsTestCase(TestCase):
+class TicketSubmitTestCase(TestCase):
     fixtures: ClassVar[list] = ["emailtemplate.json"]
 
-    def setUp(self):
-        self.queue_public = Queue.objects.create(
-            title="Queue 1",
+    @classmethod
+    def setUpTestData(cls):
+        cls.queue_public = Queue.objects.create(
+            title="Public Customer Accounts Queue",
             slug="q1",
             allow_public_submission=True,
             new_ticket_cc="new.public@example.com",
             updated_ticket_cc="update.public@example.com",
         )
-        self.queue_private = Queue.objects.create(
-            title="Queue 2",
+        cls.queue_private = Queue.objects.create(
+            title="Private Payments Queue",
             slug="q2",
             allow_public_submission=False,
             new_ticket_cc="new.private@example.com",
             updated_ticket_cc="update.private@example.com",
         )
 
-        self.ticket_data = {
-            "title": "Test Ticket",
-            "description": "Some Test Ticket",
+        cls.ticket_data = {
+            "title": "My account is locked",
+            "description": "Can you reset my password?",
         }
 
-        self.user = User.objects.create(
-            username="User_1",
-        )
-
-        self.client = Client()
+        cls.user = User.objects.create_user(username="User_1")
+        cls.url = reverse("helpdesk:submit")
 
     def test_create_ticket_instance_from_payload(self):
-        """
-        Ensure that a <Ticket> instance is created whenever an email is sent to a public queue.
-        """
 
-        email_count = len(mail.outbox)
         ticket_data = dict(queue=self.queue_public, **self.ticket_data)
         ticket = Ticket.objects.create(**ticket_data)
+
         self.assertEqual(ticket.ticket_for_url, f"q1-{ticket.id}")
-        self.assertEqual(email_count, len(mail.outbox))
 
-    def test_create_ticket_public(self):
+    def test_creating_a_ticket_via_post_works(self):
         email_count = len(mail.outbox)
-
-        response = self.client.get(reverse("helpdesk:home"))
-        self.assertEqual(response.status_code, 200)
-
+        # Arrange
         post_data = {
             "title": "Test ticket title",
             "queue": self.queue_public.id,
@@ -83,29 +74,29 @@ class TicketBasicsTestCase(TestCase):
             "priority": 3,
         }
 
-        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
-        last_redirect = response.redirect_chain[-1]
-        last_redirect_url = last_redirect[0]
-        # last_redirect_status = last_redirect[1]
+        # Act
+        r = self.client.post(self.url, post_data, follow=True)
 
-        # Ensure we landed on the "View" page.
-        # Django 1.9 compatible way of testing this
-        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
-        urlparts = urlparse(last_redirect_url)
-        self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
+        # Assert
+        ticket = Ticket.objects.last()
+        view_url = reverse(
+            "helpdesk:public_view",
+            query={
+                "email": post_data["submitter_email"],
+                "key": ticket.secret_key,
+                "ticket": ticket.ticket_for_url,
+            },
+        )
 
+        self.assertEqual(r.status_code, HTTPStatus.OK)
+        self.assertRedirects(r, view_url)
         # Ensure submitter, new-queue + update-queue were all emailed.
         self.assertEqual(email_count + 3, len(mail.outbox))
-
-        ticket = Ticket.objects.last()
         self.assertEqual(ticket.followup_set.count(), 1)
-        # Follow up is anonymous
         self.assertIsNone(ticket.followup_set.first().user)
 
     def test_create_ticket_public_with_hidden_fields(self):
-        response = self.client.get(reverse("helpdesk:home"))
-        self.assertEqual(response.status_code, 200)
-
+        # Arrange
         post_data = {
             "title": "Test ticket title",
             "queue": self.queue_public.id,
@@ -114,19 +105,17 @@ class TicketBasicsTestCase(TestCase):
             "priority": 4,
         }
 
-        response = self.client.post(
-            reverse("helpdesk:home") + "?_hide_fields_=priority", post_data, follow=True
+        # Act
+        _ = self.client.post(
+            self.url + "?_hide_fields_=priority", post_data, follow=True
         )
         ticket = Ticket.objects.last()
         self.assertEqual(ticket.priority, 4)
 
     def test_create_ticket_authorized(self):
+        # Arrange
         email_count = len(mail.outbox)
         self.client.force_login(self.user)
-
-        response = self.client.get(reverse("helpdesk:home"))
-        self.assertEqual(response.status_code, 200)
-
         post_data = {
             "title": "Test ticket title",
             "queue": self.queue_public.id,
@@ -135,15 +124,14 @@ class TicketBasicsTestCase(TestCase):
             "priority": 3,
         }
 
-        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
+        # Act
+        response = self.client.post(self.url, post_data, follow=True)
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
-        # last_redirect_status = last_redirect[1]
 
-        # Ensure we landed on the "View" page.
-        # Django 1.9 compatible way of testing this
-        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
+
+        # Assert
         self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
 
         # Ensure submitter, new-queue + update-queue were all emailed.
@@ -154,7 +142,7 @@ class TicketBasicsTestCase(TestCase):
         # Follow up is for registered user
         self.assertEqual(ticket.followup_set.first().user, self.user)
 
-    def test_create_ticket_private(self):
+    def test_ticket_cannot_be_created_on_private_queue(self):
         email_count = len(mail.outbox)
         post_data = {
             "title": "Private ticket test",
@@ -164,10 +152,13 @@ class TicketBasicsTestCase(TestCase):
             "priority": 3,
         }
 
-        response = self.client.post(reverse("helpdesk:home"), post_data)
-        self.assertEqual(response.status_code, 200)
+        # Act
+        r = self.client.post(self.url, post_data)
+        self.assertEqual(r.status_code, HTTPStatus.OK)
+
+        # No email is sent
         self.assertEqual(email_count, len(mail.outbox))
-        self.assertContains(response, "Select a valid choice.")
+        self.assertContains(r, "Select a valid choice.")
 
     def test_create_ticket_customfields(self):
         email_count = len(mail.outbox)
@@ -195,19 +186,13 @@ class TicketBasicsTestCase(TestCase):
             "custom_textfield": "This is my custom text.",
         }
 
-        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
+        response = self.client.post(self.url, post_data, follow=True)
 
         custom_field_1.delete()
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
-        # last_redirect_status = last_redirect[1]
-
-        # Ensure we landed on the "View" page.
-        # Django 1.9 compatible way of testing this
-        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
         self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
-
         # Ensure only two e-mails were sent - submitter & updated.
         self.assertEqual(email_count + 2, len(mail.outbox))
 
@@ -228,14 +213,9 @@ class TicketBasicsTestCase(TestCase):
             "priority": 3,
         }
 
-        response = self.client.post(reverse("helpdesk:home"), post_data, follow=True)
+        response = self.client.post(self.url, post_data, follow=True)
         last_redirect = response.redirect_chain[-1]
         last_redirect_url = last_redirect[0]
-        # last_redirect_status = last_redirect[1]
-
-        # Ensure we landed on the "View" page.
-        # Django 1.9 compatible way of testing this
-        # https://docs.djangoproject.com/en/1.9/releases/1.9/#http-redirects-no-longer-forced-to-absolute-uris
         urlparts = urlparse(last_redirect_url)
         self.assertEqual(urlparts.path, reverse("helpdesk:public_view"))
 

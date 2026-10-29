@@ -1,196 +1,226 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
-{% load static %}
-{% block helpdesk_title %}{% translate "View a Ticket" %}{% endblock %}
+{% extends "helpdesk/public_base.html" %}
+
+{% load i18n humanize static helpdesk_util ticket_to_link %}
+
+{% block helpdesk_title %}
+  {% translate "View a Ticket" %}
+{% endblock helpdesk_title %}
 
 {% block helpdesk_body %}
-
-<table class="table table-hover table-bordered table-striped">
-<thead>
-    <tr>
-    <th colspan="2">
-        <capiton>
-            {{ ticket.ticket }} . {{ ticket.title }} [{{ ticket.get_status }}]
-        </capiton>
-    </th>
-    </tr>
-</thead>
-<tbody>
-    <tr><th>{% blocktranslate with ticket.queue as queue_name %}Queue</th>
-    <td>{{ queue_name }}{% endblocktranslate %}</td></tr>
-<tr>
-    <th>{% translate "Submitted On" %}</th>
-    <td>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</td>
-</tr>
-
-{% if ticket.due_date %}
-    <tr>
-        <th>{% translate "Due On" %}</th>
-        <td>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</td>
-    </tr>
-{% endif %}
-
-<tr>
-    <th>{% translate "Submitter E-Mail" %}</th>
-    <td>{{ ticket.submitter_email }}</td>
-</tr>
-
-<tr>
-    <th>{% translate "Priority" %}</th>
-    <td>{{ ticket.get_priority_display }}</td>
-</tr>
-
-{% for customfield in ticket.public_custom_field_values %}
-    <tr>
-        <th>{{ customfield.field.label }}</th>
-        <td>{{ customfield.value|default:"" }}</td>
-    </tr>
-{% endfor %}
-
-{% if tags_enabled %}
-<tr>
-    <th>{% translate "Tags" %}</th>
-    <td>{{ ticket.tags }}</td>
-</tr>
-{% endif %}
-
-<tr>
-    <th colspan='2'>{% translate "Description" %}</th>
-</tr>
-<tr>
-    <td colspan='2'>{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</td>
-</tr>
-
-{% if ticket.resolution %}<tr>
-    <th colspan='2'>{% translate "Resolution" %}{% if ticket.get_status_display == "Resolved" %} <a href='{{ ticket.ticket_url }}&close'><button type="button" class="btn btn-primary btn-xs">{% translate "Accept and Close" %}</button></a>{% endif %}</th>
-</tr>
-<tr>
-    <td colspan='2'>{{ ticket.resolution|urlizetrunc:50|linebreaksbr }}</td>
-</tr>{% endif %}
-</tbody>
-</table>
-
-{% if followups %}
-<h3>{% translate "Follow-Ups" %}</h3>
-{% load ticket_to_link %}
-{% for followup in followups %}
-<div class='followup well card'>
-    <p><b>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span></span></b></p>
-    {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
-    {% if followup.public_changes %}<div class='changes'><ul>
-	    {% for change in followup.public_changes %}
-	    <li>{% blocktranslate with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktranslate %}</li>
-	    {% endfor %}
-    </ul></div>{% endif %}
-
-    {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
-    {% for attachment in followup.followupattachment_set.all %}{% if forloop.first %}<div class='attachments'><ul>{% endif %}
-	    <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
-	    {% if forloop.last %}</ul></div>{% endif %}
-    {% endfor %}
+  {# Heading & description #}
+  <span class="badge bg-danger-subtle text-danger-emphasis border border-danger-subtle">{{ ticket.get_status }}</span>
+  <h2 class="mb-3">{{ ticket.title }}</h2>
+  <p class="bg-body-tertiary rounded p-3">{{ ticket.description|force_escape|urlizetrunc:50|linebreaksbr }}</p>
+  {% if ticket.resolution %}
+    <div class="alert alert-success" role="alert">
+      <h4 class="alert-heading">{% translate "Resolution" %}</h4>
+      <p>{{ ticket.get_resolution_markdown|linebreaksbr }}</p>
+      <hr />
+      <p class="mb-0">
+        {% if "Resolved" == ticket.get_status_display %}
+          <a href="?close"
+             class="alert-link">{% translate "Accept and Close" %}<i class="fa-solid fa-arrow-right ms-2"></i></a>
+        {% endif %}
+      </p>
+    </div>
+  {% endif %}
+  {# Ticket details #}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+    <div class="col">
+      <small class="text-uppercase text-body-secondary">{% translate "Submitted On" %}</small>
+      <p>{{ ticket.created|date:"DATETIME_FORMAT" }} ({{ ticket.created|naturaltime }})</p>
+    </div>
+    {% if ticket.due_date %}
+      <div class="col">
+        <small class="text-uppercase text-body-secondary">{% translate "Due On" %}</small>
+        <p>{{ ticket.due_date|date:"DATETIME_FORMAT" }} ({{ ticket.due_date|naturaltime }})</p>
+      </div>
     {% endif %}
-</div>
-{% endfor %}
-{% endif %}
+    <div class="col">
+      <small class="text-uppercase text-body-secondary">{% translate "Priority" %}</small>
+      <p>{{ ticket.get_priority_display }}</p>
+    </div>
+    <div class="col">
+      <small class="text-uppercase text-body-secondary">{% translate "Status" %}</small>
+      <p>{{ ticket.get_status }}</p>
+    </div>
+    <div class="col">
+      <small class="text-uppercase text-body-secondary">{% translate "Submitted by" %}</small>
+      <p>{{ ticket.submitter_email }}</p>
+    </div>
+    <div class="col">
+      <small class="text-uppercase text-body-secondary">{% translate "Queue" %}</small>
+      <p>{{ ticket.queue }}</p>
+    </div>
+    {% if tags_enabled %}
+      <div class="col">
+        <small class="text-uppercase text-body-secondary">{% translate "Tags" %}</small>
+        <p>{{ ticket.tags }}</p>
+      </div>
+    {% endif %}
+    {% if ticket.public_custom_field_values %}
+      <div class="col">
+        <small class="text-uppercase text-body-secondary">{% translate "Additional Info" %}</small>
+        {% for customfield in ticket.public_custom_field_values %}
+          <p class="mb-1">{{ customfield.field.label }} {{ customfield.value|default:"" }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  <hr />
 
-<form method='post' action="{% url 'helpdesk:update' ticket.id %}" enctype='multipart/form-data'>
+  {% if followups %}
+    <h3 class="fs-5">{% translate "Follow-Ups" %}</h3>
+    <ul id="followup-list" class="list-group list-group-flush mb-3">
+      {% for followup in followups %}
+        <li class="list-group-item list-group-item-action">
+          <p class="mb-1">{{ followup.title }}</p>
+          <p class="text-body-secondary small">
+            {% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"DATETIME_FORMAT" }}'>{{ followup.date|naturaltime }}</span>
+          </p>
+          <p class="bg-body-tertiary p-3 rounded">{{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}</p>
+          {% if followup.public_changes %}
+            <div class="changes">
+              <ul>
+                {% for change in followup.public_changes %}
+                  <li>{% blocktranslate with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktranslate %}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+
+          {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+            {% for attachment in followup.followupattachment_set.all %}
+              {% if forloop.first %}
+                <div class="attachments">
+                  <ul>
+              {% endif %}
+              <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})</li>
+              {% if forloop.last %}
+                </ul>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {# Public comment / resolution form #}
+  <form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype='multipart/form-data'>
+    {% csrf_token %}
     <input type="hidden" name="key" value="{{ key }}" />
     <input type="hidden" name="mail" value="{{ mail }}" />
+    <input type="hidden" name="public" value="1" />
 
-<fieldset>
-    <dl>
-        {% if preset_replies %}
-        <dt><label for='id_preset'>{% translate "Use a Pre-set Reply" %}</label> <span class='form_optional'>{% translate "(Optional)" %}</span></dt>
-        <dd><select name='preset' id='id_preset'><option value=''>------</option>{% for preset in preset_replies %}<option value='{{ preset.id }}'>{{ preset.name }}</option>{% endfor %}</select></dd>
-        <dd class='form_help_text'>{% translate "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}</dd>
-        {% endif %}
+    {% if preset_replies %}
+      <div class="mb-3">
+        <label class="form-label" for="id_preset">{% translate "Use a Pre-set Reply (Optional)" %}</label>
+        <select class="form-select" name="preset" id="id_preset">
+          <option value=''>------</option>
+          {% for preset in preset_replies %}
+            <option value="{{ preset.id }}">{{ preset.name }}</option>
+          {% endfor %}
+        </select>
+        <div class="form-text">
+          {% translate "Selecting a pre-set reply will over-write your comment below. You can then modify the pre-set reply to your liking before saving this update." %}
+        </div>
+      </div>
+    {% endif %}
 
-        <dt><label for='commentBox'>{% translate "Comment / Resolution" %}</label></dt>
-        <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-	{% url "helpdesk:help_context" as context_help_url %}
-	{% blocktranslate %}
-        <dd class='form_help_text'>You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</dd>
+    <div class="mb-3">
+      <label class="form-label" for="commentBox">{% translate "Comment / Resolution" %}</label>
+      <textarea class="form-control" rows='8' cols='70' name='comment' id="commentBox"></textarea>
+      {% url "helpdesk:help_context" as context_help_url %}
+      {% blocktranslate %}
+        <div class="form-text">You can insert ticket and queue details in your message. For more information, see the <a href='{{ context_help_url }}'>context help page</a>.</div>
 	{% endblocktranslate %}
+    </div>
 
-        {% if not ticket.can_be_resolved %}<dd>{% translate "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
-        {% if ticket.status == 1 %}
-            <input type="hidden" name="new_status" value="{{ ticket.status }}" />
-        {% else %}
-        <dd><div class="mb-3">
+    {% if not ticket.can_be_resolved %}
+      <p class="fw-bold">{% translate "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</p>
+    {% endif %}
+    {% if ticket.status == 1 %}
+      <input type="hidden" name="new_status" value="{{ ticket.status }}" />
+    {% else %}
+      {# ticket status radio buttons #}
+      <div class="mb-3">
         {% for status_choice in ticket.get_allowed_status_flow %}
-            <label for='st_{{ status_choice.1|lower }}' class='{% if ticket.status == status_choice.0 %}active {% endif %}radio-inline'><input type='radio' name='new_status' value='{{ status_choice.0 }}' id='st_{{ status_choice.1|lower }}'{% if not ticket.can_be_resolved %} disabled='disabled'{% endif %}{% if ticket.status == status_choice.0 %} checked='checked'{% endif %}>{{ status_choice.1 }}{% if forloop.last %}{% else %} &raquo;{% endif %}</label>
+          <div class="form-check">
+            <input class="form-check-input"
+                   type="radio"
+                   name="new_status"
+                   id="st_{{ status_choice.1|lower }}"
+                   {% if not ticket.can_be_resolved %}disabled{% endif %}
+                   {% if ticket.status == status_choice.0 %}checked{% endif %} />
+            <label for="st_{{ status_choice.1|lower }}"
+                   class="form-check-label
+                          {% if ticket.status == status_choice.0 %}active{% endif %}">{{ status_choice.1 }}</label>
+          </div>
         {% endfor %}
-        </div></dd>
-        {% endif %}
+      </div>
+    {% endif %}
 
-        <input type='hidden' name='public' value='1'>
+    {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+      <p id="ShowFileUploadPara">
+        <button class="btn bg-body-tertiary border"
+                type="button"
+                id="ShowFileUpload"
+                onclick="$('#FileUpload')[0].style.display='block';return false;">{% translate "Attach File(s)" %}</button>
+      </p>
+      <div class="card mb-3" id="FileUpload" style="display: none;">
+        <div class="card-body">
+          <label class="form-label" for="id_file">{% translate "Attach a File" %}</label>
+          <div class="add_file_fields_wrap">
+            <button type="button"
+                    class="add_file_field_button btn bg-body-tertiary border">{% translate "Add Another File" %}</button>
+            <label class="btn btn-primary">
+              Browse...
+              <input type="file" name='attachment' id="file0" style="display: none;" />
+            </label><span>&nbsp;</span><span id="selectedfilename0">{% translate "No files selected." %}</span></div>
+          </div>
+        </div>
+    {% endif %}
+    <button class="btn btn-success" type="submit">{% translate "Update This Ticket" %}</button>
+  </form>
 
-    </dl>
-        
-{% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
-<p id='ShowFileUploadPara'><button class="btn btn-warning btn-sm"
-    id='ShowFileUpload' onclick="$('#FileUpload')[0].style.display='block';return false;" >{% translate "Attach File(s) &raquo;" %}</button></p>
+  {% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
+    <script language='javascript'>
+      $(document).ready(function() {
 
-<div id='FileUpload' style='display: none;'>
-
-    <dl>
-        <dt><label for='id_file'>{% translate "Attach a File" %}</label></dt>
-        <dd>
-            <div class="add_file_fields_wrap">
-                <button class="add_file_field_button btn btn-success btn-xs">{% translate "Add Another File" %}</button>
-                <div><label class='btn btn-primary btn-sm btn-file'>
-                        Browse... <input type="file" name='attachment' id='file0' style='display: none;'/>
-                </label><span>&nbsp;</span><span id='selectedfilename0'>{% translate 'No files selected.' %}</span></div>
-            </div>
-        </dd>
-    </dl>
-
-</div>
-{% endif %}
-</fieldset>
-
-<button class="btn btn-primary btn-lg" style="margin-bottom:10px" type='submit'>{% translate "Update This Ticket" %}</button>
-
-{% csrf_token %}
-</form>
-
-{% if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS %}
-<script type='text/javascript' language='javascript'>
-  $(document).ready(function() {
-
-      $("#ShowFileUpload").click(function() {
+        $("#ShowFileUpload").click(function() {
           $("#FileUpload").fadeIn();
           $("#ShowFileUploadPara").hide();
-      });
+        });
 
-      // lists for file input change events, then updates the associated text label
-      // with the file name selected
-      $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
-          $("#selectedfilename"+browseButtonNum).html(label);
-      });
+        // lists for file input change events, then updates the associated text label
+        // with the file name selected
+        $('.add_file_fields_wrap').on('fileselect', ':file', function(event, numFiles, label, browseButtonNum) {
+          $("#selectedfilename" + browseButtonNum).html(label);
+        });
 
-      var x = 0;
-      var wrapper         = $(".add_file_fields_wrap"); //Fields wrapper
-      var add_button      = $(".add_file_field_button"); //Add button ID
+        var x = 0;
+        var wrapper = $(".add_file_fields_wrap"); //Fields wrapper
+        var add_button = $(".add_file_field_button"); //Add button ID
 
-      $(add_button).click(function(e){ //on add input button click
+        $(add_button).click(function(e) { //on add input button click
           x++;
           e.preventDefault();
           $(wrapper).append("<div><label class='btn btn-primary btn-sm btn-file'>Browse... <input type='file' name='attachment' id='file" + x + "' multiple style='display: none;'/></label><span>&nbsp;</span><span id='selectedfilename" + x + "'>{% translate 'No files selected.' %}</span></div>"); //add input box
+        });
       });
-  });
 
-  // this function listens for changes on any file input, and
-  // emits the appropriate event to update the input's text.
-  // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
-  $(document).on('change', ':file', function() {
-      var input = $(this),
+      // this function listens for changes on any file input, and
+      // emits the appropriate event to update the input's text.
+      // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
+      $(document).on('change', ':file', function() {
+        var input = $(this),
           inputWidgetNum = $(this).attr('id').split("file")[1],
           numFiles = input.get(0).files ? input.get(0).files.length : 1,
           label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-      input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
-  });
+        input.trigger('fileselect', [numFiles, label, inputWidgetNum]);
+      });
+    </script>
+  {% endif %}
 
-</script>
-{% endif %}
-
-{% endblock %}
+{% endblock helpdesk_body %}
