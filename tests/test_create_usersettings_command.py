@@ -1,4 +1,4 @@
-﻿from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
 
@@ -38,10 +38,7 @@ class CreateUserSettingsCommandTests(TestCase):
 
     def test_creates_settings_for_multiple_users(self):
         User = get_user_model()
-        users = [
-            User.objects.create_user(username=f"user_{i}")
-            for i in range(3)
-        ]
+        users = [User.objects.create_user(username=f"user_{i}") for i in range(3)]
 
         # Simulate missing settings for two users.
         UserSettings.objects.filter(user__in=users[:2]).delete()
