@@ -1,4 +1,4 @@
-{% extends "helpdesk/base.html" %}
+{% extends "helpdesk/public_base.html" %}
 
 {% load static i18n %}
 
@@ -29,11 +29,10 @@
         <p class="lead mb-4">{% translate "Need help? Start here" %}</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
           <a href="{% url 'helpdesk:submit' %}"
-             class="btn btn-primary btn-lg bg-gradient px-4 gap3">{% translate "Create a ticket" %}</a>
+             class="btn btn-primary btn-lg bg-gradient px-4">{% translate "Create a ticket" %}</a>
           {% if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC %}
             <a href="{% url 'helpdesk:public_view' %}"
-               class="btn bg-body-tertiary border btn-lg px-4"
-               type="button">{% translate "Search" %}</a>
+               class="btn bg-body-tertiary border btn-lg px-4">{% translate "Search" %}</a>
           {% endif %}
         </div>
       </div>
