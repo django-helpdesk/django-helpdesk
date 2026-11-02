@@ -13,11 +13,20 @@ class CreateUserSettingsCommandTests(TestCase):
         # Remove them to simulate an existing user with missing settings.
         UserSettings.objects.filter(user=user).delete()
 
-        self.assertFalse(UserSettings.objects.filter(user=user).exists())
+        self.assertEqual(UserSettings.objects.filter(user=user).count(), 0)
 
         call_command("create_usersettings")
 
-        self.assertTrue(UserSettings.objects.filter(user=user).exists())
+        self.assertEqual(UserSettings.objects.filter(user=user).count(), 1)
+
+        settings = UserSettings.objects.get(user=user)
+        self.assertEqual(settings.user, user)
+
+        from helpdesk.settings import DEFAULT_USER_SETTINGS
+
+        for field, expected_value in DEFAULT_USER_SETTINGS.items():
+            with self.subTest(field=field):
+                self.assertEqual(getattr(settings, field), expected_value)
 
     def test_preserves_existing_user_settings(self):
         user = get_user_model().objects.create_user(username="existing_user")
