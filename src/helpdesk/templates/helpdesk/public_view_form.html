@@ -1,24 +1,38 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
+{% extends "helpdesk/public_base.html" %}
+
+{% load i18n %}
+
+{% block helpdesk_title %}
+  {% translate "Search your ticket" %}
+{% endblock helpdesk_title %}
+
+{% block sidebar %}
+{% endblock sidebar %}
 
 {% block helpdesk_body %}
-<h2>{% translate "View a Ticket" %}</h2>
+  {% if error_message %}<p><strong>{% translate "Error:" %}</strong> {{ error_message }}</p>{% endif %}
+  <div class="row">
+    <div class="col col-md-6 col-lg-3 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <h1 class="fs-4 mb-3">{% translate "Search your ticket" %}</h1>
+          <form action="{% url 'helpdesk:public_view' %}">
+            <div class="mb-3">
+              <label class="form-label" for="id_ticket">{% translate "Ticket" %}</label>
+              <input class="form-control" type="text" name="ticket" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="id_email">{% translate "Your E-mail Address" %}</label>
+              <input class="form-control" type="email" name="email" />
+            </div>
+            <div class="d-flex justify-content-end">
+              <a class="btn bg-body-tertiary border me-3" href="/">{% translate "Cancel" %}</a>
+              <button class="btn btn-primary" type="submit">{% translate "Search" %}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<form method='get' action='{% url 'helpdesk:public_view' %}'>
-
-{% if error_message %}<p><strong>{% translate "Error:" %}</strong> {{ error_message }}</p>{% endif %}
-
-<fieldset>
-    <dl>
-        <dt><label for='id_ticket'>{% translate "Ticket" %}</label></dt>
-        <dd><input type='text' name='ticket' /></dd>
-
-        <dt><label for='id_email'>{% translate "Your E-mail Address" %}</label></dt>
-        <dd><input type='text' name='email' /></dd>
-    </dl>
-
-    <input class="btn btn-primary" type='submit' value='{% translate "View Ticket" %}' />
-</fieldset>
-{% csrf_token %}</form>
-
-
-{% endblock %}
+{% endblock helpdesk_body %}

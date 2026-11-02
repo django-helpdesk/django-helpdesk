@@ -1,26 +1,28 @@
 {% extends "helpdesk/public_base.html" %}
+
 {% load i18n %}
 
-{% block helpdesk_title %}{% translate "Create Ticket" %}{% endblock %}
+{% block helpdesk_title %}
+  {% translate "Create Ticket" %}
+{% endblock helpdesk_title %}
 
-{% block helpdesk_breadcrumb %}
-    <li class="breadcrumb-item">
-        <a href="{% url 'helpdesk:home' %}">Public</a>
-    </li>
-    <li class="breadcrumb-item active">Create Ticket</li>
-{% endblock %}
+{% block sidebar %}
+{% endblock sidebar %}
 
 {% block helpdesk_body %}
-    <div class="container">
-        <div class="card card-register mx-auto mt-5">
-            <div class="card-header">{% translate "Submit a Ticket" %}</div>
-            <div class="card-body">
-                {% include 'helpdesk/public_create_ticket_base.html' %}
-            </div>
+  <div class="row">
+    <div class="col col-md-6 col-lg-4 mx-auto">
+      <div class="card">
+        <div class="card-body">
+          <h5>{% translate "Submit a Ticket" %}</h5>
+          {% include "helpdesk/public_create_ticket_base.html" %}
         </div>
+      </div>
+
     </div>
+  </div>
 {% endblock %}
 
 {% block helpdesk_js %}
-    {{ form.media.js }}
-{% endblock %}
+  {{ form.media.js }}
+{% endblock helpdesk_js %}

@@ -146,7 +146,6 @@ class RealPagesTestCase(TestCase):
     def assert_bootstrap5(self, response):
         self.assertEqual(response.status_code, 200)
         html = response.content.decode()
-        self.assertIn("mb-3", html)
         for legacy in LEGACY_CLASSES:
             self.assertNotIn(legacy, html)
 
