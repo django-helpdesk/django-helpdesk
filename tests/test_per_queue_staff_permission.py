@@ -84,6 +84,41 @@ class PerQueueStaffMembershipTestCase(TestCase):
             self.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION
         )
 
+    def test_public_submission_queue_does_not_expose_unassigned_tickets(self):
+        """Public submission must not grant staff access to queue tickets."""
+        public_queue = Queue.objects.create(
+            title="Confidential Public Queue",
+            slug="confidential-public",
+            allow_public_submission=True,
+        )
+        secret_ticket = Ticket.objects.create(
+            title="Confidential ticket",
+            queue=public_queue,
+        )
+
+        self.assertFalse(
+            HelpdeskUser(self.user_1).can_access_queue(public_queue),
+            "User_1 must not have staff access to the public-submission queue",
+        )
+
+        self.client.login(username="User_1", password="1")
+
+        response = self.client.get(reverse("helpdesk:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+        visible_ticket_ids = [
+            ticket.id for ticket in response.context["unassigned_tickets"]
+        ]
+
+        self.assertNotIn(secret_ticket.id, visible_ticket_ids)
+
+        self.assertEqual(
+            response.context["basic_ticket_stats"]["open_ticket_stats"][0][1],
+            2,
+            "Dashboard statistics must exclude unauthorized public-queue tickets",
+        )
+
     def test_dashboard_ticket_counts(self):
         """
         Check that the regular users' dashboard only shows 1 of the 2 queues,

@@ -233,7 +233,7 @@ def dashboard(request):
         .order_by(user_tickets_closed_sort)
     )
 
-    user_queues = huser.get_queues()
+    user_queues = huser.accessible_queues()
 
     unassigned_tickets = active_tickets.filter(
         assigned_to__isnull=True, queue__in=user_queues

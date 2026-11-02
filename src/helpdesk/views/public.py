@@ -18,7 +18,7 @@ from django.core.exceptions import (
     PermissionDenied,
 )
 from django.db.models import Prefetch
-from django.http import HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -298,9 +298,8 @@ class MyTickets(TemplateView):
         return self.render_to_response(context)
 
 
-def change_language(request):
-    return_to = ""
-    if "return_to" in request.GET:
-        return_to = request.GET["return_to"]
+def change_language(request: HttpRequest) -> HttpResponse:
+    """Simple view that renders a change language form."""
 
-    return render(request, "helpdesk/public_change_language.html", {"next": return_to})
+    next = request.GET.get("return_to", "")
+    return render(request, "helpdesk/public_change_language.html", {"next": next})

@@ -1,20 +1,47 @@
-{% extends "helpdesk/public_base.html" %}{% load i18n %}
-{% block helpdesk_title %}{% translate "Change the display language" %}{% endblock %}
+{% extends "helpdesk/base.html" %}
 
-{% block helpdesk_body %}
-<h3>{% translate "Change the display language" %}</h3>
-<form action="{% url 'set_language' %}" method="post">
-    {% csrf_token %}
-    <input name="next" type="hidden" value="{{ next|default:"/" }}" />
-    <select name="language">
-        {% get_available_languages as LANGUAGES %}
-        {% get_current_language as LANGUAGE_CODE %}
-        {% get_language_info_list for LANGUAGES as languages %}
-        {% for language in languages %}
-        <option value="{{ language.code }}"{% if LANGUAGE_CODE == language.code %} selected{% endif %}>{{ language.name_local }} ({{ language.code }})</option>
-        {% endfor %}
-    </select>
-    <input class="btn btn-primary" type="submit" value="Go" />
-</form>
+{% load static i18n %}
 
-{% endblock %}
+{% block helpdesk_title %}
+  {% translate "Change the display language" %}
+{% endblock helpdesk_title %}
+
+{% block body %}
+  <div class="container-fluid">
+    <div class="row align-items-center vh-100">
+      <div class="col-12 col-md-6 col-lg-3 mx-auto">
+        <div class="text-center mb-4">
+          <img src="{% static "helpdesk/img/icon.svg" %}" alt="Django helpdesk logo" width="48" height="48" />
+        </div>
+        <div class="card">
+          <div class="card-body m-3">
+            <h5 class="text-center py-3">{% translate "Change language" %}</h5>
+            <form action="{% url 'set_language' %}" method="post">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ next|default:"/" }}" />
+              <div class="input-group mb-3">
+                <select class="form-select"
+                        name="language"
+                        aria-label="{% translate "Change language" %}"
+                        aria-describedby="language-addon">
+                  {% get_available_languages as LANGUAGES %}
+                  {% get_current_language as LANGUAGE_CODE %}
+                  {% get_language_info_list for LANGUAGES as languages %}
+                  {% for language in languages %}
+                    <option value="{{ language.code }}"
+                            {% if LANGUAGE_CODE == language.code %}
+                              selected{% endif %}>{{ language.name_local }} ({{ language.code }})</option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-primary" type="submit" id="language-addon">{% translate "Go" %}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+{% endblock body %}
