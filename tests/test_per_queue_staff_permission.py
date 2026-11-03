@@ -156,6 +156,41 @@ class PerQueueStaffMembershipTestCase(TestCase):
             "Basic ticket stats were limited by queue membership for a superuser",
         )
 
+    def test_dashboard_reported_tickets_respect_queue_permissions(self):
+        """Reported tickets must not bypass staff queue permissions."""
+        authorized_ticket = Ticket.objects.create(
+            title="Authorized reported ticket",
+            queue=self.queue_1,
+            submitter_email=self.user_1.email,
+        )
+        unauthorized_ticket = Ticket.objects.create(
+            title="Unauthorized reported ticket",
+            queue=self.queue_2,
+            submitter_email=self.user_1.email,
+        )
+
+        assigned_ticket = Ticket.objects.create(
+            title="Assigned reported ticket outside authorized queue",
+            queue=self.queue_2,
+            assigned_to=self.user_1,
+            submitter_email=self.user_1.email,
+        )
+
+        self.client.login(username="User_1", password="1")
+        response = self.client.get(reverse("helpdesk:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+        reported_ticket_ids = {
+            ticket.id
+            for ticket in response.context["all_tickets_reported_by_current_user"]
+        }
+
+        self.assertIn(authorized_ticket.id, reported_ticket_ids)
+        self.assertNotIn(unauthorized_ticket.id, reported_ticket_ids)
+
+        self.assertIn(assigned_ticket.id, reported_ticket_ids)
+
     def test_report_ticket_counts(self):
         """
         Check that the regular users' report only shows 1 of the 2 queues,

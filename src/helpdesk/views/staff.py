@@ -251,6 +251,7 @@ def dashboard(request):
         all_tickets_reported_by_current_user = (
             Ticket.objects.select_related("queue")
             .filter(
+                huser.accessible_tickets_q(),
                 submitter_email=email_current_user,
             )
             .order_by(all_tickets_reported_sort)
