@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.test.client import Client
@@ -155,6 +155,74 @@ class PerQueueStaffMembershipTestCase(TestCase):
             6,
             "Basic ticket stats were limited by queue membership for a superuser",
         )
+
+    def test_dashboard_reported_tickets_respect_queue_permissions(self):
+        """Reported tickets must not bypass staff queue permissions."""
+        authorized_ticket = Ticket.objects.create(
+            title="Authorized reported ticket",
+            queue=self.queue_1,
+            submitter_email=self.user_1.email,
+        )
+        Ticket.objects.create(
+            title="Unauthorized reported ticket",
+            queue=self.queue_2,
+            submitter_email=self.user_1.email,
+        )
+
+        assigned_ticket = Ticket.objects.create(
+            title="Assigned reported ticket outside authorized queue",
+            queue=self.queue_2,
+            assigned_to=self.user_1,
+            submitter_email=self.user_1.email,
+        )
+
+        self.client.login(username="User_1", password="1")
+        response = self.client.get(reverse("helpdesk:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+        reported_ticket_ids = {
+            ticket.id
+            for ticket in response.context["all_tickets_reported_by_current_user"]
+        }
+
+        self.assertEqual(
+            reported_ticket_ids,
+            {authorized_ticket.id, assigned_ticket.id},
+        )
+
+    def test_dashboard_reported_tickets_respect_group_queue_permissions(self):
+        """Reported tickets should be visible through group-granted queue access."""
+        group = Group.objects.create(name="Queue 2 Staff")
+        permission = Permission.objects.get(codename=self.queue_2.permission_name[9:])
+        group.permissions.add(permission)
+
+        # Ensure queue access comes from the group, not a direct permission.
+        self.user_1.user_permissions.clear()
+        self.user_1.groups.add(group)
+
+        group_ticket = Ticket.objects.create(
+            title="Reported ticket accessible through group",
+            queue=self.queue_2,
+            submitter_email=self.user_1.email,
+        )
+        Ticket.objects.create(
+            title="Reported ticket without queue access",
+            queue=self.queue_1,
+            submitter_email=self.user_1.email,
+        )
+
+        self.client.login(username="User_1", password="1")
+        response = self.client.get(reverse("helpdesk:dashboard"))
+
+        self.assertEqual(response.status_code, 200)
+
+        reported_ticket_ids = {
+            ticket.id
+            for ticket in response.context["all_tickets_reported_by_current_user"]
+        }
+
+        self.assertEqual(reported_ticket_ids, {group_ticket.id})
 
     def test_report_ticket_counts(self):
         """
