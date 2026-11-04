@@ -245,7 +245,7 @@ def dashboard(request):
         kbitems = huser.get_assigned_kb_items()
 
     # all tickets, reported by current user
-    all_tickets_reported_by_current_user = ""
+    all_tickets_reported_by_current_user = Ticket.objects.none()
     email_current_user = request.user.email
     if email_current_user:
         all_tickets_reported_by_current_user = (
