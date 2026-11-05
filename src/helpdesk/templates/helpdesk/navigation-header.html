@@ -11,9 +11,11 @@
              height="24"
              class="d-inline-block align-text-top" />
       {% translate "Helpdesk" %}</a>
-      <button class="btn btn-sm" id="sidebarToggle">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+      {% if not hideToggleBtn %}
+        <button class="btn btn-sm" id="sidebarToggle">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      {% endif %}
     </div>
     {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user|is_helpdesk_staff %}
       {# Navbar Search #}
