@@ -759,6 +759,16 @@ def get_time_spent_from_form(form: dict) -> timedelta | None:
 
 
 def update_ticket_view(request, ticket_id, *args, **kwargs):
+    # The comment form on the public ticket page posts here too, carrying the
+    # submitter's email instead of a staff login.
+    if (
+        request.method == "POST"
+        and request.POST.get("mail")
+        and not is_helpdesk_staff(request.user)
+    ):
+        from helpdesk.views.public import update_ticket_from_public_view
+
+        return update_ticket_from_public_view(request, ticket_id)
     return UpdateTicketView.as_view()(request, *args, ticket_id=ticket_id, **kwargs)
 
 
