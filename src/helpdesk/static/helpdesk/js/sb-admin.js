@@ -2,7 +2,7 @@
   'use strict'
 
   // Toggle the side navigation
-  document.querySelector('#sidebarToggle').addEventListener('click', function (e) {
+  document.querySelector('#sidebarToggle')?.addEventListener('click', function (e) {
     e.preventDefault()
     document.querySelector('body').classList.toggle('sidebar-toggled')
     document.querySelector('.sidebar').classList.toggle('toggled')
