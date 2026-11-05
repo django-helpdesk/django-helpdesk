@@ -3,6 +3,15 @@ Upgrading
 
 Your ``django-helpdesk`` installation can be upgraded to the latest version using the release notes below.
 
+Staff reports respect per-queue permissions
+-------------------------------------------
+
+When ``HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION`` is enabled, staff
+reports now include only queues the staff member is authorized to access.
+Public submission alone no longer makes a queue visible in reports.
+Ticket counts, customer statistics, and monthly report periods follow
+the same restriction. Staff without accessible queues see empty reports.
+
 Prerequisites
 -------------
 
