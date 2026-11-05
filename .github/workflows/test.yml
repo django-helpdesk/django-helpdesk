@@ -16,6 +16,40 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install E2E dependencies and Chromium
+        run: |
+          uv sync --group test --group e2e
+          uv pip install "django~=6.0.0" djangorestframework
+          uv run --no-sync playwright install --with-deps chromium
+
+      - name: Build frontend dependencies
+        run: |
+          npm install --global corepack
+          corepack enable
+          yarn install --immutable
+          make static-vendor
+
+      - name: Run browser tests
+        run: uv run --no-sync quicktest.py tests.e2e.test_public_ticket_creation -v 2
+
   build:
     runs-on: ubuntu-latest
     strategy:
