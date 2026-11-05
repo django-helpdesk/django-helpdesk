@@ -1,4 +1,4 @@
-{% extends "helpdesk/public_base.html" %}
+{% extends "helpdesk/base.html" %}
 
 {% load i18n %}
 
@@ -26,7 +26,8 @@
               <p class="text-secondary">{{ category.description }}</p>
             </div>
             <div class="card-footer bg-transparent d-flex justify-content-end border-0 py-2">
-              <a class="icon-link icon-link-hover" href="{{ category.get_absolute_url }}">{% translate "View articles" %}
+              <a class="icon-link icon-link-hover"
+                 href="{{ category.get_absolute_url }}">{% translate "View articles" %}
                 <i class="fa-solid fa-chevron-right"></i>
               </a>
             </div>
