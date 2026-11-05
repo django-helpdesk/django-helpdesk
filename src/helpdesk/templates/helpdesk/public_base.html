@@ -1,1 +1,9 @@
 {% extends "helpdesk/base.html" %}
+
+{% block header %}
+  {% include "helpdesk/navigation-header.html" with hideToggleBtn="true" %}
+{% endblock header %}
+
+{% block sidebar %}
+  {# we don't wanna show sidebar on public facing templates #}
+{% endblock sidebar %}
