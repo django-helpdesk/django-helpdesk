@@ -110,3 +110,19 @@ class PublicActionsTestCase(TestCase):
         self.assertTrue(
             self.ticket.followup_set.filter(comment="Public followup test").exists()
         )
+
+    def test_public_update_rejects_invalid_key(self):
+        response = self.client.post(
+            self.ticket.ticket_url.replace(self.ticket.secret_key, "invalid-key"),
+            {"comment": "Unauthorized update", "new_status": self.ticket.status},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.ticket.followup_set.exists())
+
+    def test_public_update_rejects_invalid_status(self):
+        response = self.client.post(
+            self.ticket.ticket_url,
+            {"comment": "Invalid status update", "new_status": "invalid"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.ticket.followup_set.exists())
