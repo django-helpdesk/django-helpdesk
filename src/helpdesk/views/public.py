@@ -9,7 +9,7 @@ views/public.py - All public facing views, eg non-staff (no authentication
 
 import logging
 from importlib import import_module
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from django.conf import settings
 from django.contrib import messages
@@ -364,7 +364,16 @@ def update_ticket_from_public_view(request, ticket_id):
                 )
         except ValidationError as e:
             messages.error(request, " ".join(e.messages))
-    return HttpResponseRedirect(ticket.ticket_url)
+    # Not ticket.ticket_url: that is the absolute link for emails, built from
+    # the Sites framework domain, which need not be the host being browsed.
+    query = urlencode(
+        {
+            "ticket": ticket.ticket_for_url,
+            "email": ticket.submitter_email,
+            "key": ticket.secret_key,
+        }
+    )
+    return HttpResponseRedirect(f"{reverse('helpdesk:public_view')}?{query}")
 
 
 class MyTickets(TemplateView):

@@ -1,7 +1,9 @@
 from unittest import mock
+from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
+from django.contrib.sites.models import Site
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
@@ -116,15 +118,35 @@ class PublicUpdateTicketTests(TestCase):
     def followups(self):
         return FollowUp.objects.filter(ticket=self.ticket)
 
+    def public_page_url(self):
+        query = urlencode(
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": self.ticket.submitter_email,
+                "key": self.ticket.secret_key,
+            }
+        )
+        return f"{reverse('helpdesk:public_view')}?{query}"
+
     def test_submitter_adds_public_comment(self):
         response = self.post(mail="Test@Example.com", comment="More details")
         self.assertRedirects(
-            response, self.ticket.ticket_url, fetch_redirect_response=False
+            response, self.public_page_url(), fetch_redirect_response=False
         )
         followup = self.followups().get()
         self.assertEqual(followup.comment, "More details")
         self.assertTrue(followup.public)
         self.assertIsNone(followup.user)
+
+    def test_redirect_stays_on_the_requested_host(self):
+        # ticket.ticket_url is built from the Sites framework domain, which
+        # need not be the host being browsed ("example.com" by default).
+        site = Site.objects.get_current()
+        site.domain = "mail-links.example.org"
+        site.save()
+        response = self.post(comment="Hello")
+        self.assertTrue(response["Location"].startswith("/"), response["Location"])
+        self.assertEqual(self.client.get(response["Location"]).status_code, 200)
 
     def test_logged_in_submitter_needs_no_key(self):
         # ViewTicket lets a logged-in submitter in without the key, and then
@@ -251,7 +273,7 @@ class PublicUpdateTicketTests(TestCase):
                     new_status=str(Ticket.CLOSED_STATUS),
                 )
                 self.assertRedirects(
-                    response, self.ticket.ticket_url, fetch_redirect_response=False
+                    response, self.public_page_url(), fetch_redirect_response=False
                 )
                 self.ticket.refresh_from_db()
                 self.assertEqual(self.ticket.status, Ticket.RESOLVED_STATUS)
