@@ -1,5 +1,4 @@
 from unittest import mock
-from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
@@ -119,14 +118,7 @@ class PublicUpdateTicketTests(TestCase):
         return FollowUp.objects.filter(ticket=self.ticket)
 
     def public_page_url(self):
-        query = urlencode(
-            {
-                "ticket": self.ticket.ticket_for_url,
-                "email": self.ticket.submitter_email,
-                "key": self.ticket.secret_key,
-            }
-        )
-        return f"{reverse('helpdesk:public_view')}?{query}"
+        return self.ticket.ticket_url
 
     def test_submitter_adds_public_comment(self):
         response = self.post(mail="Test@Example.com", comment="More details")
@@ -139,8 +131,8 @@ class PublicUpdateTicketTests(TestCase):
         self.assertIsNone(followup.user)
 
     def test_redirect_stays_on_the_requested_host(self):
-        # ticket.ticket_url is built from the Sites framework domain, which
-        # need not be the host being browsed ("example.com" by default).
+        # Email links are built from the Sites framework domain, which need not
+        # be the host being browsed ("example.com" by default).
         site = Site.objects.get_current()
         site.domain = "mail-links.example.org"
         site.save()

@@ -2,11 +2,15 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db.models import ProtectedError
+from django.http import QueryDict
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import escape
 
+from helpdesk.lib import safe_template_context
 from helpdesk.models import FollowUp, Queue, Ticket, TicketCC, TicketDependency
+from helpdesk.update_ticket import update_ticket
 
 User = get_user_model()
 
@@ -170,23 +174,38 @@ class TicketModelTests(TestCase):
     def test_status_message(self):
         self.assertEqual(self.ticket.get_status, "Open")
 
-    def test_full_domain_ticket_url_property(self):
-        # Arrange
+    def test_ticket_url_is_relative(self):
+        self.ticket.submitter_email = "Bob+Tag@Example.com"
+        path, query = self.ticket.ticket_url.split("?")
+
+        self.assertEqual(path, reverse("helpdesk:public_view"))
+        self.assertEqual(
+            QueryDict(query).dict(),
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": "Bob+Tag@Example.com",
+                "key": self.ticket.secret_key,
+            },
+        )
+
+    def test_email_url_property(self):
         from django.contrib.sites.models import Site
 
         domain = Site.objects.get_current().domain
+        expected = f"http://{domain}{self.ticket.ticket_url}"
 
-        ticket_for_url = self.ticket.ticket_for_url
-        email = self.ticket.submitter_email
-        key = self.ticket.secret_key
+        self.assertEqual(self.ticket.email_url, expected)
 
-        url = reverse("helpdesk:public_view")
+    def test_email_templates_keep_absolute_ticket_url(self):
+        # Email templates are stored in the database and use ticket.ticket_url.
+        context = safe_template_context(self.ticket)
+        self.assertEqual(context["ticket"]["ticket_url"], self.ticket.email_url)
 
-        actual = self.ticket.ticket_url
-        expected = (
-            f"http://{domain}{url}?ticket={ticket_for_url}&email={email}&key={key}"
+        followup = update_ticket(
+            self.user, self.ticket, comment="See {{ ticket.ticket_url }}"
         )
-        self.assertEqual(actual, expected)
+        # Comments are rendered with autoescaping, as before.
+        self.assertEqual(followup.comment, f"See {escape(self.ticket.email_url)}")
 
     def test_staff_url_property(self):
         # Arrange
