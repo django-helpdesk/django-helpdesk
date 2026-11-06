@@ -95,14 +95,17 @@ class PublicActionsTestCase(TestCase):
         url = self.ticket.ticket_url
         self.client.get(url)
         csrf_token = self.client.cookies["csrftoken"].value
-        response = self.client.post(url, {
-            "csrfmiddlewaretoken": csrf_token,
-            "mail": self.ticket.submitter_email,
-            "key": self.ticket.secret_key,
-            "public": "1",
-            "comment": "Public followup test",
-            "new_status": self.ticket.status,
-        })
+        response = self.client.post(
+            url,
+            {
+                "csrfmiddlewaretoken": csrf_token,
+                "mail": self.ticket.submitter_email,
+                "key": self.ticket.secret_key,
+                "public": "1",
+                "comment": "Public followup test",
+                "new_status": self.ticket.status,
+            },
+        )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(
             self.ticket.followup_set.filter(comment="Public followup test").exists()

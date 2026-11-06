@@ -234,9 +234,7 @@ class ViewTicket(TemplateView):
         comment = request.POST.get("comment", "")
         status = request.POST.get("new_status")
 
-        allowed_statuses = {
-            choice[0] for choice in ticket.get_allowed_status_flow
-        }
+        allowed_statuses = {choice[0] for choice in ticket.get_allowed_status_flow}
         allowed_statuses.add(ticket.status)
 
         try:
