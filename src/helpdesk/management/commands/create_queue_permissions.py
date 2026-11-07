@@ -56,7 +56,7 @@ class Command(BaseCommand):
                 )
                 basename = q.permission_name[9:]
             else:
-                basename = q.generate_permission_name()
+                basename = q.prepare_permission_name()
                 self.stdout.write(
                     f"  .. generated `permission_name={q.permission_name}`"
                 )
