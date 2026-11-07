@@ -380,6 +380,122 @@ class PerQueueStaffMembershipTestCase(TestCase):
             "Queue choices were improperly limited by queue membership for a superuser",
         )
 
+    def test_staff_without_queue_permissions_has_empty_reports(self):
+        """Staff without queue access must not see report data."""
+        self.user_1.user_permissions.clear()
+
+        self.assertEqual(HelpdeskUser(self.user_1).accessible_queues(), [])
+
+        self.client.login(username="User_1", password="1")
+
+        index_response = self.client.get(reverse("helpdesk:report_index"))
+        self.assertEqual(index_response.status_code, 200)
+        self.assertEqual(index_response.context["number_tickets"], 0)
+        self.assertEqual(index_response.context["customers"], 0)
+        self.assertEqual(index_response.context["dash_tickets"], [])
+
+        report_response = self.client.get(
+            reverse("helpdesk:run_report", kwargs={"report": "usermonth"})
+        )
+        self.assertEqual(report_response.status_code, 200)
+        self.assertEqual(report_response.context["headings"][1:], [])
+        self.assertEqual(report_response.context["data"], [])
+
+    def test_public_submission_queue_does_not_extend_report_months(self):
+        """Unauthorized public tickets must not affect report month headings."""
+        from datetime import timedelta
+
+        public_queue = Queue.objects.create(
+            title="Confidential Historical Queue",
+            slug="confidential-historical-report",
+            allow_public_submission=True,
+        )
+        secret_ticket = Ticket.objects.create(
+            title="Confidential historical ticket",
+            queue=public_queue,
+        )
+        Ticket.objects.filter(pk=secret_ticket.pk).update(
+            created=timezone.now() - timedelta(days=365)
+        )
+
+        self.assertFalse(HelpdeskUser(self.user_1).can_access_queue(public_queue))
+
+        self.client.login(username="User_1", password="1")
+        response = self.client.get(
+            reverse("helpdesk:run_report", kwargs={"report": "usermonth"})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        authorized_months = sorted(
+            {
+                (created.year, created.month)
+                for created in Ticket.objects.filter(queue=self.queue_1).values_list(
+                    "created", flat=True
+                )
+            }
+        )
+        last_year, last_month = authorized_months[-1]
+        next_month = (
+            (last_year + 1, 1) if last_month == 12 else (last_year, last_month + 1)
+        )
+        expected_months = authorized_months + [next_month]
+
+        self.assertEqual(
+            response.context["headings"][1:],
+            [f"{year}-{month}" for year, month in expected_months],
+        )
+
+    def test_public_submission_queue_does_not_expose_run_report(self):
+        """Public submission must not grant access to staff report data."""
+        public_queue = Queue.objects.create(
+            title="Confidential Public Report Queue",
+            slug="confidential-public-run-report",
+            allow_public_submission=True,
+        )
+        Ticket.objects.create(
+            title="Confidential report ticket",
+            queue=public_queue,
+            submitter_email="confidential@example.com",
+        )
+
+        self.assertFalse(HelpdeskUser(self.user_1).can_access_queue(public_queue))
+
+        self.client.login(username="User_1", password="1")
+        response = self.client.get(
+            reverse("helpdesk:run_report", kwargs={"report": "userqueue"})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["headings"][1:], ["Queue 1"])
+        self.assertEqual(
+            sum(sum(row[1:]) for row in response.context["data"]),
+            2,
+        )
+
+    def test_public_submission_queue_does_not_expose_report_statistics(self):
+        """Public submission must not expose restricted queue report statistics."""
+        public_queue = Queue.objects.create(
+            title="Confidential Public Report Queue",
+            slug="confidential-public-report",
+            allow_public_submission=True,
+        )
+        Ticket.objects.create(
+            title="Confidential report ticket",
+            queue=public_queue,
+            submitter_email="confidential@example.com",
+        )
+
+        self.assertFalse(HelpdeskUser(self.user_1).can_access_queue(public_queue))
+
+        self.client.login(username="User_1", password="1")
+        response = self.client.get(reverse("helpdesk:report_index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["number_tickets"], 2)
+        self.assertEqual(response.context["customers"], 1)
+        self.assertEqual(len(response.context["dash_tickets"]), 1)
+        self.assertEqual(response.context["dash_tickets"][0]["name"], "Queue 1")
+
 
 class PerQueuePermissionSecurityTestCase(TestCase):
     """

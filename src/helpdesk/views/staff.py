@@ -759,6 +759,16 @@ def get_time_spent_from_form(form: dict) -> timedelta | None:
 
 
 def update_ticket_view(request, ticket_id, *args, **kwargs):
+    # The comment form on the public ticket page posts here too, carrying the
+    # submitter's email instead of a staff login.
+    if (
+        request.method == "POST"
+        and request.POST.get("mail")
+        and not is_helpdesk_staff(request.user)
+    ):
+        from helpdesk.views.public import update_ticket_from_public_view
+
+        return update_ticket_from_public_view(request, ticket_id)
     return UpdateTicketView.as_view()(request, *args, ticket_id=ticket_id, **kwargs)
 
 
@@ -1621,13 +1631,13 @@ def report_index(request: HttpRequest) -> HttpResponse:
 
     qs = Ticket.objects.select_related("queue", "assigned_to")
 
-    number_tickets = qs.count()
     saved_query = request.GET.get("saved_query", None)
 
-    user_queues = HelpdeskUser(request.user).get_queues()
+    user_queues = HelpdeskUser(request.user).accessible_queues()
     tickets = qs.filter(queue__in=user_queues)
+    number_tickets = tickets.count()
     basic_ticket_stats = calc_basic_ticket_stats(tickets)
-    customers = qs.values("submitter_email").distinct().count()
+    customers = tickets.values("submitter_email").distinct().count()
 
     # The following query builds a grid of queues & ticket statuses,
     # to be displayed to the user. EG:
@@ -1635,7 +1645,7 @@ def report_index(request: HttpRequest) -> HttpResponse:
     # Queue 1    10     4
     # Queue 2     4    12
     dash_tickets = []
-    queues = user_queues or Queue.objects.all()
+    queues = user_queues
     for queue in queues:
         dash_ticket = {
             "queue": queue.id,
@@ -1749,7 +1759,7 @@ def run_report(request: HttpRequest, report: str) -> HttpResponse:
     except QueryLoadError:
         return HttpResponseRedirect(index_url)
 
-    queues = HelpdeskUser(request.user).get_queues()
+    queues = HelpdeskUser(request.user).accessible_queues()
     report_queryset = qs.filter(queue__in=queues)
 
     if request.GET.get("saved_query", None):
@@ -1760,28 +1770,30 @@ def run_report(request: HttpRequest, report: str) -> HttpResponse:
     # a second table for more complex queries
     summarytable2 = defaultdict(int)
 
-    first_ticket = Ticket.objects.all().order_by("created")[0]
-    first_month = first_ticket.created.month
-    first_year = first_ticket.created.year
+    first_ticket = report_queryset.order_by("created").first()
+    last_ticket = report_queryset.order_by("-created").first()
 
-    last_ticket = Ticket.objects.all().order_by("-created")[0]
-    last_month = last_ticket.created.month
-    last_year = last_ticket.created.year
+    if first_ticket is not None:
+        first_month = first_ticket.created.month
+        first_year = first_ticket.created.year
+        last_month = last_ticket.created.month
+        last_year = last_ticket.created.year
 
     # Build periods
     periods = []
-    year, month = first_year, first_month
-    working = True
-    periods.append(f"{year}-{month}")
-
-    while working:
-        month += 1
-        if month > 12:
-            year += 1
-            month = 1
-        if (year > last_year) or (month > last_month and year >= last_year):
-            working = False
+    if first_ticket is not None:
+        year, month = first_year, first_month
+        working = True
         periods.append(f"{year}-{month}")
+
+        while working:
+            month += 1
+            if month > 12:
+                year += 1
+                month = 1
+            if (year > last_year) or (month > last_month and year >= last_year):
+                working = False
+            periods.append(f"{year}-{month}")
 
     priority_choices = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
     status_choices = [s[1].title() for s in Ticket.STATUS_CHOICES]

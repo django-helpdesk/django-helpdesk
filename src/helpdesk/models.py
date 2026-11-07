@@ -15,6 +15,7 @@ import os
 import re
 import uuid
 from io import StringIO
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -23,7 +24,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import QuerySet
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import SafeString, mark_safe
 from django.utils.translation import gettext
@@ -835,13 +836,25 @@ class Ticket(models.Model):
     @property
     def ticket_url(self) -> str:
         """
-        Returns a publicly-viewable URL for this ticket, used when giving
-        a URL to the submitter of a ticket.
+        Returns the relative URL of the public page for this ticket, for links
+        and redirects on the site. Emails use email_url instead.
         """
-        base_url = build_base_url()
-        path = reverse_lazy("helpdesk:public_view")
+        query = urlencode(
+            {
+                "ticket": self.ticket_for_url,
+                "email": self.submitter_email,
+                "key": self.secret_key,
+            }
+        )
+        return f"{reverse('helpdesk:public_view')}?{query}"
 
-        return f"{base_url}{path}?ticket={self.ticket_for_url}&email={self.submitter_email}&key={self.secret_key}"
+    @property
+    def email_url(self) -> str:
+        """
+        Returns the absolute URL of the public page for this ticket, used when
+        giving a URL to the submitter of a ticket by email.
+        """
+        return f"{build_base_url()}{self.ticket_url}"
 
     @property
     def staff_url(self) -> str:

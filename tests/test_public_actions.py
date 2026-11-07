@@ -81,6 +81,7 @@ class PublicActionsTestCase(TestCase):
         ticket = Ticket.objects.get(id=self.ticket.id)
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], ticket.ticket_url)
         self.assertTemplateNotUsed(response, "helpdesk/public_view_form.html")
         self.assertEqual(ticket.status, Ticket.CLOSED_STATUS)
         self.assertEqual(ticket.resolution, resolution_text)
