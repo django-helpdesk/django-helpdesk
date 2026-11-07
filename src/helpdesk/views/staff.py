@@ -1198,7 +1198,7 @@ def check_redirect_on_user_query(request, huser):
                 # a ticket number redirected to a ticket the caller would then
                 # be refused, which confirms the id exists.
                 ticket = huser.accessible_tickets().get(**filter_)
-                return HttpResponseRedirect(ticket.staff_url)
+                return HttpResponseRedirect(ticket.get_absolute_url())
             except Ticket.DoesNotExist:
                 # Go on to standard keyword searching
                 pass
