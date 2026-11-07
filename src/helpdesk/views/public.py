@@ -218,6 +218,56 @@ class SearchForTicketView(TemplateView):
 class ViewTicket(TemplateView):
     template_name = "helpdesk/public_view_ticket.html"
 
+    def post(self, request, *args, **kwargs):
+        from helpdesk.update_ticket import update_ticket
+
+        ticket_req = request.GET.get("ticket")
+        email = request.GET.get("email")
+        key = request.GET.get("key", "")
+
+        try:
+            _queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
+            ticket = Ticket.objects.get(
+                id=ticket_id,
+                submitter_email__iexact=email,
+                secret_key__iexact=key,
+            )
+        except (ObjectDoesNotExist, ValueError, TypeError):
+            raise PermissionDenied()
+
+        comment = request.POST.get("comment", "")
+        status = request.POST.get("new_status")
+
+        allowed_statuses = {choice[0] for choice in ticket.get_allowed_status_flow}
+        allowed_statuses.add(ticket.status)
+
+        try:
+            new_status = int(status) if status else ticket.status
+        except (TypeError, ValueError):
+            raise PermissionDenied()
+
+        if not ticket.can_be_resolved and new_status != ticket.status:
+            raise PermissionDenied()
+
+        if new_status not in allowed_statuses:
+            raise PermissionDenied()
+
+        files = (
+            request.FILES.getlist("attachment")
+            if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS
+            else None
+        )
+
+        update_ticket(
+            request.user,
+            ticket,
+            public=True,
+            comment=comment,
+            new_status=new_status,
+            files=files,
+        )
+        return HttpResponseRedirect(ticket.ticket_url)
+
     def get(self, request, *args, **kwargs):
         ticket_req = request.GET.get("ticket", None)
         email = request.GET.get("email", None)
