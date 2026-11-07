@@ -2,6 +2,7 @@ from http import HTTPStatus
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.contrib.sites.models import Site
 from django.test import TestCase
 from django.urls import resolve, reverse
 
@@ -47,6 +48,24 @@ class StaffTicketListViewTests(TestCase):
             "search_string": "",
             "sortreverse": False,
         }
+
+    def test_header_search_for_ticket_number_stays_on_current_host(self):
+        # staff_url is built from the Sites framework domain, which need not be
+        # the host being browsed ("example.com" by default).
+        site = Site.objects.get_current()
+        site.domain = "mail-links.example.org"
+        site.save()
+        self.client.login(username="staffuser1", password="testpass123")
+        for query in (self.ticket.id, self.ticket.ticket_for_url):
+            with self.subTest(query=query):
+                response = self.client.get(
+                    self.url, {"search_type": "header", "q": query}
+                )
+                self.assertRedirects(
+                    response,
+                    self.ticket.get_absolute_url(),
+                    fetch_redirect_response=False,
+                )
 
     def test_url_resolves_correct_view(self):
         match = resolve(self.url)
