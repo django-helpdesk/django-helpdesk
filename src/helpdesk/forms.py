@@ -15,6 +15,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -126,14 +127,18 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
             "resolution",
             "last_escalation",
             "assigned_to",
+            "secret_key",
         )
 
     class Media:
         js = ("helpdesk/js/init_due_date.js", "helpdesk/js/init_datetime_classes.js")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         """
         Add any custom fields that are defined to the form
+
+        The queue can be changed to one the user may create tickets in, or
+        left as it is. Without a user, only the current queue is offered.
         """
         super().__init__(*args, **kwargs)
 
@@ -160,7 +165,11 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         # If there is only a single queue configured, there is nothing
         # meaningful to choose, so hide the field entirely.
         if "queue" in self.fields:
-            queues = Queue.objects.all()
+            allowed = Q(pk=self.instance.queue_id)
+            if user is not None:
+                allowed |= Q(pk__in=[q.pk for q in HelpdeskUser(user).get_queues()])
+            queues = Queue.objects.filter(allowed)
+            self.fields["queue"].queryset = queues
             if queues.count() == 1:
                 self.fields["queue"].initial = queues.first().pk
                 self.fields["queue"].widget = forms.HiddenInput()

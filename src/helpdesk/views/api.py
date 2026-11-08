@@ -6,6 +6,7 @@ from rest_framework import viewsets
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
+    SAFE_METHODS,
     DjangoModelPermissions,
     IsAdminUser,
     IsAuthenticated,
@@ -162,6 +163,17 @@ class FollowUpViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def check_object_permissions(self, request, obj):
+        super().check_object_permissions(request, obj)
+        if request.method == "DELETE":
+            allowed = request.user.is_superuser
+        elif request.method in SAFE_METHODS:
+            allowed = True
+        else:
+            allowed = HelpdeskUser(request.user).can_edit_followup(obj)
+        if not allowed:
+            self.permission_denied(request)
 
 
 class FollowUpAttachmentViewSet(viewsets.ModelViewSet):

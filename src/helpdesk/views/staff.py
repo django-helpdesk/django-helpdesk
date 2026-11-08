@@ -370,6 +370,8 @@ def followup_edit(request, ticket_id, followup_id):
     # ids independently only proved access to the one in the URL, which let a
     # permitted ticket id be paired with a follow-up from any other queue.
     followup = get_object_or_404(FollowUp, id=followup_id, ticket=ticket)
+    if not HelpdeskUser(request.user).can_edit_followup(followup):
+        raise PermissionDenied()
 
     if request.method == "GET":
         form = EditFollowUpForm(
@@ -1432,7 +1434,7 @@ def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
 
-    form = EditTicketForm(request.POST or None, instance=ticket)
+    form = EditTicketForm(request.POST or None, instance=ticket, user=request.user)
     if form.is_valid():
         ticket = form.save()
         return redirect(ticket)
@@ -2369,8 +2371,7 @@ def kanban_board(request):
         "assigned_to__username",
     )
 
-    queue_ids = list(huser.get_queues().values_list("pk", flat=True))
-    tickets = base_qs.filter(queue_id__in=queue_ids)
+    tickets = base_qs.filter(huser.accessible_tickets_q())
 
     now = timezone.now()
     default_due_weeks = helpdesk_settings.HELPDESK_KANBAN_DEFAULT_DUE_WEEKS or 2

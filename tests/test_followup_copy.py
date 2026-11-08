@@ -37,7 +37,7 @@ class FollowUpCopyTests(TestCase):
             ticket=self.source,
             title="Investigation",
             comment="Restart the device.",
-            user=None,
+            user=self.user,
             public=True,
             message_id="<original@example.com>",
             new_status=Ticket.CLOSED_STATUS,

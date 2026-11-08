@@ -386,7 +386,7 @@ class ForeignQueueSweepTestCase(TestCase):
         a validation error, and the view has to answer that with the form and
         its errors rather than falling off the end and returning None."""
         my_followup = FollowUp.objects.create(
-            ticket=self.my_ticket, title="Mine", comment="Mine"
+            ticket=self.my_ticket, title="Mine", comment="Mine", user=self.staff
         )
         response = self.client.post(
             reverse(
