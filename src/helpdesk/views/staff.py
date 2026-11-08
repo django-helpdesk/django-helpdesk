@@ -2058,7 +2058,7 @@ def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
     if request.method == "POST":
-        form = TicketDependencyForm(ticket, request.POST)
+        form = TicketDependencyForm(ticket, request.POST, user=request.user)
         if form.is_valid():
             ticketdependency = form.save(commit=False)
             ticketdependency.ticket = ticket
@@ -2066,7 +2066,7 @@ def ticket_dependency_add(request, ticket_id):
                 ticketdependency.save()
             return redirect(ticket.get_absolute_url())
     else:
-        form = TicketDependencyForm(ticket)
+        form = TicketDependencyForm(ticket, user=request.user)
     return render(
         request,
         "helpdesk/ticket_dependency_add.html",
@@ -2097,7 +2097,7 @@ def ticket_resolves_add(request, ticket_id):
     depends_on = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, depends_on)
     if request.method == "POST":
-        form = TicketResolvesForm(depends_on, request.POST)
+        form = TicketResolvesForm(depends_on, request.POST, user=request.user)
         if form.is_valid():
             ticketdependency = form.save(commit=False)
             ticketdependency.depends_on = depends_on
@@ -2105,7 +2105,7 @@ def ticket_resolves_add(request, ticket_id):
                 ticketdependency.save()
             return redirect(depends_on.get_absolute_url())
     else:
-        form = TicketResolvesForm(depends_on)
+        form = TicketResolvesForm(depends_on, user=request.user)
     return render(
         request,
         "helpdesk/ticket_resolves_add.html",

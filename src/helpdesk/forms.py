@@ -757,12 +757,18 @@ class TicketDependencyForm(forms.ModelForm):
         model = TicketDependency
         fields = ("depends_on",)
 
-    def __init__(self, ticket, *args, **kwargs):
+    def __init__(self, ticket, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Only open tickets except myself, existing dependencies and parents
+        # Only open tickets the user may open, except myself, existing
+        # dependencies and parents
+        accessible = (
+            HelpdeskUser(user).accessible_tickets()
+            if user is not None
+            else Ticket.objects.none()
+        )
         self.fields["depends_on"].queryset = (
-            Ticket.objects.filter(status__in=Ticket.OPEN_STATUSES)
+            accessible.filter(status__in=Ticket.OPEN_STATUSES)
             .exclude(id=ticket.id)
             .exclude(depends_on__ticket=ticket)
             .exclude(ticketdependency__depends_on=ticket)
@@ -776,12 +782,18 @@ class TicketResolvesForm(forms.ModelForm):
         model = TicketDependency
         fields = ("ticket",)
 
-    def __init__(self, ticket, *args, **kwargs):
+    def __init__(self, ticket, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Only open tickets except myself, existing dependencies and parents
+        # Only open tickets the user may open, except myself, existing
+        # dependencies and parents
+        accessible = (
+            HelpdeskUser(user).accessible_tickets()
+            if user is not None
+            else Ticket.objects.none()
+        )
         self.fields["ticket"].queryset = (
-            Ticket.objects.filter(status__in=Ticket.OPEN_STATUSES)
+            accessible.filter(status__in=Ticket.OPEN_STATUSES)
             .exclude(id=ticket.id)
             .exclude(depends_on__ticket=ticket)
             .exclude(ticketdependency__depends_on=ticket)
