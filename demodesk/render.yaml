@@ -1,0 +1,18 @@
+# Blueprint for the public demo. Point the "Blueprint Path" field to
+# demodesk/render.yaml when creating it on Render.
+services:
+  - type: web
+    name: django-helpdesk-demo
+    runtime: python
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: demodesk/build.sh
+    startCommand: gunicorn demodesk.config.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: demodesk.config.settings_render
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.13"
