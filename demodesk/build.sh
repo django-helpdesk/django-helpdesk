@@ -16,3 +16,5 @@ python manage.py migrate --no-input
 python manage.py loaddata emailtemplate.json
 # The password for the "admin" user is 'Pa33w0rd'.
 python manage.py loaddata demo.json
+# Running it here makes a broken generator fail the deploy, not the start.
+python manage.py demo_data

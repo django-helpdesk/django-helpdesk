@@ -8,7 +8,9 @@ services:
     region: frankfurt
     branch: main
     buildCommand: demodesk/build.sh
-    startCommand: gunicorn demodesk.config.wsgi:application
+    # The instance restarts from the build's filesystem after each spin-down.
+    # Regenerating the data on start keeps its dates relative to today.
+    startCommand: python manage.py demo_data --reset && gunicorn demodesk.config.wsgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: demodesk.config.settings_render
