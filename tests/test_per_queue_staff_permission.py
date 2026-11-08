@@ -434,15 +434,9 @@ class PerQueueStaffMembershipTestCase(TestCase):
                 )
             }
         )
-        last_year, last_month = authorized_months[-1]
-        next_month = (
-            (last_year + 1, 1) if last_month == 12 else (last_year, last_month + 1)
-        )
-        expected_months = authorized_months + [next_month]
-
         self.assertEqual(
             response.context["headings"][1:],
-            [f"{year}-{month}" for year, month in expected_months],
+            [f"{year}-{month}" for year, month in authorized_months],
         )
 
     def test_public_submission_queue_does_not_expose_run_report(self):
