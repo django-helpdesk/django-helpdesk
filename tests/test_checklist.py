@@ -3,7 +3,8 @@ from _datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
+from django.utils.html import escapejs
 
 from helpdesk.models import Checklist, ChecklistTask, ChecklistTemplate, Queue, Ticket
 
@@ -194,6 +195,24 @@ class TicketChecklistTestCase(TestCase):
 
         task.refresh_from_db()
         self.assertIsNone(task.completion_date)
+
+    def test_disabled_task_message_is_escaped_for_javascript(self):
+        """The French message contains apostrophes; they must not end the JS string."""
+        message = (
+            "If you want to update state of checklist tasks, please do a Follow-Up "
+            'response and click on "Update checklists"'
+        )
+        with translation.override("fr"):
+            translated = translation.gettext(message)
+        self.assertIn("'", translated)
+
+        response = self.client.get(
+            reverse("helpdesk:view", kwargs={"ticket_id": self.ticket.id}),
+            headers={"accept-language": "fr"},
+        )
+
+        self.assertContains(response, f"alert('{escapejs(translated)}')")
+        self.assertNotContains(response, translated)
 
     def test_display_checklist_templates(self):
         ChecklistTemplate.objects.create(

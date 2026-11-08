@@ -168,8 +168,9 @@
         }
       })
 
+      {% translate 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' as disabled_task_message %}
       $('.disabledTask').on('click', () => {
-        alert('{% translate 'If you want to update state of checklist tasks, please do a Follow-Up response and click on "Update checklists"' %}')
+        alert('{{ disabled_task_message|escapejs }}')
       })
 
 
