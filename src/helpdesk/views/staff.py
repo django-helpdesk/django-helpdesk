@@ -1773,27 +1773,17 @@ def run_report(request: HttpRequest, report: str) -> HttpResponse:
     first_ticket = report_queryset.order_by("created").first()
     last_ticket = report_queryset.order_by("-created").first()
 
-    if first_ticket is not None:
-        first_month = first_ticket.created.month
-        first_year = first_ticket.created.year
-        last_month = last_ticket.created.month
-        last_year = last_ticket.created.year
-
-    # Build periods
+    # One period per month, from the first ticket's month to the last one's
     periods = []
     if first_ticket is not None:
-        year, month = first_year, first_month
-        working = True
-        periods.append(f"{year}-{month}")
-
-        while working:
+        year, month = first_ticket.created.year, first_ticket.created.month
+        last_period = (last_ticket.created.year, last_ticket.created.month)
+        while (year, month) <= last_period:
+            periods.append(f"{year}-{month}")
             month += 1
             if month > 12:
                 year += 1
                 month = 1
-            if (year > last_year) or (month > last_month and year >= last_year):
-                working = False
-            periods.append(f"{year}-{month}")
 
     priority_choices = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
     status_choices = [s[1].title() for s in Ticket.STATUS_CHOICES]

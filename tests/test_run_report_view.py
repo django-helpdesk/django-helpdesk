@@ -1,3 +1,5 @@
+from datetime import datetime
+from datetime import timezone as dt_timezone
 from http import HTTPStatus
 
 from django.test import TestCase
@@ -48,3 +50,27 @@ class RunReportViewTests(TestCase):
         self.assertTemplateUsed(r, self.template)
         self.assertContains(r, "Reports")
         self.assertNotContains(r, "Hi I shouldn't be on this page")
+
+    def _set_created(self, ticket, year, month):
+        Ticket.objects.filter(pk=ticket.pk).update(
+            created=datetime(year, month, 15, tzinfo=dt_timezone.utc)
+        )
+
+    def test_monthly_report_lists_each_month_once(self):
+        """Periods run from the first ticket's month to the last one's, inclusive."""
+        self._set_created(self.open_ticket, 2025, 11)
+        later = Ticket.objects.create(title="Later", queue=self.queue)
+        self._set_created(later, 2026, 1)
+        self.client.force_login(self.user)
+
+        r = self.client.get(reverse("helpdesk:run_report", args=["usermonth"]))
+
+        self.assertEqual(r.context["headings"][1:], ["2025-11", "2025-12", "2026-1"])
+
+    def test_monthly_report_with_a_single_month(self):
+        self._set_created(self.open_ticket, 2026, 3)
+        self.client.force_login(self.user)
+
+        r = self.client.get(reverse("helpdesk:run_report", args=["queuemonth"]))
+
+        self.assertEqual(r.context["headings"][1:], ["2026-3"])

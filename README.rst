@@ -27,6 +27,12 @@ Demo Quickstart
 get started with testing or developing `django-helpdesk`. The demo project
 resides in the `demodesk/` top-level folder.
 
+A live copy of the demo project runs at
+https://django-helpdesk-demo.onrender.com/ (log in as user `admin` with
+password `Pa33w0rd`). It is redeployed from `main` on every push and its data
+is reset regularly. On the free hosting plan the first visit after a period of
+inactivity can take about a minute.
+
 You will need to install the `uv` package manager to simplify setting up the demo:
     https://docs.astral.sh/uv/getting-started/installation/
 
@@ -39,6 +45,10 @@ If you have not already created a virtual environment then run this command:
 
 then pointing your web browser at http://localhost:8080 (log in as user
 `admin` with password `Pa33w0rd`, defined in the `demo.json` fixture file).
+The `demo_data` command adds staff users (`alice`, `bruno`, `chloe`, `kenji`),
+a customer (`sam`) with the same password, and several months of tickets
+dated relative to today. Run `uv run manage.py demo_data --reset` to start
+over from a clean data set.
 
 **Docker Compose** or with docker compose::
 
