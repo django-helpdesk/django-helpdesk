@@ -84,6 +84,7 @@ docs = [
 ]
 e2e = [
     "playwright>=1.64.0",
+    "django>=6.1.3,<6.2",
 ]
 teams = [
     "pinax-invitations>=8.0.0",
@@ -183,3 +184,5 @@ exclude_lines = [
 [tool.coverage.html]
 show_contexts = true
 
+[tool.uv.dependency-groups]
+e2e = {requires-python = ">=3.12"}
