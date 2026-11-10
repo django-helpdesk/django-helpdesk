@@ -12,11 +12,15 @@ from importlib import import_module
 from urllib.parse import quote
 
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import (
     ImproperlyConfigured,
     ObjectDoesNotExist,
     PermissionDenied,
+    ValidationError,
 )
+from django.db import transaction
 from django.db.models import Prefetch
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -214,6 +218,56 @@ class SearchForTicketView(TemplateView):
 class ViewTicket(TemplateView):
     template_name = "helpdesk/public_view_ticket.html"
 
+    def post(self, request, *args, **kwargs):
+        from helpdesk.update_ticket import update_ticket
+
+        ticket_req = request.GET.get("ticket")
+        email = request.GET.get("email")
+        key = request.GET.get("key", "")
+
+        try:
+            _queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
+            ticket = Ticket.objects.get(
+                id=ticket_id,
+                submitter_email__iexact=email,
+                secret_key__iexact=key,
+            )
+        except (ObjectDoesNotExist, ValueError, TypeError):
+            raise PermissionDenied()
+
+        comment = request.POST.get("comment", "")
+        status = request.POST.get("new_status")
+
+        allowed_statuses = {choice[0] for choice in ticket.get_allowed_status_flow}
+        allowed_statuses.add(ticket.status)
+
+        try:
+            new_status = int(status) if status else ticket.status
+        except (TypeError, ValueError):
+            raise PermissionDenied()
+
+        if not ticket.can_be_resolved and new_status != ticket.status:
+            raise PermissionDenied()
+
+        if new_status not in allowed_statuses:
+            raise PermissionDenied()
+
+        files = (
+            request.FILES.getlist("attachment")
+            if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS
+            else None
+        )
+
+        update_ticket(
+            request.user,
+            ticket,
+            public=True,
+            comment=comment,
+            new_status=new_status,
+            files=files,
+        )
+        return HttpResponseRedirect(ticket.ticket_url)
+
     def get(self, request, *args, **kwargs):
         ticket_req = request.GET.get("ticket", None)
         email = request.GET.get("email", None)
@@ -285,6 +339,82 @@ class ViewTicket(TemplateView):
         elif helpdesk_settings.HELPDESK_NAVIGATION_ENABLED:
             redirect_url = reverse("helpdesk:view", args=[ticket_id])
         return redirect_url
+
+
+def get_ticket_for_submitter(request, ticket_id, email, key):
+    """The ticket, if the request may act as its submitter.
+
+    Same rule as `ViewTicket`: the submitter's email together with the
+    ticket's secret key, or a logged-in user whose email is the submitter's.
+    Raises `Ticket.DoesNotExist` otherwise.
+    """
+    if not email:
+        raise Ticket.DoesNotExist
+    tickets = Ticket.objects.filter(id=ticket_id, submitter_email__iexact=email)
+    if request.user.is_authenticated and request.user.email == email:
+        return tickets.get()
+    if not key:
+        raise Ticket.DoesNotExist
+    return tickets.get(secret_key__iexact=key)
+
+
+@protect_view
+def update_ticket_from_public_view(request, ticket_id):
+    """Add a follow-up from the comment form on the public ticket page.
+
+    That form posts to `helpdesk:update`, whose `UpdateTicketView` requires a
+    staff login and fields the form does not send. `staff.update_ticket_view`
+    hands non-staff requests carrying the submitter's email to this view.
+
+    Only what the public page offers is taken from the request: a comment,
+    attachments when they are enabled, and a status change from the choices
+    the page shows.
+    """
+    try:
+        ticket = get_ticket_for_submitter(
+            request,
+            ticket_id,
+            request.POST.get("mail", ""),
+            request.POST.get("key", ""),
+        )
+    except (Ticket.DoesNotExist, ValueError):
+        return redirect_to_login(request.path, settings.LOGIN_URL)
+
+    comment = request.POST.get("comment", "")
+    files = []
+    if helpdesk_settings.HELPDESK_ENABLE_ATTACHMENTS:
+        files = request.FILES.getlist("attachment")
+
+    # Mirrors public_view_ticket.html: no status choice while the ticket is
+    # open or has open dependencies, otherwise one from the ticket's flow.
+    new_status = ticket.status
+    if ticket.status != Ticket.OPEN_STATUS and ticket.can_be_resolved:
+        try:
+            requested_status = int(request.POST.get("new_status", ticket.status))
+        except ValueError:
+            requested_status = ticket.status
+        if requested_status in dict(ticket.get_allowed_status_flow):
+            new_status = requested_status
+
+    if comment.strip() or files or new_status != ticket.status:
+        from helpdesk.update_ticket import update_ticket
+
+        # update_ticket() saves the follow-up and the new status before it
+        # validates attachments, and only then sends notifications. Roll the
+        # whole update back if an attachment is rejected.
+        try:
+            with transaction.atomic():
+                update_ticket(
+                    request.user,
+                    ticket,
+                    comment=comment,
+                    files=files,
+                    public=True,
+                    new_status=new_status,
+                )
+        except ValidationError as e:
+            messages.error(request, " ".join(e.messages))
+    return HttpResponseRedirect(ticket.ticket_url)
 
 
 class MyTickets(TemplateView):

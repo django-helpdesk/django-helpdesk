@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "helpdesk",  # This is us!
     "rest_framework",  # required for the API
+    "demodesk",  # demo fixtures and the demo_data command
 ]
 if HELPDESK_TEAMS_MODE_ENABLED:
     INSTALLED_APPS.extend(
@@ -249,12 +250,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # with tickets.
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-# Fixtures
-# https://docs.djangoproject.com/en/1.11/ref/settings/#std:setting-FIXTURE_DIRS
-# - This is only necessary to make the demo project work, not needed for
-# your own projects unless you make your own fixtures
-FIXTURE_DIRS = [os.path.join(BASE_DIR, "fixtures")]
 
 
 # for Django 3.2+, set default for autofields:

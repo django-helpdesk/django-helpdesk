@@ -107,7 +107,7 @@
     </ul>
   {% endif %}
   {# Public comment / resolution form #}
-  <form method="post" action="{% url 'helpdesk:update' ticket.id %}" enctype='multipart/form-data'>
+  <form method="post" action="{{ ticket.ticket_url }}" enctype='multipart/form-data'>
     {% csrf_token %}
     <input type="hidden" name="key" value="{{ key }}" />
     <input type="hidden" name="mail" value="{{ mail }}" />

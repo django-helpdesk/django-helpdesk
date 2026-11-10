@@ -81,6 +81,7 @@ class PublicActionsTestCase(TestCase):
         ticket = Ticket.objects.get(id=self.ticket.id)
 
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], ticket.ticket_url)
         self.assertTemplateNotUsed(response, "helpdesk/public_view_form.html")
         self.assertEqual(ticket.status, Ticket.CLOSED_STATUS)
         self.assertEqual(ticket.resolution, resolution_text)
@@ -89,3 +90,40 @@ class PublicActionsTestCase(TestCase):
         ticket.resolution = old_resolution
         ticket.status = old_status
         ticket.save()
+
+    def test_public_comment_update(self):
+        self.client = Client(enforce_csrf_checks=True)
+        url = self.ticket.ticket_url
+        self.client.get(url)
+        csrf_token = self.client.cookies["csrftoken"].value
+        response = self.client.post(
+            url,
+            {
+                "csrfmiddlewaretoken": csrf_token,
+                "mail": self.ticket.submitter_email,
+                "key": self.ticket.secret_key,
+                "public": "1",
+                "comment": "Public followup test",
+                "new_status": self.ticket.status,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(
+            self.ticket.followup_set.filter(comment="Public followup test").exists()
+        )
+
+    def test_public_update_rejects_invalid_key(self):
+        response = self.client.post(
+            self.ticket.ticket_url.replace(self.ticket.secret_key, "invalid-key"),
+            {"comment": "Unauthorized update", "new_status": self.ticket.status},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.ticket.followup_set.exists())
+
+    def test_public_update_rejects_invalid_status(self):
+        response = self.client.post(
+            self.ticket.ticket_url,
+            {"comment": "Invalid status update", "new_status": "invalid"},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(self.ticket.followup_set.exists())

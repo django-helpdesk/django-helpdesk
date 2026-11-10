@@ -112,6 +112,8 @@ demo:
 	uv run manage.py loaddata emailtemplate.json
 	# The password for the "admin" user is 'Pa33w0rd' for the demo project.
 	uv run manage.py loaddata demo.json
+	# Staff, customers and tickets dated relative to today, same password.
+	uv run manage.py demo_data
 
 
 #: rundemo - Run demo server using Python3.
