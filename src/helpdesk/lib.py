@@ -43,15 +43,14 @@ def ticket_template_context(ticket):
         "ticket_for_url",
         "get_status",
         "staff_url",
-        "_get_assigned_to",
     ):
         attr = getattr(ticket, field, None)
         if callable(attr):
             context[field] = f"{attr()}"
         else:
             context[field] = attr
-    context["assigned_to"] = context["_get_assigned_to"]
-    # Avoid passing the merge_to field as an object for security reasons
+    # Avoid passing the model objects for foreign keys for security reasons
+    context["assigned_to"] = ticket.assigned_to_id
     context["merged_to"] = ticket.merged_to_id
     # Email templates are stored in the database and use {{ ticket.ticket_url }},
     # so it stays the absolute link here.
