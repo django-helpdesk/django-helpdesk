@@ -41,7 +41,6 @@ def ticket_template_context(ticket):
         "last_escalation",
         "ticket",
         "ticket_for_url",
-        "merged_to",
         "get_status",
         "staff_url",
         "_get_assigned_to",
@@ -52,6 +51,8 @@ def ticket_template_context(ticket):
         else:
             context[field] = attr
     context["assigned_to"] = context["_get_assigned_to"]
+    # Avoid passing the merge_to field as an object for security reasons
+    context["merged_to"] = ticket.merged_to_id
     # Email templates are stored in the database and use {{ ticket.ticket_url }},
     # so it stays the absolute link here.
     context["email_url"] = context["ticket_url"] = ticket.email_url
