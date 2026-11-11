@@ -121,6 +121,17 @@ demo:
 rundemo: demo
 	uv run manage.py runserver 8080
 
+#: messages - Regenerate and compile the translation catalogs.
+# makemessages --all would look in the demo project's LOCALE_PATHS, so every
+# language in src/helpdesk/locale is passed explicitly.
+.PHONY: messages
+messages:
+	cd src/helpdesk && for lang in $$(ls locale); do \
+		DJANGO_SETTINGS_MODULE=demodesk.config.settings PYTHONPATH=..:../.. \
+		$(UV) run django-admin makemessages --no-obsolete -l $$lang || exit 1; \
+	done
+	cd src/helpdesk && $(UV) run django-admin compilemessages
+
 #: migrations - Create Django migrations for this project.
 .PHONY: migrations
 migrations: demo
