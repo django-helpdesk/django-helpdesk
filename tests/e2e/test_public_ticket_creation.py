@@ -50,7 +50,7 @@ class PublicTicketCreationTests(StaticLiveServerTestCase):
         cls.addClassCleanup(media_settings.disable)
         super().setUpClass()
 
-    def test_anonymous_user_creates_ticket_without_attachment(self):
+    def test_anonymous_user_creates_and_updates_ticket_without_attachment(self):
         queue = Queue.objects.create(
             title="Customer Support",
             slug="customer-support",
@@ -59,19 +59,64 @@ class PublicTicketCreationTests(StaticLiveServerTestCase):
         title = "Payment fails at checkout"
         description = "Payment failed appears after confirming the order."
         email = "customer@example.com"
+        comment = "I tried another payment method, but the error remains."
 
         with self._browser_page() as page:
             self._fill_ticket_form(
-                page, queue=queue, email=email, title=title, description=description
+                page,
+                queue=queue,
+                email=email,
+                title=title,
+                description=description,
             )
             page.get_by_role("button", name="Create Ticket", exact=True).click()
             self._assert_ticket_details(
-                page, queue=queue, email=email, title=title, description=description
+                page,
+                queue=queue,
+                email=email,
+                title=title,
+                description=description,
             )
 
-        self._assert_saved_ticket(
-            queue=queue, email=email, title=title, description=description
+            # Continue as the anonymous submitter on the newly created ticket.
+            page.get_by_label("Comment / Resolution", exact=True).fill(comment)
+            page.get_by_role("button", name="Update This Ticket", exact=True).click()
+
+            # Wait for the saved comment before checking the updated ticket page.
+            saved_comment = page.locator("#followup-list").get_by_text(
+                comment, exact=True
+            )
+            expect(saved_comment).to_have_count(1)
+            expect(saved_comment).to_be_visible()
+            self._assert_ticket_details(
+                page,
+                queue=queue,
+                email=email,
+                title=title,
+                description=description,
+            )
+            # Reload to verify that the comment persists and access still works.
+            page.reload()
+            self._assert_ticket_details(
+                page,
+                queue=queue,
+                email=email,
+                title=title,
+                description=description,
+            )
+            expect(saved_comment).to_have_count(1)
+            expect(saved_comment).to_be_visible()
+
+        # ORM checks run after Playwright stops.
+        ticket = self._assert_saved_ticket(
+            queue=queue,
+            email=email,
+            title=title,
+            description=description,
         )
+        followup = ticket.followup_set.get(comment=comment)
+        self.assertTrue(followup.public)
+        self.assertIsNone(followup.user_id)
         self.assertFalse(FollowUpAttachment.objects.exists())
 
     def test_anonymous_user_creates_ticket_with_image(self):
@@ -183,7 +228,7 @@ class PublicTicketCreationTests(StaticLiveServerTestCase):
             )
             page.get_by_role("button", name="Create Ticket", exact=True).click()
 
-            # Native required-field validation blocks submission before any POST.
+            # The browser reports a missing required description on the form.
             description_input = page.get_by_label(
                 "Description of your issue", exact=True
             )
@@ -212,7 +257,7 @@ class PublicTicketCreationTests(StaticLiveServerTestCase):
                 finally:
                     executor.submit(connections.close_all).result()
 
-            # Correct only the missing field; the retained values must be reused.
+            # Fill only the description, keeping the values already in the browser.
             description_input.fill(description)
             page.get_by_role("button", name="Create Ticket", exact=True).click()
             self._assert_ticket_details(
@@ -256,7 +301,9 @@ class PublicTicketCreationTests(StaticLiveServerTestCase):
         expect(
             ticket_details.get_by_role("heading", name=title, exact=True)
         ).to_be_visible()
-        expect(ticket_details).to_contain_text(description)
+        description_block = ticket_details.locator("h2 + p")
+        expect(description_block).to_have_text(description)
+        expect(description_block).to_be_visible()
         expect(ticket_details).to_contain_text(email)
         expect(ticket_details).to_contain_text(queue.title)
         return ticket_details
