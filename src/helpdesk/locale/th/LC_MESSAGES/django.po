@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 12:41+0000\n"
+"POT-Creation-Date: 2026-11-11 12:40+0000\n"
 "PO-Revision-Date: 2015-06-13 06:45+0000\n"
 "Last-Translator: Jonathan Barratt <jonathan@the-im.com>\n"
 "Language-Team: Thai (http://www.transifex.com/rossp/django-helpdesk/language/"
@@ -103,7 +103,7 @@ msgstr "บทสรุปของปัญหาที่เกิดขึ้
 
 #: forms.py:325
 msgid "Description of your issue"
-msgstr ""
+msgstr "คำอธิบายของปัญหาของท่าน"
 
 #: forms.py:327
 msgid "Please be as descriptive as possible and include all details"
@@ -130,7 +130,7 @@ msgstr "ลำดับความสำคัญ"
 
 #: forms.py:336
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
+msgstr "โปรดเลือกระดับความสำคัญอย่างรอบคอบ หากท่านไม่แน่ใจให้คงระดับความสำคัญไว้ที่ '3'"
 
 #: forms.py:349 models.py:594
 #: templates/helpdesk/include/ticket_respond_form.html:158 update_ticket.py:384
@@ -183,7 +183,7 @@ msgstr ""
 
 #: forms.py:553
 msgid "Ticket Opened"
-msgstr ""
+msgstr "เปิดตั๋ว"
 
 #: forms.py:582
 msgid "Your E-Mail Address"
@@ -243,7 +243,7 @@ msgstr ""
 #: templates/helpdesk/include/ticket_respond_form.html:119
 #: templates/helpdesk/my_tickets.html:29 update_ticket.py:346
 msgid "Title"
-msgstr ""
+msgstr "ชื่อเรื่อง"
 
 #: models.py:115
 msgid ""
@@ -254,7 +254,7 @@ msgstr ""
 #: models.py:121 models.py:1884 models.py:1972 models.py:2058
 #: templates/helpdesk/email_ignore_list.html:33
 msgid "E-Mail Address"
-msgstr ""
+msgstr "อีเมล์"
 
 #: models.py:125
 msgid ""
@@ -580,7 +580,7 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:85 update_ticket.py:354
 #: views/staff.py:985
 msgid "Status"
-msgstr ""
+msgstr "สถานะ"
 
 #: models.py:565 models.py:806 views/staff.py:1608
 msgid "On Hold"
@@ -611,7 +611,7 @@ msgstr ""
 
 #: models.py:590
 msgid "1 = Highest Priority, 5 = Low Priority"
-msgstr ""
+msgstr "1 = สำคัญมากที่สุด, 5 = สำคัญน้อยที่สุด"
 
 #: models.py:604
 msgid ""
@@ -798,16 +798,16 @@ msgstr "ขนาด"
 
 #: models.py:1310
 msgid "Size of this file in bytes"
-msgstr ""
+msgstr "ขนาดของไฟล์ในจำนวนไบท์"
 
 #: models.py:1347
 msgid "Attachment"
-msgstr ""
+msgstr "ไฟล์แนบ"
 
 #: models.py:1348 templates/helpdesk/include/ticket_followup_list.html:95
 #: templates/helpdesk/ticket_desc_table.html:274
 msgid "Attachments"
-msgstr ""
+msgstr "ไฟล์แนบ"
 
 #: models.py:1374 models.py:1620
 msgid "Knowledge base item"
@@ -902,7 +902,7 @@ msgstr ""
 
 #: models.py:1517
 msgid "HTML"
-msgstr ""
+msgstr "HTML"
 
 #: models.py:1518
 msgid "The same context is available here as in plain_text, above."
@@ -1064,7 +1064,7 @@ msgstr ""
 
 #: models.py:1785
 msgid "E-mail me on ticket change?"
-msgstr ""
+msgstr "ต้องการให้แจ้งเตือนทางอีเมล์เมื่อตั๋วมีความเปลี่ยนแปลง?"
 
 #: models.py:1787
 msgid ""
@@ -1083,7 +1083,7 @@ msgstr ""
 
 #: models.py:1802
 msgid "Number of tickets to show per page"
-msgstr ""
+msgstr "จำนวนตั๋วที่ต้องการแสดงต่อหน้า"
 
 #: models.py:1803
 msgid "How many tickets do you want to see on the Ticket List page?"

@@ -95,11 +95,11 @@ msgstr ""
 #: views/staff.py:1822 views/staff.py:1829 views/staff.py:1836
 #: views/staff.py:1843
 msgid "Queue"
-msgstr ""
+msgstr "Ουρά"
 
 #: forms.py:320
 msgid "Summary of the problem"
-msgstr ""
+msgstr "Περίληψη του προβλήματος"
 
 #: forms.py:325
 msgid "Description of your issue"
@@ -131,12 +131,14 @@ msgstr "Προτεραιότητα"
 #: forms.py:336
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
 msgstr ""
+"Επιλέξτε μια προτεραιότητα προσεκτικά. Εάν δεν είστε σίγουροι, αφήστε το ως "
+"\"3\"."
 
 #: forms.py:349 models.py:594
 #: templates/helpdesk/include/ticket_respond_form.html:158 update_ticket.py:384
 #: views/staff.py:984
 msgid "Due on"
-msgstr ""
+msgstr "Οφείλεται στις"
 
 #: forms.py:356
 msgid "Attach File"
@@ -155,22 +157,26 @@ msgstr ""
 
 #: forms.py:482
 msgid "Submitter E-Mail Address"
-msgstr ""
+msgstr "Διεύθυνση E-Mail του υποβάλλοντος"
 
 #: forms.py:485
 msgid ""
 "This e-mail address will receive copies of all public updates to this ticket."
 msgstr ""
+"Αυτή η διεύθυνση ηλεκτρονικού ταχυδρομείου θα λάβει αντίγραφα όλων των "
+"δημόσιων ενημερώσεων σε αυτό το εισιτήριο."
 
 #: forms.py:496
 msgid "Case owner"
-msgstr ""
+msgstr "Ιδιοκτήτης θήκης"
 
 #: forms.py:498
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
 msgstr ""
+"Εάν επιλέξετε άλλον κάτοχο εκτός από εσάς, θα λάβετε αμέσως με email τα "
+"στοιχεία αυτού του εισιτηρίου."
 
 #: forms.py:549
 #, python-format

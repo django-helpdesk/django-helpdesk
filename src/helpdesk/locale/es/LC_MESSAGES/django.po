@@ -824,10 +824,8 @@ msgid "Follow-up"
 msgstr "Seguimiento"
 
 #: models.py:1064
-#, fuzzy
-#| msgid "Follow-up"
 msgid "Follow-ups"
-msgstr "Seguimiento"
+msgstr "Seguimientos"
 
 #: models.py:1241 models.py:2198
 msgid "Field"
@@ -888,29 +886,25 @@ msgid "Size of this file in bytes"
 msgstr "Tamaño del fichero en bytes"
 
 #: models.py:1347
-#, fuzzy
-#| msgid "Attach File"
 msgid "Attachment"
-msgstr "Adjuntar Archivo."
+msgstr "Archivo adjunto"
 
 #: models.py:1348 templates/helpdesk/include/ticket_followup_list.html:95
 #: templates/helpdesk/ticket_desc_table.html:274
-#, fuzzy
-#| msgid "Attach File"
 msgid "Attachments"
-msgstr "Adjuntar Archivo."
+msgstr "Archivos adjuntos"
 
 #: models.py:1374 models.py:1620
 msgid "Knowledge base item"
-msgstr ""
+msgstr "Artículo de la Base de Datos de Conocimientos"
 
 #: models.py:1402
 msgid "Pre-set reply"
-msgstr ""
+msgstr "Respuesta pre-establecida"
 
 #: models.py:1403
 msgid "Pre-set replies"
-msgstr ""
+msgstr "Respuestas pre-establecidas"
 
 #: models.py:1409
 msgid ""
@@ -1048,11 +1042,11 @@ msgstr ""
 
 #: models.py:1563
 msgid "Knowledge base category"
-msgstr ""
+msgstr "Categoría de base de datos de conocimientos"
 
 #: models.py:1564
 msgid "Knowledge base categories"
-msgstr ""
+msgstr "Categorías de base de datos de conocimientos"
 
 #: models.py:1584
 msgid "Category"
@@ -1106,7 +1100,7 @@ msgstr ""
 
 #: models.py:1621 templates/helpdesk/filters/kbitems.html:9
 msgid "Knowledge base items"
-msgstr ""
+msgstr "Artículos de la Base de Datos de Conocimientos"
 
 #: models.py:1645
 msgid "Unrated"
@@ -1139,16 +1133,12 @@ msgstr ""
 "está haciendo."
 
 #: models.py:1708
-#, fuzzy
-#| msgid "Save Query"
 msgid "Saved search"
-msgstr "Guardar búsqueda"
+msgstr "Búsqueda guardada"
 
 #: models.py:1709
-#, fuzzy
-#| msgid "Save Changes"
 msgid "Saved searches"
-msgstr "Guardar Cambios"
+msgstr "Búsquedas guardadas"
 
 #: models.py:1755
 msgid "Tabs: follow ups and respond share a tabbed card"
@@ -1248,10 +1238,8 @@ msgid "Where should the respond form appear when viewing a ticket?"
 msgstr ""
 
 #: models.py:1831
-#, fuzzy
-#| msgid "User Settings"
 msgid "User Setting"
-msgstr "Preferencias de Usuario"
+msgstr "Preferencia del Usuario"
 
 #: models.py:1832 templates/helpdesk/navigation-header.html:134
 #: templates/helpdesk/user_settings.html:15
@@ -1259,16 +1247,12 @@ msgid "User Settings"
 msgstr "Preferencias de Usuario"
 
 #: models.py:1859
-#, fuzzy
-#| msgid "Ignore E-Mail Address"
 msgid "Ignored e-mail address"
-msgstr "Ignorar dirección de E-Mail"
+msgstr "Dirección de e-mail ignorada"
 
 #: models.py:1860
-#, fuzzy
-#| msgid "Ignore E-Mail Address"
 msgid "Ignored e-mail addresses"
-msgstr "Ignorar dirección de E-Mail"
+msgstr "Direcciones de e-mail ignoradas"
 
 #: models.py:1866
 msgid ""
@@ -1481,16 +1465,12 @@ msgid "Ticket custom field values"
 msgstr ""
 
 #: models.py:2225
-#, fuzzy
-#| msgid "Add Ticket Dependency"
 msgid "Ticket dependency"
-msgstr "Agregar Dependencia al Ticket "
+msgstr "Dependencia del Ticket"
 
 #: models.py:2226
-#, fuzzy
-#| msgid "Add Ticket Dependency"
 msgid "Ticket dependencies"
-msgstr "Agregar Dependencia al Ticket "
+msgstr "Dependencias del Ticket"
 
 #: models.py:2238
 msgid "Depends On Ticket"
@@ -1768,10 +1748,8 @@ msgid "Delete Saved Query"
 msgstr "Eliminar Consulta Guardada"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:13
-#, fuzzy
-#| msgid "Delete Saved Query"
 msgid "Delete Query"
-msgstr "Eliminar Consulta Guardada"
+msgstr "Eliminar Consulta"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
 #, python-format
@@ -1928,7 +1906,7 @@ msgstr "Editar ticket"
 
 #: templates/helpdesk/edit_ticket.html:26
 msgid "Note"
-msgstr ""
+msgstr "Nota"
 
 #: templates/helpdesk/edit_ticket.html:27
 msgid ""
@@ -2002,7 +1980,7 @@ msgstr ""
 #: templates/helpdesk/email_ignore_list.html:13
 #: templates/helpdesk/email_ignore_list.html:17
 msgid "Ignored E-Mail Addresses"
-msgstr ""
+msgstr "Direcciones de e-mail ignoradas"
 
 #: templates/helpdesk/email_ignore_list.html:19
 msgid ""
@@ -2021,7 +1999,7 @@ msgstr "Fecha"
 
 #: templates/helpdesk/email_ignore_list.html:36
 msgid "Keep in mailbox?"
-msgstr ""
+msgstr "¿Mantener en el mailbox?"
 
 #: templates/helpdesk/email_ignore_list.html:50
 #: templates/helpdesk/ticket_list.html:113
@@ -2073,7 +2051,7 @@ msgstr ""
 #: templates/helpdesk/filters/keywords.html:9
 #: templates/helpdesk/filters/keywords.html:12
 msgid "Keywords"
-msgstr ""
+msgstr "Palabras clave"
 
 #: templates/helpdesk/filters/keywords.html:14
 msgid ""
@@ -2144,7 +2122,7 @@ msgstr "Título"
 
 #: templates/helpdesk/followup_edit.html:49
 msgid "Comment:"
-msgstr ""
+msgstr "Comentario:"
 
 #: templates/helpdesk/help_context.html:6
 msgid "Context Reference"
@@ -2633,7 +2611,7 @@ msgstr ""
 #: templates/helpdesk/kb_index.html:11 templates/helpdesk/kb_index.html:18
 #: templates/helpdesk/public_homepage.html:59
 msgid "Knowledgebase"
-msgstr ""
+msgstr "Base de datos de conocimientos"
 
 #: templates/helpdesk/kb_category_base.html:11
 #: templates/helpdesk/kb_category_base.html:77
