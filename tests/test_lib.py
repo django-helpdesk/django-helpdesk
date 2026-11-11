@@ -3,8 +3,10 @@ from datetime import datetime
 from types import ModuleType, SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
 
+from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Model
 from django.test import SimpleTestCase, TestCase, override_settings
 
 from helpdesk.lib import (
@@ -14,7 +16,10 @@ from helpdesk.lib import (
     process_attachments,
     queue_template_context,
     text_is_spam,
+    ticket_template_context,
 )
+from helpdesk.models import KBCategory, KBItem, Queue, Ticket
+from tests.utils import get_foreign_key_fields
 
 
 class HelperTests(TestCase):
@@ -46,6 +51,47 @@ class HelperTests(TestCase):
         # Assert
         expected = "http://configure-django-sites.com"
         self.assertEqual(actual, expected)
+
+    def test_ticket_context_has_no_model_objects(self):
+        tested_fkeys = ["merged_to", "assigned_to", "kbitem", "queue"]
+        fkey_fields = get_foreign_key_fields(Ticket)
+        self.assertEqual(
+            len(fkey_fields),
+            len(tested_fkeys),
+            msg=f"There are new foreign key fields in the Ticket model that are not accounted for in this test: {list(set(fkey_fields).difference(tested_fkeys))}",
+        )
+        # Create all objects that have foreign key relationships from Ticket model
+        kb_category = KBCategory(name="KB Category Name", title="KB Cat 1")
+        kb_category.save()
+        kbi = KBItem(title="KBI1", question="KB1 question", category=kb_category)
+        kbi.save()
+        queue = Queue(title="Test Q", slug="TQ")
+        queue.save()
+        assigned_user = get_user_model()(username="u1")
+        assigned_user.save()
+        ticket1 = Ticket(
+            title="T1",
+            queue=queue,
+            submitter_email="submitter@example.com",
+            assigned_to=assigned_user,
+        )
+        ticket1.save()
+        ticket2 = Ticket(
+            title="T2",
+            queue=queue,
+            submitter_email="submitter@example.com",
+            assigned_to=assigned_user,
+            merged_to=ticket1,
+            kbitem=kbi,
+        )
+        ticket2.save()
+        context = ticket_template_context(ticket2)
+        for key in context:
+            val = context[key]
+            self.assertFalse(
+                isinstance(val, Model),
+                msg=f"Model instances are not permitted in the Ticket context. This key has a model instance: {key}",
+            )
 
 
 class TextIsSpamTests(SimpleTestCase):
