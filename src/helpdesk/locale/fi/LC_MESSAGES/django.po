@@ -2,665 +2,176 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
-"Report-Msgid-Bugs-To: jani\n"
-"POT-Creation-Date: 2020-04-07 23:03-0500\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-11 12:40+0000\n"
 "PO-Revision-Date: 2020-04-07 23:03-0500\n"
 "Last-Translator: Google Translate API v3\n"
 "Language-Team: fi <jani>\n"
 "Language: fi\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: forms.py:128 forms.py:328 models.py:190 models.py:267
-#: templates/helpdesk/dashboard.html:15 templates/helpdesk/dashboard.html:58
-#: templates/helpdesk/dashboard.html:78 templates/helpdesk/dashboard.html:100
-#: templates/helpdesk/dashboard.html:124 templates/helpdesk/rss_list.html:24
-#: templates/helpdesk/ticket_list.html:69
-#: templates/helpdesk/ticket_list.html:88
-#: templates/helpdesk/ticket_list.html:225 views/staff.py:1032
-#: views/staff.py:1038 views/staff.py:1044 views/staff.py:1050
+#: admin.py:60 models.py:542 templates/helpdesk/filters/sorting.html:36
+msgid "Submitter E-Mail"
+msgstr "Tukipyynnön jättäjän sähköposti"
+
+#: admin.py:103 models.py:111 models.py:1546 models.py:2061
+msgid "Slug"
+msgstr "Etana"
+
+#: copy_followup.py:16
+#, python-format
+msgid "Copied from ticket #%(ticket)s: %(title)s"
+msgstr ""
+
+#: email.py:663
+#, fuzzy, python-brace-format
+#| msgid "E-Mail Received from %(sender_email)s"
+msgid "E-Mail Received from {sender_email}"
+msgstr "E-Mail Received from %(sender_email)s"
+
+#: email.py:674
+#, fuzzy, python-brace-format
+#| msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
+msgid "Ticket Re-Opened by E-Mail Received from {sender_email}"
+msgstr "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
+
+#: email.py:796
+msgid "original_message.eml"
+msgstr ""
+
+#: email.py:982
+#, fuzzy
+#| msgid "Created from e-mail"
+msgid "Comment from e-mail"
+msgstr "Luotu sähköpostista"
+
+#: email.py:1092
+msgid "Unknown Sender"
+msgstr "Tuntematon lähettäjä"
+
+#: forms.py:156
+#, fuzzy
+#| msgid "This ticket has no dependencies."
+msgid "This ticket is merged into the selected ticket."
+msgstr "Tällä tukipyynnöllä ei ole riippuvuuksia."
+
+#: forms.py:273
+msgid "Copy instead of moving"
+msgstr ""
+
+#: forms.py:275
+msgid ""
+"Keep the original follow-up and copy the title, comment and attachments to "
+"the selected ticket. No email is sent; status changes and time spent are not "
+"copied. Check Public before sharing with the destination submitter."
+msgstr ""
+
+#: forms.py:299
+msgid "Copying follow-ups is disabled."
+msgstr ""
+
+#: forms.py:311 models.py:392 models.py:525 models.py:1161
+#: templates/helpdesk/filters/queue.html:9
+#: templates/helpdesk/filters/sorting.html:25
+#: templates/helpdesk/include/ticket_respond_form.html:145
+#: templates/helpdesk/include/tickets.html:47
+#: templates/helpdesk/include/tickets.html:49
+#: templates/helpdesk/include/tickets.html:51
+#: templates/helpdesk/include/tickets.html:55
+#: templates/helpdesk/include/unassigned.html:47
+#: templates/helpdesk/include/unassigned.html:49
+#: templates/helpdesk/include/unassigned.html:51
+#: templates/helpdesk/include/unassigned.html:55
+#: templates/helpdesk/include/unassigned.html:143
+#: templates/helpdesk/my_tickets.html:30
+#: templates/helpdesk/public_view_ticket.html:52
+#: templates/helpdesk/report_index.html:203 templates/helpdesk/rss_list.html:45
+#: templates/helpdesk/ticket_desc_table.html:162
+#: templates/helpdesk/ticket_list.html:84 update_ticket.py:376
+#: views/staff.py:1822 views/staff.py:1829 views/staff.py:1836
+#: views/staff.py:1843
 msgid "Queue"
 msgstr "Aihealue"
 
-#: forms.py:137
+#: forms.py:320
 msgid "Summary of the problem"
 msgstr "Tukipyynnön otsikko"
 
-#: forms.py:142
-msgid "Submitter E-Mail Address"
-msgstr "Tukipyynnön lähettäjän sähköpostiosoite"
-
-#: forms.py:144
-msgid ""
-"This e-mail address will receive copies of all public updates to this "
-"ticket."
-msgstr ""
-"Tämä sähköpostiosoite saa kopion kaikista päivityksistä tähän tukipyyntöön."
-
-#: forms.py:150
-msgid "Description of Issue"
-msgstr "Tukipyynnön kuvaus"
-
-#: forms.py:157
-msgid "Case owner"
-msgstr "Tukipyynnön jättäjä"
-
-#: forms.py:166 models.py:327 management/commands/escalate_tickets.py:154
-#: templates/helpdesk/public_view_ticket.html:23
-#: templates/helpdesk/ticket.html:184
-#: templates/helpdesk/ticket_desc_table.html:47
-#: templates/helpdesk/ticket_list.html:94 views/staff.py:429
-msgid "Priority"
-msgstr "Kiireellisyys"
-
-#: forms.py:167
-msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
-"Valitse kiireellisyys varovasti. Jos olet epävarma jätä se "
-"oletusasetusarvoksi (3)."
-
-#: forms.py:174 forms.py:365 models.py:335 templates/helpdesk/ticket.html:186
-#: views/staff.py:439
-msgid "Due on"
-msgstr "Eräpäivä"
-
-#: forms.py:186 forms.py:370
-msgid "Attach File"
-msgstr "Liitä tiedosto"
-
-#: forms.py:187 forms.py:371
-msgid "You can attach a file such as a document or screenshot to this ticket."
-msgstr ""
-"Voit liittää tukipyyntöön tiedoston, kuten asiakirjan tai kuvakaappauksen."
-
-#: forms.py:240
-msgid "Ticket Opened"
-msgstr "Tukipyyntö avattu"
-
-#: forms.py:342
-msgid "Your E-Mail Address"
-msgstr "Sähköpostiosoitteesi"
-
-msgid "Homepage"
-msgstr "Etusivu"
-
-#: forms.py:343
-msgid "We will e-mail you when your ticket is updated."
-msgstr "Lähetämme sinulle sähköpostin aina kun tukipyyntöäsi on päivitetty."
-
-#: forms.py:348
+#: forms.py:325
 msgid "Description of your issue"
 msgstr "Tukipyynnön kuvaus"
 
+#: forms.py:327
 msgid "Please be as descriptive as possible and include all details"
 msgstr ""
 "Kerro tukipyynnöstäsi mahdollisimman yksityiskohtaisesti jotta pystymme "
 "paremmin ratkaisemaan sen"
 
-#: forms.py:419
-msgid "Ticket Opened Via Web"
-msgstr "Tukipyyntö jätetty webin kautta"
-
-#: models.py:35 models.py:261 models.py:503 models.py:817 models.py:853
-#: templates/helpdesk/dashboard.html:58 templates/helpdesk/dashboard.html:78
-#: templates/helpdesk/dashboard.html:100 templates/helpdesk/dashboard.html:124
-#: templates/helpdesk/ticket.html:178 templates/helpdesk/ticket_list.html:85
-#: templates/helpdesk/ticket_list.html:225 views/staff.py:419
-msgid "Title"
-msgstr "Otsikko"
-
-#: models.py:87
-msgid "New Ticket CC Address"
-msgstr "Uuden tukipyynnnön cc-osoite"
-
-#: models.py:191 templates/helpdesk/email_ignore_list.html:13
-msgid "Queues"
-msgstr "Aihealueet"
-
-#: models.py:245 templates/helpdesk/dashboard.html:15
-#: templates/helpdesk/ticket.html:138
-msgid "Open"
-msgstr "Avoin"
-
-#: models.py:246 templates/helpdesk/ticket.html:144
-#: templates/helpdesk/ticket.html.py:150 templates/helpdesk/ticket.html:155
-#: templates/helpdesk/ticket.html.py:159
-msgid "Reopened"
-msgstr "Uudelleenavattu"
-
-#: models.py:247 templates/helpdesk/dashboard.html:15
-#: templates/helpdesk/ticket.html:139 templates/helpdesk/ticket.html.py:145
-#: templates/helpdesk/ticket.html:151
-msgid "Resolved"
-msgstr "Ratkaistu"
-
-#: models.py:248 templates/helpdesk/dashboard.html:15
-#: templates/helpdesk/ticket.html:140 templates/helpdesk/ticket.html.py:146
-#: templates/helpdesk/ticket.html:152 templates/helpdesk/ticket.html.py:156
-msgid "Closed"
-msgstr "Suljettu"
-
-#: models.py:249 templates/helpdesk/ticket.html:141
-#: templates/helpdesk/ticket.html.py:147 templates/helpdesk/ticket.html:160
-msgid "Duplicate"
-msgstr "Duplikaatti"
-
-#: models.py:253
-msgid "1. Critical"
-msgstr "1. Kriittinen"
-
-#: models.py:254
-msgid "2. High"
-msgstr "2. Kiireellinen"
-
-#: models.py:255
-msgid "3. Normal"
-msgstr "3. Normaali"
-
-#: models.py:256
-msgid "4. Low"
-msgstr "4. Vähemmän kiireellinen"
-
-#: models.py:257
-msgid "5. Very Low"
-msgstr "5. Ei lainkaan kiireellinen"
-
-#: models.py:271 templates/helpdesk/dashboard.html:100
-#: templates/helpdesk/ticket_list.html:82
-#: templates/helpdesk/ticket_list.html:225
-msgid "Created"
-msgstr "Luotu"
-
-#: models.py:273
-msgid "Date this ticket was first created"
-msgstr "Päivämäärä jolloin tukipyyntö luotiin"
-
-#: models.py:277
-msgid "Modified"
-msgstr "Muokattu"
-
-#: models.py:279
-msgid "Date this ticket was most recently changed."
-msgstr "Päivämäärä jolloin tukipyyntöä viimeksi muokattiin"
-
-#: models.py:283 templates/helpdesk/public_view_ticket.html:18
-#: templates/helpdesk/ticket_desc_table.html:42
-msgid "Submitter E-Mail"
-msgstr "Tukipyynnön jättäjän sähköposti"
-
-msgid "Submitter"
-msgstr "Tukipyynnön jättäjä"
-
-#: models.py:295
-msgid "Assigned to"
-msgstr "Vastuullinen"
-
-#: models.py:299 templates/helpdesk/dashboard.html:58
-#: templates/helpdesk/dashboard.html:78 templates/helpdesk/dashboard.html:124
-#: templates/helpdesk/ticket_list.html:70
-#: templates/helpdesk/ticket_list.html:91
-#: templates/helpdesk/ticket_list.html:225
-msgid "Status"
-msgstr "Tilanne"
-
-#: models.py:305
-msgid "On Hold"
-msgstr "Pidossa"
-
-#: models.py:313 models.py:826 templates/helpdesk/public_view_ticket.html:41
-#: templates/helpdesk/ticket_desc_table.html:19
-msgid "Description"
-msgstr "Kuvaus"
-
-#: models.py:316
-msgid "The content of the customers query."
-msgstr "Tukipyynnön sisältö"
-
-#: models.py:320 templates/helpdesk/public_view_ticket.html:48
-#: templates/helpdesk/ticket_desc_table.html:26
-msgid "Resolution"
-msgstr "Ratkaisu"
-
-#: models.py:323
-msgid "The resolution provided to the customer by our staff."
-msgstr "Annettu ratkaisu."
-
-#: models.py:331
-msgid "1 = Highest Priority, 5 = Low Priority"
-msgstr "1 = Kaikkein kiireellisin, 5 = Vähiten kiireellisin"
-
-#: models.py:353 templates/helpdesk/ticket_desc_table.html:38
-#: views/feeds.py:95 views/feeds.py:121 views/feeds.py:173 views/staff.py:376
-msgid "Unassigned"
-msgstr "Ei vastuullista"
-
-#: models.py:392
-msgid " - On Hold"
-msgstr "- Pidossa"
-
-#: models.py:394
-msgid " - Open dependencies"
-msgstr "- Avoimet riippuvuudet"
-
-#: models.py:448 models.py:494 models.py:1117 models.py:1280 models.py:1309
-#: templates/helpdesk/public_homepage.html:78
-#: templates/helpdesk/public_view_form.html:12
-msgid "Ticket"
-msgstr "Tukipyyntö"
-
-#: models.py:449 templates/helpdesk/navigation.html:17
-#: templates/helpdesk/ticket_list.html:2
-#: templates/helpdesk/ticket_list.html:224
-msgid "Tickets"
-msgstr "Tukipyynnöt"
-
-#: models.py:498 models.py:738 models.py:1047 models.py:1200
-msgid "Date"
-msgstr "Päivämäärä"
-
-#: models.py:510 views/staff.py:390
-msgid "Comment"
-msgstr "Kommentti"
-
-#: models.py:516
-msgid "Public"
-msgstr "Julkinen"
-
-#: models.py:665
-msgid "Attachment"
-msgstr "Liite"
-
-#: models.py:666
-msgid "Attachments"
-msgstr "Liitteet"
-
-#: templates/helpdesk/base.html:52 templates/helpdesk/public_base.html:6
-#: templates/helpdesk/public_base.html:18
-msgid "Helpdesk"
-msgstr "Tuki"
-
-#: templates/helpdesk/create_ticket.html:3
-msgid "Create Ticket"
-msgstr "Jätä tukipyyntö"
-
-#: templates/helpdesk/create_ticket.html:10
-#: templates/helpdesk/navigation.html:65 templates/helpdesk/navigation.html:68
-#: templates/helpdesk/public_homepage.html:27
-msgid "Submit a Ticket"
-msgstr "Jätä tukipyyntö"
-
-#: templates/helpdesk/create_ticket.html:11
-#: templates/helpdesk/edit_ticket.html:11
-msgid "Unless otherwise stated, all fields are required."
-msgstr "Kaikki kentät vaaditaan jos niitä ei ole erikseen mainittu valinnaiseksi."
-
-#: templates/helpdesk/create_ticket.html:11
-#: templates/helpdesk/edit_ticket.html:11
-#: templates/helpdesk/public_homepage.html:28
-msgid "Please provide as descriptive a title and description as possible."
-msgstr "Anna mahdollisimman kuvaava otsikko ja selitys"
-
-#: templates/helpdesk/create_ticket.html:30
-#: templates/helpdesk/public_homepage.html:55
-msgid "Submit Ticket"
-msgstr "Jätä tukipyyntö"
-
-#: templates/helpdesk/kb_index.html:4 templates/helpdesk/navigation.html:21
-#: templates/helpdesk/navigation.html:71
-msgid "Knowledgebase"
-msgstr "Usein kysytyt kysymykset"
-
-#: templates/helpdesk/navigation.html:18
-msgid "New Ticket"
-msgstr "Uusi tukipyyntö"
-
-#: templates/helpdesk/navigation.html:19
-msgid "Stats"
-msgstr "Tilastot"
-
-#: templates/helpdesk/public_change_language.html:2
-#: templates/helpdesk/public_homepage.html:73
-#: templates/helpdesk/public_view_form.html:4
-#: templates/helpdesk/public_view_ticket.html:2
-msgid "View a Ticket"
-msgstr "Katso tukipyyntöä"
-
-#: templates/helpdesk/public_change_language.html:5
-msgid "Change the display language"
-msgstr "Vaihda kieltä"
-
-#: templates/helpdesk/public_homepage.html:6
-msgid "Knowledgebase Articles"
-msgstr "Usein kysyttyä"
-
-#: templates/helpdesk/public_homepage.html:28
-msgid "All fields are required."
-msgstr "Kaikki kentät vaaditaan"
-
-#: templates/helpdesk/public_homepage.html:82
-#: templates/helpdesk/public_view_form.html:15
-msgid "Your E-mail Address"
-msgstr "Sähköpostiosoitteesi"
-
-#: templates/helpdesk/public_homepage.html:86
-#: templates/helpdesk/public_view_form.html:19
-msgid "View Ticket"
-msgstr "Katso tukipyyntöä"
-
-#: templates/helpdesk/public_spam.html:4
-msgid "Unable To Open Ticket"
-msgstr "Tukipyyntöä ei löydy"
-
-#: templates/helpdesk/public_spam.html:5
-msgid "Sorry, but there has been an error trying to submit your ticket."
-msgstr "Tukipyynnön jättämisessä oli ongelma."
-
-#: templates/helpdesk/public_view_form.html:8
-msgid "Error:"
-msgstr "Virhe:"
-
-#: templates/helpdesk/public_view_ticket.html:9
-#, python-format
-msgid "Queue: %(queue_name)s"
-msgstr "Aihealue: %(queue_name)s"
-
-#: templates/helpdesk/public_view_ticket.html:13
-#: templates/helpdesk/ticket_desc_table.html:32
-msgid "Submitted On"
-msgstr "Jätetty"
-
-#: templates/helpdesk/public_view_ticket.html:35
-msgid "Tags"
-msgstr "Tägit"
-
-#: templates/helpdesk/public_view_ticket.html:48
-#: templates/helpdesk/ticket_desc_table.html:26
-msgid "Accept"
-msgstr "Hyväksy"
-
-#: templates/helpdesk/public_view_ticket.html:48
-#: templates/helpdesk/ticket_desc_table.html:26
-msgid "Accept and Close"
-msgstr "Hyväksy ja sulje"
-
-#: templates/helpdesk/public_view_ticket.html:57
-#: templates/helpdesk/ticket.html:66
-msgid "Follow-Ups"
-msgstr "Päivitys"
-
-#: templates/helpdesk/report_index.html:3
-#: templates/helpdesk/report_index.html:6
-#: templates/helpdesk/report_output.html:3
-#: templates/helpdesk/report_output.html:16
-msgid "Reports &amp; Statistics"
-msgstr "Raportit &amp; tilastot"
-
-#: templates/helpdesk/ticket.html:34
-msgid "Attach another File"
-msgstr "Liitä toinen tiedosto"
-
-#: templates/helpdesk/ticket.html:34 templates/helpdesk/ticket.html.py:200
-msgid "Add Another File"
-msgstr "Lisää toinen tiedosto"
-
-#: templates/helpdesk/ticket.html:73 templates/helpdesk/ticket.html.py:86
-msgid "Private"
-msgstr "Yksityinen"
-
-#: templates/helpdesk/ticket.html:119
-msgid "Respond to this ticket"
-msgstr "Vastaa tähän tukipyyntöön"
-
-#: templates/helpdesk/ticket.html:131
-msgid "Comment / Resolution"
-msgstr "Kommentti / ratkaisu"
-
-#: templates/helpdesk/ticket.html:133
-msgid ""
-"You can insert ticket and queue details in your message. For more "
-"information, see the <a href='../../help/context/'>context help page</a>."
+#: forms.py:335 management/commands/escalate_tickets.py:115 models.py:586
+#: templates/helpdesk/filters/priority.html:9
+#: templates/helpdesk/filters/sorting.html:30
+#: templates/helpdesk/include/ticket_respond_form.html:132
+#: templates/helpdesk/include/tickets.html:32
+#: templates/helpdesk/include/tickets.html:34
+#: templates/helpdesk/include/tickets.html:36
+#: templates/helpdesk/include/tickets.html:40
+#: templates/helpdesk/include/unassigned.html:32
+#: templates/helpdesk/include/unassigned.html:34
+#: templates/helpdesk/include/unassigned.html:36
+#: templates/helpdesk/include/unassigned.html:40
+#: templates/helpdesk/include/unassigned.html:142
+#: templates/helpdesk/public_view_ticket.html:40
+#: templates/helpdesk/ticket_desc_table.html:77
+#: templates/helpdesk/ticket_list.html:83 update_ticket.py:368
+msgid "Priority"
+msgstr "Kiireellisyys"
+
+#: forms.py:336
+msgid "Please select a priority carefully. If unsure, leave it as '3'."
 msgstr ""
-"Voit käyttää tukipyynnön ja aihealueen tietoja viestissäsi jos haluat. "
-"Lisätietoja <a href='../../help/context/'>context help page</a>."
+"Valitse kiireellisyys varovasti. Jos olet epävarma jätä se "
+"oletusasetusarvoksi (3)."
 
-#: templates/helpdesk/ticket.html:136
-msgid ""
-"This ticket cannot be resolved or closed until the tickets it depends on are"
-" resolved."
-msgstr ""
-"Tätä tukipyyntöä ei voi merkata ratkaistuksi ennen kuin riippuvat "
-"tukipyynnöt on ratkaistu."
-
-#: templates/helpdesk/ticket.html:193
-msgid "Attach File(s) &raquo;"
-msgstr "Liitä tiedostoja &raquo;"
-
-#: templates/helpdesk/ticket.html:199
-msgid "Attach a File"
-msgstr "Liitä tiedosto"
-
-#: templates/helpdesk/ticket.html:207
-msgid "Update This Ticket"
-msgstr "Päivitä tätä tukipyyntöä"
-
-#: templates/helpdesk/ticket_cc_add.html:3
-msgid "Add Ticket CC"
-msgstr "Lisää CC tukipyyntöön"
-
-msgid "Ticket Opened & Assigned to %(name)s"
-msgstr "Ticket Opened & Assigned to %(name)s"
-
-msgid "POP 3"
-msgstr "POP 3"
-
-msgid "IMAP"
-msgstr "IMAP"
-
-msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
-msgstr "changed from \"%(old_value)s\" to \"%(new_value)s\""
-
-msgid ""
-"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ "
-"queue }} - The queue; and {{ user }} - the current user."
-msgstr ""
-"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); {{ "
-"queue }} - The queue; and {{ user }} - the current user."
-
-msgid ""
-"The context available to you includes {{ ticket }}, {{ queue }}, and "
-"depending on the time of the call: {{ resolution }} or {{ comment }}."
-msgstr ""
-"The context available to you includes {{ ticket }}, {{ queue }}, and "
-"depending on the time of the call: {{ resolution }} or {{ comment }}."
-
-msgid "HTML"
-msgstr "HTML"
-
-msgid "URL"
-msgstr "URL"
-
-msgid "email_html_body.html"
-msgstr "email_html_body.html"
-
-msgid "E-Mail Received from %(sender_email)s"
-msgstr "E-Mail Received from %(sender_email)s"
-
-msgid "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
-msgstr "Ticket Re-Opened by E-Mail Received from %(sender_email)s"
-
-msgid "API"
-msgstr "API"
-
-msgid ""
-"Are you sure you want to delete this saved filter "
-"(<em>%(query_title)s</em>)? To re-create it, you will need to manually re-"
-"filter your ticket listing."
-msgstr ""
-"Are you sure you want to delete this saved filter "
-"(<em>%(query_title)s</em>)? To re-create it, you will need to manually re-"
-"filter your ticket listing."
-
-msgid ""
-"Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All"
-" traces of the ticket, including followups, attachments, and updates will be"
-" irreversibly removed."
-msgstr ""
-"Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All"
-" traces of the ticket, including followups, attachments, and updates will be"
-" irreversibly removed."
-
-msgid ""
-"Are you sure you wish to stop removing this email address "
-"(<em>%(email_address)s</em>) and allow their e-mails to automatically create"
-" tickets in your system? You can re-add this e-mail address at any time."
-msgstr ""
-"Are you sure you wish to stop removing this email address "
-"(<em>%(email_address)s</em>) and allow their e-mails to automatically create"
-" tickets in your system? You can re-add this e-mail address at any time."
-
-msgid "Knowledgebase Category: %(kbcat)s"
-msgstr "Knowledgebase Category: %(kbcat)s"
-
-msgid "You are viewing all items in the %(kbcat)s category."
-msgstr "You are viewing all items in the %(kbcat)s category."
-
-msgid "Knowledgebase: %(item)s"
-msgstr "Knowledgebase: %(item)s"
-
-msgid ""
-"View <a href='%(category_url)s'>other <em>%(category_title)s</em> "
-"articles</a>, or continue <a href='../'>viewing other knowledgebase "
-"articles</a>."
-msgstr ""
-"View <a href='%(category_url)s'>other <em>%(category_title)s</em> "
-"articles</a>, or continue <a href='../'>viewing other knowledgebase "
-"articles</a>."
-
-msgid "Recommendations: %(recommendations)s"
-msgstr "Suositukset: %(recommendations)s"
-
-msgid "Query Results"
-msgstr "Kyselyn tulokset"
-
-msgid "Table"
-msgstr "Taulukko"
-
-msgid "Time Spent"
-msgstr "Käytetty aika"
-
-msgid "Due Date"
+#: forms.py:349 models.py:594
+#: templates/helpdesk/include/ticket_respond_form.html:158 update_ticket.py:384
+#: views/staff.py:984
+msgid "Due on"
 msgstr "Eräpäivä"
 
-msgid "Query Selection"
-msgstr "Kyselyn valinnat"
+#: forms.py:356
+msgid "Attach File"
+msgstr "Liitä tiedosto"
 
-msgid "Filters"
-msgstr "Seulat"
-
-msgid "Add filter"
-msgstr "Lisää seula"
-
-msgid "Apply Filters"
-msgstr "Seulo tulokset"
-
-msgid "Timeline"
-msgstr "Aikajana"
-
-msgid "Overview"
-msgstr "Yleiskatsaus"
-
-msgid "overview"
-msgstr "yleiskatsaus"
-
-msgid "Votes: %(votes)s"
-msgstr "Ääniä: %(votes)s"
-
-msgid "Overall Rating: %(score)s"
-msgstr "Yleisearvosana: %(score)s"
-
-msgid "Search..."
-msgstr "Hae..."
-
-msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
-msgstr "Changed %(field)s from %(old_value)s to %(new_value)s."
-
+#: forms.py:358
 msgid ""
-"\n"
-"<h2>Delete Ticket CC</h2>\n"
-"\n"
-"<p>Are you sure you wish to delete this email address (<em>%(email_address)s</em>) from the CC list for this ticket? They will stop receiving updates.</p>\n"
+"You can attach a file to this ticket. Only file types such as plain text "
+"(.txt), a document (.pdf, .docx, or .odt), or screenshot (.png or .jpg) may "
+"be uploaded."
 msgstr ""
-"\n"
-"<h2>Delete Ticket CC</h2>\n"
-"\n"
-"<p>Are you sure you wish to delete this email address (<em>%(email_address)s</em>) from the CC list for this ticket? They will stop receiving updates.</p>\n"
 
+#: forms.py:375
+#, fuzzy
+#| msgid "Knowledge base item"
+msgid "Knowledge Base Item"
+msgstr "UKK-kysymys"
+
+#: forms.py:482
+msgid "Submitter E-Mail Address"
+msgstr "Tukipyynnön lähettäjän sähköpostiosoite"
+
+#: forms.py:485
 msgid ""
-"\n"
-"<h2>Ticket CC Settings</h2>\n"
-"\n"
-"<p>The following people will receive an e-mail whenever <em><a href='../'>%(ticket_title)s</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>\n"
-"\n"
-"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
+"This e-mail address will receive copies of all public updates to this ticket."
 msgstr ""
-"\n"
-"<h2>Ticket CC Settings</h2>\n"
-"\n"
-"<p>The following people will receive an e-mail whenever <em><a href='../'>%(ticket_title)s</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>\n"
-"\n"
-"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
+"Tämä sähköpostiosoite saa kopion kaikista päivityksistä tähän tukipyyntöön."
 
-msgid "Return to <em>%(ticket_title)s</em>"
-msgstr "Return to <em>%(ticket_title)s</em>"
+#: forms.py:496
+msgid "Case owner"
+msgstr "Tukipyynnön jättäjä"
 
-msgid "Queue: %(queue)s"
-msgstr "Queue: %(queue)s"
-
-msgid "Assigned To"
-msgstr "Vastuullinen"
-
-msgid "(ME)"
-msgstr "(ME)"
-
-msgid "You are currently viewing saved query <strong>\"%(query_name)s\"</strong>."
-msgstr ""
-"Katsot parhaillaan tallennettua kyselyä <strong>\"%(query_name)s\"</strong>."
-
-msgid ""
-"<a href='../reports/?saved_query=%(query_id)s'>Run a report</a> on this "
-"query to see stats and charts for the data listed below."
-msgstr ""
-"<a href='../reports/?saved_query=%(query_id)s'>Run a report</a> on this "
-"query to see stats and charts for the data listed below."
-
-msgid "Page %(ticket_num)s of %(num_pages)s."
-msgstr "Sivu %(ticket_num)s / %(num_pages)s."
-
-msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
-msgstr "Tuki: Avoimia tukipyyntöjä %(queue)s käyttäjälle %(username)s"
-
-msgid "Helpdesk: Open Tickets for %(username)s"
-msgstr "Tuki: Avoimia tukipyyntöjä käyttäjälle %(username)s"
-
-msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
-msgstr "Avoimet ja uudelleenavatut tukipyynnöt alueessa %(queue)s käyttäjälle %(username)s"
-
-msgid "Open and Reopened Tickets for %(username)s"
-msgstr "Avoimet ja uudelleenavatut tukipyynnöt käyttäjälle %(username)s"
-
-msgid "Helpdesk: Open Tickets in queue %(queue)s"
-msgstr "Tuki: Avoimet tukipyynnöt alueessa %(queue)s"
-
-msgid "Open and Reopened Tickets in queue %(queue)s"
-msgstr "Avoimet ja uudelleenavatut tukipyynnöt alueessa %(queue)s"
-
-msgid "Assigned to %(username)s"
-msgstr "Vastuulliseksi henkilöksi asetettu %(username)s"
-
-msgid "Assigned to %(username)s in bulk update"
-msgstr "Vastuulliseksi henkilöksi asetettu %(username)s massapäivityksellä"
-
+#: forms.py:498
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
@@ -668,136 +179,170 @@ msgstr ""
 "Jos valitset muun omistajan kuin sinä itse, heille lähetetään välittömästi "
 "tukipyynnön tiedot sähköpostitse."
 
-msgid "Summary of your query"
-msgstr "Yhteenveto kyselystäsi"
+#: forms.py:549
+#, python-format
+msgid "Ticket Opened & Assigned to %(name)s"
+msgstr "Ticket Opened & Assigned to %(name)s"
 
+#: forms.py:550
+msgid "<invalid user>"
+msgstr ""
+
+#: forms.py:553
+msgid "Ticket Opened"
+msgstr "Tukipyyntö avattu"
+
+#: forms.py:582
+msgid "Your E-Mail Address"
+msgstr "Sähköpostiosoitteesi"
+
+#: forms.py:583
+msgid "We will e-mail you when your ticket is updated."
+msgstr "Lähetämme sinulle sähköpostin aina kun tukipyyntöäsi on päivitetty."
+
+#: forms.py:654
+msgid "Ticket Opened Via Web"
+msgstr "Tukipyyntö jätetty webin kautta"
+
+#: forms.py:773
+#, fuzzy
+#| msgid "Ticket Opened"
+msgid "Tickets to merge"
+msgstr "Tukipyyntö avattu"
+
+#: forms.py:797
+msgid "Please choose at least 2 tickets."
+msgstr ""
+
+#: forms.py:799
+msgid "Impossible to merge more than 4 tickets..."
+msgstr ""
+
+#: forms.py:804
+msgid "All selected tickets must share the same queue in order to be merged."
+msgstr ""
+
+#: forms.py:839
+#, fuzzy
+#| msgid "Template Name"
+msgid "Template"
+msgstr "Pohjan nimi"
+
+#: management/commands/create_queue_permissions.py:69
+#: migrations/0009_migrate_queuemembership.py:28 models.py:468
+msgid "Permission for queue: "
+msgstr ""
+
+#: management/commands/create_usersettings.py:23
 msgid ""
-"Please be as descriptive as possible, including any details we may need to "
-"address your query."
+"Check for user without django-helpdesk UserSettings and create settings if "
+"required. Uses settings.DEFAULT_USER_SETTINGS which can be overridden to "
+"suit your situation."
 msgstr ""
-"Ole mahdollisimman kuvaava, mukaan lukien kaikki tiedot, joita saatamme "
-"tarvita kyselyämme varten."
+"Etsi käyttäjiä ilman django-helpdesk UserSettings -sovellusta ja luo "
+"tarvittaessa asetukset. Käytä asetuksia.DEFAULT_USER_SETTINGS, jotka voidaan "
+"ohittaa tilanteeseesi sopiviksi."
 
-msgid "Urgency"
-msgstr "Kiireellisyys"
+#: management/commands/escalate_tickets.py:107
+#, fuzzy
+#| msgid "Ticket change"
+msgid "Ticket Escalated"
+msgstr "Tukipyynnön muutos"
 
-msgid "Please select a priority carefully."
-msgstr "Valitse prioriteetti huolellisesti."
+#: management/commands/escalate_tickets.py:109
+#, fuzzy, python-format
+#| msgid "Ticket escalated after %s days"
+msgid "Ticket escalated after %(nb)s days"
+msgstr "Tukipyyntö eskaloitui %s päivän kuluttua"
 
-msgid "Show Ticket List on Login?"
-msgstr "Näytä tukipyyntöluettelo kirjautumisen yhteydessä?"
+#: models.py:106 models.py:523 models.py:997 models.py:1587
+#: templates/helpdesk/filters/sorting.html:24
+#: templates/helpdesk/include/ticket_respond_form.html:119
+#: templates/helpdesk/my_tickets.html:29 update_ticket.py:346
+msgid "Title"
+msgstr "Otsikko"
 
-msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
-msgstr ""
-"Näytä tukipyyntöluettelo kirjautumisen yhteydessä? Muutoin kojetaulu näkyy."
-
-msgid "E-mail me on ticket change?"
-msgstr "Lähetä minulle sähköpostia tukipyynnön muutoksesta?"
-
-msgid ""
-"If you're the ticket owner and the ticket is changed via the web by somebody"
-" else, do you want to receive an e-mail?"
-msgstr ""
-"Jos olet tukipyynnön omistaja ja joku muutti tukipyyntöä, haluatko saada "
-"sähköpostia?"
-
-msgid "E-mail me when assigned a ticket?"
-msgstr "Lähetä minulle sähköpostia, kun joku ottaa tukipyynnön käsittelyyn?"
-
-msgid ""
-"If you are assigned a ticket via the web, do you want to receive an e-mail?"
-msgstr ""
-"Jos sinulle annetaan tukipyyntö verkon kautta, haluatko saada sähköpostia?"
-
-msgid "E-mail me when a ticket is changed via the API?"
-msgstr "Lähetä minulle sähköpostia, kun tukipyyntö vaihdetaan API:n kautta?"
-
-msgid "If a ticket is altered by the API, do you want to receive an e-mail?"
-msgstr "Jos sovellusliittymä muuttaa tukipyyntöä, haluatko saada sähköpostia?"
-
-msgid "Number of tickets to show per page"
-msgstr "Näytettävien tukipyyntöjen määrä sivua kohden"
-
-msgid "How many tickets do you want to see on the Ticket List page?"
-msgstr "Kuinka monta tukipyyntöa haluat nähdä tukipyyntölista-sivulla?"
-
-msgid "Use my e-mail address when submitting tickets?"
-msgstr "Käytätkö omaa sähköpostiosoitettasi lähettäessäsi tukipyyntöja?"
-
-msgid ""
-"When you submit a ticket, do you want to automatically use your e-mail "
-"address as the submitter address? You can type a different e-mail address "
-"when entering the ticket if needed, this option only changes the default."
-msgstr ""
-"Kun lähetät tukipyynnön, haluatko käyttää automaattisesti sähköpostiosoitettasi "
-"lähettäjän osoitteena? Voit kirjoittaa toisen sähköpostiosoitteen "
-"kirjoittaessasi tukipyyntöön tarvittaessa. Tämä vaihtoehto muuttaa vain "
-"oletusasetusta."
-
-msgid "Slug"
-msgstr "Etana"
-
+#: models.py:115
 msgid ""
 "This slug is used when building ticket ID's. Once set, try not to change it "
 "or e-mailing may get messy."
 msgstr ""
-"Tätä etanaa käytetään rakennettaessa tukipyyntötunnuksia. Kun olet asettanut sen,"
-" yritä olla muuttamatta sitä. Sähköpostit saattavat tulla sotkuisia."
+"Tätä etanaa käytetään rakennettaessa tukipyyntötunnuksia. Kun olet asettanut "
+"sen, yritä olla muuttamatta sitä. Sähköpostit saattavat tulla sotkuisia."
 
+#: models.py:121 models.py:1884 models.py:1972 models.py:2058
+#: templates/helpdesk/email_ignore_list.html:33
 msgid "E-Mail Address"
 msgstr "Sähköpostiosoite"
 
+#: models.py:125
 msgid ""
-"All outgoing e-mails for this queue will use this e-mail address. If you use"
-" IMAP or POP3, this should be the e-mail address for that mailbox."
+"All outgoing e-mails for this queue will use this e-mail address. If you use "
+"IMAP or POP3, this should be the e-mail address for that mailbox."
 msgstr ""
 "Kaikissa tämän alueen lähtevissä sähköposteissa käytetään tätä "
 "sähköpostiosoitetta. Jos käytät IMAP- tai POP3-protokollaa, tämän pitäisi "
 "olla kyseisen postilaatikon sähköpostiosoite."
 
+#: models.py:132 models.py:1522
 msgid "Locale"
 msgstr "Kieli"
 
+#: models.py:137
 msgid ""
 "Locale of this queue. All correspondence in this queue will be in this "
 "language."
 msgstr ""
-"Tämän alueen kieli. Kaikki tämän alueen viesteily tapahtuu tällä "
-"kielellä."
+"Tämän alueen kieli. Kaikki tämän alueen viesteily tapahtuu tällä kielellä."
 
+#: models.py:143
 msgid "Allow Public Submission?"
 msgstr "Sallitaanko julkinen lähettäminen?"
 
+#: models.py:146
 msgid "Should this queue be listed on the public submission form?"
 msgstr "Pitäisikö tämä jono olla julkisessa lähetyslomakkeessa?"
 
+#: models.py:150
 msgid "Allow E-Mail Submission?"
 msgstr "Sallitaanko sähköpostitse lähettäminen?"
 
+#: models.py:153
 msgid "Do you want to poll the e-mail box below for new tickets?"
-msgstr "Haluatko kyselyä alla olevasta sähköpostilaatikosta uusia tukipyyntöja?"
+msgstr ""
+"Haluatko kyselyä alla olevasta sähköpostilaatikosta uusia tukipyyntöja?"
 
+#: models.py:157
 msgid "Escalation Days"
 msgstr "Eskalaatio-aika päivinä"
 
+#: models.py:161
 msgid ""
 "For tickets which are not held, how often do you wish to increase their "
 "priority? Set to 0 for no escalation."
 msgstr ""
-"Kuinka usein haluat lisätä tukipyyntöjen prioriteettia jotka ei ole pidossa? Arvo 0 disabloi eskaloinnin."
+"Kuinka usein haluat lisätä tukipyyntöjen prioriteettia jotka ei ole pidossa? "
+"Arvo 0 disabloi eskaloinnin."
 
+#: models.py:167
+msgid "New Ticket CC Address"
+msgstr "Uuden tukipyynnnön cc-osoite"
+
+#: models.py:172
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
-"all new tickets created for this queue. Enter a comma between multiple "
-"e-mail addresses."
+"all new tickets created for this queue. Enter a comma between multiple e-"
+"mail addresses."
 msgstr ""
 "Jos sähköpostiosoite syötetään tähän, se saa ilmoituksen kaikista tälle "
 "jonoon luotuista uusista tukipyynnöistä. Kirjoita pilkku useiden "
 "sähköpostiosoitteiden väliin."
 
+#: models.py:179
 msgid "Updated Ticket CC Address"
 msgstr "Päivitetty tukipyynnön CC-osoite"
 
+#: models.py:184
 msgid ""
 "If an e-mail address is entered here, then it will receive notification of "
 "all activity (new tickets, closed tickets, updates, reassignments, etc) for "
@@ -807,19 +352,54 @@ msgstr ""
 "alueen toiminnasta (uudet tukipyynnöt, suljetut tukipyynnöt, päivitykset, "
 "uudelleenmääritykset jne.). Erota useita osoitteita pilkulla."
 
+#: models.py:192
+msgid "Notify contacts when email updates arrive"
+msgstr ""
+
+#: models.py:196
+msgid ""
+"When an email arrives to either create a ticket or to interact with an "
+"existing discussion. Should email notifications be sent ? Note: the "
+"new_ticket_cc and updated_ticket_cc work independently of this feature"
+msgstr ""
+
+#: models.py:203
 msgid "E-Mail Box Type"
 msgstr "Sähköpostilaatikon tyyppi"
 
+#: models.py:206
+msgid "POP 3"
+msgstr "POP 3"
+
+#: models.py:207
+msgid "IMAP"
+msgstr "IMAP"
+
+#: models.py:208
+msgid "IMAP OAUTH"
+msgstr ""
+
+#: models.py:209
+msgid "Local Directory"
+msgstr ""
+
+#: models.py:214
+#, fuzzy
+#| msgid ""
+#| "E-Mail server type for creating tickets automatically from a mailbox - "
+#| "both POP3 and IMAP are supported."
 msgid ""
 "E-Mail server type for creating tickets automatically from a mailbox - both "
-"POP3 and IMAP are supported."
+"POP3 and IMAP are supported, as well as reading from a local directory."
 msgstr ""
-"Sähköpostipalvelintyyppi tukipyyntöjen luomiseksi automaattisesti postilaatikosta"
-" - sekä POP3 että IMAP ovat tuettuja."
+"Sähköpostipalvelintyyppi tukipyyntöjen luomiseksi automaattisesti "
+"postilaatikosta - sekä POP3 että IMAP ovat tuettuja."
 
+#: models.py:221
 msgid "E-Mail Hostname"
 msgstr "Sähköpostipalvelimen nimi"
 
+#: models.py:226
 msgid ""
 "Your e-mail server address - either the domain name or IP address. May be "
 "\"localhost\"."
@@ -827,9 +407,11 @@ msgstr ""
 "Sähköpostipalvelimesi osoite - joko verkkotunnus tai IP-osoite. Voi olla "
 "&quot;localhost&quot;."
 
+#: models.py:232
 msgid "E-Mail Port"
 msgstr "Sähköpostipalvelimen portti"
 
+#: models.py:236
 msgid ""
 "Port number to use for accessing e-mail. Default for POP3 is \"110\", and "
 "for IMAP is \"143\". This may differ on some servers. Leave it blank to use "
@@ -839,9 +421,11 @@ msgstr ""
 "&quot;110&quot; ja IMAP: lle on &quot;143&quot;. Tämä voi erota joissakin "
 "palvelimissa. Jätä se tyhjäksi käyttääksesi oletusasetuksia."
 
+#: models.py:243
 msgid "Use SSL for E-Mail?"
 msgstr "Käytätkö SSL-suojausta sähköpostissa?"
 
+#: models.py:247
 msgid ""
 "Whether to use SSL for IMAP or POP3 - the default ports when using SSL are "
 "993 for IMAP and 995 for POP3."
@@ -849,293 +433,818 @@ msgstr ""
 "Käytetäänkö SSL IMAP:lle vai POP3:lle - oletusportit SSL:tä käytettäessä "
 "ovat 993 IMAP:lle ja 995 POP3:lle."
 
+#: models.py:253
 msgid "E-Mail Username"
 msgstr "Sähköpostin käyttäjätunnus"
 
+#: models.py:257
 msgid "Username for accessing this mailbox."
 msgstr "Käyttäjätunnus tähän postilaatikkoon pääsyä varten."
 
+#: models.py:261
 msgid "E-Mail Password"
 msgstr "Sähköpostin salasana"
 
+#: models.py:265
 msgid "Password for the above username"
 msgstr "Yllä olevan käyttäjänimen salasana"
 
+#: models.py:269
 msgid "IMAP Folder"
 msgstr "IMAP-kansio"
 
+#: models.py:274
 msgid ""
 "If using IMAP, what folder do you wish to fetch messages from? This allows "
 "you to use one IMAP account for multiple queues, by filtering messages on "
 "your IMAP server into separate folders. Default: INBOX."
 msgstr ""
-"Jos käytät IMAP:ä, mistä kansiosta haluat hakea viestejä? Tämän avulla "
-"voit käyttää yhtä IMAP-tiliä useisiin jonoihin suodattamalla IMAP-palvelimen"
-" viestit erillisiin kansioihin. Oletus: INBOX."
+"Jos käytät IMAP:ä, mistä kansiosta haluat hakea viestejä? Tämän avulla voit "
+"käyttää yhtä IMAP-tiliä useisiin jonoihin suodattamalla IMAP-palvelimen "
+"viestit erillisiin kansioihin. Oletus: INBOX."
 
+#: models.py:282
+#, fuzzy
+#| msgid "E-Mail Port"
+msgid "E-Mail Local Directory"
+msgstr "Sähköpostipalvelimen portti"
+
+#: models.py:287
+msgid ""
+"If using a local directory, what directory path do you wish to poll for new "
+"email? Example: /var/lib/mail/helpdesk/"
+msgstr ""
+
+#: models.py:294
+msgid "Django auth permission name"
+msgstr ""
+
+#: models.py:299
+msgid "Name used in the django.contrib.auth permission system"
+msgstr ""
+
+#: models.py:303
 msgid "E-Mail Check Interval"
 msgstr "Sähköpostin tarkistusväli"
 
+#: models.py:304
 msgid "How often do you wish to check this mailbox? (in Minutes)"
 msgstr "Kuinka usein haluat tarkistaa tämän postilaatikon? (minuutteja)"
 
+#: models.py:318
+msgid "Socks Proxy Type"
+msgstr ""
+
+#: models.py:320
+msgid "SOCKS4"
+msgstr ""
+
+#: models.py:320
+msgid "SOCKS5"
+msgstr ""
+
+#: models.py:324
+msgid ""
+"SOCKS4 or SOCKS5 allows you to proxy your connections through a SOCKS server."
+msgstr ""
+
+#: models.py:329
+msgid "Socks Proxy Host"
+msgstr ""
+
+#: models.py:332
+msgid "Socks proxy IP address. Default: 127.0.0.1"
+msgstr ""
+
+#: models.py:336
+msgid "Socks Proxy Port"
+msgstr ""
+
+#: models.py:339
+msgid "Socks proxy port number. Default: 9150 (default TOR port)"
+msgstr ""
+
+#: models.py:343
+msgid "Logging Type"
+msgstr ""
+
+#: models.py:346 templates/helpdesk/ticket_list.html:118
+msgid "None"
+msgstr "Ei mitään"
+
+#: models.py:347
+msgid "Debug"
+msgstr ""
+
+#: models.py:348
+msgid "Information"
+msgstr ""
+
+#: models.py:349
+msgid "Warning"
+msgstr ""
+
+#: models.py:350
+#, fuzzy
+#| msgid "Error:"
+msgid "Error"
+msgstr "Virhe:"
+
+#: models.py:351
+#, fuzzy
+#| msgid "1. Critical"
+msgid "Critical"
+msgstr "1. Kriittinen"
+
+#: models.py:356
+msgid ""
+"Set the default logging level. All messages at that level or above will be "
+"logged to the directory set below. If no level is set, logging will be "
+"disabled."
+msgstr ""
+
+#: models.py:363
+msgid "Logging Directory"
+msgstr ""
+
+#: models.py:368
+msgid ""
+"If logging is enabled, what directory should we use to store log files for "
+"this queue? The standard logging mechanisms are used if no directory is set"
+msgstr ""
+
+#: models.py:380
+#, fuzzy
+#| msgid "Case owner"
+msgid "Default owner"
+msgstr "Tukipyynnön jättäjä"
+
+#: models.py:384
+msgid "Time to be spent on this Queue in total"
+msgstr ""
+
+#: models.py:393 templates/helpdesk/email_ignore_list.html:35
+msgid "Queues"
+msgstr "Aihealueet"
+
+#: models.py:528 templates/helpdesk/filters/sorting.html:16
+#: templates/helpdesk/include/unassigned.html:62
+#: templates/helpdesk/include/unassigned.html:64
+#: templates/helpdesk/include/unassigned.html:66
+#: templates/helpdesk/include/unassigned.html:70
+#: templates/helpdesk/include/unassigned.html:144
+#: templates/helpdesk/my_tickets.html:32 templates/helpdesk/ticket_list.html:86
+msgid "Created"
+msgstr "Luotu"
+
+#: models.py:530
+msgid "Date this ticket was first created"
+msgstr "Päivämäärä jolloin tukipyyntö luotiin"
+
+#: models.py:535
+msgid "Modified"
+msgstr "Muokattu"
+
+#: models.py:537
+msgid "Date this ticket was most recently changed."
+msgstr "Päivämäärä jolloin tukipyyntöä viimeksi muokattiin"
+
+#: models.py:546
 msgid ""
 "The submitter will receive an email for all public follow-ups left for this "
 "task."
 msgstr ""
-"Lähettäjä saa sähköpostin kaikista julkisista tähän tehtävään liittyvistä muutoksista."
+"Lähettäjä saa sähköpostin kaikista julkisista tähän tehtävään liittyvistä "
+"muutoksista."
 
+#: models.py:557 templates/helpdesk/ticket_desc_table.html:85
+msgid "Assigned to"
+msgstr "Vastuullinen"
+
+#: models.py:561 templates/helpdesk/filters/sorting.html:28
+#: templates/helpdesk/filters/status.html:9
+#: templates/helpdesk/filters/status.html:12
+#: templates/helpdesk/include/tickets.html:62
+#: templates/helpdesk/include/tickets.html:64
+#: templates/helpdesk/include/tickets.html:66
+#: templates/helpdesk/include/tickets.html:70
+#: templates/helpdesk/my_tickets.html:31
+#: templates/helpdesk/public_view_ticket.html:44
+#: templates/helpdesk/ticket_desc_table.html:81
+#: templates/helpdesk/ticket_list.html:85 update_ticket.py:354
+#: views/staff.py:985
+msgid "Status"
+msgstr "Tilanne"
+
+#: models.py:565 models.py:806 views/staff.py:1608
+msgid "On Hold"
+msgstr "Pidossa"
+
+#: models.py:568
 msgid "If a ticket is on hold, it will not automatically be escalated."
 msgstr "Jos tukipyyntö on pidossa, sitä ei eskaloida automaattisesti."
 
+#: models.py:572 models.py:1547 models.py:2306
+#: templates/helpdesk/checklist_form.html:67
+#: templates/helpdesk/checklist_templates.html:85 views/staff.py:988
+msgid "Description"
+msgstr "Kuvaus"
+
+#: models.py:575
+msgid "The content of the customers query."
+msgstr "Tukipyynnön sisältö"
+
+#: models.py:579 templates/helpdesk/public_view_ticket.html:16
+#: templates/helpdesk/ticket_desc_table.html:51 views/staff.py:989
+msgid "Resolution"
+msgstr "Ratkaisu"
+
+#: models.py:582
+msgid "The resolution provided to the customer by our staff."
+msgstr "Annettu ratkaisu."
+
+#: models.py:590
+msgid "1 = Highest Priority, 5 = Low Priority"
+msgstr "1 = Kaikkein kiireellisin, 5 = Vähiten kiireellisin"
+
+#: models.py:604
 msgid ""
 "The date this ticket was last escalated - updated automatically by "
 "management/commands/escalate_tickets.py."
 msgstr ""
-"Päivämäärä, jona tukipyyntö viimeksi eskaloitiin escalate_tickets-komennon toimesta."
+"Päivämäärä, jona tukipyyntö viimeksi eskaloitiin escalate_tickets-komennon "
+"toimesta."
 
+#: models.py:610
+msgid "Secret key needed for viewing/editing ticket by non-logged in users"
+msgstr ""
+
+#: models.py:621
+msgid "Knowledge base item the user was viewing when they created this ticket."
+msgstr ""
+
+#: models.py:627
+#, fuzzy
+#| msgid "Assigned to"
+msgid "merged to"
+msgstr "Vastuullinen"
+
+#: models.py:637 models.py:991 models.py:1959 models.py:2192 models.py:2231
+#: models.py:2274 templates/helpdesk/filters/sorting.html:14
+#: templates/helpdesk/include/tickets.html:17
+#: templates/helpdesk/include/tickets.html:19
+#: templates/helpdesk/include/tickets.html:21
+#: templates/helpdesk/include/tickets.html:25
+#: templates/helpdesk/include/unassigned.html:17
+#: templates/helpdesk/include/unassigned.html:19
+#: templates/helpdesk/include/unassigned.html:21
+#: templates/helpdesk/include/unassigned.html:25
+#: templates/helpdesk/include/unassigned.html:141
+#: templates/helpdesk/public_view_form.html:19
+#: templates/helpdesk/ticket_list.html:82
+msgid "Ticket"
+msgstr "Tukipyyntö"
+
+#: models.py:638 templates/helpdesk/checklist_confirm_delete.html:9
+#: templates/helpdesk/checklist_form.html:11
+#: templates/helpdesk/create_ticket.html:7
+#: templates/helpdesk/delete_ticket.html:7
+#: templates/helpdesk/edit_ticket.html:9
+#: templates/helpdesk/email_ignore_add.html:11
+#: templates/helpdesk/email_ignore_del.html:11
+#: templates/helpdesk/followup_edit.html:16 templates/helpdesk/rss_list.html:8
+#: templates/helpdesk/saved_searches_list.html:10
+#: templates/helpdesk/ticket.html:12 templates/helpdesk/ticket_cc_add.html:9
+#: templates/helpdesk/ticket_cc_del.html:7
+#: templates/helpdesk/ticket_cc_list.html:9
+#: templates/helpdesk/ticket_dependency_add.html:7
+#: templates/helpdesk/ticket_dependency_del.html:7
+#: templates/helpdesk/ticket_list.html:6 templates/helpdesk/ticket_list.html:29
+#: templates/helpdesk/ticket_merge.html:14
+#: templates/helpdesk/ticket_resolves_add.html:7
+msgid "Tickets"
+msgstr "Tukipyynnöt"
+
+#: models.py:762 templates/helpdesk/filters/owner.html:20
+#: templates/helpdesk/filters/queue.html:20
+#: templates/helpdesk/include/ticket_respond_form.html:125
+#: templates/helpdesk/ticket_desc_table.html:99 update_ticket.py:337
+#: update_ticket.py:363 views/feeds.py:102 views/feeds.py:126
+#: views/feeds.py:185
+msgid "Unassigned"
+msgstr "Ei vastuullista"
+
+#: models.py:806
+#, fuzzy
+#| msgid " - Open dependencies"
+msgid "Open dependencies"
+msgstr "- Avoimet riippuvuudet"
+
+#: models.py:826
+#, fuzzy
+#| msgid "Label"
+msgid "No label"
+msgstr "Nimikenttä"
+
+#: models.py:994 models.py:1461 models.py:1877 models.py:2055
+msgid "Date"
+msgstr "Päivämäärä"
+
+#: models.py:1004 update_ticket.py:174
+msgid "Comment"
+msgstr "Kommentti"
+
+#: models.py:1010
+msgid "Public"
+msgstr "Julkinen"
+
+#: models.py:1014
 msgid ""
 "Public tickets are viewable by the submitter and all staff, but non-public "
 "tickets can only be seen by staff."
 msgstr ""
-"Julkiset tukipyynnöt ovat lähettäjän ja koko henkilöstön nähtävissä, mutta vain "
-"henkilöstö näkee ei-julkiset tukipyynnöt."
+"Julkiset tukipyynnöt ovat lähettäjän ja koko henkilöstön nähtävissä, mutta "
+"vain henkilöstö näkee ei-julkiset tukipyynnöt."
 
+#: models.py:1024 models.py:1680 models.py:1968
+#: templates/helpdesk/ticket_cc_add.html:39 views/staff.py:1794
+#: views/staff.py:1801 views/staff.py:1808 views/staff.py:1815
 msgid "User"
 msgstr "Käyttäjä"
 
+#: models.py:1028 templates/helpdesk/include/ticket_respond_form.html:34
 msgid "New Status"
 msgstr "Uusi tila"
 
+#: models.py:1032
 msgid "If the status was changed, what was it changed to?"
 msgstr "Jos tila muutettiin, mihin se muutettiin?"
 
+#: models.py:1036
+#, fuzzy
+#| msgid "E-Mail Port"
+msgid "E-Mail ID"
+msgstr "Sähköpostipalvelimen portti"
+
+#: models.py:1040
+msgid "The Message ID of the submitter's email."
+msgstr ""
+
+#: models.py:1047
+msgid "Time spent on this follow up"
+msgstr ""
+
+#: models.py:1051
+msgid "E-Mail Recipients"
+msgstr ""
+
+#: models.py:1056
+msgid ""
+"Addresses successfully notified by e-mail about this follow-up. Null means "
+"recipients were not recorded."
+msgstr ""
+
+#: models.py:1063 models.py:1237 models.py:1356
 msgid "Follow-up"
 msgstr "Päivitys"
 
+#: models.py:1064
 msgid "Follow-ups"
 msgstr "Päivitykset"
 
+#: models.py:1241 models.py:2198
 msgid "Field"
 msgstr "Kenttä"
 
+#: models.py:1246
 msgid "Old Value"
 msgstr "Vanha arvo"
 
+#: models.py:1252
 msgid "New Value"
 msgstr "Uusi arvo"
 
+#: models.py:1262
 msgid "removed"
 msgstr "poistettu"
 
+#: models.py:1264
+#, python-format
 msgid "set to %s"
 msgstr "asetettu arvoksi %s"
 
+#: models.py:1266
+#, python-format
+msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
+msgstr "changed from \"%(old_value)s\" to \"%(new_value)s\""
+
+#: models.py:1273
 msgid "Ticket change"
 msgstr "Tukipyynnön muutos"
 
+#: models.py:1274
 msgid "Ticket changes"
 msgstr "Tukipyynnön muutokset"
 
+#: models.py:1289
 msgid "File"
 msgstr "Tiedosto"
 
+#: models.py:1296
 msgid "Filename"
 msgstr "Tiedoston nimi"
 
+#: models.py:1302
 msgid "MIME Type"
 msgstr "MIME-tyyppi"
 
+#: models.py:1308
 msgid "Size"
 msgstr "Koko"
 
+#: models.py:1310
 msgid "Size of this file in bytes"
 msgstr "Tiedoston koko tavuina"
 
+#: models.py:1347
+msgid "Attachment"
+msgstr "Liite"
+
+#: models.py:1348 templates/helpdesk/include/ticket_followup_list.html:95
+#: templates/helpdesk/ticket_desc_table.html:274
+msgid "Attachments"
+msgstr "Liitteet"
+
+#: models.py:1374 models.py:1620
+msgid "Knowledge base item"
+msgstr "UKK-kysymys"
+
+#: models.py:1402
+msgid "Pre-set reply"
+msgstr "Esiasetettu vastaus"
+
+#: models.py:1403
+msgid "Pre-set replies"
+msgstr "Esiasetetut vastaukset"
+
+#: models.py:1409
 msgid ""
 "Leave blank to allow this reply to be used for all queues, or select those "
 "queues you wish to limit this reply to."
 msgstr ""
-"Jätä tyhjäksi jos haluat tätä vastausta voidaan käyttää kaikissa alueissa, tai "
-"valitse ne alueet, joihin haluat rajoittaa tämän vastauksen."
+"Jätä tyhjäksi jos haluat tätä vastausta voidaan käyttää kaikissa alueissa, "
+"tai valitse ne alueet, joihin haluat rajoittaa tämän vastauksen."
 
+#: models.py:1415 models.py:1456 models.py:1872 models.py:2257 models.py:2277
+#: templates/helpdesk/email_ignore_list.html:32
 msgid "Name"
 msgstr "Nimi"
 
+#: models.py:1418
 msgid ""
 "Only used to assist users with selecting a reply - not shown to the user."
 msgstr ""
 "Käytetään vain käyttäjien auttamiseen vastauksen valinnassa - ei näytetä "
 "käyttäjälle."
 
+#: models.py:1423
 msgid "Body"
 msgstr "Leipäteksti"
 
-msgid "Pre-set reply"
-msgstr "Esiasetettu vastaus"
+#: models.py:1425
+msgid ""
+"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); "
+"{{ queue }} - The queue; and {{ user }} - the current user."
+msgstr ""
+"Context available: {{ ticket }} - ticket object (eg {{ ticket.title }}); "
+"{{ queue }} - The queue; and {{ user }} - the current user."
 
-msgid "Pre-set replies"
-msgstr "Esiasetetut vastaukset"
-
+#: models.py:1450
 msgid ""
 "Leave blank for this exclusion to be applied to all queues, or select those "
 "queues you wish to exclude with this entry."
 msgstr ""
-"Jätä tyhjäksi jos haluat käyttää tätä poissulkemista kaikkiin alueisiin,"
-" tai valitse ne alueet, jotka haluat sulkea pois tällä merkinnällä."
+"Jätä tyhjäksi jos haluat käyttää tätä poissulkemista kaikkiin alueisiin, tai "
+"valitse ne alueet, jotka haluat sulkea pois tällä merkinnällä."
 
+#: models.py:1462
 msgid "Date on which escalation should not happen"
 msgstr "Päivä, jona eskalaation ei pitäisi tapahtua"
 
+#: models.py:1469
 msgid "Escalation exclusion"
 msgstr "Eskalaation poissulkeminen"
 
+#: models.py:1470
 msgid "Escalation exclusions"
 msgstr "Eskalaation poissulkemiset"
 
+#: models.py:1483
 msgid "Template Name"
 msgstr "Pohjan nimi"
 
+#: models.py:1488
 msgid "Subject"
 msgstr "Aihe"
 
+#: models.py:1491
 msgid ""
 "This will be prefixed with \"[ticket.ticket] ticket.title\". We recommend "
-"something simple such as \"(Updated\") or \"(Closed)\" - the same context is"
-" available as in plain_text, below."
+"something simple such as \"(Updated\") or \"(Closed)\" - the same context is "
+"available as in plain_text, below."
 msgstr ""
-"Tämä etuliite on \"[ticket.ticket] ticket.title\". Suosittelemme "
-"jotain yksinkertaista, kuten \"(Updated\") or \"(Closed)\" - sama konteksti on saatavana kuin alla olevassa "
-"tekstissä."
+"Tämä etuliite on \"[ticket.ticket] ticket.title\". Suosittelemme jotain "
+"yksinkertaista, kuten \"(Updated\") or \"(Closed)\" - sama konteksti on "
+"saatavana kuin alla olevassa tekstissä."
 
+#: models.py:1498
 msgid "Heading"
 msgstr "Otsikko"
 
+#: models.py:1501
 msgid ""
-"In HTML e-mails, this will be the heading at the top of the email - the same"
-" context is available as in plain_text, below."
+"In HTML e-mails, this will be the heading at the top of the email - the same "
+"context is available as in plain_text, below."
 msgstr ""
 "HTML-sähköposteissa tämä on otsikko sähköpostin yläosassa - sama konteksti "
 "on saatavana kuin alla olevassa tavallisessa tekstissä."
 
+#: models.py:1508
 msgid "Plain Text"
 msgstr "Pelkkä teksti"
 
+#: models.py:1510
+msgid ""
+"The context available to you includes {{ ticket }}, {{ queue }}, and "
+"depending on the time of the call: {{ resolution }} or {{ comment }}."
+msgstr ""
+"The context available to you includes {{ ticket }}, {{ queue }}, and "
+"depending on the time of the call: {{ resolution }} or {{ comment }}."
+
+#: models.py:1517
+msgid "HTML"
+msgstr "HTML"
+
+#: models.py:1518
 msgid "The same context is available here as in plain_text, above."
 msgstr ""
-"Täällä on saatavana sama konteksti kuin yllä olevassa tavallisessa "
-"tekstissä."
+"Täällä on saatavana sama konteksti kuin yllä olevassa tavallisessa tekstissä."
 
+#: models.py:1526
 msgid "Locale of this template."
 msgstr "Tämän pohjan kieli."
 
+#: models.py:1534
 msgid "e-mail template"
 msgstr "sähköpostipohja"
 
+#: models.py:1535
 msgid "e-mail templates"
 msgstr "sähköpostipohjat"
 
-msgid "Time spent"
-msgstr "Käytetty aika"
+#: models.py:1544
+msgid "Name of the category"
+msgstr ""
 
-msgid "Total time spent"
-msgstr "Käytetty aika yhteensä"
+#: models.py:1545
+#, fuzzy
+#| msgid "Maintain Knowledgebase Categories"
+msgid "Title on knowledgebase page"
+msgstr "Ylläpidä UKK-kategerioita"
 
-msgid "Yes, make this update public."
-msgstr "Kyllä, tee tämä päivitys julkisesti."
+#: models.py:1554
+msgid "Default queue when creating a ticket after viewing this category."
+msgstr ""
 
+#: models.py:1558
+msgid "Is KBCategory publicly visible?"
+msgstr ""
+
+#: models.py:1563
 msgid "Knowledge base category"
 msgstr "UKK-kategoria"
 
+#: models.py:1564
 msgid "Knowledge base categories"
 msgstr "UKK-kategoriat"
 
+#: models.py:1584
 msgid "Category"
 msgstr "Kategoria"
 
+#: models.py:1590
 msgid "Question"
 msgstr "Kysymys"
 
+#: models.py:1591
 msgid "Answer"
 msgstr "Vastaus"
 
+#: models.py:1593
 msgid "Votes"
 msgstr "Äänet"
 
+#: models.py:1593
 msgid "Total number of votes cast for this item"
 msgstr "Tälle annettu kokonaisäänimäärä"
 
+#: models.py:1596
 msgid "Positive Votes"
 msgstr "Positiiviset äänet"
 
+#: models.py:1597
 msgid "Number of votes for this item which were POSITIVE."
 msgstr "Tämän kohdan positiiviset äänet."
 
+#: models.py:1602
 msgid "Last Updated"
 msgstr "Viimeksi päivitetty"
 
+#: models.py:1603
 msgid "The date on which this question was most recently changed."
 msgstr "Päivämäärä, jolloin tämä kysymys on viimeksi muutettu."
 
-msgid "Unrated"
-msgstr "Luokittelematon"
+#: models.py:1610
+msgid "Team"
+msgstr ""
 
-msgid "Knowledge base item"
-msgstr "UKK-kysymys"
+#: models.py:1615
+#, fuzzy
+#| msgid "Ordering"
+msgid "Order"
+msgstr "Tilaaminen"
 
+#: models.py:1616
+msgid "Enabled to display to users"
+msgstr ""
+
+#: models.py:1621 templates/helpdesk/filters/kbitems.html:9
 msgid "Knowledge base items"
 msgstr "UKK-kysymykset"
 
+#: models.py:1645
+msgid "Unrated"
+msgstr "Luokittelematon"
+
+#: models.py:1684 templates/helpdesk/ticket_list.html:278
 msgid "Query Name"
 msgstr "Kyselyn nimi"
 
+#: models.py:1686
 msgid "User-provided name for this query"
 msgstr "Kyselylle käyttäjän antama nimi"
 
+#: models.py:1690
 msgid "Shared With Other Users?"
 msgstr "Jaettu muiden käyttäjien kanssa?"
 
+#: models.py:1693
 msgid "Should other users see this query?"
 msgstr "Pitäisikö muiden käyttäjien nähdä tämän kysely?"
 
+#: models.py:1697
 msgid "Search Query"
 msgstr "Hakulauseke"
 
+#: models.py:1698
 msgid "Pickled query object. Be wary changing this."
 msgstr "Järjestelmän kyselyobjekti. Ole varovainen muuttaessasi tätä."
 
+#: models.py:1708
 msgid "Saved search"
 msgstr "Tallennettu haku"
 
+#: models.py:1709
 msgid "Saved searches"
 msgstr "Tallennetut haut"
 
-msgid "Settings Dictionary"
+#: models.py:1755
+msgid "Tabs: follow ups and respond share a tabbed card"
+msgstr ""
+
+#: models.py:1756
+msgid "Respond form below the follow ups"
+msgstr ""
+
+#: models.py:1757
+msgid "Respond form above the follow ups"
+msgstr ""
+
+#: models.py:1767
+#, fuzzy
+#| msgid "Settings Dictionary"
+msgid "DEPRECATED! Settings Dictionary DEPRECATED!"
 msgstr "Asetukset-sanakirja"
 
+#: models.py:1769
+#, fuzzy
+#| msgid ""
+#| "This is a base64-encoded representation of a pickled Python dictionary. "
+#| "Do not change this field via the admin."
 msgid ""
-"This is a base64-encoded representation of a pickled Python dictionary. Do "
-"not change this field via the admin."
+"DEPRECATED! This is a base64-encoded representation of a pickled Python "
+"dictionary. Do not change this field via the admin."
 msgstr ""
 "Tämä on base64-koodattu esitys järjestelmän Python-sanakirjasta. Älä muuta "
 "tätä kenttää järjestelmänvalvojan kautta."
 
+#: models.py:1777
+msgid "Show Ticket List on Login?"
+msgstr "Näytä tukipyyntöluettelo kirjautumisen yhteydessä?"
+
+#: models.py:1779
+msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
+msgstr ""
+"Näytä tukipyyntöluettelo kirjautumisen yhteydessä? Muutoin kojetaulu näkyy."
+
+#: models.py:1785
+msgid "E-mail me on ticket change?"
+msgstr "Lähetä minulle sähköpostia tukipyynnön muutoksesta?"
+
+#: models.py:1787
+#, fuzzy
+#| msgid ""
+#| "If you're the ticket owner and the ticket is changed via the web by "
+#| "somebody else, do you want to receive an e-mail?"
+msgid ""
+"If you're the ticket owner and the ticket is changed via the web by somebody "
+"else,do you want to receive an e-mail?"
+msgstr ""
+"Jos olet tukipyynnön omistaja ja joku muutti tukipyyntöä, haluatko saada "
+"sähköpostia?"
+
+#: models.py:1794
+msgid "E-mail me when assigned a ticket?"
+msgstr "Lähetä minulle sähköpostia, kun joku ottaa tukipyynnön käsittelyyn?"
+
+#: models.py:1796
+msgid ""
+"If you are assigned a ticket via the web, do you want to receive an e-mail?"
+msgstr ""
+"Jos sinulle annetaan tukipyyntö verkon kautta, haluatko saada sähköpostia?"
+
+#: models.py:1802
+msgid "Number of tickets to show per page"
+msgstr "Näytettävien tukipyyntöjen määrä sivua kohden"
+
+#: models.py:1803
+msgid "How many tickets do you want to see on the Ticket List page?"
+msgstr "Kuinka monta tukipyyntöa haluat nähdä tukipyyntölista-sivulla?"
+
+#: models.py:1809
+msgid "Use my e-mail address when submitting tickets?"
+msgstr "Käytätkö omaa sähköpostiosoitettasi lähettäessäsi tukipyyntöja?"
+
+#: models.py:1811
+msgid ""
+"When you submit a ticket, do you want to automatically use your e-mail "
+"address as the submitter address? You can type a different e-mail address "
+"when entering the ticket if needed, this option only changes the default."
+msgstr ""
+"Kun lähetät tukipyynnön, haluatko käyttää automaattisesti "
+"sähköpostiosoitettasi lähettäjän osoitteena? Voit kirjoittaa toisen "
+"sähköpostiosoitteen kirjoittaessasi tukipyyntöön tarvittaessa. Tämä "
+"vaihtoehto muuttaa vain oletusasetusta."
+
+#: models.py:1820
+msgid "Ticket respond form layout"
+msgstr ""
+
+#: models.py:1821
+msgid "Where should the respond form appear when viewing a ticket?"
+msgstr ""
+
+#: models.py:1831
 msgid "User Setting"
 msgstr "Käyttäjäasetus"
 
+#: models.py:1832 templates/helpdesk/navigation-header.html:134
+#: templates/helpdesk/user_settings.html:15
 msgid "User Settings"
 msgstr "Käyttäjäasetukset"
 
+#: models.py:1859
+msgid "Ignored e-mail address"
+msgstr "Huomiotta jätetty sähköpostiosoite"
+
+#: models.py:1860
+msgid "Ignored e-mail addresses"
+msgstr "Ohitetut sähköpostiosoitteet"
+
+#: models.py:1866
 msgid ""
 "Leave blank for this e-mail to be ignored on all queues, or select those "
 "queues you wish to ignore this e-mail for."
 msgstr ""
-"Jätä tyhjäksi jos haluat että tämä sähköpostiviesti jätetään huomioimatta kaikissa "
-"alueissa, tai valitse ne alueet, joiden haluat sivuuttaa tämän sähköpostin."
+"Jätä tyhjäksi jos haluat että tämä sähköpostiviesti jätetään huomioimatta "
+"kaikissa alueissa, tai valitse ne alueet, joiden haluat sivuuttaa tämän "
+"sähköpostin."
 
+#: models.py:1878
 msgid "Date on which this e-mail address was added"
 msgstr "Päivämäärä, jolloin tämä sähköpostiosoite lisättiin"
 
+#: models.py:1887
 msgid ""
 "Enter a full e-mail address, or portions with wildcards, eg *@domain.com or "
 "postmaster@*."
@@ -1143,9 +1252,11 @@ msgstr ""
 "Kirjoita täydellinen sähköpostiosoite tai osia yleismerkeillä, esim. "
 "*@verkkotunnus.com tai postmaster@*."
 
+#: models.py:1893
 msgid "Save Emails in Mailbox?"
 msgstr "Tallennetaanko sähköpostiviestit postilaatikkoon?"
 
+#: models.py:1897
 msgid ""
 "Do you want to save emails from this address in the mailbox? If this is "
 "unticked, emails from this address will be deleted."
@@ -1153,334 +1264,684 @@ msgstr ""
 "Haluatko tallentaa sähköpostit tästä osoitteesta postilaatikkoon? Jos tätä "
 "ei ole valittu, sähköpostiosoitteet tästä osoitteesta poistetaan."
 
-msgid "Ignored e-mail address"
-msgstr "Huomiotta jätetty sähköpostiosoite"
-
-msgid "Ignored e-mail addresses"
-msgstr "Ohitetut sähköpostiosoitteet"
-
+#: models.py:1967
 msgid "User who wishes to receive updates for this ticket."
 msgstr "Käyttäjä, joka haluaa saada päivityksiä tukipyyntöun."
 
+#: models.py:1975
 msgid "For non-user followers, enter their e-mail address"
 msgstr "Ei-käyttäjien sähköpostiosoitteet jotka haluavat seurata tätä"
 
+#: models.py:1979
 msgid "Can View Ticket?"
 msgstr "Voiko tukipyyntöä katsella?"
 
+#: models.py:1982
 msgid "Can this CC login to view the ticket details?"
 msgstr "Voiko tämä CC kirjautua sisään nähdäkseen tukipyynnön yksityiskohdat?"
 
+#: models.py:1986
 msgid "Can Update Ticket?"
 msgstr "Voiko päivittää tukipyyntöä?"
 
+#: models.py:1989
 msgid "Can this CC login and update the ticket?"
 msgstr "Voiko tämä CC kirjautua sisään ja päivittää tukipyyntöä?"
 
+#: models.py:2027
 msgid "Field Name"
 msgstr "Kenttä nimi"
 
+#: models.py:2029
 msgid ""
-"As used in the database and behind the scenes. Must be unique and consist of"
-" only lowercase letters with no punctuation."
+"As used in the database and behind the scenes. Must be unique and consist of "
+"only lowercase letters with no punctuation."
 msgstr ""
 "Tietokannassa ja kulissien takana. Täytyy olla ainutlaatuinen ja koostua "
 "vain pienistä kirjaimista ilman välimerkkejä."
 
+#: models.py:2036
 msgid "Label"
 msgstr "Nimikenttä"
 
+#: models.py:2038
 msgid "The display label for this field"
 msgstr "Tämän kentän näkyvä nimi"
 
+#: models.py:2042
 msgid "Help Text"
 msgstr "Ohjeteksti"
 
+#: models.py:2043
 msgid "Shown to the user when editing the ticket"
 msgstr "Näytetään käyttäjälle tukipyyntöa muokattaessa"
 
+#: models.py:2049
 msgid "Character (single line)"
 msgstr "Merkki (yksirivinen)"
 
+#: models.py:2050
 msgid "Text (multi-line)"
 msgstr "Teksti (monirivinen)"
 
+#: models.py:2051
 msgid "Integer"
 msgstr "Kokonaisluku"
 
+#: models.py:2052
 msgid "Decimal"
 msgstr "Desimaali-numero"
 
+#: models.py:2053
 msgid "List"
 msgstr "Lista"
 
+#: models.py:2054
 msgid "Boolean (checkbox yes/no)"
 msgstr "Totuusarvo (valintaruutu kyllä / ei)"
 
+#: models.py:2056 templates/helpdesk/debug.html:21
 msgid "Time"
 msgstr "Aika"
 
+#: models.py:2057
 msgid "Date & Time"
 msgstr "Aika ja päivämäärä"
 
+#: models.py:2059
+msgid "URL"
+msgstr "URL"
+
+#: models.py:2060
 msgid "IP Address"
 msgstr "IP-osoite"
 
+#: models.py:2065
 msgid "Data Type"
 msgstr "Tietotyyppi"
 
+#: models.py:2067
 msgid "Allows you to restrict the data entered into this field"
 msgstr "Mahdollistaa tähän kenttään syötettyjen tietojen rajoittamisen"
 
+#: models.py:2072
 msgid "Maximum Length (characters)"
 msgstr "Enimmäispituus (merkit)"
 
+#: models.py:2078
 msgid "Decimal Places"
 msgstr "Desimaalien lukumäärä"
 
+#: models.py:2079
 msgid "Only used for decimal fields"
 msgstr "Käytetään vain desimaalikenttiin"
 
+#: models.py:2085
 msgid "Add empty first choice to List?"
 msgstr "Lisää tyhjä ensimmäinen valinta luetteloon?"
 
+#: models.py:2088
 msgid ""
-"Only for List: adds an empty first entry to the choices list, which enforces"
-" that the user makes an active choice."
+"Only for List: adds an empty first entry to the choices list, which enforces "
+"that the user makes an active choice."
 msgstr ""
 "Vain luettelolle: lisää tyhjän ensimmäisen merkinnän valintaluetteloon, mikä "
 "pakottaa käyttäjän tekemään aktiivisen valinnan."
 
+#: models.py:2094
 msgid "List Values"
 msgstr "Listan arvot"
 
+#: models.py:2095
 msgid "For list fields only. Enter one option per line."
 msgstr "Vain luettelokentät. Kirjoita yksi vaihtoehto riviä kohti."
 
+#: models.py:2101
 msgid "Ordering"
 msgstr "Tilaaminen"
 
+#: models.py:2103
 msgid "Lower numbers are displayed first; higher numbers are listed later"
 msgstr ""
 "Alemmat numerot näytetään ensin; Suuremmat numerot luetellaan myöhemmin"
 
+#: models.py:2118
 msgid "Required?"
 msgstr "Vaaditaan?"
 
+#: models.py:2119
 msgid "Does the user have to enter a value for this field?"
 msgstr "Onko käyttäjän syötettävä arvo tälle kentälle?"
 
+#: models.py:2124
 msgid "Staff Only?"
 msgstr "Vain henkilökunta?"
 
+#: models.py:2126
 msgid ""
 "If this is ticked, then the public submission form will NOT show this field"
 msgstr ""
 "Jos tämä valitaan, julkisessa lähetyslomakkeessa EI näytetä tätä kenttää"
 
+#: models.py:2138
 msgid "Custom field"
 msgstr "Räätälöity kenttä"
 
+#: models.py:2139
 msgid "Custom fields"
 msgstr "Räätälöidyt kentät"
 
+#: models.py:2208
+msgid "Not defined"
+msgstr ""
+
+#: models.py:2212
 msgid "Ticket custom field value"
 msgstr "Tukipyynnön räätälöidyn kentän arvo"
 
+#: models.py:2213
 msgid "Ticket custom field values"
 msgstr "Tukipyynnön räätälöidyn kentän arvot"
 
-msgid "Depends On Ticket"
-msgstr "Riippuu tukipyynnöstä"
-
+#: models.py:2225
 msgid "Ticket dependency"
 msgstr "Tukipyyntö riippuvuus"
 
+#: models.py:2226
 msgid "Ticket dependencies"
 msgstr "Tukipyyntö riippuvuudet"
 
-msgid ""
-"Check for user without django-helpdesk UserSettings and create settings if "
-"required. Uses settings.DEFAULT_USER_SETTINGS which can be overridden to "
-"suit your situation."
+#: models.py:2238
+msgid "Depends On Ticket"
+msgstr "Riippuu tukipyynnöstä"
+
+#: models.py:2259
+#, fuzzy
+#| msgid "List"
+msgid "Task List"
+msgstr "Lista"
+
+#: models.py:2263
+#, fuzzy
+#| msgid "e-mail template"
+msgid "Checklist Template"
+msgstr "sähköpostipohja"
+
+#: models.py:2264 templates/helpdesk/checklist_template_confirm_delete.html:12
+#: templates/helpdesk/checklist_templates.html:6
+#: templates/helpdesk/checklist_templates.html:13
+#: templates/helpdesk/system_settings.html:27
+#, fuzzy
+#| msgid "e-mail templates"
+msgid "Checklist Templates"
+msgstr "sähköpostipohjat"
+
+#: models.py:2280 models.py:2303
+msgid "Checklist"
 msgstr ""
-"Etsi käyttäjiä ilman django-helpdesk UserSettings -sovellusta ja luo "
-"tarvittaessa asetukset. Käytä asetuksia.DEFAULT_USER_SETTINGS, jotka voidaan"
-" ohittaa tilanteeseesi sopiviksi."
 
-msgid "Ticket escalated after %s days"
-msgstr "Tukipyyntö eskaloitui %s päivän kuluttua"
-
-msgid "Created from e-mail"
-msgstr "Luotu sähköpostista"
-
-msgid "Unknown Sender"
-msgstr "Tuntematon lähettäjä"
-
-msgid ""
-"No plain-text email body available. Please see attachment "
-"email_html_body.html."
+#: models.py:2281 templates/helpdesk/ticket_desc_table.html:306
+msgid "Checklists"
 msgstr ""
-"Yksinkertaisesta sähköpostiviestitekstiä ei ole saatavilla. Katso liitetiedosto "
-"email_html_body.html."
 
-msgid " (Reopened)"
-msgstr "(Uudelleenavattu)"
+#: models.py:2308
+msgid "Completion Date"
+msgstr ""
 
-msgid " (Updated)"
-msgstr "(Päivitetty)"
+#: models.py:2311 templates/helpdesk/checklist_form.html:66
+#: templates/helpdesk/checklist_templates.html:84
+#, fuzzy
+#| msgid "Positive Votes"
+msgid "Position"
+msgstr "Positiiviset äänet"
 
+#: models.py:2317
+msgid "Checklist Task"
+msgstr ""
+
+#: models.py:2318
+msgid "Checklist Tasks"
+msgstr ""
+
+#: query.py:306
+msgid "No text"
+msgstr ""
+
+#: query.py:312
+#, fuzzy
+#| msgid "View Ticket"
+msgid "View ticket"
+msgstr "Katso tukipyyntöä"
+
+#: query.py:316
+msgid "Messages"
+msgstr ""
+
+#: settings.py:163 templates/helpdesk/report_index.html:204
+msgid "Open"
+msgstr "Avoin"
+
+#: settings.py:164
+msgid "Reopened"
+msgstr "Uudelleenavattu"
+
+#: settings.py:165 templates/helpdesk/report_index.html:205
+msgid "Resolved"
+msgstr "Ratkaistu"
+
+#: settings.py:166 templates/helpdesk/report_index.html:206
+msgid "Closed"
+msgstr "Suljettu"
+
+#: settings.py:167
+msgid "Duplicate"
+msgstr "Duplikaatti"
+
+#: settings.py:231
+msgid "1. Critical"
+msgstr "1. Kriittinen"
+
+#: settings.py:232
+msgid "2. High"
+msgstr "2. Kiireellinen"
+
+#: settings.py:233
+msgid "3. Normal"
+msgstr "3. Normaali"
+
+#: settings.py:234
+msgid "4. Low"
+msgstr "4. Vähemmän kiireellinen"
+
+#: settings.py:235
+msgid "5. Very Low"
+msgstr "5. Ei lainkaan kiireellinen"
+
+#: templates/helpdesk/attribution.html:6
+#, fuzzy
+#| msgid ""
+#| "<a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>."
 msgid ""
-"<a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a>."
+"\n"
+"      Powered by <a href='https://github.com/django-helpdesk/django-"
+"helpdesk' class=\"ms-2\">django-helpdesk</a>\n"
+"      "
 msgstr ""
 "<a href='https://github.com/rossp/django-helpdesk'>django-helpdesk</a> ."
 
-msgid "Powered by django-helpdesk"
-msgstr "Powered by django-helpdesk"
-
+#: templates/helpdesk/base-head.html:33 templates/helpdesk/rss_list.html:21
+#: templates/helpdesk/rss_list.html:47
 msgid "My Open Tickets"
 msgstr "Omat tukipyynnöt"
 
+#: templates/helpdesk/base-head.html:37
 msgid "All Recent Activity"
 msgstr "Kaikki viimeaikaiset tapahtumat"
 
+#: templates/helpdesk/base-head.html:41
+#: templates/helpdesk/include/unassigned.html:6
+#: templates/helpdesk/rss_list.html:27
 msgid "Unassigned Tickets"
 msgstr "Tukipyynnöt joilla ei ole vastuuhenkilöä"
 
-msgid "RSS Icon"
-msgstr "RSS-kuvake"
+#: templates/helpdesk/base.html:11 templates/helpdesk/kb_category_iframe.html:5
+#: templates/helpdesk/public_create_ticket_iframe.html:6
+msgid "Powered by django-helpdesk"
+msgstr "Powered by django-helpdesk"
 
-msgid "RSS Feeds"
-msgstr "RSS-syötteet"
+#: templates/helpdesk/checklist_confirm_delete.html:5
+#: templates/helpdesk/checklist_confirm_delete.html:23
+#, fuzzy
+#| msgid "Delete Ticket"
+msgid "Delete Checklist"
+msgstr "Poista tukipyyntö"
 
+#: templates/helpdesk/checklist_confirm_delete.html:29
+msgid "Are you sure your want to delete checklist"
+msgstr ""
+
+#: templates/helpdesk/checklist_confirm_delete.html:33
+#: templates/helpdesk/checklist_template_confirm_delete.html:35
+#: templates/helpdesk/ticket_attachment_del.html:11
+#: templates/helpdesk/ticket_cc_del.html:25
+#: templates/helpdesk/ticket_dependency_del.html:21
+msgid "Don't Delete"
+msgstr "Älä poista"
+
+#: templates/helpdesk/checklist_confirm_delete.html:37
+#: templates/helpdesk/checklist_template_confirm_delete.html:39
+#: templates/helpdesk/ticket_attachment_del.html:14
+#: templates/helpdesk/ticket_dependency_del.html:24
+msgid "Yes, I Understand - Delete"
+msgstr ""
+
+#: templates/helpdesk/checklist_form.html:6
+#: templates/helpdesk/checklist_form.html:24
+#, fuzzy
+#| msgid "Edit Ticket"
+msgid "Edit Checklist"
+msgstr "Muokkaa tukipyyntöä"
+
+#: templates/helpdesk/checklist_form.html:38
+#: templates/helpdesk/checklist_templates.html:48
+#: templates/helpdesk/email_ignore_del.html:16
+#: templates/helpdesk/email_ignore_del.html:40
+#: templates/helpdesk/email_ignore_list.html:37
+#: templates/helpdesk/include/ticket_followup_list.html:56
+#: templates/helpdesk/include/unassigned.html:85
+#: templates/helpdesk/include/unassigned.html:157
+#: templates/helpdesk/ticket_cc_list.html:40
+#: templates/helpdesk/ticket_cc_list.html:64
+#: templates/helpdesk/ticket_desc_table.html:41
+#: templates/helpdesk/ticket_list.html:132
+msgid "Delete"
+msgstr "Poista"
+
+#: templates/helpdesk/checklist_form.html:60
+#: templates/helpdesk/checklist_templates.html:79
+msgid "Tasks"
+msgstr ""
+
+#: templates/helpdesk/checklist_form.html:61
+#: templates/helpdesk/checklist_templates.html:80
+msgid "Click and drag the position icon to reorder the task items."
+msgstr ""
+
+#: templates/helpdesk/checklist_form.html:68
+#: templates/helpdesk/checklist_templates.html:86
+#, fuzzy
+#| msgid "Delete"
+msgid "Delete?"
+msgstr "Poista"
+
+#: templates/helpdesk/checklist_form.html:82
+#: templates/helpdesk/checklist_templates.html:104
+msgid "Add task"
+msgstr ""
+
+#: templates/helpdesk/checklist_form.html:85
+#: templates/helpdesk/checklist_templates.html:108
+#: templates/helpdesk/email_ignore_add.html:35
+#: templates/helpdesk/email_ignore_del.html:39
+#: templates/helpdesk/public_view_form.html:27
+#: templates/helpdesk/ticket_cc_add.html:71
+#: templates/helpdesk/ticket_cc_add.html:95
+#: templates/helpdesk/ticket_list.html:224
+#: templates/helpdesk/ticket_list.html:292
+#: templates/helpdesk/ticket_list.html:318
+msgid "Cancel"
+msgstr ""
+
+#: templates/helpdesk/checklist_form.html:86
+#: templates/helpdesk/checklist_templates.html:111
+#: templates/helpdesk/email_ignore_add.html:36
+#: templates/helpdesk/include/ticket_respond_form.html:227
+#: templates/helpdesk/ticket_list.html:288
+msgid "Save"
+msgstr ""
+
+#: templates/helpdesk/checklist_template_confirm_delete.html:5
+#: templates/helpdesk/checklist_template_confirm_delete.html:25
+msgid "Delete Checklist Template"
+msgstr ""
+
+#: templates/helpdesk/checklist_template_confirm_delete.html:9
+#: templates/helpdesk/checklist_templates.html:11
+#: templates/helpdesk/email_ignore_list.html:11
+#: templates/helpdesk/navigation-header.html:147
+#: templates/helpdesk/system_settings.html:14
+#: templates/helpdesk/system_settings.html:18
 msgid "System Settings"
 msgstr "Järjestelmäasetukset"
 
+#: templates/helpdesk/checklist_template_confirm_delete.html:31
+msgid "Are you sure your want to delete checklist template"
+msgstr ""
+
+#: templates/helpdesk/checklist_templates.html:17
+#, fuzzy
+#| msgid "Locale of this template."
+msgid "Manage checklist templates"
+msgstr "Tämän pohjan kieli."
+
+#: templates/helpdesk/checklist_templates.html:18
+msgid "Create new or edit existing checklist templates."
+msgstr ""
+
+#: templates/helpdesk/checklist_templates.html:26
+msgid "tasks"
+msgstr ""
+
+#: templates/helpdesk/checklist_templates.html:40
+#: templates/helpdesk/include/ticket_followup_list.html:47
+#: templates/helpdesk/ticket_desc_table.html:16
+msgid "Edit"
+msgstr ""
+
+#: templates/helpdesk/checklist_templates.html:61
+msgid "Edit checklist template"
+msgstr ""
+
+#: templates/helpdesk/checklist_templates.html:63
+#, fuzzy
+#| msgid "Locale of this template."
+msgid "Create new checklist template"
+msgstr "Tämän pohjan kieli."
+
+#: templates/helpdesk/confirm_delete_saved_query.html:7
+#: templates/helpdesk/confirm_delete_saved_query.html:10
+#: templates/helpdesk/ticket_list.html:170
 msgid "Delete Saved Query"
 msgstr "Poista tallennettu kysely"
 
+#: templates/helpdesk/confirm_delete_saved_query.html:13
 msgid "Delete Query"
 msgstr "Poista kysely"
 
+#: templates/helpdesk/confirm_delete_saved_query.html:15
+#, python-format
+msgid ""
+"Are you sure you want to delete this saved filter (<em>%(query_title)s</"
+"em>)? To re-create it, you will need to manually re-filter your ticket "
+"listing."
+msgstr ""
+"Are you sure you want to delete this saved filter (<em>%(query_title)s</"
+"em>)? To re-create it, you will need to manually re-filter your ticket "
+"listing."
+
+#: templates/helpdesk/confirm_delete_saved_query.html:18
 msgid ""
 "You have shared this query, so other users may be using it. If you delete "
 "it, they will have to manually create their own query."
 msgstr ""
-"Olet jakanut tämän kyselyn, joten muut käyttäjät saattavat käyttää sitä. Jos"
-" poistat sen, heidän on luotava oma kysely manuaalisesti."
+"Olet jakanut tämän kyselyn, joten muut käyttäjät saattavat käyttää sitä. Jos "
+"poistat sen, heidän on luotava oma kysely manuaalisesti."
 
+#: templates/helpdesk/confirm_delete_saved_query.html:21
+#: templates/helpdesk/delete_ticket.html:20
 msgid "No, Don't Delete It"
 msgstr "Ei, älä poista sitä"
 
-msgid "Yes - Delete It"
+#: templates/helpdesk/confirm_delete_saved_query.html:24
+#: templates/helpdesk/delete_ticket.html:25
+#, fuzzy
+#| msgid "Yes - Delete It"
+msgid "Yes I Understand - Delete It Anyway"
 msgstr "Kyllä - poista se"
 
+#: templates/helpdesk/create_ticket.html:3
+#: templates/helpdesk/create_ticket.html:9
+#: templates/helpdesk/kb_category_base.html:18
+#: templates/helpdesk/public_create_ticket.html:6
+#: templates/helpdesk/public_create_ticket_base.html:16
+#: templates/helpdesk/public_create_ticket_iframe.html:6
+msgid "Create Ticket"
+msgstr "Jätä tukipyyntö"
+
+#: templates/helpdesk/create_ticket.html:18
+#: templates/helpdesk/navigation-header.html:178
+#: templates/helpdesk/public_create_ticket.html:15
+msgid "Submit a Ticket"
+msgstr "Jätä tukipyyntö"
+
+#: templates/helpdesk/create_ticket.html:21
+#: templates/helpdesk/edit_ticket.html:22
+msgid "Unless otherwise stated, all fields are required."
+msgstr ""
+"Kaikki kentät vaaditaan jos niitä ei ole erikseen mainittu valinnaiseksi."
+
+#: templates/helpdesk/create_ticket.html:22
+#: templates/helpdesk/edit_ticket.html:23
+msgid "Please provide as descriptive a title and description as possible."
+msgstr "Anna mahdollisimman kuvaava otsikko ja selitys"
+
+#: templates/helpdesk/create_ticket.html:39
+msgid "Optional"
+msgstr "Valinnainen"
+
+#: templates/helpdesk/create_ticket.html:53
+msgid "Submit Ticket"
+msgstr "Jätä tukipyyntö"
+
+#: templates/helpdesk/dashboard.html:2
 msgid "Helpdesk Dashboard"
 msgstr "Tukipalvelun hallintapaneeli"
 
+#: templates/helpdesk/dashboard.html:7 templates/helpdesk/kb_index.html:13
+#: templates/helpdesk/report_index.html:16
+#: templates/helpdesk/report_output.html:13
+#: templates/helpdesk/ticket_list.html:35
+msgid "Overview"
+msgstr "Yleiskatsaus"
+
+#: templates/helpdesk/dashboard.html:16
 msgid ""
 "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets "
-"submitted by you, tickets you are working on, and those tickets that have no"
-" owner."
+"submitted by you, tickets you are working on, and those tickets that have no "
+"owner."
 msgstr ""
 "Tervetuloa tukipalvelun hallintapaneeliin! Täältä voit nähdä nopeasti "
-"lähettämäsi tukipyynnöt, työskentelemäsi tukipyynnöt ja tukipyynnöt, joilla ei ole omistajaa."
+"lähettämäsi tukipyynnöt, työskentelemäsi tukipyynnöt ja tukipyynnöt, joilla "
+"ei ole omistajaa."
 
-msgid "Helpdesk Summary"
-msgstr "Tukipalvelun yhteenveto"
-
-msgid "Current Ticket Stats"
-msgstr "Nykyiset tukipyyntötilastot"
-
-msgid "Average number of days until ticket is closed (all tickets): "
-msgstr ""
-"Keskimäärin päiviä tukipyynnön sulkemiseen (kaikki tukipyynnöt):"
-
-msgid ""
-"Average number of days until ticket is closed (tickets opened in last 60 "
-"days): "
-msgstr ""
-"Keskimääräinen päivien lukumäärä tukipyyntön sulkemiseen asti (tukipyynnöt jotka avattu "
-"viimeisen 60 päivän aikana):"
-
-msgid "Click"
-msgstr "Klikkaus"
-
-msgid "for detailed average by month."
-msgstr "yksityiskohtaisempi kuukausikeskiarvo."
-
-msgid "Distribution of open tickets, grouped by time period:"
-msgstr "Avoimien tukipyyntöjen jakauma ajanjaksoittain ryhmiteltynä:"
-
-msgid "Days since opened"
-msgstr "Päiviä avaamisen jälkeen"
-
-msgid "Number of open tickets"
-msgstr "Avoimien tukipyyntöjen lukumäärä"
-
+#: templates/helpdesk/dashboard.html:21
 msgid "All Tickets submitted by you"
 msgstr "Kaikki lähettämäsi tukipyynnöt"
 
-msgid "All Tickets"
-msgstr "Kaikki tukipyynnöt"
+#: templates/helpdesk/dashboard.html:22 views/staff.py:199
+msgid "atrbcu_page"
+msgstr ""
 
-msgid "Reports"
-msgstr "Raportit"
-
-msgid "Pr"
-msgstr "Pr"
-
-msgid "Last Update"
-msgstr "Viimeisin päivitys"
-
+#: templates/helpdesk/dashboard.html:25
 msgid "Open Tickets assigned to you (you are working on this ticket)"
-msgstr "Sinulle osoitetut avoimet tukipyynnöt (työskentelet tällä tukipyynnöllä)"
+msgstr ""
+"Sinulle osoitetut avoimet tukipyynnöt (työskentelet tällä tukipyynnöllä)"
 
+#: templates/helpdesk/dashboard.html:26
 msgid "You have no tickets assigned to you."
 msgstr "Sinulle ei ole osoitettu tukipyyntöja."
 
-msgid "(pick up a ticket if you start to work on it)"
-msgstr "(ota tukipyyntö itsellesi, jos alat työskennellä sen parissa)"
+#: templates/helpdesk/dashboard.html:27 views/staff.py:197
+msgid "ut_page"
+msgstr ""
 
-msgid "Take"
-msgstr "Ota"
+#: templates/helpdesk/dashboard.html:29 views/staff.py:200
+msgid "una_page"
+msgstr ""
 
-msgid "Delete"
-msgstr "Poista"
-
-msgid "There are no unassigned tickets."
-msgstr "Osoittamattomia tukipyyntöja ei ole."
-
+#: templates/helpdesk/dashboard.html:32
 msgid "Closed & resolved Tickets you used to work on"
 msgstr "Suljetut ja ratkaisetut tukipyynnöt, joissa työskentelit"
 
+#: templates/helpdesk/dashboard.html:33 views/staff.py:198
+msgid "utcr_page"
+msgstr ""
+
+#: templates/helpdesk/debug.html:12 templates/helpdesk/ticket_list.html:234
+#, fuzzy
+#| msgid "Saved Queries"
+msgid "Queries"
+msgstr "Tallennetut kyselyt"
+
+#: templates/helpdesk/debug.html:20
+msgid "SQL"
+msgstr ""
+
+#: templates/helpdesk/debug.html:38 templates/helpdesk/ticket.html:119
+#: templates/helpdesk/ticket_list.html:134
+msgid "Close"
+msgstr "Sulje"
+
+#: templates/helpdesk/delete_ticket.html:3
+#: templates/helpdesk/delete_ticket.html:12
+#: templates/helpdesk/delete_ticket.html:16
 msgid "Delete Ticket"
 msgstr "Poista tukipyyntö"
 
+#: templates/helpdesk/delete_ticket.html:18
+#, python-format
+msgid ""
+"Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All "
+"traces of the ticket, including followups, attachments, and updates will be "
+"irreversibly removed."
+msgstr ""
+"Are you sure you want to delete this ticket (<em>%(ticket_title)s</em>)? All "
+"traces of the ticket, including followups, attachments, and updates will be "
+"irreversibly removed."
+
+#: templates/helpdesk/edit_ticket.html:5 templates/helpdesk/edit_ticket.html:14
 msgid "Edit Ticket"
 msgstr "Muokkaa tukipyyntöä"
 
+#: templates/helpdesk/edit_ticket.html:20
 msgid "Edit a Ticket"
 msgstr "Muokkaa tukipyyntöä"
 
+#: templates/helpdesk/edit_ticket.html:26
 msgid "Note"
 msgstr "Merkintä"
 
+#: templates/helpdesk/edit_ticket.html:27
 msgid ""
 "Editing a ticket does <em>not</em> send an e-mail to the ticket owner or "
 "submitter. No new details should be entered, this form should only be used "
 "to fix incorrect details or clean up the submission."
 msgstr ""
-"Tukipyynnön muokkaaminen <em>ei</em> lähetä sähköpostia tukipyynnön omistajalle tai "
-"lähettäjälle. Uusia tietoja ei tule antaa, tätä lomaketta tulisi käyttää vain "
-"virheellisten tietojen korjaamiseen tai tukipyynnön siistimiseen."
+"Tukipyynnön muokkaaminen <em>ei</em> lähetä sähköpostia tukipyynnön "
+"omistajalle tai lähettäjälle. Uusia tietoja ei tule antaa, tätä lomaketta "
+"tulisi käyttää vain virheellisten tietojen korjaamiseen tai tukipyynnön "
+"siistimiseen."
 
+#: templates/helpdesk/edit_ticket.html:29
+#, fuzzy
+#| msgid "Error:"
+msgid "Error: "
+msgstr "Virhe:"
+
+#: templates/helpdesk/edit_ticket.html:35
+#: templates/helpdesk/user_settings.html:24
 msgid "Save Changes"
 msgstr "Tallenna muutokset"
 
+#: templates/helpdesk/edit_ticket.html:37
+#, fuzzy
+#| msgid "Save Changes"
+msgid "Cancel Changes"
+msgstr "Tallenna muutokset"
+
+#: templates/helpdesk/email_ignore_add.html:6
+#: templates/helpdesk/email_ignore_add.html:14
+#: templates/helpdesk/email_ignore_add.html:20
+#: templates/helpdesk/email_ignore_del.html:14
 msgid "Ignore E-Mail Address"
 msgstr "Sivuuta sähköpostiosoite"
 
+#: templates/helpdesk/email_ignore_add.html:16
+#: templates/helpdesk/ticket.html:129
+msgid "Add"
+msgstr ""
+
+#: templates/helpdesk/email_ignore_add.html:22
 msgid ""
 "To ignore an e-mail address and prevent any emails from that address "
 "creating tickets automatically, enter the e-mail address below."
@@ -1489,35 +1950,54 @@ msgstr ""
 "sähköpostiosoitteen ja estää sähköpostiosoitteiden luomisesta tukipyyntöja "
 "automaattisesti."
 
+#: templates/helpdesk/email_ignore_add.html:24
 msgid ""
-"You can either enter a whole e-mail address such as "
-"<em>email@domain.com</em> or a portion of an e-mail address with a wildcard,"
-" such as <em>*@domain.com</em> or <em>user@*</em>."
+"You can either enter a whole e-mail address such as <em>email@domain.com</"
+"em> or a portion of an e-mail address with a wildcard, such as "
+"<em>*@domain.com</em> or <em>user@*</em>."
 msgstr ""
 "Voit joko kirjoittaa kokonaisen sähköpostiosoitteen, kuten "
 "<em>email@domain.com,</em> tai osan sähköpostiosoitteesta yleismerkillä, "
 "kuten <em>*@domain.com</em> tai <em>user@*</em> ."
 
+#: templates/helpdesk/email_ignore_del.html:6
+#: templates/helpdesk/email_ignore_del.html:24
 msgid "Delete Ignored E-Mail Address"
 msgstr "Poista ohitettu sähköpostiosoitteet"
 
-msgid "Un-Ignore E-Mail Address"
-msgstr "Poista sähköpostiosoitteen ohitus"
+#: templates/helpdesk/email_ignore_del.html:28
+#, python-format
+msgid ""
+"\n"
+"            Remove <em>(%(email_address)s)</em> from the ignore list?\n"
+"            "
+msgstr ""
 
-msgid "Keep Ignoring It"
-msgstr "Jatka sen ohittamista"
+#: templates/helpdesk/email_ignore_del.html:32
+msgid ""
+"This will allow them to create tickets. You can re-add this e-mail again "
+"anytime."
+msgstr ""
 
-msgid "Stop Ignoring It"
-msgstr "Lopeta sen ohitus"
-
+#: templates/helpdesk/email_ignore_list.html:6
+#: templates/helpdesk/email_ignore_list.html:13
+#: templates/helpdesk/email_ignore_list.html:17
 msgid "Ignored E-Mail Addresses"
 msgstr "Ohitetut sähköpostiosoitteet"
 
+#: templates/helpdesk/email_ignore_list.html:19
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "<h2>Ignored E-Mail Addresses</h2>\n"
+#| "\n"
+#| "<p>The following e-mail addresses are currently being ignored by the "
+#| "incoming e-mail processor. You can <a href='add/'>add a new e-mail "
+#| "address to the list</a> or delete any of the items below as required.</p>"
 msgid ""
-"\n"
-"<h2>Ignored E-Mail Addresses</h2>\n"
-"\n"
-"<p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can <a href='add/'>add a new e-mail address to the list</a> or delete any of the items below as required.</p>"
+"The following e-mail addresses are currently being ignored by the incoming e-"
+"mail processor. You can add a new item or delete any of the items below as "
+"required."
 msgstr ""
 "\n"
 "<h2> Ohitetut sähköpostiosoitteet </h2><p> Saapuvan sähköpostin prosessori "
@@ -1525,95 +2005,905 @@ msgstr ""
 "href='add/'>lisätä uuden sähköpostiosoitteen luetteloon</a> tai poistaa "
 "kaikki alla olevat kohteet tarpeen mukaan. </p>"
 
+#: templates/helpdesk/email_ignore_list.html:23
+msgid "Add an Email"
+msgstr ""
+
+#: templates/helpdesk/email_ignore_list.html:34
 msgid "Date Added"
 msgstr "Lisäyspäivämäärä"
 
+#: templates/helpdesk/email_ignore_list.html:36
 msgid "Keep in mailbox?"
 msgstr "Pidä postilaatikossa?"
 
+#: templates/helpdesk/email_ignore_list.html:50
+#: templates/helpdesk/ticket_list.html:113
 msgid "All"
 msgstr "Kaikki"
 
-msgid "Keep"
-msgstr "Pidä"
+#: templates/helpdesk/email_ignore_list.html:55
+msgid "Yes"
+msgstr ""
 
+#: templates/helpdesk/email_ignore_list.html:57
+#, fuzzy
+#| msgid "Note"
+msgid "No"
+msgstr "Merkintä"
+
+#: templates/helpdesk/email_ignore_list.html:64
+msgid "Remove email from ignored list"
+msgstr ""
+
+#: templates/helpdesk/email_ignore_list.html:73
+#, fuzzy
+#| msgid ""
+#| "<strong>Note:</strong> If the 'Keep' option is not selected, emails sent "
+#| "from that address will be deleted permanently."
 msgid ""
-"<strong>Note:</strong> If the 'Keep' option is not selected, emails sent "
-"from that address will be deleted permanently."
+"Note: If the 'Keep' option is not selected, emails sent from that address "
+"will be deleted permanently."
 msgstr ""
 "<strong>Huomaa:</strong> Jos 'Säilytä' -vaihtoehtoa ei ole valittu, "
 "kyseisestä osoitteesta lähetetyt sähköpostit poistetaan pysyvästi."
 
+#: templates/helpdesk/filters/date.html:9
+#, fuzzy
+#| msgid "Date"
+msgid "Dates"
+msgstr "Päivämäärä"
+
+#: templates/helpdesk/filters/date.html:13
+msgid "Date (From)"
+msgstr "Päivämäärä (alkaen)"
+
+#: templates/helpdesk/filters/date.html:21
+msgid "Date (To)"
+msgstr "Päivämäärä (asti)"
+
+#: templates/helpdesk/filters/date.html:28
+#, fuzzy
+#| msgid "Use YYYY-MM-DD date format, eg 2011-05-29"
+msgid "Use YYYY-MM-DD date format, eg 2018-01-30"
+msgstr "Käytä päivämäärämuotoa VVVV-KK-PP, esim. 2011-05-29"
+
+#: templates/helpdesk/filters/kbitems.html:20
+msgid "Uncategorized"
+msgstr ""
+
+#: templates/helpdesk/filters/keywords.html:9
+#: templates/helpdesk/filters/keywords.html:12
+msgid "Keywords"
+msgstr "Avainsanat"
+
+#: templates/helpdesk/filters/keywords.html:14
+msgid ""
+"Keywords are case-insensitive, and will be looked for pretty much everywhere "
+"possible. Prepend with 'queue:' or 'priority:' to search by queue or "
+"priority. You can also use the keyword OR to combine multiple searches."
+msgstr ""
+
+#: templates/helpdesk/filters/owner.html:9
+#: templates/helpdesk/filters/sorting.html:33
+#: templates/helpdesk/include/ticket_respond_form.html:123
+#: templates/helpdesk/ticket_list.html:88 update_ticket.py:361
+#: views/staff.py:987
+msgid "Owner"
+msgstr "Omistaja"
+
+#: templates/helpdesk/filters/sorting.html:9
+#: templates/helpdesk/filters/sorting.html:12
+msgid "Sorting"
+msgstr "Lajittelu"
+
+#: templates/helpdesk/filters/sorting.html:19
+#: templates/helpdesk/ticket_list.html:90
+#, fuzzy
+#| msgid "Follow-up"
+msgid "Last Followup"
+msgstr "Päivitys"
+
+#: templates/helpdesk/filters/sorting.html:22
+#: templates/helpdesk/ticket_desc_table.html:65
+#: templates/helpdesk/ticket_list.html:87
+msgid "Due Date"
+msgstr "Eräpäivä"
+
+#: templates/helpdesk/filters/sorting.html:41
+#: templates/helpdesk/ticket_list.html:95
+msgid "KB Item"
+msgstr ""
+
+#: templates/helpdesk/filters/sorting.html:45
+#, fuzzy
+#| msgid "Reverse"
+msgid "Reverse?"
+msgstr "Käänteinen"
+
+#: templates/helpdesk/filters/sorting.html:53
+msgid "Ordering applied to tickets"
+msgstr "Järjestystä sovellettiin tukipyyntöihin"
+
+#: templates/helpdesk/followup_edit.html:2
 msgid "Edit followup"
 msgstr "Muokkaa seurantaa"
 
+#: templates/helpdesk/followup_edit.html:22
+#: templates/helpdesk/followup_edit.html:32
 msgid "Edit FollowUp"
 msgstr "Muokkaa seurantaa"
 
+#: templates/helpdesk/followup_edit.html:39
 msgid "Reassign ticket:"
 msgstr "Määritä tukipyynnön vastuullinen uudelleen:"
 
+#: templates/helpdesk/followup_edit.html:47
 msgid "Title:"
 msgstr "Otsikko:"
 
+#: templates/helpdesk/followup_edit.html:49
 msgid "Comment:"
 msgstr "Kommentti:"
 
-msgid "Article"
-msgstr "Artikkeli"
-
-msgid "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket."
+#: templates/helpdesk/help_context.html:6
+msgid "Context Reference"
 msgstr ""
-"Olemme luetteloineet usein kysyttyjä kysymyksiä "
-"seuraavissa kategorioissa. Tarkista ennen tukitukipyynnön avaamista, voisiko jokin "
-"näistä artikkeleista ratkaista ongelmasi."
 
-msgid "Knowledgebase Categories"
-msgstr "UKK-artikkelien kategoriat"
+#: templates/helpdesk/help_context.html:11 templates/helpdesk/kanban.html:15
+#: templates/helpdesk/my_tickets.html:12
+#: templates/helpdesk/navigation-sidebar.html:90
+#, fuzzy
+#| msgid "Homepage"
+msgid "Home"
+msgstr "Etusivu"
 
-msgid "Feedback"
-msgstr "Palaute"
+#: templates/helpdesk/help_context.html:13
+msgid "Contextual Overview"
+msgstr ""
 
+#: templates/helpdesk/help_context.html:18
+msgid "Contextual Reference"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:20
 msgid ""
-"We give our users an opportunity to vote for items that they believe have "
-"helped them out, in order for us to better serve future customers. We would "
-"appreciate your feedback on this article. Did you find it useful?"
+"django-helpdesk provides a powerful way for you to embed fields from the "
+"current ticket or queue into your comments and ticket resolutions using a "
+"template language. It does this by leveraging the capabilities of Django's "
+"templating system with a sandboxed template context. Read more about"
 msgstr ""
-"Annamme käyttäjille mahdollisuuden äänestää kohteista, jotka heidän "
-"mielestään ovat auttaneet heitä, jotta voimme palvella paremmin tulevia "
-"asiakkaita. Arvostamme palautetta tästä artikkelista. Piditkö sitä "
-"hyödyllisenä?"
 
-msgid "This article was useful to me"
-msgstr "Tämä artikkeli oli minulle hyödyllinen"
+#: templates/helpdesk/help_context.html:23
+msgid "Inserting Fields"
+msgstr ""
 
-msgid "This article was <strong>not</strong> useful to me"
-msgstr "Tämä artikkeli ei <strong>ollut</strong> minulle hyödyllinen"
+#: templates/helpdesk/help_context.html:24
+msgid ""
+"For example, you may want to place the last escalation date into a ticket "
+"comment, or reproduce the original description sent to you by the submitter."
+msgstr ""
 
-msgid "The results of voting by other readers of this article are below:"
-msgstr "Tähän artikkeliin liittyvät lukijoiden äänestystulokset ovat alla:"
+#: templates/helpdesk/help_context.html:27
+msgid ""
+"In your comment, enter the field name surrounded by double curly braces. For "
+"example, to get the ticket title, use:"
+msgstr ""
 
-msgid "Dashboard"
-msgstr "Kojelauta"
+#: templates/helpdesk/help_context.html:35
+#, fuzzy
+#| msgid "Per-Queue Feeds"
+msgid "Queue Fields"
+msgstr "Aluekohtaiset syötteen"
 
-msgid "Saved Query"
-msgstr "Tallennettu kysely"
+#: templates/helpdesk/help_context.html:36
+msgid ""
+"The following fields are available in the template context to display the "
+"details of the queue to which this ticket belongs. Ex: to get the email "
+"address of the queue in your comment use"
+msgstr ""
 
+#: templates/helpdesk/help_context.html:41
+#, fuzzy
+#| msgid "The display label for this field"
+msgid "The display title of the queue"
+msgstr "Tämän kentän näkyvä nimi"
+
+#: templates/helpdesk/help_context.html:45
+msgid ""
+"The \"slug\" of the queue, a single-word lowercase identifier used in urls "
+"and e-mail subjects."
+msgstr ""
+
+#: templates/helpdesk/help_context.html:49
+msgid ""
+"The e-mail address to which users can send an e-mail to open a new ticket "
+"automatically."
+msgstr ""
+
+#: templates/helpdesk/help_context.html:53
+msgid ""
+"The e-mail address from which the queue will send e-mails to submitters."
+msgstr ""
+
+#: templates/helpdesk/help_context.html:61
+#, fuzzy
+#| msgid "Tickets"
+msgid "Ticket Fields"
+msgstr "Tukipyynnöt"
+
+#: templates/helpdesk/help_context.html:62
+msgid ""
+"The following fields are available in the template context to display the "
+"details of a ticket. Ex: to get submitter email use"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:67
+msgid ""
+"Title of the ticket, as provided by the submitter. A single line of text."
+msgstr ""
+
+#: templates/helpdesk/help_context.html:71
+#, fuzzy
+#| msgid "Date this ticket was first created"
+msgid "The time/date this ticket was first opened"
+msgstr "Päivämäärä jolloin tukipyyntö luotiin"
+
+#: templates/helpdesk/help_context.html:75
+#, fuzzy
+#| msgid "Date this ticket was most recently changed."
+msgid "The time/date this ticket was most recently changed"
+msgstr "Päivämäärä jolloin tukipyyntöä viimeksi muokattiin"
+
+#: templates/helpdesk/help_context.html:79
+msgid "E-Mail address of the ticket submitter"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:83
+msgid "Status of this ticket (Integer)"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:87
+msgid "Status of this ticket (Text-based)"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:91
+msgid "Status of this ticket (Text-based, includes \"On Hold\" if required)"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:95
+msgid "Indicates whether this ticket is on hold (True/False)"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:99
+msgid ""
+"The description of the ticket, eg the body of the e-mail sent or the problem "
+"entered by the submitter"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:103
+msgid "The resolution of the ticket provided by staff. This may be blank."
+msgstr ""
+
+#: templates/helpdesk/help_context.html:107
+msgid "The priority of this ticket (1-5, Integer only)"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:111
+msgid "The priority of this ticket (Text-based)"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:115
+#, fuzzy
+#| msgid "Date this ticket was first created"
+msgid "The time/date this ticket was last escalated"
+msgstr "Päivämäärä jolloin tukipyyntö luotiin"
+
+#: templates/helpdesk/help_context.html:119
+msgid ""
+"The ticket ID in form \"[queue_slug-id]\", used in e-mail subjects. For "
+"example, use"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:124
+msgid "The ticket ID in form \"queue_slug-id\", used in URLs"
+msgstr ""
+
+#: templates/helpdesk/help_context.html:128
+#, fuzzy
+#| msgid "Respond to this ticket"
+msgid "Public URL for this ticket"
+msgstr "Vastaa tähän tukipyyntöön"
+
+#: templates/helpdesk/help_context.html:132
+#, fuzzy
+#| msgid "Respond to this ticket"
+msgid "Staff-only URL for this ticket"
+msgstr "Vastaa tähän tukipyyntöön"
+
+#: templates/helpdesk/help_context.html:136
+msgid ""
+"Name of the staff member assigned to this ticket, or \"Unassigned\" if it is "
+"unassigned."
+msgstr ""
+
+#: templates/helpdesk/help_context.html:140
+msgid ""
+"Another dictionary of queue information, identical to queue above. For "
+"example, use"
+msgstr ""
+
+#: templates/helpdesk/include/alert_form_errors.html:4
+msgid "There are errors in the form"
+msgstr ""
+
+#: templates/helpdesk/include/attachment_list_item.html:10
+msgid "View formatted"
+msgstr ""
+
+#: templates/helpdesk/include/stats.html:15
+#, fuzzy
+#| msgid "View Ticket"
+msgid "View Tickets"
+msgstr "Katso tukipyyntöä"
+
+#: templates/helpdesk/include/stats.html:15
+#: templates/helpdesk/report_index.html:121
+#, fuzzy
+#| msgid "Number of tickets to show per page"
+msgid "No tickets in this range"
+msgstr "Näytettävien tukipyyntöjen määrä sivua kohden"
+
+#: templates/helpdesk/include/ticket_followup_list.html:20
+msgid "Private"
+msgstr "Yksityinen"
+
+#: templates/helpdesk/include/ticket_followup_list.html:24
+#, fuzzy
+#| msgid "Submitter"
+msgid "To submitter"
+msgstr "Tukipyynnön jättäjä"
+
+#: templates/helpdesk/include/ticket_followup_list.html:28
+#, fuzzy
+#| msgid "Submitter"
+msgid "From submitter"
+msgstr "Tukipyynnön jättäjä"
+
+#: templates/helpdesk/include/ticket_followup_list.html:71
+#, python-format
+msgid "Emailed: %(recipients)s"
+msgstr ""
+
+#: templates/helpdesk/include/ticket_followup_list.html:73
+msgid "Emailed: no one"
+msgstr ""
+
+#: templates/helpdesk/include/ticket_followup_list.html:86
+#, fuzzy, python-format
+#| msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
+msgid ""
+"\n"
+"                  Changed %(field)s from %(old_value)s to %(new_value)s.\n"
+"          "
+msgstr "Changed %(field)s from %(old_value)s to %(new_value)s."
+
+#: templates/helpdesk/include/ticket_followup_sort_toggle.html:10
+#: templates/helpdesk/ticket.html:194
+msgid "Newest first"
+msgstr ""
+
+#: templates/helpdesk/include/ticket_followup_sort_toggle.html:12
+#: templates/helpdesk/ticket.html:194
+msgid "Oldest first"
+msgstr ""
+
+#: templates/helpdesk/include/ticket_respond_card.html:5
+msgid "Respond to this ticket"
+msgstr "Vastaa tähän tukipyyntöön"
+
+#: templates/helpdesk/include/ticket_respond_form.html:10
+#: templates/helpdesk/public_view_ticket.html:118
+#, fuzzy
+#| msgid "Use a Pre-set Reply"
+msgid "Use a Pre-set Reply (Optional)"
+msgstr "Käytä ennalta asetettua vastausta"
+
+#: templates/helpdesk/include/ticket_respond_form.html:16
+#: templates/helpdesk/public_view_ticket.html:126
+msgid ""
+"Selecting a pre-set reply will over-write your comment below. You can then "
+"modify the pre-set reply to your liking before saving this update."
+msgstr ""
+"Valitsemalla ennalta asetetun vastauksen, ylikirjoitat kommentin. Voit "
+"sitten muokata esiasetettua vastausta mieleiseesi ennen tämän päivityksen "
+"tallentamista."
+
+#: templates/helpdesk/include/ticket_respond_form.html:22
+#: templates/helpdesk/public_view_ticket.html:132
+msgid "Comment / Resolution"
+msgstr "Kommentti / ratkaisu"
+
+#: templates/helpdesk/include/ticket_respond_form.html:25
+#, fuzzy, python-format
+#| msgid ""
+#| "You can insert ticket and queue details in your message. For more "
+#| "information, see the <a href='../../help/context/'>context help page</a>."
+msgid ""
+"\n"
+"      <p class=\"form-text\">\n"
+"        You can insert ticket and queue details in your message. \n"
+"        For more information, see the <a href=\"%(context_help_url)s\" "
+"target=\"_blank\">context help page.</a>\n"
+"      </p>\n"
+"    "
+msgstr ""
+"Voit käyttää tukipyynnön ja aihealueen tietoja viestissäsi jos haluat. "
+"Lisätietoja <a href='../../help/context/'>context help page</a>."
+
+#: templates/helpdesk/include/ticket_respond_form.html:53
+#: templates/helpdesk/public_view_ticket.html:141
+msgid ""
+"This ticket cannot be resolved or closed until the tickets it depends on are "
+"resolved."
+msgstr ""
+"Tätä tukipyyntöä ei voi merkata ratkaistuksi ennen kuin riippuvat "
+"tukipyynnöt on ratkaistu."
+
+#: templates/helpdesk/include/ticket_respond_form.html:62
+#, fuzzy
+#| msgid "Is this update public?"
+msgid "Is this update public? (Optional)"
+msgstr "Onko tämä päivitys julkinen?"
+
+#: templates/helpdesk/include/ticket_respond_form.html:63
+msgid ""
+"If this is public, the submitter will be e-mailed your comment or resolution."
+msgstr ""
+"Jos tämä on julkinen, lähettäjälle lähetetään kommentti tai ratkaisu "
+"sähköpostitse."
+
+#: templates/helpdesk/include/ticket_respond_form.html:69
+msgid "The following addresses will be notified:"
+msgstr ""
+
+#: templates/helpdesk/include/ticket_respond_form.html:77
+#, fuzzy
+#| msgid "Time spent"
+msgid "Time spent (Optional)"
+msgstr "Käytetty aika"
+
+#: templates/helpdesk/include/ticket_respond_form.html:94
+#, fuzzy
+#| msgid "View Ticket Details"
+msgid "Update ticket details"
+msgstr "Näytä tukipyynnön tiedot"
+
+#: templates/helpdesk/include/ticket_respond_form.html:101
+#, fuzzy
+#| msgid "Update This Ticket"
+msgid "Update checklists"
+msgstr "Päivitä tätä tukipyyntöä"
+
+#: templates/helpdesk/include/ticket_respond_form.html:109
+#: templates/helpdesk/public_view_ticket.html:170
+#, fuzzy
+#| msgid "Attach File"
+msgid "Attach File(s)"
+msgstr "Liitä tiedosto"
+
+#: templates/helpdesk/include/ticket_respond_form.html:184
+#: templates/helpdesk/ticket_desc_table.html:342
+msgid "Completed on"
+msgstr ""
+
+#: templates/helpdesk/include/ticket_respond_form.html:215
+msgid "Browse..."
+msgstr ""
+
+#: templates/helpdesk/include/ticket_respond_form.html:220
+#: templates/helpdesk/public_view_ticket.html:177
+msgid "Add Another File"
+msgstr "Lisää toinen tiedosto"
+
+#: templates/helpdesk/include/tickets.html:6
+#, fuzzy
+#| msgid "Tickets"
+msgid "Your Tickets"
+msgstr "Tukipyynnöt"
+
+#: templates/helpdesk/include/tickets.html:77
+#: templates/helpdesk/include/tickets.html:79
+#: templates/helpdesk/include/tickets.html:81
+#: templates/helpdesk/include/tickets.html:85
+msgid "Last Update"
+msgstr "Viimeisin päivitys"
+
+#: templates/helpdesk/include/tickets.html:104
+msgid "You do not have any pending tickets."
+msgstr ""
+
+#: templates/helpdesk/include/unassigned.html:6
+#: templates/helpdesk/include/unassigned.html:134
+msgid "(pick up a ticket if you start to work on it)"
+msgstr "(ota tukipyyntö itsellesi, jos alat työskennellä sen parissa)"
+
+#: templates/helpdesk/include/unassigned.html:73
+#: templates/helpdesk/include/unassigned.html:145
+#: templates/helpdesk/ticket_desc_table.html:12
+#: templates/helpdesk/ticket_list.html:106
+msgid "Actions"
+msgstr ""
+
+#: templates/helpdesk/include/unassigned.html:84
+#: templates/helpdesk/include/unassigned.html:156
+msgid "Take"
+msgstr "Ota"
+
+#: templates/helpdesk/include/unassigned.html:89
+#: templates/helpdesk/include/unassigned.html:161
+#: templates/helpdesk/report_index.html:248
+msgid "There are no unassigned tickets."
+msgstr "Osoittamattomia tukipyyntöja ei ole."
+
+#: templates/helpdesk/include/unassigned.html:134
+msgid "KBItem:"
+msgstr ""
+
+#: templates/helpdesk/include/unassigned.html:134
+msgid "Team:"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:6 templates/helpdesk/kanban.html:17
+#: templates/helpdesk/kanban.html:24
+#: templates/helpdesk/navigation-sidebar.html:67
+msgid "Kanban Board"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:31 templates/helpdesk/ticket_list.html:197
+#: templates/helpdesk/ticket_list.html:202
+msgid "Filters"
+msgstr "Seulat"
+
+#: templates/helpdesk/kanban.html:34
+msgid "Drag cards between columns to update their status."
+msgstr ""
+
+#: templates/helpdesk/kanban.html:44
+#, python-format
+msgid ""
+"Showing only tickets due within the next <strong>%(w)s week%(w|pluralize)s</"
+"strong>. Overdue and tickets without a due date are hidden."
+msgstr ""
+
+#: templates/helpdesk/kanban.html:46
+#, python-format
+msgid ""
+"Showing tickets due within the next <strong>%(w)s week%(w|pluralize)s</"
+"strong> plus any overdue open tickets. Tickets without a due date are hidden."
+msgstr ""
+
+#: templates/helpdesk/kanban.html:49
+msgid ""
+"Showing all tickets. No date filter is active — this may be slow with large "
+"datasets."
+msgstr ""
+
+#: templates/helpdesk/kanban.html:55
+msgid "Filter by due date"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:57
+msgid "Due in next"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:66
+msgid "weeks"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:69
+msgid ""
+"Only shows tickets with a due date set between now and the chosen number of "
+"weeks from today."
+msgstr ""
+
+#: templates/helpdesk/kanban.html:79
+msgid "Exclude overdue"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:84
+msgid "Reset"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:88
+msgid "Show all"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:91
+msgid "Reset to default"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:93
+msgid "Apply"
+msgstr ""
+
+#: templates/helpdesk/kanban.html:203
+#, fuzzy
+#| msgid "Last Updated"
+msgid "Status updated."
+msgstr "Viimeksi päivitetty"
+
+#: templates/helpdesk/kanban.html:205
+#, fuzzy
+#| msgid "Updated"
+msgid "Update failed."
+msgstr "Päivitetty"
+
+#: templates/helpdesk/kanban.html:208
+msgid "Network error."
+msgstr ""
+
+#: templates/helpdesk/kb_category.html:6 templates/helpdesk/kb_category.html:13
+#: templates/helpdesk/kb_category_base.html:6
+#, python-format
+msgid "%(kbcat)s"
+msgstr ""
+
+#: templates/helpdesk/kb_category.html:11 templates/helpdesk/kb_index.html:6
+#: templates/helpdesk/kb_index.html:11 templates/helpdesk/kb_index.html:18
+#: templates/helpdesk/public_homepage.html:59
+msgid "Knowledgebase"
+msgstr "Usein kysytyt kysymykset"
+
+#: templates/helpdesk/kb_category_base.html:11
+#: templates/helpdesk/kb_category_base.html:77
+msgid "Contact a human"
+msgstr ""
+
+#: templates/helpdesk/kb_category_base.html:62
+#, python-format
+msgid ""
+"\n"
+"                    <span class=\"text-body-secondary small "
+"ms-2\">%(recommendations)s of %(votes)s people found this answer useful</"
+"span>\n"
+"                    "
+msgstr ""
+
+#: templates/helpdesk/kb_category_base.html:70
+#, fuzzy
+#| msgid "Open Tickets"
+msgid "Open tickets"
+msgstr "Avaa tukipyynnöt"
+
+#: templates/helpdesk/kb_category_base.html:83
+#, fuzzy
+#| msgid "Create Ticket"
+msgid "Create New Ticket"
+msgstr "Jätä tukipyyntö"
+
+#: templates/helpdesk/kb_index.html:19
+msgid ""
+"We have listed a number of Knowledgebase articles for your perusal in the "
+"following categories. Please check to see if any of these articles address "
+"your problem prior to opening a support ticket."
+msgstr ""
+"Olemme luetteloineet usein kysyttyjä kysymyksiä seuraavissa kategorioissa. "
+"Tarkista ennen tukitukipyynnön avaamista, voisiko jokin näistä artikkeleista "
+"ratkaista ongelmasi."
+
+#: templates/helpdesk/kb_index.html:30
+#, fuzzy
+#| msgid "View a Ticket"
+msgid "View articles"
+msgstr "Katso tukipyyntöä"
+
+#: templates/helpdesk/messages.html:8
+msgid "Info:"
+msgstr ""
+
+#: templates/helpdesk/messages.html:11
+msgid "Success:"
+msgstr ""
+
+#: templates/helpdesk/messages.html:14
+msgid "Warning:"
+msgstr ""
+
+#: templates/helpdesk/messages.html:17
+#: templates/helpdesk/public_view_form.html:11
+msgid "Error:"
+msgstr "Virhe:"
+
+#: templates/helpdesk/my_tickets.html:14 templates/helpdesk/my_tickets.html:18
+#: templates/helpdesk/navigation-sidebar.html:59
+#: templates/helpdesk/navigation-sidebar.html:103
+#, fuzzy
+#| msgid "Tickets"
+msgid "My Tickets"
+msgstr "Tukipyynnöt"
+
+#: templates/helpdesk/my_tickets.html:24
+#, fuzzy
+#| msgid "Helpdesk: Unassigned Tickets"
+msgid "Hide Closed Tickets"
+msgstr "Tukipalvelu: Tukipyynnöt jotka ei ole kenellekään käsittelyssä"
+
+#: templates/helpdesk/navigation-header.html:13
+msgid "Helpdesk"
+msgstr "Tuki"
+
+#: templates/helpdesk/navigation-header.html:32
+msgid "Search..."
+msgstr "Hae..."
+
+#: templates/helpdesk/navigation-header.html:34
+msgid "Enter a keyword, or a ticket number to jump straight to that ticket."
+msgstr ""
+"Kirjoita avainsana tai tukipyynnön numero hypätäksesi suoraan tukipyyntöun."
+
+#: templates/helpdesk/navigation-header.html:42
+#: templates/helpdesk/navigation-header.html:74
+#: templates/helpdesk/public_change_language.html:36
+#: templates/helpdesk/ticket_list.html:154
+msgid "Go"
+msgstr ""
+
+#: templates/helpdesk/navigation-header.html:54
+#: templates/helpdesk/navigation-header.html:62
+#: templates/helpdesk/public_change_language.html:18
+#: templates/helpdesk/public_change_language.html:25
+#, fuzzy
+#| msgid "Change the display language"
+msgid "Change language"
+msgstr "Vaihda kieltä"
+
+#: templates/helpdesk/navigation-header.html:89
+msgid "Toggle Theme"
+msgstr ""
+
+#: templates/helpdesk/navigation-header.html:97
+msgid "Light"
+msgstr ""
+
+#: templates/helpdesk/navigation-header.html:105
+msgid "Dark"
+msgstr ""
+
+#: templates/helpdesk/navigation-header.html:113
+msgid "Auto"
+msgstr ""
+
+#: templates/helpdesk/navigation-header.html:137
+#: templates/helpdesk/rss_list.html:4 templates/helpdesk/rss_list.html:16
+msgid "RSS Feeds"
+msgstr "RSS-syötteet"
+
+#: templates/helpdesk/navigation-header.html:141
+#: templates/helpdesk/registration/change_password.html:6
+#: templates/helpdesk/registration/change_password_done.html:6
 msgid "Change password"
 msgstr "Vaihda salasana"
 
-msgid "Enter a keyword, or a ticket number to jump straight to that ticket."
-msgstr "Kirjoita avainsana tai tukipyynnön numero hypätäksesi suoraan tukipyyntöun."
-
+#: templates/helpdesk/navigation-header.html:154
+#: templates/helpdesk/navigation-header.html:191
 msgid "Logout"
 msgstr "Kirjaudu ulos"
 
+#: templates/helpdesk/navigation-header.html:168
+#: templates/helpdesk/navigation-sidebar.html:9
+msgid "Dashboard"
+msgstr "Kojelauta"
+
+#: templates/helpdesk/navigation-header.html:197
+#: templates/helpdesk/registration/logged_out.html:22
 msgid "Log In"
 msgstr "Kirjaudu sisään"
 
-msgid "Please use button at upper right to login first."
-msgstr "Kirjaudu ensin oikean yläkulman painikkeella."
+#: templates/helpdesk/navigation-sidebar.html:15
+msgid "All Tickets"
+msgstr "Kaikki tukipyynnöt"
 
+#: templates/helpdesk/navigation-sidebar.html:27
+#: templates/helpdesk/saved_searches_list.html:5
+#: templates/helpdesk/saved_searches_list.html:12
+#: templates/helpdesk/saved_searches_list.html:17
+msgid "Saved Queries"
+msgstr "Tallennetut kyselyt"
+
+#: templates/helpdesk/navigation-sidebar.html:39
+msgid ""
+"No saved queries currently available. You can create one in the All Tickets "
+"page."
+msgstr ""
+
+#: templates/helpdesk/navigation-sidebar.html:46
+#, fuzzy
+#| msgid "Saved Queries"
+msgid "Manage Saved Queries"
+msgstr "Tallennetut kyselyt"
+
+#: templates/helpdesk/navigation-sidebar.html:52
+#: templates/helpdesk/navigation-sidebar.html:96
+msgid "New Ticket"
+msgstr "Uusi tukipyyntö"
+
+#: templates/helpdesk/navigation-sidebar.html:74
+msgid "Reports"
+msgstr "Raportit"
+
+#: templates/helpdesk/navigation-sidebar.html:81
+#: templates/helpdesk/navigation-sidebar.html:111
+#, fuzzy
+#| msgid "Knowledgebase"
+msgid "Knowledge Base"
+msgstr "Usein kysytyt kysymykset"
+
+#: templates/helpdesk/public_change_language.html:6
+#: templates/helpdesk/registration/login.html:67
+msgid "Change the display language"
+msgstr "Vaihda kieltä"
+
+#: templates/helpdesk/public_create_ticket_base.html:7
+#, fuzzy
+#| msgid "Please provide as descriptive a title and description as possible."
+msgid ""
+"Unless otherwise stated, all fields are required. Please provide as "
+"descriptive a title and description as possible."
+msgstr "Anna mahdollisimman kuvaava otsikko ja selitys"
+
+#: templates/helpdesk/public_create_ticket_base.html:19
+msgid ""
+"Public ticket submission is disabled. Please contact the administrator for "
+"assistance."
+msgstr ""
+
+#: templates/helpdesk/public_homepage.html:6
+#: templates/helpdesk/public_homepage.html:25
+#, fuzzy
+#| msgid "Helpdesk Summary"
+msgid "Helpdesk Support"
+msgstr "Tukipalvelun yhteenveto"
+
+#: templates/helpdesk/public_homepage.html:27
+msgid "Need help? Start here"
+msgstr ""
+
+#: templates/helpdesk/public_homepage.html:30
+#, fuzzy
+#| msgid "Create Ticket"
+msgid "Create a ticket"
+msgstr "Jätä tukipyyntö"
+
+#: templates/helpdesk/public_homepage.html:33
+#: templates/helpdesk/public_view_form.html:28
+#, fuzzy
+#| msgid "Search..."
+msgid "Search"
+msgstr "Hae..."
+
+#: templates/helpdesk/public_homepage.html:41
+#: templates/helpdesk/public_homepage.html:62
+msgid "Explore"
+msgstr ""
+
+#: templates/helpdesk/public_homepage.html:50
+msgid "Learn more"
+msgstr ""
+
+#: templates/helpdesk/public_homepage.html:60
+msgid "Can't find what you need? Explore the knowledge base here."
+msgstr ""
+
+#: templates/helpdesk/public_spam.html:4
+msgid "Unable To Open Ticket"
+msgstr "Tukipyyntöä ei löydy"
+
+#: templates/helpdesk/public_spam.html:5
+msgid "Sorry, but there has been an error trying to submit your ticket."
+msgstr "Tukipyynnön jättämisessä oli ongelma."
+
+#: templates/helpdesk/public_spam.html:6
 msgid ""
 "Our system has marked your submission as <strong>spam</strong>, so we are "
 "unable to save it. If this is not spam, please press back and re-type your "
@@ -1622,10 +2912,10 @@ msgid ""
 msgstr ""
 "Järjestelmämme on merkinnyt lähettämäsi <strong>roskapostiksi</strong> , "
 "joten emme pysty tallentamaan sitä. Jos tämä ei ole roskapostia, palaa "
-"takaisin ja kirjoita viesti uudelleen. Vältä \"spammiltä\" "
-"kuulostamista, ja jos sinulla on kasa linkkejä, yritä poistaa ne, jos "
-"mahdollista."
+"takaisin ja kirjoita viesti uudelleen. Vältä \"spammiltä\" kuulostamista, ja "
+"jos sinulla on kasa linkkejä, yritä poistaa ne, jos mahdollista."
 
+#: templates/helpdesk/public_spam.html:7
 msgid ""
 "We are sorry for any inconvenience, however this check is required to avoid "
 "our helpdesk resources being overloaded by spammers."
@@ -1633,45 +2923,442 @@ msgstr ""
 "Pahoittelemme häiriöitä, mutta tämä tarkistus on välttämätöntä, jotta "
 "roskapostittajat eivät ylikuormittaisi asiakaspalvelumme resursseja."
 
+#: templates/helpdesk/public_view_form.html:6
+#: templates/helpdesk/public_view_form.html:16
+#, fuzzy
+#| msgid "Search Query"
+msgid "Search your ticket"
+msgstr "Hakulauseke"
+
+#: templates/helpdesk/public_view_form.html:23
+msgid "Your E-mail Address"
+msgstr "Sähköpostiosoitteesi"
+
+#: templates/helpdesk/public_view_ticket.html:6
+msgid "View a Ticket"
+msgstr "Katso tukipyyntöä"
+
+#: templates/helpdesk/public_view_ticket.html:22
+#: templates/helpdesk/ticket_desc_table.html:57
+msgid "Accept and Close"
+msgstr "Hyväksy ja sulje"
+
+#: templates/helpdesk/public_view_ticket.html:30
+msgid "Submitted On"
+msgstr "Jätetty"
+
+#: templates/helpdesk/public_view_ticket.html:35
+#, fuzzy
+#| msgid "Due on"
+msgid "Due On"
+msgstr "Eräpäivä"
+
+#: templates/helpdesk/public_view_ticket.html:48
+#: templates/helpdesk/ticket_desc_table.html:124
+#, fuzzy
+#| msgid "Submitted On"
+msgid "Submitted by"
+msgstr "Jätetty"
+
+#: templates/helpdesk/public_view_ticket.html:57
+msgid "Tags"
+msgstr "Tägit"
+
+#: templates/helpdesk/public_view_ticket.html:63
+#: templates/helpdesk/ticket_desc_table.html:249
+msgid "Additional Info"
+msgstr ""
+
+#: templates/helpdesk/public_view_ticket.html:73
+msgid "Follow-Ups"
+msgstr "Päivitys"
+
+#: templates/helpdesk/public_view_ticket.html:86
+#, python-format
+msgid "Changed %(field)s from %(old_value)s to %(new_value)s."
+msgstr "Changed %(field)s from %(old_value)s to %(new_value)s."
+
+#: templates/helpdesk/public_view_ticket.html:135
+#, fuzzy, python-format
+#| msgid ""
+#| "You can insert ticket and queue details in your message. For more "
+#| "information, see the <a href='../../help/context/'>context help page</a>."
+msgid ""
+"\n"
+"        <div class=\"form-text\">You can insert ticket and queue details in "
+"your message. For more information, see the <a "
+"href='%(context_help_url)s'>context help page</a>.</div>\n"
+"\t"
+msgstr ""
+"Voit käyttää tukipyynnön ja aihealueen tietoja viestissäsi jos haluat. "
+"Lisätietoja <a href='../../help/context/'>context help page</a>."
+
+#: templates/helpdesk/public_view_ticket.html:174
+msgid "Attach a File"
+msgstr "Liitä tiedosto"
+
+#: templates/helpdesk/public_view_ticket.html:181
+#: templates/helpdesk/public_view_ticket.html:214
+msgid "No files selected."
+msgstr ""
+
+#: templates/helpdesk/public_view_ticket.html:185
+msgid "Update This Ticket"
+msgstr "Päivitä tätä tukipyyntöä"
+
+#: templates/helpdesk/registration/change_password.html:18
+#, fuzzy
+#| msgid "Change password"
+msgid "Change Password"
+msgstr "Vaihda salasana"
+
+#: templates/helpdesk/registration/change_password.html:25
+msgid "Please correct the error below."
+msgstr ""
+
+#: templates/helpdesk/registration/change_password.html:27
+msgid "Please correct the errors below."
+msgstr ""
+
+#: templates/helpdesk/registration/change_password.html:31
+msgid "Please enter your old password and new password (twice) to reset it."
+msgstr ""
+
+#: templates/helpdesk/registration/change_password.html:43
+#: templates/helpdesk/registration/password_reset_confirm.html:28
+#, fuzzy
+#| msgid "Change password"
+msgid "Change my password"
+msgstr "Vaihda salasana"
+
+#: templates/helpdesk/registration/change_password.html:44
+#: templates/helpdesk/registration/login.html:73
+#: templates/helpdesk/registration/password_reset_form.html:32
+#, fuzzy
+#| msgid "Feedback"
+msgid "Take me back"
+msgstr "Palaute"
+
+#: templates/helpdesk/registration/change_password_done.html:14
+msgid "Success!"
+msgstr ""
+
+#: templates/helpdesk/registration/change_password_done.html:15
+msgid "Your password has been changed successfully."
+msgstr ""
+
+#: templates/helpdesk/registration/change_password_done.html:17
+msgid "Go back home"
+msgstr ""
+
+#: templates/helpdesk/registration/logged_out.html:6
+msgid "Logged Out"
+msgstr "Kirjautunut ulos"
+
+#: templates/helpdesk/registration/logged_out.html:18
+msgid "Logout successful"
+msgstr ""
+
+#: templates/helpdesk/registration/logged_out.html:24
+msgid "Take me home"
+msgstr ""
+
+#: templates/helpdesk/registration/login.html:6
+msgid "Helpdesk Login"
+msgstr "Kirjautuminen tukipalveluun"
+
+#: templates/helpdesk/registration/login.html:21
+msgid "Log in to your account"
+msgstr ""
+
+#: templates/helpdesk/registration/login.html:25
+msgid "Your username and password didn't match. Please try again."
+msgstr "Käyttäjätunnuksesi ja salasanasi eivät vastanneet. Yritä uudelleen."
+
+#: templates/helpdesk/registration/login.html:28
+#, fuzzy
+#| msgid "E-Mail Username"
+msgid "Username"
+msgstr "Sähköpostin käyttäjätunnus"
+
+#: templates/helpdesk/registration/login.html:33
+msgid "Your username"
+msgstr ""
+
+#: templates/helpdesk/registration/login.html:38
+#, fuzzy
+#| msgid "E-Mail Password"
+msgid "Password"
+msgstr "Sähköpostin salasana"
+
+#: templates/helpdesk/registration/login.html:43
+#, fuzzy
+#| msgid "E-Mail Password"
+msgid "Your Password"
+msgstr "Sähköpostin salasana"
+
+#: templates/helpdesk/registration/login.html:47
+#, fuzzy
+#| msgid "Change password"
+msgid "Forgot password?"
+msgstr "Vaihda salasana"
+
+#: templates/helpdesk/registration/login.html:54
+msgid "Remember me"
+msgstr ""
+
+#: templates/helpdesk/registration/login.html:58
+#: templates/helpdesk/registration/password_reset_complete.html:21
+#, fuzzy
+#| msgid "Log In"
+msgid "Log in"
+msgstr "Kirjaudu sisään"
+
+#: templates/helpdesk/registration/password_reset_complete.html:6
+msgid "Password reset complete"
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_complete.html:18
+msgid "Password reset successful!"
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_complete.html:19
+msgid "Your password has been set. You may go ahead and log in now."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_confirm.html:7
+#: templates/helpdesk/registration/password_reset_done.html:6
+#: templates/helpdesk/registration/password_reset_done.html:18
+#: templates/helpdesk/registration/password_reset_form.html:6
+#: templates/helpdesk/registration/password_reset_form.html:18
+msgid "Password reset"
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_confirm.html:20
+#, fuzzy
+#| msgid "Change password"
+msgid "Set new password"
+msgstr "Vaihda salasana"
+
+#: templates/helpdesk/registration/password_reset_confirm.html:22
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_confirm.html:33
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_done.html:20
+msgid ""
+"We’ve emailed you instructions for setting your password, if an account "
+"exists with the email you entered. You should receive them shortly."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_done.html:23
+msgid ""
+"If you don’t receive an email, please make sure you’ve entered the address "
+"you registered with, and check your spam folder."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_done.html:25
+msgid "Take me Home"
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_email.html:2
+#, python-format
+msgid ""
+"You're receiving this email because a password reset was requested for your "
+"account at %(site_name)s."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_email.html:4
+msgid "Please visit the following page to choose a new password:"
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_email.html:8
+msgid ""
+"If you didn't request a password reset, you can safely ignore this email. "
+"Your password will not be changed."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_email.html:10
+msgid "Thanks,"
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_email.html:11
+#, python-format
+msgid "The %(site_name)s team"
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_form.html:20
+msgid ""
+"Forgotten your password? Enter your email address below, and we’ll email "
+"instructions for setting a new one."
+msgstr ""
+
+#: templates/helpdesk/registration/password_reset_form.html:26
+#, fuzzy
+#| msgid "Change password"
+msgid "Reset my password"
+msgstr "Vaihda salasana"
+
+#: templates/helpdesk/registration/password_reset_subject.txt:2
+#, fuzzy, python-format
+#| msgid "Password for the above username"
+msgid "Password reset on %(site_name)s"
+msgstr "Yllä olevan käyttäjänimen salasana"
+
+#: templates/helpdesk/report_index.html:6
+#: templates/helpdesk/report_index.html:17
+#: templates/helpdesk/report_index.html:102
+#, fuzzy
+#| msgid "Reports &amp; Statistics"
+msgid "Reports & Statistics"
+msgstr "Raportit &amp; tilastot"
+
+#: templates/helpdesk/report_index.html:11
 msgid "You haven't created any tickets yet, so you cannot run any reports."
 msgstr "Et ole vielä luonut tukipyyntöja, joten et voi ajaa raportteja."
 
-msgid "Reports By User"
+#: templates/helpdesk/report_index.html:26
+#, fuzzy
+#| msgid "Create Ticket"
+msgid "Create new report"
+msgstr "Jätä tukipyyntö"
+
+#: templates/helpdesk/report_index.html:30
+#: templates/helpdesk/report_output.html:36
+#, fuzzy
+#| msgid "Reports By User"
+msgid "Reports for User"
 msgstr "Käyttäjän raportit"
 
+#: templates/helpdesk/report_index.html:39
+#: templates/helpdesk/report_index.html:73
+#: templates/helpdesk/report_output.html:45
+#: templates/helpdesk/report_output.html:79
 msgid "by Priority"
 msgstr "prioriteetin mukaan"
 
+#: templates/helpdesk/report_index.html:45
+#: templates/helpdesk/report_output.html:51
 msgid "by Queue"
 msgstr "alueen mukaan"
 
+#: templates/helpdesk/report_index.html:51
+#: templates/helpdesk/report_index.html:79
+#: templates/helpdesk/report_output.html:57
+#: templates/helpdesk/report_output.html:85
 msgid "by Status"
 msgstr "tilan mukaan"
 
+#: templates/helpdesk/report_index.html:57
+#: templates/helpdesk/report_index.html:85
+#: templates/helpdesk/report_output.html:63
+#: templates/helpdesk/report_output.html:91
 msgid "by Month"
 msgstr "kuukauden mukaan"
 
-msgid "Reports By Queue"
+#: templates/helpdesk/report_index.html:64
+#: templates/helpdesk/report_output.html:70
+#, fuzzy
+#| msgid "Reports By Queue"
+msgid "Reports for Queue"
 msgstr "Raportit alueen mukaan"
 
+#: templates/helpdesk/report_index.html:91
+#: templates/helpdesk/report_output.html:97 views/staff.py:1841
 msgid "Days until ticket closed by Month"
 msgstr "Päiviä ennen tukipyyntöun sulkemista kuukauden mukaan"
 
+#: templates/helpdesk/report_index.html:104
+msgid ""
+"From here you can quickly generate reports for a user or see tickets in each "
+"queue."
+msgstr ""
+
+#: templates/helpdesk/report_index.html:117
+#, fuzzy
+#| msgid "View?"
+msgid "View"
+msgstr "Näytä?"
+
+#: templates/helpdesk/report_index.html:138
+#, fuzzy
+#| msgid "Tickets"
+msgid "Total tickets"
+msgstr "Tukipyynnöt"
+
+#: templates/helpdesk/report_index.html:154
+#, fuzzy
+#| msgid "Average number of days until ticket is closed (all tickets): "
+msgid "Average number of days needed to close a ticket (across all tickets)."
+msgstr "Keskimäärin päiviä tukipyynnön sulkemiseen (kaikki tukipyynnöt):"
+
+#: templates/helpdesk/report_index.html:155
+msgid "Days to close"
+msgstr ""
+
+#: templates/helpdesk/report_index.html:172
+#, fuzzy
+#| msgid ""
+#| "Average number of days until ticket is closed (tickets opened in last 60 "
+#| "days): "
+msgid ""
+"Average number of days needed to close a ticket (only for tickets opened in "
+"the last 60 days)."
+msgstr ""
+"Keskimääräinen päivien lukumäärä tukipyyntön sulkemiseen asti (tukipyynnöt "
+"jotka avattu viimeisen 60 päivän aikana):"
+
+#: templates/helpdesk/report_index.html:173
+#, fuzzy
+#| msgid "Days until ticket closed by Month"
+msgid "Days to close last 2 months"
+msgstr "Päiviä ennen tukipyyntöun sulkemista kuukauden mukaan"
+
+#: templates/helpdesk/report_index.html:187
+msgid "Unique Customers"
+msgstr ""
+
+#: templates/helpdesk/report_index.html:208
+#: templates/helpdesk/ticket_desc_table.html:157
+msgid "Time spent"
+msgstr "Käytetty aika"
+
+#: templates/helpdesk/report_output.html:24
+msgid "Filter Report"
+msgstr "Suodata raportti"
+
+#: templates/helpdesk/report_output.html:32
+#, fuzzy
+#| msgid "Change Query"
+msgid "Change report"
+msgstr "Vaihda kysely"
+
+#: templates/helpdesk/report_output.html:108
 msgid ""
 "You can run this query on filtered data by using one of your saved queries."
 msgstr ""
 "Voit suorittaa tämän kyselyn suodatetuille tiedoille käyttämällä yhtä "
 "tallennetuista kyselyistä."
 
-msgid "Saved Queries"
-msgstr "Tallennetut kyselyt"
-
-msgid "Select Query:"
+#: templates/helpdesk/report_output.html:112
+#, fuzzy
+#| msgid "Select Query:"
+msgid "Select Query"
 msgstr "Valitse kysely:"
 
-msgid "Filter Report"
-msgstr "Suodata raportti"
+#: templates/helpdesk/report_output.html:120
+#: templates/helpdesk/saved_searches_list.html:41
+msgid "Run"
+msgstr ""
 
+#: templates/helpdesk/report_output.html:127
 msgid ""
 "Want to filter this report to just show a subset of data? Go to the Ticket "
 "List, filter your query, and save your query."
@@ -1679,28 +3366,36 @@ msgstr ""
 "Haluatko suodattaa tämän raportin vain osajoukon tietojen näyttämiseksi? "
 "Siirry tukipyyntöluetteloon, suodata kysely ja tallenna kysely."
 
+#: templates/helpdesk/report_output.html:149
+msgid "Download as PNG"
+msgstr ""
+
+#: templates/helpdesk/rss_list.html:18
 msgid ""
 "The following RSS feeds are available for you to monitor using your "
 "preferred RSS software. With the exception of the 'Latest Activity' feed, "
 "all feeds provide information only on Open and Reopened cases. This ensures "
 "your RSS reader isn't full of information about closed or historical tasks."
 msgstr ""
-"Seuraavat RSS-syötteet ovat käytettävissäsi valitsemasi RSS-"
-"ohjelmiston avulla. Lukuun ottamatta viimeisimmän toiminnan syötettä, kaikki"
-" syötteet tarjoavat tietoja vain avoimista ja uudelleen avatuista "
-"tapauksista. Tämä varmistaa, että RSS-lukijasi ei ole täynnä tietoja "
-"suljetuista tai historiallisista tehtävistä."
+"Seuraavat RSS-syötteet ovat käytettävissäsi valitsemasi RSS-ohjelmiston "
+"avulla. Lukuun ottamatta viimeisimmän toiminnan syötettä, kaikki syötteet "
+"tarjoavat tietoja vain avoimista ja uudelleen avatuista tapauksista. Tämä "
+"varmistaa, että RSS-lukijasi ei ole täynnä tietoja suljetuista tai "
+"historiallisista tehtävistä."
 
+#: templates/helpdesk/rss_list.html:22
 msgid ""
 "A summary of your open tickets - useful for getting alerted to new tickets "
 "opened for you"
 msgstr ""
-"Yhteenveto avoimista tukipyynnöistä - hyödyllinen ilmoituksen saamiseksi sinulle "
-"avoimista uusista tukipyynnöistä"
+"Yhteenveto avoimista tukipyynnöistä - hyödyllinen ilmoituksen saamiseksi "
+"sinulle avoimista uusista tukipyynnöistä"
 
+#: templates/helpdesk/rss_list.html:24
 msgid "Latest Activity"
 msgstr "Uusimmat tapahtumat"
 
+#: templates/helpdesk/rss_list.html:25
 msgid ""
 "A summary of all helpdesk activity - including comments, emails, "
 "attachments, and more"
@@ -1708,13 +3403,16 @@ msgstr ""
 "Yhteenveto kaikesta asiakastuen toiminnasta - mukaan lukien kommentit, "
 "sähköpostit, liitteet ja paljon muuta"
 
+#: templates/helpdesk/rss_list.html:28
 msgid ""
 "All unassigned tickets - useful for being alerted to new tickets opened by "
 "the public via the web or via e-mail"
 msgstr ""
-"Kaikki tukipyynnöt joilla ei ole vastuuhenkilöä - hyödyllinen ilmoituksen saamiseksi uusista "
-"tukipyynnöistä, jotka asiakkaat ovat lähettäneet verkon tai sähköpostin kautta"
+"Kaikki tukipyynnöt joilla ei ole vastuuhenkilöä - hyödyllinen ilmoituksen "
+"saamiseksi uusista tukipyynnöistä, jotka asiakkaat ovat lähettäneet verkon "
+"tai sähköpostin kautta"
 
+#: templates/helpdesk/rss_list.html:31
 msgid ""
 "These RSS feeds allow you to view a summary of either your own tickets, or "
 "all tickets, for each of the queues in your helpdesk. For example, if you "
@@ -1722,139 +3420,384 @@ msgid ""
 "new tickets coming into that queue."
 msgstr ""
 "Näiden RSS-syötteiden avulla voit tarkastella yhteenvetoa joko omista "
-"lipuistasi tai kaikista tukipyynnöistä jokaisessa asiakaspalvelun jonossa. Jos "
-"esimerkiksi hallitset henkilöstöä, joka käyttää tiettyä aluetta, sitä voidaan "
-"käyttää katsomaan alueeseen liittyviä uusia tukipyyntöja."
+"lipuistasi tai kaikista tukipyynnöistä jokaisessa asiakaspalvelun jonossa. "
+"Jos esimerkiksi hallitset henkilöstöä, joka käyttää tiettyä aluetta, sitä "
+"voidaan käyttää katsomaan alueeseen liittyviä uusia tukipyyntöja."
 
+#: templates/helpdesk/rss_list.html:37
 msgid "Per-Queue Feeds"
 msgstr "Aluekohtaiset syötteen"
 
+#: templates/helpdesk/rss_list.html:46
 msgid "All Open Tickets"
 msgstr "Kaikki avoimet tukipyynnöt"
 
-msgid "Open Tickets"
-msgstr "Avaa tukipyynnöt"
+#: templates/helpdesk/saved_searches_list.html:29
+#, fuzzy
+#| msgid "Shared?"
+msgid "Shared"
+msgstr "Jaettu?"
 
+#: templates/helpdesk/saved_searches_list.html:31
+#, fuzzy
+#| msgid "Shared?"
+msgid "Shared by"
+msgstr "Jaettu?"
+
+#: templates/helpdesk/saved_searches_list.html:40
+#, fuzzy
+#| msgid "Run Query"
+msgid "Run this query"
+msgstr "Suorita kysely"
+
+#: templates/helpdesk/saved_searches_list.html:47
+#, fuzzy
+#| msgid "Delete Query"
+msgid "Delete this query"
+msgstr "Poista kysely"
+
+#: templates/helpdesk/saved_searches_list.html:56
+#, fuzzy
+#| msgid "Saved Queries"
+msgid "No saved queries found."
+msgstr "Tallennetut kyselyt"
+
+#: templates/helpdesk/success_iframe.html:3
+msgid ""
+"Ticket submitted successfully! We will reply via email as soon as we get the "
+"chance."
+msgstr ""
+
+#: templates/helpdesk/system_settings.html:7
 msgid "Change System Settings"
 msgstr "Vaihda järjestelmäasetukset"
 
-msgid "The following items can be maintained by you or other superusers:"
+#: templates/helpdesk/system_settings.html:12
+#: templates/helpdesk/user_settings.html:7
+#, fuzzy
+#| msgid "User Settings"
+msgid "Settings"
+msgstr "Käyttäjäasetukset"
+
+#: templates/helpdesk/system_settings.html:19
+#, fuzzy
+#| msgid "The following items can be maintained by you or other superusers:"
+msgid "The following items can be maintained by you or other superusers."
 msgstr "Sinä tai muut superkäyttäjät voivat ylläpitää seuraavia osia:"
 
+#: templates/helpdesk/system_settings.html:24
 msgid "E-Mail Ignore list"
 msgstr "Sähköpostin ohitusluettelo"
 
+#: templates/helpdesk/system_settings.html:30
 msgid "Maintain Queues"
 msgstr "Ylläpidä alueita"
 
+#: templates/helpdesk/system_settings.html:33
 msgid "Maintain Pre-Set Replies"
 msgstr "Ylläpidä esiasetettuja vastauksia"
 
+#: templates/helpdesk/system_settings.html:37
 msgid "Maintain Knowledgebase Categories"
 msgstr "Ylläpidä UKK-kategerioita"
 
+#: templates/helpdesk/system_settings.html:40
 msgid "Maintain Knowledgebase Items"
 msgstr "Ylläpidä UKK-artikkeleita"
 
+#: templates/helpdesk/system_settings.html:44
 msgid "Maintain E-Mail Templates"
 msgstr "Ylläpidä sähköpostipohjia"
 
+#: templates/helpdesk/system_settings.html:47
 msgid "Maintain Users"
 msgstr "Ylläpidä käyttäjiä"
 
+#: templates/helpdesk/ticket.html:6
 msgid "View Ticket Details"
 msgstr "Näytä tukipyynnön tiedot"
 
-msgid "Use a Pre-set Reply"
-msgstr "Käytä ennalta asetettua vastausta"
+#: templates/helpdesk/ticket.html:30
+#, fuzzy
+#| msgid "This ticket has no dependencies."
+msgid "This ticket has been merged into ticket"
+msgstr "Tällä tukipyynnöllä ei ole riippuvuuksia."
 
-msgid "Optional"
-msgstr "Valinnainen"
+#: templates/helpdesk/ticket.html:49 templates/helpdesk/ticket.html:96
+#, fuzzy
+#| msgid "Follow-ups"
+msgid "Follow ups"
+msgstr "Päivitykset"
 
-msgid "(Optional)"
-msgstr "(Valinnainen)"
-
-msgid ""
-"Selecting a pre-set reply will over-write your comment below. You can then "
-"modify the pre-set reply to your liking before saving this update."
+#: templates/helpdesk/ticket.html:59
+msgid "Respond"
 msgstr ""
-"Valitsemalla ennalta asetetun vastauksen, ylikirjoitat kommentin. "
-"Voit sitten muokata esiasetettua vastausta mieleiseesi ennen tämän "
-"päivityksen tallentamista."
 
-msgid "Is this update public?"
-msgstr "Onko tämä päivitys julkinen?"
-
-msgid ""
-"If this is public, the submitter will be e-mailed your comment or "
-"resolution."
+#: templates/helpdesk/ticket.html:118
+msgid "Add a new checklist"
 msgstr ""
-"Jos tämä on julkinen, lähettäjälle lähetetään kommentti tai ratkaisu "
-"sähköpostitse."
 
-msgid "Change Further Details &raquo;"
-msgstr "Muuta lisätietoja &raquo;"
+#: templates/helpdesk/ticket.html:122
+msgid ""
+"You can select a template to generate a checklist with a predefined set of "
+"tasks."
+msgstr ""
 
-msgid "Owner"
-msgstr "Omistaja"
+#: templates/helpdesk/ticket.html:123
+msgid "Ignore it and only give a name to create an empty checklist."
+msgstr ""
 
-msgid "Unassign"
-msgstr "Poista vastuuhenkilö"
+#: templates/helpdesk/ticket.html:128
+#, fuzzy
+#| msgid "e-mail templates"
+msgid "Manage templates"
+msgstr "sähköpostipohjat"
 
+#: templates/helpdesk/ticket.html:171
+msgid ""
+"If you want to update state of checklist tasks, please do a Follow-Up "
+"response and click on \"Update checklists\""
+msgstr ""
+
+#: templates/helpdesk/ticket.html:245
+msgid "Fetching image…"
+msgstr ""
+
+#: templates/helpdesk/ticket.html:246
+#, fuzzy
+#| msgid "Attachment"
+msgid "Attached:"
+msgstr "Liite"
+
+#: templates/helpdesk/ticket.html:247
+msgid "Unsupported file type:"
+msgstr ""
+
+#: templates/helpdesk/ticket.html:248
+msgid "Allowed types:"
+msgstr ""
+
+#: templates/helpdesk/ticket.html:249
+msgid "The dropped item is not a supported image."
+msgstr ""
+
+#: templates/helpdesk/ticket.html:250
+msgid "The image is too large to attach."
+msgstr ""
+
+#: templates/helpdesk/ticket.html:251
+msgid ""
+"Couldn't determine the image's address. Save the image and drop the file "
+"here instead."
+msgstr ""
+
+#: templates/helpdesk/ticket.html:252
+msgid ""
+"Couldn't fetch this image, the site may not allow it. Right-click the image, "
+"choose Copy image and paste it here, or save it and drop the file here "
+"instead."
+msgstr ""
+
+#: templates/helpdesk/ticket_attachment_del.html:3
+#, fuzzy
+#| msgid "Delete Ticket"
+msgid "Delete Ticket Attachment"
+msgstr "Poista tukipyyntö"
+
+#: templates/helpdesk/ticket_attachment_del.html:5
+#, python-format
 msgid ""
 "\n"
-"<h2>Add Ticket CC</h2>\n"
+"<h2>Delete Ticket Attachment</h2>\n"
 "\n"
-"<p>To automatically send an email to a user or e-mail address when this ticket is updated, select the user or enter an e-mail address below.</p>"
+"<p>Are you sure you wish to delete the attachment <i>%(filename)s</i> from "
+"this ticket? The attachment data will be permanently deleted from the "
+"database, but the attachment itself will still exist on the server.</p>\n"
+msgstr ""
+
+#: templates/helpdesk/ticket_cc_add.html:5
+#: templates/helpdesk/ticket_cc_add.html:21
+msgid "Add Ticket CC"
+msgstr "Lisää CC tukipyyntöön"
+
+#: templates/helpdesk/ticket_cc_add.html:15
+#: templates/helpdesk/ticket_cc_del.html:13
+#: templates/helpdesk/ticket_cc_list.html:14
+#, fuzzy
+#| msgid "Ticket CC Settings"
+msgid "CC Settings"
+msgstr "Tukipyynnön CC-asetukset"
+
+#: templates/helpdesk/ticket_cc_add.html:17
+#, fuzzy
+#| msgid "Add Ticket CC"
+msgid "Add CC"
+msgstr "Lisää CC tukipyyntöön"
+
+#: templates/helpdesk/ticket_cc_add.html:26
+#, fuzzy
+#| msgid ""
+#| "\n"
+#| "<h2>Add Ticket CC</h2>\n"
+#| "\n"
+#| "<p>To automatically send an email to a user or e-mail address when this "
+#| "ticket is updated, select the user or enter an e-mail address below.</p>"
+msgid ""
+"To automatically send an email to a user or e-mail address when this ticket "
+"is updated, select the user or enter an e-mail address below."
 msgstr ""
 "\n"
-"<h2> Lisää tukipyyntö CC </h2><p> Jos haluat lähettää sähköpostin käyttäjälle tai"
-" sähköpostiosoitteeseen automaattisesti, kun tukipyyntö päivitetään, valitse "
-"käyttäjä tai kirjoita sähköpostiosoite alla. </p>"
+"<h2> Lisää tukipyyntö CC </h2><p> Jos haluat lähettää sähköpostin "
+"käyttäjälle tai sähköpostiosoitteeseen automaattisesti, kun tukipyyntö "
+"päivitetään, valitse käyttäjä tai kirjoita sähköpostiosoite alla. </p>"
 
+#: templates/helpdesk/ticket_cc_add.html:33
+msgid "Email"
+msgstr ""
+
+#: templates/helpdesk/ticket_cc_add.html:52
+#, fuzzy
+#| msgid "Add filter"
+msgid "Add Email"
+msgstr "Lisää seula"
+
+#: templates/helpdesk/ticket_cc_add.html:69
+#: templates/helpdesk/ticket_cc_add.html:93
 msgid "Save Ticket CC"
 msgstr "Tallenna tukipyyntö CC"
 
+#: templates/helpdesk/ticket_cc_add.html:76
+#, fuzzy
+#| msgid "Add filter"
+msgid "Add User"
+msgstr "Lisää seula"
+
+#: templates/helpdesk/ticket_cc_del.html:3
 msgid "Delete Ticket CC"
 msgstr "Poista tukipyyntö CC"
 
-msgid "Don't Delete"
-msgstr "Älä poista"
+#: templates/helpdesk/ticket_cc_del.html:15
+#, fuzzy
+#| msgid "Delete"
+msgid "Delete CC"
+msgstr "Poista"
 
-msgid "Yes, Delete"
-msgstr "Kyllä, poista"
+#: templates/helpdesk/ticket_cc_del.html:18
+#, python-format
+msgid ""
+"\n"
+"<h2>Delete Ticket CC</h2>\n"
+"\n"
+"<p>Are you sure you wish to delete this email address "
+"(<em>%(email_address)s</em>) from the CC list for this ticket? They will "
+"stop receiving updates.</p>\n"
+msgstr ""
+"\n"
+"<h2>Delete Ticket CC</h2>\n"
+"\n"
+"<p>Are you sure you wish to delete this email address "
+"(<em>%(email_address)s</em>) from the CC list for this ticket? They will "
+"stop receiving updates.</p>\n"
 
+#: templates/helpdesk/ticket_cc_del.html:28
+#, fuzzy
+#| msgid "Yes - Delete It"
+msgid "Yes I Understand - Delete"
+msgstr "Kyllä - poista se"
+
+#: templates/helpdesk/ticket_cc_list.html:5
 msgid "Ticket CC Settings"
 msgstr "Tukipyynnön CC-asetukset"
 
+#: templates/helpdesk/ticket_cc_list.html:17
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "<h2>Ticket CC Settings</h2>\n"
+#| "\n"
+#| "<p>The following people will receive an e-mail whenever <em><a "
+#| "href='../'>%(ticket_title)s</a></em> is updated. Some people can also "
+#| "view or edit the ticket via the public ticket views.</p>\n"
+#| "\n"
+#| "<p>You can <a href='add/'>add a new e-mail address to the list</a> or "
+#| "delete any of the items below as required.</p>"
+msgid ""
+"\n"
+"<h2>Ticket CC Settings</h2>\n"
+"\n"
+"<p>The following people will receive an e-mail whenever <em><a "
+"href='../'>%(ticket_title)s</a></em> is updated. Some people can also view "
+"or edit the ticket via the public ticket views.</p>\n"
+"\n"
+"<p>You can add a new recipient to the list or delete any of the items below "
+"as required.</p>"
+msgstr ""
+"\n"
+"<h2>Ticket CC Settings</h2>\n"
+"\n"
+"<p>The following people will receive an e-mail whenever <em><a "
+"href='../'>%(ticket_title)s</a></em> is updated. Some people can also view "
+"or edit the ticket via the public ticket views.</p>\n"
+"\n"
+"<p>You can <a href='add/'>add a new e-mail address to the list</a> or delete "
+"any of the items below as required.</p>"
+
+#: templates/helpdesk/ticket_cc_list.html:28
 msgid "Ticket CC List"
 msgstr "Tukipyynnön CC-luettelo"
 
+#: templates/helpdesk/ticket_cc_list.html:32
+msgid "Add an Email or Helpdesk User"
+msgstr ""
+
+#: templates/helpdesk/ticket_cc_list.html:37
+#, fuzzy
+#| msgid "E-Mail Address"
+msgid "E-Mail Address or Helpdesk User"
+msgstr "Sähköpostiosoite"
+
+#: templates/helpdesk/ticket_cc_list.html:38
 msgid "View?"
 msgstr "Näytä?"
 
+#: templates/helpdesk/ticket_cc_list.html:39
 msgid "Update?"
 msgstr "Päivitä?"
 
+#: templates/helpdesk/ticket_cc_list.html:86
+#, python-format
+msgid "Return to <em>%(ticket_title)s</em>"
+msgstr "Return to <em>%(ticket_title)s</em>"
+
+#: templates/helpdesk/ticket_dependency_add.html:3
+#: templates/helpdesk/ticket_dependency_add.html:12
 msgid "Add Ticket Dependency"
 msgstr "Lisää tukipyyntöriippuvuus"
 
+#: templates/helpdesk/ticket_dependency_add.html:15
 msgid ""
 "\n"
 "<h2>Add Ticket Dependency</h2>\n"
 "\n"
-"<p>Adding a dependency will stop you resolving this ticket until the dependent ticket has been resolved or closed.</p>"
+"<p>Adding a dependency will stop you resolving this ticket until the "
+"dependent ticket has been resolved or closed.</p>"
 msgstr ""
 "\n"
-"<h2> Lisää tukipyyntöriippuvuus </h2><p> Riippuvuuden lisääminen lopettaa tukipyynnön "
-"ratkaisemisen, kunnes riippuvainen tukipyyntö on ratkaistu tai suljettu. </p>"
+"<h2> Lisää tukipyyntöriippuvuus </h2><p> Riippuvuuden lisääminen lopettaa "
+"tukipyynnön ratkaisemisen, kunnes riippuvainen tukipyyntö on ratkaistu tai "
+"suljettu. </p>"
 
+#: templates/helpdesk/ticket_dependency_add.html:31
+#: templates/helpdesk/ticket_resolves_add.html:33
 msgid "Save Ticket Dependency"
 msgstr "Tallenna tukipyyntöriippuvuus"
 
+#: templates/helpdesk/ticket_dependency_del.html:3
+#: templates/helpdesk/ticket_dependency_del.html:12
 msgid "Delete Ticket Dependency"
 msgstr "Poista tukipyyntöriippuvuus"
 
+#: templates/helpdesk/ticket_dependency_del.html:15
 msgid ""
 "\n"
 "<h2>Delete Ticket Dependency</h2>\n"
@@ -1862,121 +3805,268 @@ msgid ""
 "<p>Are you sure you wish to remove the dependency on this ticket?</p>\n"
 msgstr ""
 "\n"
-"<h2> Poista tukipyyntöriippuvuus </h2><p> Haluatko varmasti poistaa riippuvuuden "
-"tästä tukipyynnöstä? </p>\n"
+"<h2> Poista tukipyyntöriippuvuus </h2><p> Haluatko varmasti poistaa "
+"riippuvuuden tästä tukipyynnöstä? </p>\n"
 
+#: templates/helpdesk/ticket_desc_table.html:24
 msgid "Unhold"
 msgstr "Poista pidosta"
 
+#: templates/helpdesk/ticket_desc_table.html:31
 msgid "Hold"
 msgstr "Laita pitoon"
 
-msgid "Ignore"
-msgstr "Jättää huomiotta"
+#: templates/helpdesk/ticket_desc_table.html:110
+#, fuzzy
+#| msgid "You have no tickets assigned to you."
+msgid "Save ticket assignment"
+msgstr "Sinulle ei ole osoitettu tukipyyntöja."
 
-msgid "Copies To"
+#: templates/helpdesk/ticket_desc_table.html:116
+#, fuzzy
+#| msgid "Respond to this ticket"
+msgid "Assign this ticket to "
+msgstr "Vastaa tähän tukipyyntöön"
+
+#: templates/helpdesk/ticket_desc_table.html:136
+#, fuzzy
+#| msgid "Edit Ticket"
+msgid "Edit "
+msgstr "Muokkaa tukipyyntöä"
+
+#: templates/helpdesk/ticket_desc_table.html:136
+msgid " user profile"
+msgstr ""
+
+#: templates/helpdesk/ticket_desc_table.html:143
+msgid "Display tickets filtered for "
+msgstr ""
+
+#: templates/helpdesk/ticket_desc_table.html:143
+msgid " as a keyword"
+msgstr ""
+
+#: templates/helpdesk/ticket_desc_table.html:149
+msgid "Add email address for the ticket system to ignore."
+msgstr ""
+
+#: templates/helpdesk/ticket_desc_table.html:166
+#, fuzzy
+#| msgid "Copies To"
+msgid "Copies to"
 msgstr "Kopio kohteeseen"
 
-msgid "Manage"
-msgstr "Hallitse"
-
+#: templates/helpdesk/ticket_desc_table.html:173
 msgid ""
-"Click here to add / remove people who should receive an e-mail whenever this"
-" ticket is updated."
+"Click here to add / remove people who should receive an e-mail whenever this "
+"ticket is updated."
 msgstr ""
 "Napsauta tätä lisätäksesi tai poistaaksesi ihmisiä, joiden pitäisi saada "
 "sähköposti aina, kun tukipyyntö päivitetään."
 
-msgid "Subscribe"
-msgstr "Seuraa"
-
+#: templates/helpdesk/ticket_desc_table.html:180
 msgid ""
-"Click here to subscribe yourself to this ticket, if you want to receive an "
-"e-mail whenever this ticket is updated."
+"Click here to subscribe yourself to this ticket, if you want to receive an e-"
+"mail whenever this ticket is updated."
 msgstr ""
-"Napsauta tätä ja tilaa itsesi tukipyyntö, jos haluat saada sähköpostia aina, kun "
-"tukipyyntö päivitetään."
+"Napsauta tätä ja tilaa itsesi tukipyyntö, jos haluat saada sähköpostia aina, "
+"kun tukipyyntö päivitetään."
 
-msgid "Dependencies"
-msgstr "Riippuvuudet"
+#: templates/helpdesk/ticket_desc_table.html:187
+msgid "Assigned queue does not have CC notifications enabled."
+msgstr ""
 
+#: templates/helpdesk/ticket_desc_table.html:188
+msgid "CC Notifications disabled"
+msgstr ""
+
+#: templates/helpdesk/ticket_desc_table.html:195
+#, fuzzy
+#| msgid "Resolved"
+msgid "Resolves"
+msgstr "Ratkaistu"
+
+#: templates/helpdesk/ticket_desc_table.html:199
+msgid "Make this ticket resolve another ticket."
+msgstr ""
+
+#: templates/helpdesk/ticket_desc_table.html:209
+#: templates/helpdesk/ticket_desc_table.html:232
+#, fuzzy
+#| msgid ""
+#| "Click on 'Add Dependency', if you want to make this ticket dependent on "
+#| "another ticket. A ticket may not be closed until all tickets it depends "
+#| "on are closed."
 msgid ""
-"This ticket cannot be resolved until the following ticket(s) are resolved"
-msgstr "Tätä lipua ei voida ratkaista ennen kuin seuraavat tukipyynnöt on ratkaistu"
+"Drop the dependency on this ticket. A ticket may not be closed until all "
+"tickets it depends on are closed or removed."
+msgstr ""
+"Napsauta 'Lisää riippuvuus', jos haluat tehdä tämän tukipyynnön "
+"riippuvaiseksi toisesta tukipyynnöstä. Tukipyyntöä ei saa sulkea ennen kuin "
+"kaikki tukipyynnöt, joista se riippuu, ovat suljettuja."
 
-msgid "Remove Dependency"
-msgstr "Poista riippuvuus"
+#: templates/helpdesk/ticket_desc_table.html:214
+#, fuzzy
+#| msgid "Respond to this ticket"
+msgid "No other ticket"
+msgstr "Vastaa tähän tukipyyntöön"
 
+#: templates/helpdesk/ticket_desc_table.html:219
+#, fuzzy
+#| msgid "Depends On Ticket"
+msgid "Depends on"
+msgstr "Riippuu tukipyynnöstä"
+
+#: templates/helpdesk/ticket_desc_table.html:223
+#, fuzzy
+#| msgid ""
+#| "Click on 'Add Dependency', if you want to make this ticket dependent on "
+#| "another ticket. A ticket may not be closed until all tickets it depends "
+#| "on are closed."
+msgid ""
+"Make this ticket dependent on another ticket. A ticket may not be closed "
+"until all tickets it depends on are closed or removed."
+msgstr ""
+"Napsauta 'Lisää riippuvuus', jos haluat tehdä tämän tukipyynnön "
+"riippuvaiseksi toisesta tukipyynnöstä. Tukipyyntöä ei saa sulkea ennen kuin "
+"kaikki tukipyynnöt, joista se riippuu, ovat suljettuja."
+
+#: templates/helpdesk/ticket_desc_table.html:236
 msgid "This ticket has no dependencies."
 msgstr "Tällä tukipyynnöllä ei ole riippuvuuksia."
 
-msgid "Add Dependency"
-msgstr "Lisää riippuvuus"
+#: templates/helpdesk/ticket_desc_table.html:243
+#, fuzzy
+#| msgid "Knowledge base item"
+msgid "Knowledgebase item"
+msgstr "UKK-kysymys"
 
-msgid ""
-"Click on 'Add Dependency', if you want to make this ticket dependent on "
-"another ticket. A ticket may not be closed until all tickets it depends on "
-"are closed."
-msgstr ""
-"Napsauta 'Lisää riippuvuus', jos haluat tehdä tämän tukipyynnön "
-"riippuvaiseksi toisesta tukipyynnöstä. Tukipyyntöä ei saa sulkea ennen kuin kaikki "
-"tukipyynnöt, joista se riippuu, ovat suljettuja."
+#: templates/helpdesk/ticket_desc_table.html:280
+#, fuzzy
+#| msgid "Attachments"
+msgid "No attachments"
+msgstr "Liitteet"
 
-msgid "Change Query"
-msgstr "Vaihda kysely"
+#: templates/helpdesk/ticket_desc_table.html:291
+#, python-format
+msgid "Show %(counter)s older attachment"
+msgid_plural "Show %(counter)s older attachments"
+msgstr[0] ""
+msgstr[1] ""
 
-msgid "Sorting"
-msgstr "Lajittelu"
+#: templates/helpdesk/ticket_desc_table.html:309
+#, fuzzy
+#| msgid "Created"
+msgid "Create"
+msgstr "Luotu"
 
-msgid "Keywords"
-msgstr "Avainsanat"
+#: templates/helpdesk/ticket_list.html:32
+msgid "Saved Query"
+msgstr "Tallennettu kysely"
 
-msgid "Date Range"
-msgstr "Ajanjakso"
+#: templates/helpdesk/ticket_list.html:51
+msgid "Table"
+msgstr "Taulukko"
 
-msgid "Reverse"
+#: templates/helpdesk/ticket_list.html:63
+msgid "Timeline"
+msgstr "Aikajana"
+
+#: templates/helpdesk/ticket_list.html:89
+msgid "Submitter"
+msgstr "Tukipyynnön jättäjä"
+
+#: templates/helpdesk/ticket_list.html:92
+msgid "Time Spent"
+msgstr "Käytetty aika"
+
+#: templates/helpdesk/ticket_list.html:109
+#, fuzzy
+#| msgid "Select:"
+msgid "Select"
+msgstr "Valitse:"
+
+#: templates/helpdesk/ticket_list.html:123
+#, fuzzy
+#| msgid "Inverse"
+msgid "Invert"
 msgstr "Käänteinen"
 
-msgid "Ordering applied to tickets"
-msgstr "Järjestystä sovellettiin tukipyyntöihin"
-
-msgid "Owner(s)"
-msgstr "Omistaja(t)"
-
-msgid "Ctrl-Click to select multiple options"
-msgstr "Ctrl-klikkaa valitaksesi useita vaihtoehtoja"
-
-msgid "Queue(s)"
-msgstr "Alue(et)"
-
-msgid "Ctrl-click to select multiple options"
-msgstr "Ctrl-klikkaa voit valita useita vaihtoehtoja"
-
-msgid "Status(es)"
-msgstr "Statukset"
-
-msgid "Date (From)"
-msgstr "Päivämäärä (alkaen)"
-
-msgid "Date (To)"
-msgstr "Päivämäärä (asti)"
-
-msgid "Use YYYY-MM-DD date format, eg 2011-05-29"
-msgstr "Käytä päivämäärämuotoa VVVV-KK-PP, esim. 2011-05-29"
-
-msgid ""
-"Keywords are case-insensitive, and will be looked for in the title, body and"
-" submitter fields."
+#: templates/helpdesk/ticket_list.html:127
+msgid "Action"
 msgstr ""
-"Avainsanat eivät ole kirjainkoolla merkityksellisiä, ja niitä etsitään "
-"otsikko-, runko- ja lähettäjäkentistä."
 
-msgid "Apply Filter"
-msgstr "Käytä suodatinta"
+#: templates/helpdesk/ticket_list.html:131
+msgid "Take (Assign to me)"
+msgstr "Ota (anna minulle)"
 
+#: templates/helpdesk/ticket_list.html:133
+msgid "Merge"
+msgstr ""
+
+#: templates/helpdesk/ticket_list.html:135
+msgid "Close (Don't Send E-Mail)"
+msgstr "Sulje (älä lähetä sähköpostia)"
+
+#: templates/helpdesk/ticket_list.html:136
+msgid "Close (Send E-Mail)"
+msgstr "Sulje (lähetä sähköposti)"
+
+#: templates/helpdesk/ticket_list.html:138
+msgid "Assign To"
+msgstr "Anna tukipyyntö jollekin"
+
+#: templates/helpdesk/ticket_list.html:139
+msgid "Nobody (Unassign)"
+msgstr "Ei kukaan (peruuta tukipyynnön anto)"
+
+#: templates/helpdesk/ticket_list.html:144
+msgid "Set KB Item"
+msgstr ""
+
+#: templates/helpdesk/ticket_list.html:145
+msgid "No KB Item"
+msgstr ""
+
+#: templates/helpdesk/ticket_list.html:168
+#, python-format
+msgid ""
+"You are currently viewing saved query <strong>\"%(query_name)s\"</strong>."
+msgstr ""
+"Katsot parhaillaan tallennettua kyselyä <strong>\"%(query_name)s\"</strong>."
+
+#: templates/helpdesk/ticket_list.html:175
+#, fuzzy, python-format
+#| msgid ""
+#| "<a href='../reports/?saved_query=%(query_id)s'>Run a report</a> on this "
+#| "query to see stats and charts for the data listed below."
+msgid ""
+"\n"
+"        <a href=\"../reports/?saved_query=%(query_id)s\" class=\"alert-link "
+"text-decoration-underline link-offset-2\">Run a report</a> on this query to "
+"see stats and charts for the data listed below.\n"
+"        "
+msgstr ""
+"<a href='../reports/?saved_query=%(query_id)s'>Run a report</a> on this "
+"query to see stats and charts for the data listed below."
+
+#: templates/helpdesk/ticket_list.html:225
+msgid "Apply Filters"
+msgstr "Seulo tulokset"
+
+#: templates/helpdesk/ticket_list.html:237
+msgid "Query Selection"
+msgstr "Kyselyn valinnat"
+
+#: templates/helpdesk/ticket_list.html:250
 msgid "Save Query"
 msgstr "Tallenna kysely"
 
+#: templates/helpdesk/ticket_list.html:262
+msgid "Use Saved Query"
+msgstr "Käytä tallennettua kyselyä"
+
+#: templates/helpdesk/ticket_list.html:280
 msgid ""
 "This name appears in the drop-down list of saved queries. If you share your "
 "query, other users will see this name, so choose something clear and "
@@ -1986,12 +4076,13 @@ msgstr ""
 "kyselysi, muut käyttäjät näkevät tämän nimen, joten valitse jotain selkeää "
 "ja kuvaavaa!"
 
-msgid "Shared?"
-msgstr "Jaettu?"
-
-msgid "Yes, share this query with other users."
+#: templates/helpdesk/ticket_list.html:285
+#, fuzzy
+#| msgid "Yes, share this query with other users."
+msgid "Share this query with other users."
 msgstr "Kyllä, jaa tämä kysely muille käyttäjille."
 
+#: templates/helpdesk/ticket_list.html:286
 msgid ""
 "If you share this query, it will be visible by <em>all</em> other logged-in "
 "users."
@@ -1999,57 +4090,117 @@ msgstr ""
 "Jos jaat tämän kyselyn, se näkyy <em>kaikille</em> muille kirjautuneille "
 "käyttäjille."
 
-msgid "Use Saved Query"
-msgstr "Käytä tallennettua kyselyä"
+#: templates/helpdesk/ticket_list.html:304
+#, fuzzy
+#| msgid "Select Query:"
+msgid "Select a query"
+msgstr "Valitse kysely:"
 
-msgid "Query"
-msgstr "Kysely"
-
+#: templates/helpdesk/ticket_list.html:316
 msgid "Run Query"
 msgstr "Suorita kysely"
 
+#: templates/helpdesk/ticket_list.html:359
+msgid ""
+"Error fetching tickets occured, please contact the system administrators of "
+"this server providing the message below:\\n    "
+msgstr ""
+
+#: templates/helpdesk/ticket_list.html:363
 msgid "No Tickets Match Your Selection"
 msgstr "Valintaasi vastaavia tukipyyntöja ei löydy"
 
-msgid "Previous"
-msgstr "Edellinen"
+#: templates/helpdesk/ticket_list.html:393
+msgid "Search any ticket by id or title..."
+msgstr ""
 
-msgid "Next"
-msgstr "Seuraava"
+#: templates/helpdesk/ticket_merge.html:5
+#: templates/helpdesk/ticket_merge.html:16
+#: templates/helpdesk/ticket_merge.html:24
+#, fuzzy
+#| msgid "Open Tickets"
+msgid "Merge Tickets"
+msgstr "Avaa tukipyynnöt"
 
-msgid "Select:"
-msgstr "Valitse:"
+#: templates/helpdesk/ticket_merge.html:34
+msgid "OK"
+msgstr ""
 
-msgid "None"
-msgstr "Ei mitään"
+#: templates/helpdesk/ticket_merge.html:43
+msgid ""
+"\n"
+"                        Choose the ticket which will be conserved and then, "
+"for each information, you can decide to use\n"
+"                        a data from another ticket to merge. I you don't "
+"select a data on a row, <b>the information\n"
+"                        from the main ticket will stay unchanged</b>.\n"
+"                    "
+msgstr ""
 
-msgid "Inverse"
-msgstr "Käänteinen"
+#: templates/helpdesk/ticket_merge.html:50
+msgid ""
+"\n"
+"                        The  <b>follow-ups</b> and <b>attachments</b> from "
+"the merged tickets will be moved to\n"
+"                        the main ticket.<br>\n"
+"                        <b>Involved users</b> (the ticket submitter and "
+"emails in CC) will also be added in the\n"
+"                        main ticket CC list.<br>\n"
+"                        However, ticket dependencies from the merged ticket "
+"won't be applied to the main ticket.\n"
+"                    "
+msgstr ""
 
-msgid "With Selected Tickets:"
-msgstr "Valituilla tukipyynnöillä:"
+#: templates/helpdesk/ticket_merge.html:70
+#, fuzzy
+#| msgid "Field"
+msgid "Fields"
+msgstr "Kenttä"
 
-msgid "Take (Assign to me)"
-msgstr "Ota (anna minulle)"
+#: templates/helpdesk/ticket_merge.html:77
+#, fuzzy
+#| msgid "Open Tickets"
+msgid "Open ticket"
+msgstr "Avaa tukipyynnöt"
 
-msgid "Close"
-msgstr "Sulje"
+#: templates/helpdesk/ticket_merge.html:97
+msgid "Validate"
+msgstr ""
 
-msgid "Close (Don't Send E-Mail)"
-msgstr "Sulje (älä lähetä sähköpostia)"
+#: templates/helpdesk/ticket_resolves_add.html:3
+#: templates/helpdesk/ticket_resolves_add.html:12
+#, fuzzy
+#| msgid "Add Ticket Dependency"
+msgid "Add Ticket as Dependency"
+msgstr "Lisää tukipyyntöriippuvuus"
 
-msgid "Close (Send E-Mail)"
-msgstr "Sulje (lähetä sähköposti)"
+#: templates/helpdesk/ticket_resolves_add.html:15
+#, fuzzy, python-format
+#| msgid ""
+#| "\n"
+#| "<h2>Add Ticket Dependency</h2>\n"
+#| "\n"
+#| "<p>Adding a dependency will stop you resolving this ticket until the "
+#| "dependent ticket has been resolved or closed.</p>"
+msgid ""
+"\n"
+"<h2>Add Ticket as Dependency</h2>\n"
+"\n"
+"<p>Ticket: %(depends_on)s </p>\n"
+"\n"
+"<p>Adding this ticket as dependency will stop you resolving the selected "
+"ticket until this ticket has been resolved or closed.</p>"
+msgstr ""
+"\n"
+"<h2> Lisää tukipyyntöriippuvuus </h2><p> Riippuvuuden lisääminen lopettaa "
+"tukipyynnön ratkaisemisen, kunnes riippuvainen tukipyyntö on ratkaistu tai "
+"suljettu. </p>"
 
-msgid "Assign To"
-msgstr "Anna tukipyyntö jollekin"
-
-msgid "Nobody (Unassign)"
-msgstr "Ei kukaan (peruuta tukipyynnön anto)"
-
+#: templates/helpdesk/user_settings.html:3
 msgid "Change User Settings"
 msgstr "Muuta käyttäjän asetuksia"
 
+#: templates/helpdesk/user_settings.html:17
 msgid ""
 "Use the following options to change the way your helpdesk system works for "
 "you. These settings do not impact any other user."
@@ -2058,46 +4209,74 @@ msgstr ""
 "asiakaspalvelujärjestelmäsi toimii sinulle. Nämä asetukset eivät vaikuta "
 "muihin käyttäjiin."
 
-msgid "Save Options"
-msgstr "Tallenna asetukset"
+#: update_ticket.py:58
+#, python-format
+msgid "Referenced in ticket #%(ticket_id)s"
+msgstr ""
 
-msgid "Logged Out"
-msgstr "Kirjautunut ulos"
-
+#: update_ticket.py:143
+#, python-brace-format
 msgid ""
-"\n"
-"<h2>Logged Out</h2>\n"
-"\n"
-"<p>Thanks for being here. Hopefully you've helped resolve a few tickets and make the world a better place.</p>\n"
-"\n"
+"When you add somebody on Cc, you must provide either a User or a valid "
+"email. Email: {}"
 msgstr ""
-"\n"
-"<h2> Kirjautunut ulos </h2><p> Kiitos, että käytit järjestelmää. Toivottavasti "
-"olet auttanut ratkaisemaan muutaman tukipyynnön ja tehnyt maailmasta paremman "
-"paikan. </p>\n"
 
-msgid "Helpdesk Login"
-msgstr "Kirjautuminen tukipalveluun"
+#: update_ticket.py:176
+msgid "Updated"
+msgstr "Päivitetty"
 
-msgid "To log in simply enter your username and password below."
+#: update_ticket.py:330
+#, python-format
+msgid "Assigned to %(username)s"
+msgstr "Vastuulliseksi henkilöksi asetettu %(username)s"
+
+#: update_ticket.py:415 update_ticket.py:416
+msgid "To do"
 msgstr ""
-"Kirjaudu sisään vain kirjoittamalla käyttäjätunnuksesi ja salasanasi."
 
-msgid "Your username and password didn't match. Please try again."
-msgstr "Käyttäjätunnuksesi ja salasanasi eivät vastanneet. Yritä uudelleen."
+#: update_ticket.py:415 update_ticket.py:416
+msgid "Completed"
+msgstr ""
 
-msgid "Login"
-msgstr "Kirjaudu sisään"
+#: validators.py:31
+msgid "Unsupported file extension: "
+msgstr ""
 
+#: views/feeds.py:51
+#, python-format
+msgid "Helpdesk: Open Tickets in queue %(queue)s for %(username)s"
+msgstr "Tuki: Avoimia tukipyyntöjä %(queue)s käyttäjälle %(username)s"
+
+#: views/feeds.py:56
+#, python-format
+msgid "Helpdesk: Open Tickets for %(username)s"
+msgstr "Tuki: Avoimia tukipyyntöjä käyttäjälle %(username)s"
+
+#: views/feeds.py:63
+#, python-format
+msgid "Open and Reopened Tickets in queue %(queue)s for %(username)s"
+msgstr ""
+"Avoimet ja uudelleenavatut tukipyynnöt alueessa %(queue)s käyttäjälle "
+"%(username)s"
+
+#: views/feeds.py:69
+#, python-format
+msgid "Open and Reopened Tickets for %(username)s"
+msgstr "Avoimet ja uudelleenavatut tukipyynnöt käyttäjälle %(username)s"
+
+#: views/feeds.py:109
 msgid "Helpdesk: Unassigned Tickets"
 msgstr "Tukipalvelu: Tukipyynnöt jotka ei ole kenellekään käsittelyssä"
 
+#: views/feeds.py:110
 msgid "Unassigned Open and Reopened tickets"
 msgstr "Käsittelemättmät avoimet ja uudelleen avatut tukipyynnöt"
 
+#: views/feeds.py:133
 msgid "Helpdesk: Recent Followups"
 msgstr "Tuki: Viimeaikaiset seurannat"
 
+#: views/feeds.py:135
 msgid ""
 "Recent FollowUps, such as e-mail replies, comments, attachments and "
 "resolutions"
@@ -2105,31 +4284,100 @@ msgstr ""
 "Viimeaikaiset seurannat, kuten sähköpostiviestit, kommentit, liitteet ja "
 "päätöslauselmat"
 
+#: views/feeds.py:160
+#, python-format
+msgid "Helpdesk: Open Tickets in queue %(queue)s"
+msgstr "Tuki: Avoimet tukipyynnöt alueessa %(queue)s"
+
+#: views/feeds.py:165
+#, python-format
+msgid "Open and Reopened Tickets in queue %(queue)s"
+msgstr "Avoimet ja uudelleenavatut tukipyynnöt alueessa %(queue)s"
+
+#: views/kb.py:127
+msgid "Vote registered successfully"
+msgstr ""
+
+#: views/public.py:281
+#, fuzzy
+#| msgid "Invalid ticket ID or e-mail address. Please try again."
+msgid "Missing ticket ID or e-mail address. Please try again."
+msgstr "Virheellinen tukipyynnön tunnus tai sähköpostiosoite. Yritä uudelleen."
+
+#: views/public.py:294
 msgid "Invalid ticket ID or e-mail address. Please try again."
 msgstr "Virheellinen tukipyynnön tunnus tai sähköpostiosoite. Yritä uudelleen."
 
+#: views/public.py:304
 msgid "Submitter accepted resolution and closed ticket"
 msgstr "Lähettäjä hyväksyi ratkaisun ja sulki tukipyynnön"
 
+#: views/staff.py:434
+msgid "Choose another ticket for the copy."
+msgstr ""
+
+#: views/staff.py:447
+msgid "Unable to copy the attachments. No copy was created."
+msgstr ""
+
+#: views/staff.py:522
+#, python-format
+msgid "You don't have permission to view ticket %(ticket_id)s."
+msgstr ""
+
+#: views/staff.py:552
 msgid "Accepted resolution and closed ticket"
 msgstr "Hyväksytty ratkaisu ja suljettu tukipyyntö"
 
-msgid "Updated"
-msgstr "Päivitetty"
+#: views/staff.py:894
+#, fuzzy, python-brace-format
+#| msgid "Assigned to %(username)s in bulk update"
+msgid "Assigned to {username} in bulk update"
+msgstr "Vastuulliseksi henkilöksi asetettu %(username)s massapäivityksellä"
 
+#: views/staff.py:905
 msgid "Unassigned in bulk update"
 msgstr "Vastuullinen poistettu joukkopäivityksenä"
 
+#: views/staff.py:914
+#, fuzzy
+#| msgid "Closed in bulk update"
+msgid "KBItem set in bulk update"
+msgstr "Suljettu joukkopäivityksenä"
+
+#: views/staff.py:924 views/staff.py:935
 msgid "Closed in bulk update"
 msgstr "Suljettu joukkopäivityksenä"
 
+#: views/staff.py:983
+#, fuzzy
+#| msgid "Created"
+msgid "Created date"
+msgstr "Luotu"
+
+#: views/staff.py:986
+#, fuzzy
+#| msgid "Submitter E-Mail"
+msgid "Submitter email"
+msgstr "Tukipyynnön jättäjän sähköposti"
+
+#: views/staff.py:1102
+#, python-format
+msgid "[Merged from #%(id)d] %(title)s"
+msgstr ""
+
+#: views/staff.py:1150
+msgid "Please choose a ticket in which the others will be merged into."
+msgstr ""
+
+#: views/staff.py:1346
 msgid ""
 "<p><strong>Note:</strong> Your keyword search is case sensitive because of "
 "your database. This means the search will <strong>not</strong> be accurate. "
 "By switching to a different database system you will gain better searching! "
-"For more information, read the <a "
-"href=\"http://docs.djangoproject.com/en/dev/ref/databases/#sqlite-string-"
-"matching\">Django Documentation on string matching in SQLite</a>."
+"For more information, read the <a href=\"http://docs.djangoproject.com/en/"
+"dev/ref/databases/#sqlite-string-matching\">Django Documentation on string "
+"matching in SQLite</a>."
 msgstr ""
 "<p> <strong>Huomaa:</strong> Avainsanahaussa on kirjainkoolla tietokannasta "
 "johtuen. Tämä tarkoittaa, että haku ei <strong>ole</strong> tarkka. "
@@ -2138,29 +4386,96 @@ msgstr ""
 "string-matching\">Djangon ohjekirjassa merkkijonojen sovittamisesta SQLite: "
 "ssä</a> ."
 
+#: views/staff.py:1591
 msgid "Ticket taken off hold"
 msgstr "Tukipyyntö otettu pidosta"
 
+#: views/staff.py:1594
 msgid "Ticket placed on hold"
 msgstr "Tukipyyntö asetettu pitoon"
 
+#: views/staff.py:1792
 msgid "User by Priority"
 msgstr "Käyttäjä prioriteetin mukaan"
 
+#: views/staff.py:1793
+msgid "Total tickets assigned to each user segmented by priority"
+msgstr ""
+
+#: views/staff.py:1799
 msgid "User by Queue"
 msgstr "Käyttäjä alueen mukaan"
 
+#: views/staff.py:1800
+#, fuzzy
+#| msgid "You have no tickets assigned to you."
+msgid "Queue wise count of each ticket assigned to each user"
+msgstr "Sinulle ei ole osoitettu tukipyyntöja."
+
+#: views/staff.py:1806
 msgid "User by Status"
 msgstr "Käyttäjä tilan mukaan"
 
+#: views/staff.py:1807
+msgid "Count of tickets assigned to each user segmented by status"
+msgstr ""
+
+#: views/staff.py:1813
 msgid "User by Month"
 msgstr "Käyttäjä kuukauden mukaan"
 
+#: views/staff.py:1814
+msgid "Monthwise count of tickets handled by each user"
+msgstr ""
+
+#: views/staff.py:1820
 msgid "Queue by Priority"
 msgstr "Alue tärkeysjärjestyksen mukaan"
 
+#: views/staff.py:1821
+msgid "Count of tickets in each queue segmented by priority"
+msgstr ""
+
+#: views/staff.py:1827
 msgid "Queue by Status"
 msgstr "Alue tilan mukaan"
 
+#: views/staff.py:1828
+msgid "Count of tickets in each queue segmented by status"
+msgstr ""
+
+#: views/staff.py:1834
 msgid "Queue by Month"
 msgstr "Alue kuukauden mukaan"
+
+#: views/staff.py:1835
+msgid "Count of tickets in each queue shown monthwise"
+msgstr ""
+
+#: views/staff.py:1842
+#, fuzzy
+#| msgid "Average number of days until ticket is closed (all tickets): "
+msgid "Average number of days it took to close a ticket monthwise"
+msgstr "Keskimäärin päiviä tukipyynnön sulkemiseen (kaikki tukipyynnöt):"
+
+#: views/staff.py:1870
+#, fuzzy
+#| msgid "Number of open tickets"
+msgid "Number of tickets"
+msgstr "Avoimien tukipyyntöjen lukumäärä"
+
+#: views/staff.py:1969
+msgid "Email added to ignore list successfully."
+msgstr ""
+
+#: views/staff.py:1985
+msgid "Email removed from ignore list successfully."
+msgstr ""
+
+#: views/staff.py:2019
+msgid "Impossible to add twice the same user"
+msgstr ""
+
+#: views/staff.py:2022
+msgid "Impossible to add twice the same email address"
+msgstr ""
