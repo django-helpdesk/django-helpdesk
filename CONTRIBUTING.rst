@@ -259,11 +259,19 @@ collaborative translation. If you want to help translate django-helpdesk into
 languages other than English, we encourage you to make use of our Transifex
 project:
 
-http://www.transifex.com/projects/p/django-helpdesk/resource/core/
+https://explore.transifex.com/django-helpdesk/django-helpdesk/
 
 Once you have translated content via Transifex, please raise an issue on the
 project Github page and tag it as "translations" to let us know it's ready to
 import.
+
+When you add or change a translatable string, regenerate and compile the
+catalogs with::
+
+    make messages
+
+The English catalog is the source that Transifex reads, and ``.tx/config``
+maps the catalogs to the Transifex project for the ``tx`` command line client.
 
 
 Licensing
