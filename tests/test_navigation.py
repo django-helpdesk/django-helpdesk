@@ -23,6 +23,25 @@ class KBDisabledTestCase(TestCase):
             helpdesk_settings.HELPDESK_KB_ENABLED = True
             reload_urlconf()
 
+    def test_urlconf_imports_without_kb(self):
+        """helpdesk.urls imports from scratch when the knowledge base is off.
+
+        reload_urlconf() reuses the module namespace, which can still hold the
+        kb module from an earlier import, so import a fresh copy here.
+        """
+        import importlib
+        import sys
+
+        from .helpers import HELPDESK_URLCONF
+
+        loaded = sys.modules.pop(HELPDESK_URLCONF, None)
+        try:
+            urls = importlib.import_module(HELPDESK_URLCONF)
+            self.assertFalse(hasattr(urls, "kb"))
+        finally:
+            if loaded is not None:
+                sys.modules[HELPDESK_URLCONF] = loaded
+
     def test_navigation(self):
         """Test proper rendering of navigation.html by accessing the dashboard"""
         from django.urls import NoReverseMatch
