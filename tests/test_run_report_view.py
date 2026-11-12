@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timezone as dt_timezone
+from datetime import UTC, datetime
 from http import HTTPStatus
 
 from django.test import TestCase
@@ -53,7 +52,7 @@ class RunReportViewTests(TestCase):
 
     def _set_created(self, ticket, year, month):
         Ticket.objects.filter(pk=ticket.pk).update(
-            created=datetime(year, month, 15, tzinfo=dt_timezone.utc)
+            created=datetime(year, month, 15, tzinfo=UTC)
         )
 
     def test_monthly_report_lists_each_month_once(self):
