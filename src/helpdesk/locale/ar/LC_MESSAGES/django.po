@@ -26,7 +26,7 @@ msgstr ""
 
 #: admin.py:103 models.py:111 models.py:1546 models.py:2061
 msgid "Slug"
-msgstr ""
+msgstr "شعار"
 
 #: copy_followup.py:16
 #, python-format
@@ -95,7 +95,7 @@ msgstr ""
 #: views/staff.py:1822 views/staff.py:1829 views/staff.py:1836
 #: views/staff.py:1843
 msgid "Queue"
-msgstr ""
+msgstr "موضوع"
 
 #: forms.py:320
 msgid "Summary of the problem"
@@ -142,7 +142,7 @@ msgstr "رجاء اختيار الاولوية بحرص , فى حالة عدم �
 #: templates/helpdesk/include/ticket_respond_form.html:158 update_ticket.py:384
 #: views/staff.py:984
 msgid "Due on"
-msgstr ""
+msgstr "مستحقه في"
 
 #: forms.py:356
 msgid "Attach File"
@@ -167,6 +167,8 @@ msgstr "مرسل العنوان البريدى للشكوة "
 msgid ""
 "This e-mail address will receive copies of all public updates to this ticket."
 msgstr ""
+"عنوان البريد الإلكتروني هذا سوف يستقبل نسخ من كل التحديثات العامة لهذه "
+"التذكرة."
 
 #: forms.py:496
 msgid "Case owner"
@@ -262,6 +264,8 @@ msgid ""
 "This slug is used when building ticket ID's. Once set, try not to change it "
 "or e-mailing may get messy."
 msgstr ""
+"يستخدم هذا الشعار عند بناء معرف التذكرة. بمجرد تعيينه، لا تحاول تغييره أو "
+"إرساله عبر البريد الإلكتروني قد تحدث مشكلة."
 
 #: models.py:121 models.py:1884 models.py:1972 models.py:2058
 #: templates/helpdesk/email_ignore_list.html:33
@@ -402,7 +406,7 @@ msgstr ""
 
 #: models.py:253
 msgid "E-Mail Username"
-msgstr ""
+msgstr "مستخدم البريد الإلكترونى"
 
 #: models.py:257
 msgid "Username for accessing this mailbox."
@@ -410,7 +414,7 @@ msgstr ""
 
 #: models.py:261
 msgid "E-Mail Password"
-msgstr ""
+msgstr "كلمة سر البريد الإلكترونى"
 
 #: models.py:265
 msgid "Password for the above username"
@@ -543,7 +547,7 @@ msgstr ""
 
 #: models.py:393 templates/helpdesk/email_ignore_list.html:35
 msgid "Queues"
-msgstr ""
+msgstr "الصفوف"
 
 #: models.py:528 templates/helpdesk/filters/sorting.html:16
 #: templates/helpdesk/include/unassigned.html:62
@@ -553,7 +557,7 @@ msgstr ""
 #: templates/helpdesk/include/unassigned.html:144
 #: templates/helpdesk/my_tickets.html:32 templates/helpdesk/ticket_list.html:86
 msgid "Created"
-msgstr ""
+msgstr "تم إنشائه"
 
 #: models.py:530
 msgid "Date this ticket was first created"
@@ -561,7 +565,7 @@ msgstr ""
 
 #: models.py:535
 msgid "Modified"
-msgstr ""
+msgstr "تم تعديله"
 
 #: models.py:537
 msgid "Date this ticket was most recently changed."
@@ -575,7 +579,7 @@ msgstr ""
 
 #: models.py:557 templates/helpdesk/ticket_desc_table.html:85
 msgid "Assigned to"
-msgstr ""
+msgstr "مخصص لـ"
 
 #: models.py:561 templates/helpdesk/filters/sorting.html:28
 #: templates/helpdesk/filters/status.html:9
@@ -590,11 +594,11 @@ msgstr ""
 #: templates/helpdesk/ticket_list.html:85 update_ticket.py:354
 #: views/staff.py:985
 msgid "Status"
-msgstr ""
+msgstr "الحالة"
 
 #: models.py:565 models.py:806 views/staff.py:1608
 msgid "On Hold"
-msgstr ""
+msgstr "معلق"
 
 #: models.py:568
 msgid "If a ticket is on hold, it will not automatically be escalated."
@@ -604,7 +608,7 @@ msgstr ""
 #: templates/helpdesk/checklist_form.html:67
 #: templates/helpdesk/checklist_templates.html:85 views/staff.py:988
 msgid "Description"
-msgstr ""
+msgstr "الوصف"
 
 #: models.py:575
 msgid "The content of the customers query."
@@ -613,7 +617,7 @@ msgstr ""
 #: models.py:579 templates/helpdesk/public_view_ticket.html:16
 #: templates/helpdesk/ticket_desc_table.html:51 views/staff.py:989
 msgid "Resolution"
-msgstr ""
+msgstr "توضيح"
 
 #: models.py:582
 msgid "The resolution provided to the customer by our staff."
@@ -655,7 +659,7 @@ msgstr ""
 #: templates/helpdesk/public_view_form.html:19
 #: templates/helpdesk/ticket_list.html:82
 msgid "Ticket"
-msgstr ""
+msgstr "تذكرة"
 
 #: models.py:638 templates/helpdesk/checklist_confirm_delete.html:9
 #: templates/helpdesk/checklist_form.html:11
@@ -675,7 +679,7 @@ msgstr ""
 #: templates/helpdesk/ticket_merge.html:14
 #: templates/helpdesk/ticket_resolves_add.html:7
 msgid "Tickets"
-msgstr ""
+msgstr "تذاكر"
 
 #: models.py:762 templates/helpdesk/filters/owner.html:20
 #: templates/helpdesk/filters/queue.html:20
@@ -684,7 +688,7 @@ msgstr ""
 #: update_ticket.py:363 views/feeds.py:102 views/feeds.py:126
 #: views/feeds.py:185
 msgid "Unassigned"
-msgstr ""
+msgstr "غير مخصص"
 
 #: models.py:806
 msgid "Open dependencies"
@@ -696,15 +700,15 @@ msgstr ""
 
 #: models.py:994 models.py:1461 models.py:1877 models.py:2055
 msgid "Date"
-msgstr ""
+msgstr "تاريخ"
 
 #: models.py:1004 update_ticket.py:174
 msgid "Comment"
-msgstr ""
+msgstr "تعليق"
 
 #: models.py:1010
 msgid "Public"
-msgstr ""
+msgstr "عام"
 
 #: models.py:1014
 msgid ""
@@ -716,11 +720,11 @@ msgstr ""
 #: templates/helpdesk/ticket_cc_add.html:39 views/staff.py:1794
 #: views/staff.py:1801 views/staff.py:1808 views/staff.py:1815
 msgid "User"
-msgstr ""
+msgstr "مستخدم"
 
 #: models.py:1028 templates/helpdesk/include/ticket_respond_form.html:34
 msgid "New Status"
-msgstr ""
+msgstr "حالة جديدة"
 
 #: models.py:1032
 msgid "If the status was changed, what was it changed to?"
@@ -752,27 +756,27 @@ msgstr ""
 
 #: models.py:1063 models.py:1237 models.py:1356
 msgid "Follow-up"
-msgstr ""
+msgstr "متابعة"
 
 #: models.py:1064
 msgid "Follow-ups"
-msgstr ""
+msgstr "متابعيين"
 
 #: models.py:1241 models.py:2198
 msgid "Field"
-msgstr ""
+msgstr "حقل"
 
 #: models.py:1246
 msgid "Old Value"
-msgstr ""
+msgstr "القيمة القديمة"
 
 #: models.py:1252
 msgid "New Value"
-msgstr ""
+msgstr "القيمة الجديدة"
 
 #: models.py:1262
 msgid "removed"
-msgstr ""
+msgstr "تم حذفه"
 
 #: models.py:1264
 #, python-format
@@ -785,24 +789,20 @@ msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
 msgstr ""
 
 #: models.py:1273
-#, fuzzy
-#| msgid "Ticket Opened"
 msgid "Ticket change"
-msgstr "تذاكر الدعم المفتوحة"
+msgstr "تغيير التذكرة"
 
 #: models.py:1274
-#, fuzzy
-#| msgid "Ticket Opened"
 msgid "Ticket changes"
-msgstr "تذاكر الدعم المفتوحة"
+msgstr "تغييرات التذكرة"
 
 #: models.py:1289
 msgid "File"
-msgstr ""
+msgstr "الملف"
 
 #: models.py:1296
 msgid "Filename"
-msgstr ""
+msgstr "إسم الملف"
 
 #: models.py:1302
 msgid "MIME Type"
@@ -810,24 +810,20 @@ msgstr ""
 
 #: models.py:1308
 msgid "Size"
-msgstr ""
+msgstr "الحجم"
 
 #: models.py:1310
 msgid "Size of this file in bytes"
-msgstr ""
+msgstr "حجم هذا الملف بـ bytes"
 
 #: models.py:1347
-#, fuzzy
-#| msgid "Attach File"
 msgid "Attachment"
-msgstr "اضافة ملف"
+msgstr "مرفق"
 
 #: models.py:1348 templates/helpdesk/include/ticket_followup_list.html:95
 #: templates/helpdesk/ticket_desc_table.html:274
-#, fuzzy
-#| msgid "Attach File"
 msgid "Attachments"
-msgstr "اضافة ملف"
+msgstr "مرفقات"
 
 #: models.py:1374 models.py:1620
 msgid "Knowledge base item"
@@ -850,7 +846,7 @@ msgstr ""
 #: models.py:1415 models.py:1456 models.py:1872 models.py:2257 models.py:2277
 #: templates/helpdesk/email_ignore_list.html:32
 msgid "Name"
-msgstr ""
+msgstr "الإسم"
 
 #: models.py:1418
 msgid ""
@@ -891,11 +887,11 @@ msgstr "أيام التصعيد"
 
 #: models.py:1483
 msgid "Template Name"
-msgstr ""
+msgstr "إسم النموذج"
 
 #: models.py:1488
 msgid "Subject"
-msgstr ""
+msgstr "الموضوع"
 
 #: models.py:1491
 msgid ""
@@ -906,7 +902,7 @@ msgstr ""
 
 #: models.py:1498
 msgid "Heading"
-msgstr ""
+msgstr "العنوان"
 
 #: models.py:1501
 msgid ""
@@ -970,19 +966,19 @@ msgstr ""
 
 #: models.py:1584
 msgid "Category"
-msgstr ""
+msgstr "فئة"
 
 #: models.py:1590
 msgid "Question"
-msgstr ""
+msgstr "سؤال"
 
 #: models.py:1591
 msgid "Answer"
-msgstr ""
+msgstr "إجابة"
 
 #: models.py:1593
 msgid "Votes"
-msgstr ""
+msgstr "تصويت"
 
 #: models.py:1593
 msgid "Total number of votes cast for this item"
@@ -998,7 +994,7 @@ msgstr ""
 
 #: models.py:1602
 msgid "Last Updated"
-msgstr ""
+msgstr "اخر مرة تم تحديثه"
 
 #: models.py:1603
 msgid "The date on which this question was most recently changed."
@@ -1022,11 +1018,11 @@ msgstr ""
 
 #: models.py:1645
 msgid "Unrated"
-msgstr ""
+msgstr "غير مقييم"
 
 #: models.py:1684 templates/helpdesk/ticket_list.html:278
 msgid "Query Name"
-msgstr ""
+msgstr "إسم الإستعلام"
 
 #: models.py:1686
 msgid "User-provided name for this query"
@@ -1042,7 +1038,7 @@ msgstr ""
 
 #: models.py:1697
 msgid "Search Query"
-msgstr ""
+msgstr "إستعلام البحث"
 
 #: models.py:1698
 msgid "Pickled query object. Be wary changing this."
@@ -1050,7 +1046,7 @@ msgstr ""
 
 #: models.py:1708
 msgid "Saved search"
-msgstr ""
+msgstr "بحث محفوظ"
 
 #: models.py:1709
 msgid "Saved searches"
@@ -1084,7 +1080,7 @@ msgstr "مشاهدة قائمة تذاكر الدعم عند الدخول؟"
 
 #: models.py:1779
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
-msgstr ""
+msgstr "عرض قائمة التذاكر عند تسجيل الدخول؟ خلاف ذلك، يتم عرض لوحة المعلومات."
 
 #: models.py:1785
 msgid "E-mail me on ticket change?"
@@ -1129,6 +1125,9 @@ msgid ""
 "address as the submitter address? You can type a different e-mail address "
 "when entering the ticket if needed, this option only changes the default."
 msgstr ""
+"عندما ترسل تذكرة، هل تريد استخدام عنوان البريد الإلكتروني الخاص بك تلقائيا "
+"كعنوان مقدم التذكرة؟ يمكنك كتابة عنوان بريد إلكتروني مختلف عند إرسال تذكرة "
+"إذا لزم الأمر، وهذا الخيار يغير فقط الافتراضية."
 
 #: models.py:1820
 msgid "Ticket respond form layout"
@@ -1140,12 +1139,12 @@ msgstr ""
 
 #: models.py:1831
 msgid "User Setting"
-msgstr ""
+msgstr "إعداد المستخدم"
 
 #: models.py:1832 templates/helpdesk/navigation-header.html:134
 #: templates/helpdesk/user_settings.html:15
 msgid "User Settings"
-msgstr ""
+msgstr "إعدادات المستخدم"
 
 #: models.py:1859
 #, fuzzy
@@ -1211,7 +1210,7 @@ msgstr ""
 
 #: models.py:2027
 msgid "Field Name"
-msgstr ""
+msgstr "إسم الحقل"
 
 #: models.py:2029
 msgid ""
@@ -1229,7 +1228,7 @@ msgstr ""
 
 #: models.py:2042
 msgid "Help Text"
-msgstr ""
+msgstr "نص المساعدة"
 
 #: models.py:2043
 msgid "Shown to the user when editing the ticket"
@@ -1241,7 +1240,7 @@ msgstr ""
 
 #: models.py:2050
 msgid "Text (multi-line)"
-msgstr ""
+msgstr "نص (متعدد الأسطر)"
 
 #: models.py:2051
 msgid "Integer"
@@ -1428,43 +1427,43 @@ msgstr ""
 
 #: settings.py:163 templates/helpdesk/report_index.html:204
 msgid "Open"
-msgstr ""
+msgstr "فتح"
 
 #: settings.py:164
 msgid "Reopened"
-msgstr ""
+msgstr "إعادة فتح"
 
 #: settings.py:165 templates/helpdesk/report_index.html:205
 msgid "Resolved"
-msgstr ""
+msgstr "تم حله"
 
 #: settings.py:166 templates/helpdesk/report_index.html:206
 msgid "Closed"
-msgstr ""
+msgstr "مغلق"
 
 #: settings.py:167
 msgid "Duplicate"
-msgstr ""
+msgstr "مكرر"
 
 #: settings.py:231
 msgid "1. Critical"
-msgstr ""
+msgstr "1. حرج"
 
 #: settings.py:232
 msgid "2. High"
-msgstr ""
+msgstr "2. مهم"
 
 #: settings.py:233
 msgid "3. Normal"
-msgstr ""
+msgstr "3. عادى"
 
 #: settings.py:234
 msgid "4. Low"
-msgstr ""
+msgstr "4. منخفض"
 
 #: settings.py:235
 msgid "5. Very Low"
-msgstr ""
+msgstr "5. منخفض جدا"
 
 #: templates/helpdesk/attribution.html:6
 msgid ""
@@ -1492,7 +1491,7 @@ msgstr ""
 #: templates/helpdesk/base.html:11 templates/helpdesk/kb_category_iframe.html:5
 #: templates/helpdesk/public_create_ticket_iframe.html:6
 msgid "Powered by django-helpdesk"
-msgstr ""
+msgstr "مدعم من خلال django-helpdesk"
 
 #: templates/helpdesk/checklist_confirm_delete.html:5
 #: templates/helpdesk/checklist_confirm_delete.html:23
@@ -1670,7 +1669,7 @@ msgstr ""
 #: templates/helpdesk/navigation-header.html:178
 #: templates/helpdesk/public_create_ticket.html:15
 msgid "Submit a Ticket"
-msgstr ""
+msgstr "إرسال تذكرة"
 
 #: templates/helpdesk/create_ticket.html:21
 #: templates/helpdesk/edit_ticket.html:22
@@ -1680,7 +1679,7 @@ msgstr ""
 #: templates/helpdesk/create_ticket.html:22
 #: templates/helpdesk/edit_ticket.html:23
 msgid "Please provide as descriptive a title and description as possible."
-msgstr ""
+msgstr "يرجى تقديم عنوان يعبر عن التذكرة ووصف قدر الإمكان."
 
 #: templates/helpdesk/create_ticket.html:39
 msgid "Optional"
@@ -1688,11 +1687,11 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:53
 msgid "Submit Ticket"
-msgstr ""
+msgstr "إرسال تذكرة"
 
 #: templates/helpdesk/dashboard.html:2
 msgid "Helpdesk Dashboard"
-msgstr ""
+msgstr "لوحة مهام مكتب المساعدة"
 
 #: templates/helpdesk/dashboard.html:7 templates/helpdesk/kb_index.html:13
 #: templates/helpdesk/report_index.html:16
@@ -1975,7 +1974,7 @@ msgstr ""
 
 #: templates/helpdesk/followup_edit.html:47
 msgid "Title:"
-msgstr ""
+msgstr "العنوان:"
 
 #: templates/helpdesk/followup_edit.html:49
 msgid "Comment:"
@@ -2212,7 +2211,7 @@ msgstr ""
 
 #: templates/helpdesk/include/ticket_respond_card.html:5
 msgid "Respond to this ticket"
-msgstr ""
+msgstr "الرد على هذه التذكرة"
 
 #: templates/helpdesk/include/ticket_respond_form.html:10
 #: templates/helpdesk/public_view_ticket.html:118
@@ -2305,7 +2304,7 @@ msgstr ""
 #: templates/helpdesk/include/tickets.html:81
 #: templates/helpdesk/include/tickets.html:85
 msgid "Last Update"
-msgstr ""
+msgstr "أخر  تحديث"
 
 #: templates/helpdesk/include/tickets.html:104
 msgid "You do not have any pending tickets."
@@ -2437,7 +2436,7 @@ msgstr ""
 #: templates/helpdesk/kb_index.html:11 templates/helpdesk/kb_index.html:18
 #: templates/helpdesk/public_homepage.html:59
 msgid "Knowledgebase"
-msgstr ""
+msgstr "قاعدة المعرفة"
 
 #: templates/helpdesk/kb_category_base.html:11
 #: templates/helpdesk/kb_category_base.html:77
@@ -2502,7 +2501,7 @@ msgstr ""
 
 #: templates/helpdesk/navigation-header.html:13
 msgid "Helpdesk"
-msgstr ""
+msgstr "مكتب المساعدة"
 
 #: templates/helpdesk/navigation-header.html:32
 msgid "Search..."
@@ -2556,17 +2555,17 @@ msgstr ""
 #: templates/helpdesk/navigation-header.html:154
 #: templates/helpdesk/navigation-header.html:191
 msgid "Logout"
-msgstr ""
+msgstr "تسجبل الخروج"
 
 #: templates/helpdesk/navigation-header.html:168
 #: templates/helpdesk/navigation-sidebar.html:9
 msgid "Dashboard"
-msgstr ""
+msgstr " لوحة المعلومات"
 
 #: templates/helpdesk/navigation-header.html:197
 #: templates/helpdesk/registration/logged_out.html:22
 msgid "Log In"
-msgstr ""
+msgstr "تسجيل الدخول"
 
 #: templates/helpdesk/navigation-sidebar.html:15
 msgid "All Tickets"
@@ -2684,7 +2683,7 @@ msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:6
 msgid "View a Ticket"
-msgstr ""
+msgstr "مشاهدة تذكرة"
 
 #: templates/helpdesk/public_view_ticket.html:22
 #: templates/helpdesk/ticket_desc_table.html:57
@@ -2693,7 +2692,7 @@ msgstr ""
 
 #: templates/helpdesk/public_view_ticket.html:30
 msgid "Submitted On"
-msgstr ""
+msgstr "تم إرسالها فى"
 
 #: templates/helpdesk/public_view_ticket.html:35
 msgid "Due On"
@@ -2786,7 +2785,7 @@ msgstr ""
 
 #: templates/helpdesk/registration/logged_out.html:6
 msgid "Logged Out"
-msgstr ""
+msgstr "تم تسجبل الخروج"
 
 #: templates/helpdesk/registration/logged_out.html:18
 msgid "Logout successful"
@@ -2798,7 +2797,7 @@ msgstr ""
 
 #: templates/helpdesk/registration/login.html:6
 msgid "Helpdesk Login"
-msgstr ""
+msgstr "تسجيل دخول لمكتب المساعدة"
 
 #: templates/helpdesk/registration/login.html:21
 msgid "Log in to your account"
@@ -3074,7 +3073,7 @@ msgstr ""
 
 #: templates/helpdesk/rss_list.html:24
 msgid "Latest Activity"
-msgstr ""
+msgstr "أخر نشاط"
 
 #: templates/helpdesk/rss_list.html:25
 msgid ""
@@ -3173,7 +3172,7 @@ msgstr ""
 
 #: templates/helpdesk/ticket.html:6
 msgid "View Ticket Details"
-msgstr ""
+msgstr "مشاهدة تفاصيل تذكرة"
 
 #: templates/helpdesk/ticket.html:30
 msgid "This ticket has been merged into ticket"
@@ -3769,7 +3768,7 @@ msgstr ""
 #: views/feeds.py:56
 #, python-format
 msgid "Helpdesk: Open Tickets for %(username)s"
-msgstr ""
+msgstr "مكتب المساعدة: فتح تذكرة لـ %(username)s"
 
 #: views/feeds.py:63
 #, python-format
@@ -3783,7 +3782,7 @@ msgstr ""
 
 #: views/feeds.py:109
 msgid "Helpdesk: Unassigned Tickets"
-msgstr ""
+msgstr "مكتب المساعدة: تذاكر غير مخصصة"
 
 #: views/feeds.py:110
 msgid "Unassigned Open and Reopened tickets"
@@ -3791,7 +3790,7 @@ msgstr ""
 
 #: views/feeds.py:133
 msgid "Helpdesk: Recent Followups"
-msgstr ""
+msgstr "مكتب المساعدة: أخر المتابعات"
 
 #: views/feeds.py:135
 msgid ""
