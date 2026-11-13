@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 import logging
 import os
@@ -113,7 +114,11 @@ def send_templated_mail(
                 fields[key] = mark_safe(html.replace("\n", "&#10;"))
     # keep new lines in html emails
     elif "comment" in context:
-        context["comment"] = mark_safe(context["comment"].replace("\r\n", "<br>"))
+        # A copy, as the caller reuses context for every recipient.
+        context = {
+            **context,
+            "comment": mark_safe(escape(context["comment"]).replace("\r\n", "<br>")),
+        }
 
     html_part = from_string(
         "{%% extends '%s' %%}"
