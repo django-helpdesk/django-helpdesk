@@ -48,7 +48,7 @@ jobs:
           make static-vendor
 
       - name: Run browser tests
-        run: uv run --no-sync quicktest.py tests.e2e.test_public_ticket_creation -v 2
+        run: uv run --no-sync quicktest.py tests.e2e.test_public_ticket_creation tests.e2e.test_staff_ticket_reply -v 2
 
   build:
     runs-on: ubuntu-latest
