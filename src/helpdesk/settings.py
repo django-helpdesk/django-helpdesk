@@ -406,6 +406,11 @@ HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS = getattr(
     settings, "HELPDESK_PRIVATE_FOLLOWUP_MEANS_NO_EMAILS", False
 )
 
+# If True, the comment, resolution and description in HTML emails are rendered as markdown
+HELPDESK_EMAIL_RENDER_MARKDOWN = getattr(
+    settings, "HELPDESK_EMAIL_RENDER_MARKDOWN", False
+)
+
 ########################################
 # options for staff.create_ticket view #
 ########################################

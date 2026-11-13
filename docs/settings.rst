@@ -221,6 +221,12 @@ These changes are visible throughout django-helpdesk
    If ``True``, private follow-ups (marked with ``public=False``) will not trigger any email notifications to any recipients (submitters, assigned users, CC'd users, or queue notifications). This provides complete privacy for internal staff communications.
    Public follow-ups (``public=True``) continue to work normally. This setting overrides other notification settings like :setting:`HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES` when the follow-up is private.
 
+.. setting:: HELPDESK_EMAIL_RENDER_MARKDOWN
+
+   *Default:* ``False``
+
+   If ``True``, the follow-up comment, resolution and ticket description in the HTML part of e-mail notifications are rendered as markdown, as they are on the ticket page. The plain-text part keeps the text as written. Images are left out of e-mails, so a submitter cannot use a remote image to see when staff open them. No change to the e-mail templates is needed.
+
 .. setting:: HELPDESK_EMAIL_FALLBACK_LOCALE
 
    *Default:* ``en``
