@@ -298,8 +298,11 @@ def update_ticket(
     comment = comment.replace(
         "X-HELPDESK-COMMENT-VERBATIM", "{% verbatim %}{%"
     ).replace("X-HELPDESK-COMMENT-ENDVERBATIM", "%}{% endverbatim %}")
-    # render the neutralized template
-    comment = template_func(comment).render(context)
+    # render the neutralized template; unescaped, as the comment is stored as
+    # plain text and escaped (or sanitised) wherever it is displayed
+    comment = template_func(
+        "{% autoescape off %}" + comment + "{% endautoescape %}"
+    ).render(context)
 
     if owner == -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id

@@ -6,7 +6,6 @@ from django.http import QueryDict
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.html import escape
 
 from helpdesk.lib import safe_template_context
 from helpdesk.models import FollowUp, Queue, Ticket, TicketCC, TicketDependency
@@ -204,8 +203,8 @@ class TicketModelTests(TestCase):
         followup = update_ticket(
             self.user, self.ticket, comment="See {{ ticket.ticket_url }}"
         )
-        # Comments are rendered with autoescaping, as before.
-        self.assertEqual(followup.comment, f"See {escape(self.ticket.email_url)}")
+        # Comments are stored as plain text and escaped wherever they are shown.
+        self.assertEqual(followup.comment, f"See {self.ticket.email_url}")
 
     def test_staff_url_property(self):
         # Arrange

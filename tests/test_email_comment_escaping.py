@@ -54,6 +54,17 @@ class EmailCommentEscapingTests(TestCase):
             self.assertIn("a &amp; b", html, message.to)
             self.assertNotIn("&amp;amp;", html, message.to)
 
+    def test_should_escape_templated_comment_once(self):
+        self.ticket.title = "O'Brien & Sons"
+        self.ticket.save()
+
+        message = self.add_comment("Re {{ ticket.title }}")
+
+        self.assertEqual(self.ticket.followup_set.last().comment, "Re O'Brien & Sons")
+        html = html_part(message)
+        self.assertIn("Re O&#x27;Brien &amp; Sons", html)
+        self.assertNotIn("&amp;amp;", html)
+
     def test_should_keep_comment_line_breaks(self):
         message = self.add_comment("line one\r\nline two")
 
