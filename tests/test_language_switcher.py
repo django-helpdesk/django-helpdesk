@@ -29,3 +29,19 @@ class NavbarLanguageSwitcherTestCase(TestCase):
         response = self.client.get(reverse("helpdesk:home"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'name="language"')
+
+    def test_switcher_returns_to_current_page(self):
+        url = reverse("helpdesk:list") + "?status=1&status=2"
+        response = self.client.get(url)
+        self.assertContains(
+            response,
+            '<input name="next" type="hidden" value="'
+            + url.replace("&", "&amp;")
+            + '" />',
+            html=True,
+        )
+
+        response = self.client.post(
+            reverse("set_language"), {"language": "fr", "next": url}
+        )
+        self.assertRedirects(response, url, fetch_redirect_response=False)

@@ -59,7 +59,7 @@
             <li>
               <form action="{{ set_language_url }}" method="post">
                 {% csrf_token %}
-                <input name="next" type="hidden" value="{{ redirect_to }}" />
+                <input name="next" type="hidden" value="{{ request.get_full_path }}" />
                 <div class="mb-3">
                   <label class="form-label small text-body-secondary">{% translate "Change language" %}</label>
                   <select name="language" class="form-select">
