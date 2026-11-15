@@ -276,3 +276,84 @@ class PublicUpdateTicketTests(TestCase):
     def test_empty_post_adds_nothing(self):
         self.post(comment="   ")
         self.assertFalse(self.followups().exists())
+
+
+class UpdateTicketCustomFieldChangesTests(TestCase):
+    def setUp(self):
+        self.queue = Queue.objects.create(title="Test Queue", slug="test")
+        self.user = User.objects.create_user(
+            username="testuser", password="pass123", is_staff=True
+        )
+        self.ticket = Ticket.objects.create(
+            title="Sample ticket", queue=self.queue, submitter_email="test@example.com"
+        )
+        for name, data_type, extra in [
+            ("text_field", "varchar", {"max_length": 50}),
+            ("flag", "boolean", {}),
+            ("count", "integer", {}),
+            ("amount", "decimal", {"max_length": 6, "decimal_places": 2}),
+            ("visit_on", "date", {}),
+        ]:
+            CustomField.objects.create(
+                name=name, label=name, data_type=data_type, required=False, **extra
+            )
+        self.url = reverse("helpdesk:update", kwargs={"ticket_id": self.ticket.id})
+        self.client.login(username="testuser", password="pass123")
+
+    def post(self, **custom_values):
+        data = {
+            "title": self.ticket.title,
+            "queue": self.queue.id,
+            "priority": self.ticket.priority,
+            "owner": self.user.id,
+        }
+        data.update({f"custom_{k}": v for k, v in custom_values.items()})
+        self.client.post(self.url, data)
+        return self.ticket.followup_set.latest("id")
+
+    def test_untouched_custom_fields_without_values_are_not_logged(self):
+        followup = self.post(text_field="", count="", amount="", visit_on="")
+
+        self.assertEqual(
+            list(followup.ticketchange_set.values_list("field", flat=True)),
+            ["Owner"],
+        )
+
+    def test_untouched_custom_fields_with_values_are_not_logged(self):
+        for name, value in [
+            ("text_field", "hello"),
+            ("flag", "True"),
+            ("count", "5"),
+            ("amount", "1.50"),
+            ("visit_on", "2026-03-04"),
+        ]:
+            self.ticket.ticketcustomfieldvalue_set.create(
+                field=CustomField.objects.get(name=name), value=value
+            )
+
+        followup = self.post(
+            text_field="hello",
+            flag="on",
+            count="5",
+            amount="1.50",
+            visit_on="2026-03-04",
+        )
+
+        self.assertEqual(
+            list(followup.ticketchange_set.values_list("field", flat=True)),
+            ["Owner"],
+        )
+
+    def test_edited_custom_fields_are_logged(self):
+        followup = self.post(
+            text_field="hello", flag="on", count="", amount="", visit_on=""
+        )
+
+        self.assertEqual(
+            set(
+                followup.ticketchange_set.exclude(field="Owner").values_list(
+                    "field", "new_value"
+                )
+            ),
+            {("text_field", "hello"), ("flag", "True")},
+        )
