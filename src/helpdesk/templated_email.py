@@ -4,8 +4,12 @@ import logging
 import os
 from smtplib import SMTPException
 
+import nh3
+
 
 logger = logging.getLogger("helpdesk")
+
+NO_IMAGES = nh3.ALLOWED_TAGS - {"img"}
 
 
 def send_templated_mail(
@@ -52,9 +56,10 @@ def send_templated_mail(
 
     from_string = engines["django"].from_string
 
-    from helpdesk.models import EmailTemplate
+    from helpdesk.models import EmailTemplate, get_markdown
     from helpdesk.settings import (
         HELPDESK_EMAIL_FALLBACK_LOCALE,
+        HELPDESK_EMAIL_RENDER_MARKDOWN,
         HELPDESK_EMAIL_SUBJECT_TEMPLATE,
     )
 
@@ -89,8 +94,25 @@ def send_templated_mail(
     ).render(context)
 
     email_html_base_file = os.path.join("helpdesk", locale, "email_html_base.html")
+    # NOTE: markdown is re-rendered for each recipient; it is cheap, and doing it
+    # here keeps the change in one place for every caller and template.
+    if HELPDESK_EMAIL_RENDER_MARKDOWN:
+        # A copy, as the caller reuses context for every recipient.
+        context = {**context, "ticket": dict(context.get("ticket", {}))}
+        for fields, key in (
+            (context, "comment"),
+            (context, "resolution"),
+            (context["ticket"], "description"),
+            (context["ticket"], "resolution"),
+        ):
+            if fields.get(key):
+                # Remote images would let a submitter track who opens the mail.
+                html = nh3.clean(get_markdown(fields[key]), tags=NO_IMAGES)
+                # &#10; renders like a newline, but stops the templates'
+                # |linebreaksbr adding <br>s between blocks and inside <pre>.
+                fields[key] = mark_safe(html.replace("\n", "&#10;"))
     # keep new lines in html emails
-    if "comment" in context:
+    elif "comment" in context:
         context["comment"] = mark_safe(context["comment"].replace("\r\n", "<br>"))
 
     html_part = from_string(
