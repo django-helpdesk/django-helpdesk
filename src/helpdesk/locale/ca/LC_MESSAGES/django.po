@@ -94,15 +94,15 @@ msgstr ""
 #: views/staff.py:1822 views/staff.py:1829 views/staff.py:1836
 #: views/staff.py:1843
 msgid "Queue"
-msgstr ""
+msgstr "Cua"
 
 #: forms.py:320
 msgid "Summary of the problem"
-msgstr ""
+msgstr "Resum del problema"
 
 #: forms.py:325
 msgid "Description of your issue"
-msgstr ""
+msgstr "Descripció del vostre problema"
 
 #: forms.py:327
 msgid "Please be as descriptive as possible and include all details"
@@ -125,21 +125,21 @@ msgstr ""
 #: templates/helpdesk/ticket_desc_table.html:77
 #: templates/helpdesk/ticket_list.html:83 update_ticket.py:368
 msgid "Priority"
-msgstr ""
+msgstr "Prioritat"
 
 #: forms.py:336
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
-msgstr ""
+msgstr "Seŀlecciona una prioritat. Si no n'estàs segur, deixa '3'."
 
 #: forms.py:349 models.py:594
 #: templates/helpdesk/include/ticket_respond_form.html:158 update_ticket.py:384
 #: views/staff.py:984
 msgid "Due on"
-msgstr ""
+msgstr "Data límit"
 
 #: forms.py:356
 msgid "Attach File"
-msgstr ""
+msgstr "Adjunta arxiu"
 
 #: forms.py:358
 msgid ""
@@ -154,27 +154,31 @@ msgstr ""
 
 #: forms.py:482
 msgid "Submitter E-Mail Address"
-msgstr ""
+msgstr "Correu electrònic del remitent"
 
 #: forms.py:485
 msgid ""
 "This e-mail address will receive copies of all public updates to this ticket."
 msgstr ""
+"Aquest correu electrònic rebrà còpies de totes les actualitzacions públiques "
+"d'aquest ticket."
 
 #: forms.py:496
 msgid "Case owner"
-msgstr ""
+msgstr "Propietari del cas"
 
 #: forms.py:498
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
 msgstr ""
+"Si seŀlecciones un propietari que no siguis tu mateix, se li enviaran els "
+"detalls del ticket immediatament."
 
 #: forms.py:549
 #, python-format
 msgid "Ticket Opened & Assigned to %(name)s"
-msgstr ""
+msgstr "Ticket obert i assignat a %(name)s"
 
 #: forms.py:550
 msgid "<invalid user>"
@@ -182,19 +186,19 @@ msgstr ""
 
 #: forms.py:553
 msgid "Ticket Opened"
-msgstr ""
+msgstr "Ticket Obert"
 
 #: forms.py:582
 msgid "Your E-Mail Address"
-msgstr ""
+msgstr "La vostra direcció de correu electrònic"
 
 #: forms.py:583
 msgid "We will e-mail you when your ticket is updated."
-msgstr ""
+msgstr "Li enviarem un correu electrònic quan el vostre ticket s'actualitzi."
 
 #: forms.py:654
 msgid "Ticket Opened Via Web"
-msgstr ""
+msgstr "Ticket obert a través de la Web"
 
 #: forms.py:773
 msgid "Tickets to merge"
@@ -242,7 +246,7 @@ msgstr ""
 #: templates/helpdesk/include/ticket_respond_form.html:119
 #: templates/helpdesk/my_tickets.html:29 update_ticket.py:346
 msgid "Title"
-msgstr ""
+msgstr "Títol"
 
 #: models.py:115
 msgid ""
@@ -253,7 +257,7 @@ msgstr ""
 #: models.py:121 models.py:1884 models.py:1972 models.py:2058
 #: templates/helpdesk/email_ignore_list.html:33
 msgid "E-Mail Address"
-msgstr ""
+msgstr "Correu electrònic"
 
 #: models.py:125
 msgid ""

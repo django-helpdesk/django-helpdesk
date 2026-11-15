@@ -178,6 +178,8 @@ msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
 msgstr ""
+"Ako odaberete vlasnika koji nije vas, njemu će se odmah e-poštom poslati "
+"detalji ove karte."
 
 #: forms.py:549
 #, python-format
@@ -1072,6 +1074,8 @@ msgstr "Prikaži listu slučajeva prilikom prijave?"
 #: models.py:1779
 msgid "Display the ticket list upon login? Otherwise, the dashboard is shown."
 msgstr ""
+"Prikaži popis ulaznica nakon prijave? U suprotnom, prikazuje se nadzorna "
+"ploča."
 
 #: models.py:1785
 msgid "E-mail me on ticket change?"
@@ -1643,13 +1647,13 @@ msgstr ""
 #: templates/helpdesk/public_create_ticket_base.html:16
 #: templates/helpdesk/public_create_ticket_iframe.html:6
 msgid "Create Ticket"
-msgstr ""
+msgstr "Kreiraj ulaznicu"
 
 #: templates/helpdesk/create_ticket.html:18
 #: templates/helpdesk/navigation-header.html:178
 #: templates/helpdesk/public_create_ticket.html:15
 msgid "Submit a Ticket"
-msgstr ""
+msgstr "Pošaljite kartu"
 
 #: templates/helpdesk/create_ticket.html:21
 #: templates/helpdesk/edit_ticket.html:22
@@ -1659,7 +1663,7 @@ msgstr ""
 #: templates/helpdesk/create_ticket.html:22
 #: templates/helpdesk/edit_ticket.html:23
 msgid "Please provide as descriptive a title and description as possible."
-msgstr ""
+msgstr "Navedite što opisniji naslov i opis."
 
 #: templates/helpdesk/create_ticket.html:39
 msgid "Optional"
@@ -1667,7 +1671,7 @@ msgstr ""
 
 #: templates/helpdesk/create_ticket.html:53
 msgid "Submit Ticket"
-msgstr ""
+msgstr "Pošaljite kartu"
 
 #: templates/helpdesk/dashboard.html:2
 msgid "Helpdesk Dashboard"
@@ -1841,7 +1845,7 @@ msgstr ""
 
 #: templates/helpdesk/email_ignore_list.html:34
 msgid "Date Added"
-msgstr ""
+msgstr "Datum dodan"
 
 #: templates/helpdesk/email_ignore_list.html:36
 msgid "Keep in mailbox?"
