@@ -162,6 +162,9 @@ Otherwise each bugfix, feature, code refactoring or functionality change should 
 Please provide clear commit messages per file explaining *what*, precisely, has been changed in that file - it aids in
 researching behaviour issues down the line.
 
+We recommend, but do not require, the `Conventional Commits <https://www.conventionalcommits.org>`_
+format for commit messages and PR titles (``fix: ...``, ``feat: ...``, ``chore(deps): ...``).
+
 All commits should include appropriate new or updated tests; see the Tests
 section below for more details.
 
