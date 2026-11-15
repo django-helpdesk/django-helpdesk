@@ -2,30 +2,29 @@
 #
 # validators for file uploads, etc.
 
+import os
+
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
 
 from helpdesk import settings as helpdesk_settings
 
-# TODO: can we use the builtin Django validator instead?
-# see:
-# https://docs.djangoproject.com/en/4.0/ref/validators/#fileextensionvalidator
-
 
 def validate_file_extension(value):
-    import os
+    """Refuse attachments whose extension is not in HELPDESK_VALID_EXTENSIONS.
 
-    from django.core.exceptions import ValidationError
-
-    ext = os.path.splitext(value.name)[1]  # [0] returns path+filename
-    # TODO: we might improve this with more thorough checks of file types
-    # rather than just the extensions.
-
+    Trailing dots and spaces are ignored when reading the extension, since
+    some web servers derive the content type from every dot-separated part of
+    the name: `payload.html.` is checked as `.html`. A name without an
+    extension is refused, because it may be served with no content type and
+    left to the browser to guess.
+    """
     if not helpdesk_settings.HELPDESK_VALIDATE_ATTACHMENT_TYPES:
         return
 
-    # TODO: one more check in case it is a file with no extension; we
-    # should always allow that?
-    if ext.lower() not in helpdesk_settings.HELPDESK_VALID_EXTENSIONS and not (
-        ext.lower() == "" or ext.lower() == "."
-    ):
-        raise ValidationError(_("Unsupported file extension: ") + ext.lower())
+    name = os.path.basename(value.name).rstrip(". ")
+    ext = os.path.splitext(name)[1].lower()
+    if not ext:
+        raise ValidationError(_("Attachments must have a file extension."))
+    if ext not in helpdesk_settings.HELPDESK_VALID_EXTENSIONS:
+        raise ValidationError(_("Unsupported file extension: ") + ext)
