@@ -240,14 +240,13 @@ urlpatterns += [
 ]
 
 
-KNOWLEDGE_BASE_PATTERNS = [
-    path("kb/", kb.index, name="kb_index"),
-    path("kb/<slug:slug>/", kb.category, name="kb_category"),
-    path("kb_iframe/<slug:slug>/", kb.category_iframe, name="kb_category_iframe"),
-    path("kb/<int:item_id>/vote/<str:vote>/", kb.vote, name="kb_vote"),
-]
-
 if helpdesk_settings.HELPDESK_KB_ENABLED:
+    KNOWLEDGE_BASE_PATTERNS = [
+        path("kb/", kb.index, name="kb_index"),
+        path("kb/<slug:slug>/", kb.category, name="kb_category"),
+        path("kb_iframe/<slug:slug>/", kb.category_iframe, name="kb_category_iframe"),
+        path("kb/<int:item_id>/vote/<str:vote>/", kb.vote, name="kb_vote"),
+    ]
     urlpatterns += KNOWLEDGE_BASE_PATTERNS
 
 
