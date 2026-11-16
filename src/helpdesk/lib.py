@@ -38,6 +38,7 @@ def ticket_template_context(ticket):
         "resolution",
         "priority",
         "get_priority_display",
+        "get_assigned_to",
         "last_escalation",
         "ticket",
         "ticket_for_url",
@@ -50,8 +51,17 @@ def ticket_template_context(ticket):
         else:
             context[field] = attr
     # Avoid passing the model objects for foreign keys for security reasons
-    context["assigned_to"] = ticket.assigned_to_id
-    context["merged_to"] = ticket.merged_to_id
+    context["assigned_to"] = ticket.get_assigned_to if ticket.assigned_to_id else None
+    context["merged_to"] = (
+        {
+            "id": ticket.merged_to_id,
+            "ticket": ticket.merged_to.ticket,
+            "staff_url": ticket.merged_to.staff_url,
+        }
+        if ticket.merged_to_id
+        else None
+    )
+
     # Email templates are stored in the database and use {{ ticket.ticket_url }},
     # so it stays the absolute link here.
     context["email_url"] = context["ticket_url"] = ticket.email_url
