@@ -821,10 +821,8 @@ msgid "Follow-up"
 msgstr "Seguito"
 
 #: models.py:1064
-#, fuzzy
-#| msgid "Follow-up"
 msgid "Follow-ups"
-msgstr "Seguito"
+msgstr "Risposte"
 
 #: models.py:1241 models.py:2198
 msgid "Field"
@@ -853,16 +851,12 @@ msgid "changed from \"%(old_value)s\" to \"%(new_value)s\""
 msgstr "modificato da \"%(old_value)s\" a \"%(new_value)s\""
 
 #: models.py:1273
-#, fuzzy
-#| msgid "Ticket Opened"
 msgid "Ticket change"
-msgstr "Ticket aperto"
+msgstr "Modifica al ticket"
 
 #: models.py:1274
-#, fuzzy
-#| msgid "Ticket Opened"
 msgid "Ticket changes"
-msgstr "Ticket aperto"
+msgstr "Modifiche ai ticket"
 
 #: models.py:1289
 msgid "File"
@@ -885,35 +879,25 @@ msgid "Size of this file in bytes"
 msgstr "Dimensione del file in byte"
 
 #: models.py:1347
-#, fuzzy
-#| msgid "Attach File"
 msgid "Attachment"
-msgstr "Allega un file"
+msgstr "Allegato"
 
 #: models.py:1348 templates/helpdesk/include/ticket_followup_list.html:95
 #: templates/helpdesk/ticket_desc_table.html:274
-#, fuzzy
-#| msgid "Attach File"
 msgid "Attachments"
-msgstr "Allega un file"
+msgstr "Allegati"
 
 #: models.py:1374 models.py:1620
-#, fuzzy
-#| msgid "Knowledgebase: %(item)s"
 msgid "Knowledge base item"
-msgstr "Knowledge base: %(item)s"
+msgstr "Elemento knowledge base"
 
 #: models.py:1402
-#, fuzzy
-#| msgid "Use a Pre-set Reply"
 msgid "Pre-set reply"
-msgstr "Usa una risposta predefinita"
+msgstr "Risposta predefinita"
 
 #: models.py:1403
-#, fuzzy
-#| msgid "Maintain Pre-Set Replies"
 msgid "Pre-set replies"
-msgstr "Gestisci risposte predefinite"
+msgstr "Risposte predefinite"
 
 #: models.py:1409
 msgid ""
@@ -960,16 +944,12 @@ msgid "Date on which escalation should not happen"
 msgstr "Data in cui non dovrebbe avvenire l'escalation"
 
 #: models.py:1469
-#, fuzzy
-#| msgid "Escalation Days"
 msgid "Escalation exclusion"
-msgstr "Giorni Escalation"
+msgstr "Esclusione dall'escalation"
 
 #: models.py:1470
-#, fuzzy
-#| msgid "Escalation Days"
 msgid "Escalation exclusions"
-msgstr "Giorni Escalation"
+msgstr "Esclusioni dall'escalation"
 
 #: models.py:1483
 msgid "Template Name"
@@ -1027,16 +1007,12 @@ msgid "Locale of this template."
 msgstr "Impostazioni internazionali per questo modello."
 
 #: models.py:1534
-#, fuzzy
-#| msgid "Maintain E-Mail Templates"
 msgid "e-mail template"
-msgstr "Gestisci modelli e-mail"
+msgstr "Modello e-mail"
 
 #: models.py:1535
-#, fuzzy
-#| msgid "Maintain E-Mail Templates"
 msgid "e-mail templates"
-msgstr "Gestisci modelli e-mail"
+msgstr "Modelli e-mail"
 
 #: models.py:1544
 msgid "Name of the category"
@@ -1057,14 +1033,10 @@ msgid "Is KBCategory publicly visible?"
 msgstr ""
 
 #: models.py:1563
-#, fuzzy
-#| msgid "Knowledgebase Categories"
 msgid "Knowledge base category"
-msgstr "Categorie knowledge base"
+msgstr "Categoria knowledge base"
 
 #: models.py:1564
-#, fuzzy
-#| msgid "Knowledgebase Categories"
 msgid "Knowledge base categories"
 msgstr "Categorie knowledge base"
 
@@ -1119,10 +1091,8 @@ msgid "Enabled to display to users"
 msgstr ""
 
 #: models.py:1621 templates/helpdesk/filters/kbitems.html:9
-#, fuzzy
-#| msgid "Knowledgebase: %(item)s"
 msgid "Knowledge base items"
-msgstr "Knowledge base: %(item)s"
+msgstr "Elementi knowledge base"
 
 #: models.py:1645
 msgid "Unrated"
@@ -1153,16 +1123,12 @@ msgid "Pickled query object. Be wary changing this."
 msgstr "Oggetto Ricerca pickled. Modificare con estrema cautela."
 
 #: models.py:1708
-#, fuzzy
-#| msgid "Save Query"
 msgid "Saved search"
-msgstr "Salva ricerca"
+msgstr "Ricerca salvata"
 
 #: models.py:1709
-#, fuzzy
-#| msgid "Save Changes"
 msgid "Saved searches"
-msgstr "Salva modifiche"
+msgstr "Ricerche salvate"
 
 #: models.py:1755
 msgid "Tabs: follow ups and respond share a tabbed card"
@@ -1261,10 +1227,8 @@ msgid "Where should the respond form appear when viewing a ticket?"
 msgstr ""
 
 #: models.py:1831
-#, fuzzy
-#| msgid "User Settings"
 msgid "User Setting"
-msgstr "Preferenze utente"
+msgstr "Impostazione utente"
 
 #: models.py:1832 templates/helpdesk/navigation-header.html:134
 #: templates/helpdesk/user_settings.html:15
@@ -1272,14 +1236,10 @@ msgid "User Settings"
 msgstr "Preferenze utente"
 
 #: models.py:1859
-#, fuzzy
-#| msgid "Ignore E-Mail Address"
 msgid "Ignored e-mail address"
-msgstr "Ignora indirizzo e-mail"
+msgstr "Indirizzo e-mail ignorato"
 
 #: models.py:1860
-#, fuzzy
-#| msgid "Ignored E-Mail Addresses"
 msgid "Ignored e-mail addresses"
 msgstr "Indirizzi e-mail ignorati"
 
@@ -1477,11 +1437,11 @@ msgstr ""
 
 #: models.py:2138
 msgid "Custom field"
-msgstr ""
+msgstr "Campo custom"
 
 #: models.py:2139
 msgid "Custom fields"
-msgstr ""
+msgstr "Campi custom"
 
 #: models.py:2208
 msgid "Not defined"
@@ -1489,23 +1449,19 @@ msgstr ""
 
 #: models.py:2212
 msgid "Ticket custom field value"
-msgstr ""
+msgstr "Valore di un campo custom"
 
 #: models.py:2213
 msgid "Ticket custom field values"
-msgstr ""
+msgstr "Valori di campi custom"
 
 #: models.py:2225
-#, fuzzy
-#| msgid "Add Ticket Dependency"
 msgid "Ticket dependency"
-msgstr "Aggiungi dipendenza ticket"
+msgstr "Dipendenza da ticket"
 
 #: models.py:2226
-#, fuzzy
-#| msgid "Add Ticket Dependency"
 msgid "Ticket dependencies"
-msgstr "Aggiungi dipendenza ticket"
+msgstr "Dipendenze da ticket"
 
 #: models.py:2238
 msgid "Depends On Ticket"
@@ -1789,31 +1745,18 @@ msgid "Delete Saved Query"
 msgstr "Elimina ricerca salvata"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:13
-#, fuzzy
-#| msgid "Delete Saved Query"
 msgid "Delete Query"
-msgstr "Elimina ricerca salvata"
+msgstr "Elimina ricerca"
 
 #: templates/helpdesk/confirm_delete_saved_query.html:15
-#, fuzzy, python-format
-#| msgid ""
-#| "\n"
-#| "<h2>Delete Query</h2>\n"
-#| "\n"
-#| "<p>Are you sure you want to delete this saved filter "
-#| "(<em>%(query_title)s</em>)? To re-create it, you will need to manually re-"
-#| "filter your ticket listing.</p>\n"
+#, python-format
 msgid ""
 "Are you sure you want to delete this saved filter (<em>%(query_title)s</"
 "em>)? To re-create it, you will need to manually re-filter your ticket "
 "listing."
 msgstr ""
-"\n"
-"<h2>Elimina ricerca</h2>\n"
-"\n"
-"<p>Confermi la cancellazione di questo filtro salvato (<em>%(query_title)s</"
-"em>)? Per ricrearlo dovrai filtrare nuovamente a mano l'elenco dei ticket.</"
-"p>\n"
+"Confermi la cancellazione di questo filtro salvato (<em>%(query_title)s</"
+"em>)? Per ricrearlo dovrai impostarne nuovamente a mano le condizioni."
 
 #: templates/helpdesk/confirm_delete_saved_query.html:18
 msgid ""
@@ -2855,10 +2798,8 @@ msgstr "Feed RSS"
 #: templates/helpdesk/navigation-header.html:141
 #: templates/helpdesk/registration/change_password.html:6
 #: templates/helpdesk/registration/change_password_done.html:6
-#, fuzzy
-#| msgid "Password"
 msgid "Change password"
-msgstr "Password"
+msgstr "Modifica password"
 
 #: templates/helpdesk/navigation-header.html:154
 #: templates/helpdesk/navigation-header.html:191
@@ -3352,7 +3293,7 @@ msgstr "Report per Coda"
 #: templates/helpdesk/report_index.html:91
 #: templates/helpdesk/report_output.html:97 views/staff.py:1841
 msgid "Days until ticket closed by Month"
-msgstr ""
+msgstr "Giorni per la chiusura dei ticket per mese"
 
 #: templates/helpdesk/report_index.html:104
 msgid ""
@@ -3937,16 +3878,12 @@ msgstr ""
 "degli aggiornamenti di questo ticket."
 
 #: templates/helpdesk/ticket_desc_table.html:180
-#, fuzzy
-#| msgid ""
-#| "Click here to add / remove people who should receive an e-mail whenever "
-#| "this ticket is updated."
 msgid ""
 "Click here to subscribe yourself to this ticket, if you want to receive an e-"
 "mail whenever this ticket is updated."
 msgstr ""
-"Premi qui per aggiungere / rimuovere persone dall'elenco dei destinatari "
-"degli aggiornamenti di questo ticket."
+"Seleziona per seguire questo ticket, se vuoi ricevere un'e-mail ogni volta "
+"che viene aggiornato."
 
 #: templates/helpdesk/ticket_desc_table.html:187
 msgid "Assigned queue does not have CC notifications enabled."
@@ -4035,10 +3972,8 @@ msgid "Create"
 msgstr "Creato"
 
 #: templates/helpdesk/ticket_list.html:32
-#, fuzzy
-#| msgid "Save Query"
 msgid "Saved Query"
-msgstr "Salva ricerca"
+msgstr "Ricerca salvata"
 
 #: templates/helpdesk/ticket_list.html:51
 msgid "Table"
@@ -4109,11 +4044,12 @@ msgid "No KB Item"
 msgstr ""
 
 #: templates/helpdesk/ticket_list.html:168
-#, fuzzy, python-format
-#| msgid "You are currently viewing saved query <em>%(query_name)s</em>."
+#, python-format
 msgid ""
 "You are currently viewing saved query <strong>\"%(query_name)s\"</strong>."
-msgstr "Stai visualizzando la ricerca salvata <em>%(query_name)s</em>."
+msgstr ""
+"Stai vedendo il risultato della ricerca salvata <strong>\"%(query_name)s\"</"
+"strong>."
 
 #: templates/helpdesk/ticket_list.html:175
 #, fuzzy, python-format
