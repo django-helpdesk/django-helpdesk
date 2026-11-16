@@ -16,6 +16,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from helpdesk import settings as helpdesk_settings
@@ -243,18 +244,37 @@ class EditTicketCustomFieldForm(EditTicketForm):
                 ):
                     self.fields.pop(field, None)
 
+    @cached_property
+    def changed_data(self):
+        """Compare custom fields as Python objects, since stored values are strings."""
+        changed = [
+            name for name in super().changed_data if not name.startswith("custom_")
+        ]
+        for name, field in self.fields.items():
+            if not name.startswith("custom_"):
+                continue
+            try:
+                initial = field.to_python(field.initial)
+                value = field.to_python(self[name].data)
+            except ValidationError:
+                changed.append(name)
+                continue
+            if initial != value:
+                changed.append(name)
+        return changed
+
     def save(self, *args, **kwargs):
         # if form is saved in a ticket update, it is passed
         # a followup instance to trace custom fields changes
         if "followup" in kwargs:
             followup = kwargs.pop("followup", None)
 
-            for field, value in self.cleaned_data.items():
-                if field.startswith("custom_") and value != self.fields[field].initial:
+            for field in self.changed_data:
+                if field.startswith("custom_"):
                     followup.ticketchange_set.create(
                         field=field.replace("custom_", "", 1),
                         old_value=self.fields[field].initial,
-                        new_value=value,
+                        new_value=self.cleaned_data[field],
                     )
 
         super().save(*args, **kwargs)
