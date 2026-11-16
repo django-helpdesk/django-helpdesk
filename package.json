@@ -2,7 +2,7 @@
   "name": "django-helpdesk",
   "packageManager": "yarn@4.18.1",
   "dependencies": {
-    "bootstrap": "5.3.8",
+    "bootstrap": "5.3.9",
     "chart.js": "^4.6.1",
     "datatables.net": "^3.1.5",
     "datatables.net-bs5": "^3.1.5",
