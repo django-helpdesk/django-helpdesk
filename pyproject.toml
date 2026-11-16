@@ -27,7 +27,7 @@ dependencies = [
     "markdown",
     "beautifulsoup4",
     "nh3",
-    "djangorestframework",
+    "djangorestframework>=3.18",
     "django-model-utils",
     "oauthlib",
     "requests-oauthlib",
