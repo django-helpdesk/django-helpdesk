@@ -1128,12 +1128,11 @@ def merge_tickets(request):
     )
     tickets = custom_fields = None
     if ticket_select_form.is_valid():
+        # No per-ticket check here: the form only accepts tickets from
+        # accessible_tickets(), the same rule ticket_perm_check() applies.
+        # A further can_access_queue() test refused tickets assigned to the
+        # user outside their queues, which the form had just offered.
         tickets = ticket_select_form.cleaned_data.get("tickets")
-
-        huser = HelpdeskUser(request.user)
-        for t in tickets:
-            if not huser.can_access_queue(t.queue):
-                raise PermissionDenied()
 
         custom_fields = CustomField.objects.all()
 
