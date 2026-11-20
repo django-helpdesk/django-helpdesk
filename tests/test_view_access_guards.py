@@ -105,3 +105,28 @@ class MassUpdateQueueGuardTests(TestCase):
         foreign.refresh_from_db()
         self.assertEqual(mine.assigned_to, staff)
         self.assertIsNone(foreign.assigned_to)
+
+    def test_restricted_staff_updates_tickets_assigned_to_them_in_other_queues(self):
+        # ticket_perm_check() lets an assignee open, edit and delete a ticket
+        # outside their queues, so a bulk action must reach it too.
+        granted = Queue.objects.create(title="Granted", slug="granted")
+        other = Queue.objects.create(title="Other", slug="other")
+        staff = get_user_model().objects.create(username="agent", is_staff=True)
+        staff.user_permissions.add(
+            Permission.objects.get(codename=granted.permission_name[9:])
+        )
+        assigned = Ticket.objects.create(
+            title="Assigned", queue=other, description="d", assigned_to=staff
+        )
+        foreign = Ticket.objects.create(title="Foreign", queue=other, description="d")
+
+        self.client.force_login(staff)
+        self.client.post(
+            reverse("helpdesk:mass_update"),
+            {"ticket_id": [assigned.id, foreign.id], "action": "close"},
+        )
+
+        assigned.refresh_from_db()
+        foreign.refresh_from_db()
+        self.assertEqual(assigned.status, Ticket.CLOSED_STATUS)
+        self.assertNotEqual(foreign.status, Ticket.CLOSED_STATUS)
