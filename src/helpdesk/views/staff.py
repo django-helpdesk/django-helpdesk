@@ -881,11 +881,10 @@ def mass_update(request):
             + "&".join([f"tickets={ticket_id}" for ticket_id in tickets])
         )
 
-    huser = HelpdeskUser(request.user)
-    for t in Ticket.objects.filter(id__in=tickets):
-        if not huser.can_access_queue(t.queue):
-            continue
-
+    # accessible_tickets() rather than can_access_queue(): a bulk action must
+    # reach the same tickets ticket_perm_check() lets the user act on one by
+    # one, including those assigned to them outside their queues.
+    for t in HelpdeskUser(request.user).accessible_tickets().filter(id__in=tickets):
         if action == "assign" and t.assigned_to != user:
             t.assigned_to = user
             t.save()
