@@ -1,9 +1,12 @@
 """Follow-up comments in the HTML part of notification e-mails."""
 
+from unittest import mock
+
 from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import TestCase
 
+from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue, Ticket
 from helpdesk.update_ticket import update_ticket
 
@@ -69,3 +72,24 @@ class EmailCommentEscapingTests(TestCase):
         message = self.add_comment("line one\r\nline two")
 
         self.assertIn("line one<br>line two", html_part(message))
+
+
+@mock.patch.object(helpdesk_settings, "HELPDESK_EMAIL_RENDER_MARKDOWN", True)
+class EmailCommentEscapingWithMarkdownTests(EmailCommentEscapingTests):
+    """The same guarantees hold when comments are rendered as markdown."""
+
+    def test_should_keep_comment_line_breaks(self):
+        message = self.add_comment("line one\r\nline two")
+
+        self.assertIn("line one<br", html_part(message))
+        self.assertIn("line two", html_part(message))
+
+    def test_should_escape_templated_comment_once(self):
+        self.ticket.title = "O'Brien & Sons"
+        self.ticket.save()
+
+        message = self.add_comment("Re {{ ticket.title }}")
+
+        html = html_part(message)
+        self.assertIn("Re O'Brien &amp; Sons", html)
+        self.assertNotIn("&amp;amp;", html)
