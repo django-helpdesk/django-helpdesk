@@ -264,9 +264,8 @@ project:
 
 https://explore.transifex.com/django-helpdesk/django-helpdesk/
 
-Once you have translated content via Transifex, please raise an issue on the
-project Github page and tag it as "translations" to let us know it's ready to
-import.
+The Transifex project is connected to this repository: once a language is fully
+translated, Transifex opens a pull request with the updated catalog.
 
 When you add or change a translatable string, regenerate and compile the
 catalogs with::
@@ -275,6 +274,11 @@ catalogs with::
 
 The English catalog is the source that Transifex reads, and ``.tx/config``
 maps the catalogs to the Transifex project for the ``tx`` command line client.
+
+The default e-mail templates are not part of the Transifex project. They live
+in ``src/helpdesk/fixtures/emailtemplate.json``, with one entry per template
+and locale. To add a language, open a pull request that adds a translated copy
+of the 16 ``en`` entries with your ``locale`` code.
 
 
 Licensing
