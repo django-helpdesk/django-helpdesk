@@ -86,3 +86,66 @@ class KanbanClosedTicketFilterTests(TestCase):
         ):
             response = self.client.get(self.url)
         self.assertContains(response, t.title)
+
+
+class KanbanDueWeeksFilterTests(TestCase):
+    def setUp(self):
+        self.queue = _make_queue()
+        self.user = get_staff_user()
+        self.client.force_login(self.user)
+        self.url = reverse("helpdesk:kanban")
+
+        now = timezone.now()
+        self.upcoming = Ticket.objects.create(
+            title="Upcoming unique ticket",
+            queue=self.queue,
+            due_date=now + timedelta(days=3),
+        )
+        self.overdue = Ticket.objects.create(
+            title="Overdue unique ticket",
+            queue=self.queue,
+            due_date=now - timedelta(days=3),
+        )
+        self.far_future = Ticket.objects.create(
+            title="Far future unique ticket",
+            queue=self.queue,
+            due_date=now + timedelta(weeks=8),
+        )
+
+    def test_zero_and_negative_weeks_disable_due_date_limit(self):
+        for weeks in ("0", "-2"):
+            with self.subTest(weeks=weeks):
+                response = self.client.get(self.url, {"due_weeks": weeks})
+                self.assertEqual(response.status_code, 200)
+                self.assertIsNone(response.context["due_weeks"])
+                self.assertContains(response, self.far_future.title)
+
+    def test_invalid_weeks_fall_back_to_default(self):
+        with mock.patch.object(
+            helpdesk_settings, "HELPDESK_KANBAN_DEFAULT_DUE_WEEKS", 2
+        ):
+            response = self.client.get(self.url, {"due_weeks": "invalid"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["due_weeks"], 2)
+        self.assertNotContains(response, self.far_future.title)
+
+    def test_positive_weeks_limit_upcoming_tickets(self):
+        response = self.client.get(self.url, {"due_weeks": "1"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["due_weeks"], 1)
+        self.assertContains(response, self.upcoming.title)
+        self.assertNotContains(response, self.far_future.title)
+
+    def test_exclude_overdue_hides_overdue_tickets(self):
+        included = self.client.get(self.url, {"due_weeks": "1"})
+        excluded = self.client.get(
+            self.url,
+            {"due_weeks": "1", "exclude_overdue": "1"},
+        )
+
+        self.assertContains(included, self.overdue.title)
+        self.assertNotContains(excluded, self.overdue.title)
+        self.assertContains(excluded, self.upcoming.title)
+        self.assertTrue(excluded.context["exclude_overdue"])

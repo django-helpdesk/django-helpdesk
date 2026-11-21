@@ -190,3 +190,66 @@ class StaffTicketListViewTests(TestCase):
             r = self.client.get(self.url)
             self.assertEqual(r.status_code, HTTPStatus.OK)
             self.assertNotContains(r, "value='kbitem'")
+
+    def test_invalid_saved_query_redirects_to_ticket_list(self):
+        self.client.force_login(self.staff_user)
+
+        for saved_query in ("999999", "invalid"):
+            with self.subTest(saved_query=saved_query):
+                response = self.client.get(self.url, {"saved_query": saved_query})
+                self.assertRedirects(
+                    response,
+                    self.url,
+                    fetch_redirect_response=False,
+                )
+
+    def test_saved_query_with_invalid_json_redirects(self):
+        saved = SavedSearch.objects.create(
+            title="Invalid query",
+            query="bm90LWpzb24=",
+            user=self.staff_user,
+        )
+        self.client.force_login(self.staff_user)
+
+        response = self.client.get(self.url, {"saved_query": str(saved.pk)})
+
+        self.assertRedirects(
+            response,
+            self.url,
+            fetch_redirect_response=False,
+        )
+
+    def test_filters_support_null_values_and_date_ranges(self):
+        self.client.force_login(self.staff_user)
+
+        response = self.client.get(
+            self.url,
+            {
+                "assigned_to": ["-1", str(self.staff_user.pk)],
+                "status": ["1", "invalid"],
+                "date_from": "2026-01-01",
+                "date_to": "2026-12-31",
+            },
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        params = response.context["query_params"]
+        self.assertTrue(params["filtering_null"]["assigned_to__id__isnull"])
+        self.assertEqual(
+            params["filtering"]["assigned_to__id__in"],
+            [self.staff_user.pk],
+        )
+        self.assertEqual(params["filtering"]["created__gte"], "2026-01-01")
+        self.assertEqual(params["filtering"]["created__lte"], "2026-12-31")
+
+    def test_header_search_invalid_ticket_ids_fall_back_to_list(self):
+        self.client.force_login(self.staff_user)
+
+        for query in ("not-a-number", "payments-invalid", "999999", "payments-999999"):
+            with self.subTest(query=query):
+                response = self.client.get(
+                    self.url,
+                    {"search_type": "header", "q": query},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertTemplateUsed(response, self.template)
