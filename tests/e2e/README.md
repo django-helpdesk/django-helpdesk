@@ -24,10 +24,10 @@ yarn install --immutable
 make static-vendor
 ```
 
-Run all public ticket creation scenarios:
+Run all browser scenarios:
 
 ```bash
-uv run --group e2e quicktest.py tests.e2e.test_public_ticket_creation -v 2
+uv run --group e2e quicktest.py tests.e2e.test_public_ticket_creation tests.e2e.test_staff_ticket_reply -v 2
 ```
 
 To watch the browser with a one-second delay between actions:
@@ -43,6 +43,14 @@ Browser tests are excluded from the default `make test` discovery by the
 package's `load_tests` hook. Run each browser module explicitly, as above.
 The `e2e` CI job installs Chromium and runs these tests separately from the
 backend matrix.
+
+The staff reply scenario logs in as an employee, sends a public reply, and checks
+that the customer can read it after reloading in a separate anonymous context.
+Run it on its own with:
+
+```bash
+uv run --group e2e quicktest.py tests.e2e.test_staff_ticket_reply -v 2
+```
 
 The image scenario uses `tests/e2e/fixtures/ticket-attachment.png`. Include this small PNG
 alongside the test code when submitting changes.
