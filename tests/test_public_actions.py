@@ -33,6 +33,19 @@ class PublicActionsTestCase(TestCase):
 
         self.client = Client()
 
+    @override_settings(HELPDESK_VIEW_A_TICKET_PUBLIC=False)
+    def test_public_view_ticket_without_key_when_lookup_disabled(self):
+        response = self.client.get(
+            reverse("helpdesk:public_view"),
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": self.ticket.submitter_email,
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateNotUsed(response, "helpdesk/public_view_form.html")
+        self.assertTemplateNotUsed(response, "helpdesk/public_view_ticket.html")
+
     @override_settings(HELPDESK_VIEW_A_TICKET_PUBLIC=True)
     def test_public_view_ticket(self):
         # Without a key, the public lookup form is shown without ticket details.
