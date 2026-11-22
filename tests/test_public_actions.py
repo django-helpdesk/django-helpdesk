@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
 
@@ -33,6 +33,7 @@ class PublicActionsTestCase(TestCase):
 
         self.client = Client()
 
+    @override_settings(HELPDESK_VIEW_A_TICKET_PUBLIC=True)
     def test_public_view_ticket(self):
         # Without a key, the public lookup form is shown without ticket details.
         response = self.client.get(
