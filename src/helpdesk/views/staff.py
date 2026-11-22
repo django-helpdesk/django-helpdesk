@@ -1130,8 +1130,6 @@ def merge_tickets(request):
     if ticket_select_form.is_valid():
         # No per-ticket check here: the form only accepts tickets from
         # accessible_tickets(), the same rule ticket_perm_check() applies.
-        # A further can_access_queue() test refused tickets assigned to the
-        # user outside their queues, which the form had just offered.
         tickets = ticket_select_form.cleaned_data.get("tickets")
 
         custom_fields = CustomField.objects.all()
