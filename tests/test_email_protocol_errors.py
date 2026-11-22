@@ -245,6 +245,7 @@ class POP3ErrorHandlingTests(SimpleTestCase):
                     [(b"1 (RFC822)", b"Subject: Test\r\n\r\nBody")],
                 )
 
+                mocked_extract.reset_mock()
                 if isinstance(result, Exception):
                     mocked_extract.side_effect = result
                     mocked_extract.return_value = None
@@ -620,6 +621,10 @@ class ProcessEmailLoggingTests(SimpleTestCase):
         handler = mock.Mock()
         handler.level = logging.NOTSET
         mocked_file_handler.return_value = handler
+        self.addCleanup(
+            logging.getLogger("django.helpdesk.queue.test").removeHandler,
+            handler,
+        )
 
         with (
             mock.patch("helpdesk.email.timezone.now") as mocked_now,
@@ -631,7 +636,6 @@ class ProcessEmailLoggingTests(SimpleTestCase):
 
         mocked_file_handler.assert_called_once()
         handler.close.assert_called_once()
-        logging.getLogger("django.helpdesk.queue.test").removeHandler(handler)
 
     @mock.patch("helpdesk.email.process_queue")
     @mock.patch("helpdesk.email.Queue.objects.filter")
@@ -681,10 +685,13 @@ class ProcessEmailLoggingTests(SimpleTestCase):
         handler = mock.Mock()
         handler.level = logging.NOTSET
         mocked_file_handler.return_value = handler
+        self.addCleanup(
+            logging.getLogger("django.helpdesk.queue.test").removeHandler,
+            handler,
+        )
 
         with mock.patch("helpdesk.email.timezone.now") as mocked_now:
             mocked_now.return_value = queue.email_box_last_check + timedelta(minutes=1)
             process_email()
 
         handler.close.assert_called_once()
-        logging.getLogger("django.helpdesk.queue.test").removeHandler(handler)
