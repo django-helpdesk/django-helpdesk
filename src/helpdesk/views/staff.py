@@ -1620,7 +1620,8 @@ def unhold_ticket(request, ticket_id):
 
 @helpdesk_staff_member_required
 def rss_list(request):
-    return render(request, "helpdesk/rss_list.html", {"queues": Queue.objects.all()})
+    queues = HelpdeskUser(request.user).accessible_queues()
+    return render(request, "helpdesk/rss_list.html", {"queues": queues})
 
 
 @helpdesk_staff_member_required

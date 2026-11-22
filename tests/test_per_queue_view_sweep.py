@@ -364,6 +364,14 @@ class ForeignQueueSweepTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_rss_index_lists_only_permitted_queues(self):
+        """The feed index carries no ticket data, but names every queue it lists."""
+        response = self.client.get(reverse("helpdesk:rss_index"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["queues"]), [self.mine])
+        self.assertNotContains(response, "/rss/queue/theirs/")
+
     def test_kanban_update_checks_the_authorization_helper(self):
         """kanban_update_ticket filtered on get_queues(), which also returns
         queues accepting public submissions, so a status could be written on a
