@@ -114,3 +114,24 @@ class StaffTicketViewTests(TestCase):
         self.assertEqual(r.context["ticket_attachments"].count(), 8)
         self.assertContains(r, "Show 5 older attachments")
         self.assertContains(r, 'id="olderAttachments"')
+
+    def test_accepting_resolution_closes_ticket(self):
+        for assigned_to in (None, self.staff_user):
+            with self.subTest(assigned_to=assigned_to):
+                self.ticket.status = Ticket.RESOLVED_STATUS
+                self.ticket.assigned_to = assigned_to
+                self.ticket.save()
+                self.client.force_login(self.staff_user)
+
+                r = self.client.get(f"{self.url}?close")
+
+                self.assertRedirects(r, self.url, fetch_redirect_response=False)
+                self.ticket.refresh_from_db()
+                self.assertEqual(self.ticket.status, Ticket.CLOSED_STATUS)
+                self.assertEqual(self.ticket.assigned_to, assigned_to)
+                followup = self.ticket.followup_set.latest("date")
+                self.assertEqual(
+                    followup.comment, "Accepted resolution and closed ticket"
+                )
+                self.assertEqual(followup.new_status, Ticket.CLOSED_STATUS)
+                self.assertTrue(followup.public)

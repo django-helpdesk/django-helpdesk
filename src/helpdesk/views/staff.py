@@ -550,6 +550,8 @@ def view_ticket(request, ticket_id):
             ticket,
             owner=owner,
             comment=_("Accepted resolution and closed ticket"),
+            new_status=Ticket.CLOSED_STATUS,
+            public=True,
         )
         return return_to_ticket(request.user, ticket)
 
