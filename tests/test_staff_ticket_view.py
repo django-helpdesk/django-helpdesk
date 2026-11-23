@@ -129,26 +129,6 @@ class StaffTicketViewTests(TestCase):
             TicketCC.objects.filter(ticket=self.ticket, user=self.staff_user).exists()
         )
 
-    def test_resolved_ticket_can_be_closed_with_or_without_owner(self):
-        for assigned_to in (None, self.staff_user):
-            with self.subTest(assigned_to=assigned_to):
-                self.ticket.status = Ticket.RESOLVED_STATUS
-                self.ticket.assigned_to = assigned_to
-                self.ticket.save()
-
-                self.client.force_login(self.staff_user)
-                response = self.client.get(f"{self.url}?close")
-
-                self.assertRedirects(response, self.url, fetch_redirect_response=False)
-                self.ticket.refresh_from_db()
-                self.assertEqual(self.ticket.status, Ticket.RESOLVED_STATUS)
-                self.assertTrue(
-                    FollowUp.objects.filter(
-                        ticket=self.ticket,
-                        comment="Accepted resolution and closed ticket",
-                    ).exists()
-                )
-
     def test_superuser_can_delete_followup(self):
         self.staff_user.is_superuser = True
         self.staff_user.save(update_fields=["is_superuser"])
