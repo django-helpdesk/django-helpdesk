@@ -1,6 +1,18 @@
-from django.test import SimpleTestCase
+import logging
+from email.message import EmailMessage
+from unittest import mock
 
-from helpdesk.email import attempt_body_extract_from_html, get_encoded_body
+from django.test import SimpleTestCase, override_settings
+
+from helpdesk.email import (
+    add_file_if_always_save_incoming_email_message,
+    attempt_body_extract_from_html,
+    extract_email_message_content,
+    get_body_from_fragments,
+    get_email_body_from_part_payload,
+    get_encoded_body,
+    process_as_attachment,
+)
 
 
 class EmailBodyHelperTests(SimpleTestCase):
@@ -24,33 +36,18 @@ class EmailBodyHelperTests(SimpleTestCase):
         self.assertEqual(body, "")
         self.assertIsNone(full_body)
 
+    @override_settings(HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE=True)
     def test_original_email_is_saved_when_enabled(self):
-        from unittest import mock
-
-        from django.conf import settings
-
-        from helpdesk.email import add_file_if_always_save_incoming_email_message
-
         message = "Subject: Test\\n\\nOriginal message body"
         files = []
 
-        with mock.patch.object(
-            settings,
-            "HELPDESK_ALWAYS_SAVE_INCOMING_EMAIL_MESSAGE",
-            True,
-            create=True,
-        ):
-            add_file_if_always_save_incoming_email_message(files, message)
+        add_file_if_always_save_incoming_email_message(files, message)
 
         self.assertEqual(len(files), 1)
         self.assertTrue(files[0].name.endswith(".eml"))
         self.assertEqual(files[0].read(), message.encode("utf-8"))
 
     def test_html_only_email_extracts_readable_body(self):
-        from email.message import EmailMessage
-
-        from helpdesk.email import extract_email_message_content
-
         message = EmailMessage()
         message.set_content(
             "<html><body><p>HTML-only support request</p></body></html>",
@@ -69,12 +66,6 @@ class EmailBodyHelperTests(SimpleTestCase):
         self.assertEqual(len(files), 1)
 
     def test_unnamed_attachment_generates_filename_and_debug_log(self):
-        import logging
-        from email.message import EmailMessage
-        from unittest import mock
-
-        from helpdesk.email import process_as_attachment
-
         part = EmailMessage()
         part.set_content("Attachment contents")
 
@@ -92,16 +83,10 @@ class EmailBodyHelperTests(SimpleTestCase):
         )
 
     def test_unicode_body_is_preserved(self):
-        from helpdesk.email import get_encoded_body
-
         body = "Caf\u00e9 \u2014 r\u00e9sum\u00e9"
         self.assertEqual(get_encoded_body(body), body)
 
     def test_email_reply_fragments_are_joined(self):
-        from unittest import mock
-
-        from helpdesk.email import get_body_from_fragments
-
         fragments = [
             mock.Mock(content="Current reply"),
             mock.Mock(content="Earlier message"),
@@ -116,10 +101,6 @@ class EmailBodyHelperTests(SimpleTestCase):
         self.assertEqual(result, "Current reply\n\nEarlier message")
 
     def test_payload_decoding_and_unicode_fallback(self):
-        from unittest import mock
-
-        from helpdesk.email import get_email_body_from_part_payload
-
         part = mock.Mock()
         part.get_payload.return_value = b"Normal message"
 

@@ -1,12 +1,28 @@
+import builtins
+import imaplib
 import logging
 import os
+import socket
+import ssl
+import sys
+import types
 from datetime import timedelta
 from unittest import mock
 
 from django.test import SimpleTestCase
 from django.utils import timezone
 
-from helpdesk.email import pop3_sync
+from helpdesk.email import (
+    imap_oauth_sync,
+    imap_sync,
+    pop3_sync,
+    process_email,
+    process_queue,
+)
+from helpdesk.exceptions import (
+    DeleteIgnoredTicketException,
+    IgnoreTicketException,
+)
 
 
 class POP3ErrorHandlingTests(SimpleTestCase):
@@ -31,9 +47,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     @mock.patch("helpdesk.email.oauth2lib.BackendApplicationClient")
     @mock.patch("helpdesk.email.requests_oauthlib.OAuth2Session")
     def test_oauth_authentication_failure_logs_out(self, mocked_session, mocked_client):
-        import imaplib
-
-        from helpdesk.email import imap_oauth_sync
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -54,9 +67,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     @mock.patch("helpdesk.email.oauth2lib.BackendApplicationClient")
     @mock.patch("helpdesk.email.requests_oauthlib.OAuth2Session")
     def test_oauth_ssl_failure_logs_out(self, mocked_session, mocked_client):
-        import ssl
-
-        from helpdesk.email import imap_oauth_sync
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -86,7 +96,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     def test_local_mailbox_deletion_failure_is_logged(
         self, mocked_open, mocked_listdir, mocked_isfile, mocked_unlink, mocked_extract
     ):
-        from helpdesk.email import process_queue
 
         queue = mock.Mock()
         queue.title = "Test Queue"
@@ -106,7 +115,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
 
     @mock.patch("helpdesk.email.extract_email_metadata")
     def test_pop3_ignored_message_is_not_deleted(self, mocked_extract):
-        from helpdesk.exceptions import IgnoreTicketException
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -127,7 +135,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
 
     @mock.patch("helpdesk.email.extract_email_metadata")
     def test_pop3_delete_ignored_message(self, mocked_extract):
-        from helpdesk.exceptions import DeleteIgnoredTicketException
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -147,9 +154,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
         server.quit.assert_called_once_with()
 
     def test_imap_authentication_failure_logs_out(self):
-        import imaplib
-
-        from helpdesk.email import imap_sync
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -170,9 +174,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
         server.search.assert_not_called()
 
     def test_imap_ssl_failure_logs_out(self):
-        import ssl
-
-        from helpdesk.email import imap_sync
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -194,11 +195,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
 
     @mock.patch("helpdesk.email.extract_email_metadata")
     def test_imap_message_processing_outcomes(self, mocked_extract):
-        from helpdesk.email import imap_sync
-        from helpdesk.exceptions import (
-            DeleteIgnoredTicketException,
-            IgnoreTicketException,
-        )
 
         cases = [
             (
@@ -276,11 +272,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     def test_oauth_message_processing_outcomes(
         self, mocked_session, mocked_client, mocked_extract
     ):
-        from helpdesk.email import imap_oauth_sync
-        from helpdesk.exceptions import (
-            DeleteIgnoredTicketException,
-            IgnoreTicketException,
-        )
 
         mocked_session.return_value.fetch_token.return_value = {
             "access_token": "test-token"
@@ -334,9 +325,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
                 server.logout.assert_called_once_with()
 
     def test_missing_pysocks_raises_helpful_error(self):
-        import builtins
-
-        from helpdesk.email import process_queue
 
         queue = mock.Mock()
         queue.title = "Proxy Queue"
@@ -365,11 +353,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
         )
 
     def test_socks_proxy_configuration(self):
-        import socket
-        import sys
-        import types
-
-        from helpdesk.email import process_queue
 
         fake_socks = types.ModuleType("socks")
         fake_socks.SOCKS4 = 1
@@ -437,7 +420,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
         server.quit.assert_called_once()
 
     def test_imap_starttls_failure_continues_processing(self):
-        from helpdesk.email import imap_sync
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -460,9 +442,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
         server.logout.assert_called_once()
 
     def test_imap_retrieval_failure_logs_error_and_closes_connection(self):
-        import imaplib
-
-        from helpdesk.email import imap_sync
 
         queue = mock.Mock()
         queue.email_box_user = "user@example.com"
@@ -487,9 +466,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     def test_oauth_retrieval_failure_logs_error_and_closes_connection(
         self, mocked_session, mocked_client
     ):
-        import imaplib
-
-        from helpdesk.email import imap_oauth_sync
 
         mocked_session.return_value.fetch_token.return_value = {
             "access_token": "test-token"
@@ -523,8 +499,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     def test_local_mailbox_ignored_message_is_preserved(
         self, mocked_open, mocked_listdir, mocked_isfile, mocked_unlink, mocked_extract
     ):
-        from helpdesk.email import process_queue
-        from helpdesk.exceptions import IgnoreTicketException
 
         queue = mock.Mock()
         queue.title = "Test Queue"
@@ -553,8 +527,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     def test_local_mailbox_delete_ignored_message(
         self, mocked_open, mocked_listdir, mocked_isfile, mocked_unlink, mocked_extract
     ):
-        from helpdesk.email import process_queue
-        from helpdesk.exceptions import DeleteIgnoredTicketException
 
         queue = mock.Mock()
         queue.title = "Test Queue"
@@ -580,7 +552,6 @@ class POP3ErrorHandlingTests(SimpleTestCase):
     def test_local_mailbox_unsuccessful_message_is_preserved(
         self, mocked_open, mocked_listdir, mocked_isfile, mocked_unlink, mocked_extract
     ):
-        from helpdesk.email import process_queue
 
         queue = mock.Mock()
         queue.title = "Test Queue"
@@ -607,7 +578,6 @@ class ProcessEmailLoggingTests(SimpleTestCase):
     def test_file_handler_is_created_and_cleaned_up(
         self, mocked_filter, mocked_file_handler, mocked_process_queue
     ):
-        from helpdesk.email import process_email
 
         queue = mock.Mock()
         queue.slug = "test"
@@ -628,10 +598,8 @@ class ProcessEmailLoggingTests(SimpleTestCase):
 
         with (
             mock.patch("helpdesk.email.timezone.now") as mocked_now,
-            mock.patch("helpdesk.email.timedelta") as mocked_timedelta,
         ):
             mocked_now.return_value = queue.email_box_last_check + timedelta(minutes=1)
-            mocked_timedelta.side_effect = timedelta
             process_email()
 
         mocked_file_handler.assert_called_once()
@@ -642,7 +610,6 @@ class ProcessEmailLoggingTests(SimpleTestCase):
     def test_logging_disabled_does_not_create_file_handler(
         self, mocked_filter, mocked_process_queue
     ):
-        from helpdesk.email import process_email
 
         queue = mock.Mock()
         queue.slug = "test"
@@ -656,10 +623,8 @@ class ProcessEmailLoggingTests(SimpleTestCase):
         with (
             mock.patch("helpdesk.email.logging.FileHandler") as mocked_handler,
             mock.patch("helpdesk.email.timezone.now") as mocked_now,
-            mock.patch("helpdesk.email.timedelta") as mocked_timedelta,
         ):
             mocked_now.return_value = queue.email_box_last_check + timedelta(minutes=1)
-            mocked_timedelta.side_effect = timedelta
             process_email()
 
         mocked_handler.assert_not_called()
@@ -671,7 +636,6 @@ class ProcessEmailLoggingTests(SimpleTestCase):
     def test_file_handler_is_cleaned_up_after_queue_failure(
         self, mocked_filter, mocked_file_handler, mocked_process_queue
     ):
-        from helpdesk.email import process_email
 
         queue = mock.Mock()
         queue.slug = "test"
