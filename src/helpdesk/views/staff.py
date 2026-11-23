@@ -83,7 +83,6 @@ from helpdesk.models import (
     FollowUpAttachment,
     IgnoreEmail,
     PreSetReply,
-    Queue,
     SavedSearch,
     Ticket,
     TicketCC,
