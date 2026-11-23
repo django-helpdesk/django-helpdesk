@@ -338,6 +338,7 @@
   <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.buttons.min.js' %}"></script>
   <script src="{% static 'helpdesk/vendor/datatables/js/buttons.colVis.min.js' %}"></script>
   <script src="{% static 'helpdesk/js/relative_dates.js' %}"></script>
+  {% include 'helpdesk/include/datatables_language.html' %}
   <script>
     window.helpdesk_settings = {
       LANGUAGE_CODE: "{{ helpdesk_settings.LANGUAGE_CODE|default:'en-US' }}",
@@ -359,9 +360,9 @@
         alert("{% translate 'Error fetching tickets occured, please contact the system administrators of this server providing the message below:\n    ' %}" + message)
       };
       $('#ticketTable').DataTable({
-        language: {
+        language: Object.assign({}, window.helpdeskDataTablesLanguage, {
           "emptyTable": "{% translate 'No Tickets Match Your Selection' %}"
-        },
+        }),
         stateSave: true,
         processing: true,
         serverSide: true,
@@ -396,7 +397,7 @@
               extend: "colvis",
               className: "btn bg-body-tertiary border",
               id: "column-visibility",
-              text: "Columns"
+              text: "{% translate 'Columns' as columns_label %}{{ columns_label|escapejs }}"
             }],
 
           },
