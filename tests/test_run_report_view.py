@@ -73,3 +73,53 @@ class RunReportViewTests(TestCase):
         r = self.client.get(reverse("helpdesk:run_report", args=["queuemonth"]))
 
         self.assertEqual(r.context["headings"][1:], ["2026-3"])
+
+    def test_remaining_report_types_render_correct_headings(self):
+        self.client.force_login(self.user)
+
+        cases = (
+            ("userstatus", "User by Status", "bar"),
+            ("queuepriority", "Queue by Priority", "bar"),
+            ("queuestatus", "Queue by Status", "bar"),
+            (
+                "daysuntilticketclosedbymonth",
+                "Days until ticket closed by Month",
+                "line",
+            ),
+        )
+
+        for report, expected_title, expected_charttype in cases:
+            with self.subTest(report=report):
+                response = self.client.get(
+                    reverse("helpdesk:run_report", args=[report])
+                )
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+                self.assertTemplateUsed(response, self.template)
+                self.assertEqual(response.context["title"], expected_title)
+                self.assertEqual(response.context["charttype"], expected_charttype)
+
+    def test_days_until_closed_report_calculates_average(self):
+        from datetime import timedelta
+
+        created = datetime(2026, 3, 10, tzinfo=UTC)
+        tickets = [
+            self.open_ticket,
+            Ticket.objects.create(title="Second closed ticket", queue=self.queue),
+        ]
+
+        for ticket, days in zip(tickets, (2, 4), strict=True):
+            Ticket.objects.filter(pk=ticket.pk).update(
+                status=Ticket.CLOSED_STATUS,
+                created=created,
+                modified=created + timedelta(days=days),
+            )
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("helpdesk:run_report", args=["daysuntilticketclosedbymonth"])
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.context["headings"][1:], ["2026-3"])
+        self.assertEqual(response.context["data"], [["Accounts", 3.0]])
+        self.assertEqual(response.context["total_data"], ["Total", "3.0"])
