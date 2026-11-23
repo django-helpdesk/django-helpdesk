@@ -618,6 +618,26 @@ class PerQueuePermissionSecurityTestCase(TestCase):
         self.assertIsNone(self.ticket_2.merged_to_id)
         self.assertIsNone(self.ticket_2b.merged_to_id)
 
+    def test_merge_tickets_allowed_for_assigned_tickets_in_inaccessible_queue(self):
+        """user_1 can merge tickets in queue_2 that are assigned to them.
+
+        ticket_perm_check() lets an assignee open and edit such a ticket, and
+        the selector offers it, so the merge itself must not refuse it.
+        """
+        for ticket in (self.ticket_2, self.ticket_2b):
+            ticket.assigned_to = self.user_1
+            ticket.submitter_email = "submitter@example.com"
+            ticket.save()
+        self._login_user_1()
+        url = (
+            reverse("helpdesk:merge_tickets")
+            + f"?tickets={self.ticket_2.id}&tickets={self.ticket_2b.id}"
+        )
+        response = self.client.post(url, {"chosen_ticket": self.ticket_2.id})
+        self.assertEqual(response.status_code, 302)
+        self.ticket_2b.refresh_from_db()
+        self.assertEqual(self.ticket_2b.merged_to_id, self.ticket_2.id)
+
     def test_rss_queue_blocked_for_inaccessible_queue(self):
         """user_1 cannot read the RSS feed for queue_2."""
         self._login_user_1()

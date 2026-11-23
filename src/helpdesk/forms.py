@@ -798,10 +798,10 @@ class MultipleTicketSelectForm(forms.Form):
     def __init__(self, *args, user=None, **kwargs):
         """The choices are narrowed to what `user` may open.
 
-        merge_tickets() already refuses to merge a ticket from a queue the
-        caller cannot access, but the picker itself listed the id and title of
-        every unmerged ticket in the installation. Passing the user keeps the
-        two consistent: what cannot be merged is not offered either.
+        This queryset is the only permission check on the tickets being
+        merged: merge_tickets() trusts the validated selection and does not
+        re-check each ticket. Widening it would let users merge tickets they
+        cannot access.
         """
         super().__init__(*args, **kwargs)
         tickets = (
