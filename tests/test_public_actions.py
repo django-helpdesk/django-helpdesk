@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
 
@@ -33,8 +33,22 @@ class PublicActionsTestCase(TestCase):
 
         self.client = Client()
 
+    @override_settings(HELPDESK_VIEW_A_TICKET_PUBLIC=False)
+    def test_public_view_ticket_without_key_when_lookup_disabled(self):
+        response = self.client.get(
+            reverse("helpdesk:public_view"),
+            {
+                "ticket": self.ticket.ticket_for_url,
+                "email": self.ticket.submitter_email,
+            },
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertTemplateNotUsed(response, "helpdesk/public_view_form.html")
+        self.assertTemplateNotUsed(response, "helpdesk/public_view_ticket.html")
+
+    @override_settings(HELPDESK_VIEW_A_TICKET_PUBLIC=True)
     def test_public_view_ticket(self):
-        # Without key, we get 403
+        # Without a key, the public lookup form is shown without ticket details.
         response = self.client.get(
             "{}?ticket={}&email={}".format(
                 reverse("helpdesk:public_view"),
@@ -42,8 +56,10 @@ class PublicActionsTestCase(TestCase):
                 "test.submitter@example.com",
             )
         )
-        self.assertEqual(response.status_code, 403)
-        self.assertTemplateNotUsed(response, "helpdesk/public_view_form.html")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "helpdesk/public_view_form.html")
+        self.assertTemplateNotUsed(response, "helpdesk/public_view_ticket.html")
+        self.assertNotContains(response, self.ticket.title)
         # With a key it works
         response = self.client.get(
             "{}?ticket={}&email={}&key={}".format(
