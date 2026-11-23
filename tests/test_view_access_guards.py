@@ -1,7 +1,9 @@
 """Who gets through the access guards on helpdesk views.
 
-Staff views are guarded by helpdesk_staff_member_required, superuser-only
-views by superuser_required, and public views by protect_view.
+Staff views are guarded by helpdesk_staff_member_required or
+MustBeStaffMixin, superuser-only views by superuser_required, and public views
+by protect_view. Staff and superuser views also apply
+HELPDESK_STAFF_VIEW_PROTECTOR once the user has passed those checks.
 """
 
 from unittest import mock
@@ -72,6 +74,70 @@ class PublicViewGuardTests(TestCase):
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], "/elsewhere/")
+
+
+class StaffViewProtectorTests(TestCase):
+    def setUp(self):
+        self.staff = get_user_model().objects.create(
+            username="agent", is_staff=True, is_superuser=True
+        )
+        self.protector = mock.Mock(return_value=HttpResponseRedirect("/2fa/"))
+        patcher = mock.patch.object(
+            helpdesk_settings, "HELPDESK_STAFF_VIEW_PROTECTOR", self.protector
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def assertProtected(self, url):
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/2fa/")
+
+    def test_redirect_is_returned_on_every_kind_of_staff_view(self):
+        self.client.force_login(self.staff)
+        for name in (
+            "helpdesk:list",  # helpdesk_staff_member_required
+            "helpdesk:user_settings",  # MustBeStaffMixin
+            "helpdesk:email_ignore",  # superuser_required
+            "helpdesk:rss_unassigned",  # staff feed in urls.py
+        ):
+            with self.subTest(view=name):
+                self.assertProtected(reverse(name))
+
+    def test_view_does_not_run_when_protector_denies_access(self):
+        queue = Queue.objects.create(title="Queue", slug="queue")
+        ticket = Ticket.objects.create(title="Ticket", queue=queue, description="d")
+        self.client.force_login(self.staff)
+
+        response = self.client.post(
+            reverse("helpdesk:mass_update"),
+            {"ticket_id": [ticket.id], "action": "take"},
+        )
+
+        self.assertEqual(response["Location"], "/2fa/")
+        ticket.refresh_from_db()
+        self.assertIsNone(ticket.assigned_to)
+
+    def test_protector_is_not_consulted_before_the_staff_check(self):
+        customer = get_user_model().objects.create(username="customer")
+        self.client.force_login(customer)
+        # The decorator sends refused users to login, the mixin answers 403.
+        for name, status in (
+            ("helpdesk:list", 302),
+            ("helpdesk:user_settings", 403),
+        ):
+            with self.subTest(view=name):
+                response = self.client.get(reverse(name))
+                self.assertEqual(response.status_code, status)
+                self.assertNotEqual(response.get("Location"), "/2fa/")
+        self.protector.assert_not_called()
+
+    def test_staff_user_gets_the_view_when_protector_allows_access(self):
+        self.protector.return_value = None
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse("helpdesk:list"))
+        self.assertEqual(response.status_code, 200)
+        self.protector.assert_called_once()
 
 
 class AnonymousTicketAccessTests(TestCase):
