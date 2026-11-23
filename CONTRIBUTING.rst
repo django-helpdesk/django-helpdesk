@@ -267,13 +267,17 @@ https://explore.transifex.com/django-helpdesk/django-helpdesk/
 The Transifex project is connected to this repository: once a language is fully
 translated, Transifex opens a pull request with the updated catalog.
 
-When you add or change a translatable string, regenerate and compile the
-catalogs with::
+When you add or change a translatable string, regenerate the English catalog
+with::
 
     make messages
 
-The English catalog is the source that Transifex reads, and ``.tx/config``
-maps the catalogs to the Transifex project for the ``tx`` command line client.
+The English catalog is the source that Transifex reads. Only commit that one:
+Transifex updates the other languages through its own pull requests, and a
+workflow compiles their ``.mo`` files. ``make messages-all`` regenerates and
+compiles every catalog, for the rare cases where they have to be updated by
+hand. ``.tx/config`` maps the catalogs to the Transifex project for the ``tx``
+command line client.
 
 The default e-mail templates are not part of the Transifex project. They live
 in ``src/helpdesk/fixtures/emailtemplate.json``, with one entry per template
