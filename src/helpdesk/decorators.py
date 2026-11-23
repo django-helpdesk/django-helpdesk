@@ -39,7 +39,31 @@ elif helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE:
 else:
     is_helpdesk_staff = check_staff_status(True)(False)
 
-helpdesk_staff_member_required = user_passes_test(is_helpdesk_staff)
+
+def apply_staff_view_protector(view_func):
+    """
+    Run HELPDESK_STAFF_VIEW_PROTECTOR before the view, returning its redirect
+    instead of the view when it denies access. Apply it after the staff or
+    superuser check so the protector only sees users who passed it.
+    """
+
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if auth_redirect := helpdesk_settings.HELPDESK_STAFF_VIEW_PROTECTOR(request):
+            return auth_redirect
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
+
+
+def helpdesk_staff_member_required(view_func):
+    """
+    Decorator for staff views: redirects users who fail is_helpdesk_staff to
+    the log-in page, then applies HELPDESK_STAFF_VIEW_PROTECTOR.
+    """
+    return user_passes_test(is_helpdesk_staff)(apply_staff_view_protector(view_func))
+
+
 helpdesk_superuser_required = user_passes_test(check_staff_status(False)(True))
 
 
@@ -68,28 +92,6 @@ def protect_view(view_func):
     return _wrapped_view
 
 
-def staff_member_required(view_func):
-    """
-    Decorator for staff member the views checking user, redirecting
-    to the log-in page if necessary or returning 403
-    """
-
-    @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
-        if not request.user.is_authenticated and not request.user.is_active:
-            return redirect("helpdesk:login")
-        if (
-            not helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE
-            and not request.user.is_staff
-        ):
-            raise PermissionDenied()
-        if auth_redirect := helpdesk_settings.HELPDESK_STAFF_VIEW_PROTECTOR(request):
-            return auth_redirect
-        return view_func(request, *args, **kwargs)
-
-    return _wrapped_view
-
-
 def superuser_required(view_func):
     """
     Decorator for superuser member the views checking user, redirecting
@@ -102,6 +104,6 @@ def superuser_required(view_func):
             return redirect("helpdesk:login")
         if not request.user.is_superuser:
             raise PermissionDenied()
-        return view_func(request, *args, **kwargs)
+        return apply_staff_view_protector(view_func)(request, *args, **kwargs)
 
     return _wrapped_view

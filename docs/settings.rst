@@ -52,7 +52,9 @@ These settings can be used to change who can access the helpdesk.
 
 .. setting:: HELPDESK_STAFF_VIEW_PROTECTOR
 
-   Function that takes a request and can either return ``None`` granting access to to a staff view or a redirect denying access.
+   Function that takes a request and can either return ``None`` granting access to a staff view or a redirect denying access.
+
+   It runs on every staff and superuser view, after the user has passed the staff (or superuser) check, so it only sees users who would otherwise get the view. Use it to add a requirement on top of being staff, such as two-factor authentication.
 
 .. setting:: HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT
 
