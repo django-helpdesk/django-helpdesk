@@ -4,6 +4,11 @@ These tests use Playwright with Django's existing test runner. The server and
 database are created by `StaticLiveServerTestCase`; no running demo or admin
 account is required. Uploaded files use a temporary media directory.
 
+The quick way to set up for E2E tests:
+```bash
+make e2e_env
+```
+
 From the repository root, install the Python dependencies and Chromium:
 
 ```bash
@@ -11,6 +16,7 @@ uv sync --group test --group e2e
 uv run --group e2e playwright install chromium
 ```
 
+The following steps are more detailed instructions if the `make` command does not work for you.
 On Linux, use `uv run --group e2e playwright install --with-deps chromium` to install the browser's
 system dependencies as well.
 
@@ -27,7 +33,12 @@ make static-vendor
 Run all browser scenarios:
 
 ```bash
-uv run --group e2e quicktest.py tests.e2e.test_public_ticket_creation tests.e2e.test_staff_ticket_reply -v 2
+make test_e2e
+```
+
+Run a specific test by specifiying the test
+```bash
+uv run --group e2e -v 2 quicktest.py tests.e2e.test_staff_ticket_reply
 ```
 
 To watch the browser with a one-second delay between actions:
