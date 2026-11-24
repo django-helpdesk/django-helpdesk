@@ -1,0 +1,38 @@
+{% load i18n %}
+{# Translated labels for the DataTables library, passed as its "language" option. #}
+<script>
+  window.helpdeskDataTablesLanguage = {
+    aria: {
+      orderable: "{% translate ': Activate to sort' context 'datatables' as s %}{{ s|escapejs }}",
+      orderableRemove: "{% translate ': Activate to remove sorting' context 'datatables' as s %}{{ s|escapejs }}",
+      orderableReverse: "{% translate ': Activate to invert sorting' context 'datatables' as s %}{{ s|escapejs }}",
+      paginate: {
+        first: "{% translate 'First' context 'datatables' as s %}{{ s|escapejs }}",
+        last: "{% translate 'Last' context 'datatables' as s %}{{ s|escapejs }}",
+        next: "{% translate 'Next' context 'datatables' as s %}{{ s|escapejs }}",
+        previous: "{% translate 'Previous' context 'datatables' as s %}{{ s|escapejs }}"
+      }
+    },
+    emptyTable: "{% translate 'No data available in table' context 'datatables' as s %}{{ s|escapejs }}",
+    entries: {
+      {# Translators: plural noun shown in place of _ENTRIES_ and _ENTRIES-TOTAL_. #}
+      _: "{% translate 'entries' context 'datatables' as s %}{{ s|escapejs }}",
+      {# Translators: singular noun shown when there is exactly one entry. #}
+      1: "{% translate 'entry' context 'datatables' as s %}{{ s|escapejs }}"
+    },
+    {# Translators: keep the _START_, _END_, _TOTAL_ and _ENTRIES-TOTAL_ placeholders. #}
+    info: "{% translate 'Showing _START_ to _END_ of _TOTAL_ _ENTRIES-TOTAL_' context 'datatables' as s %}{{ s|escapejs }}",
+    {# Translators: keep the _ENTRIES-TOTAL_ placeholder. #}
+    infoEmpty: "{% translate 'Showing 0 to 0 of 0 _ENTRIES-TOTAL_' context 'datatables' as s %}{{ s|escapejs }}",
+    {# Translators: keep the _MAX_ and _ENTRIES-MAX_ placeholders. #}
+    infoFiltered: "{% translate '(filtered from _MAX_ total _ENTRIES-MAX_)' context 'datatables' as s %}{{ s|escapejs }}",
+    lengthLabels: {
+      "-1": "{% translate 'All' context 'datatables' as s %}{{ s|escapejs }}"
+    },
+    {# Translators: _MENU_ is the page size selector; keep it and the _ENTRIES_ placeholder. #}
+    lengthMenu: "{% translate '_MENU_ _ENTRIES_ per page' context 'datatables' as s %}{{ s|escapejs }}",
+    loadingRecords: "{% translate 'Loading...' context 'datatables' as s %}{{ s|escapejs }}",
+    search: "{% translate 'Search:' context 'datatables' as s %}{{ s|escapejs }}",
+    zeroRecords: "{% translate 'No matching records found' context 'datatables' as s %}{{ s|escapejs }}"
+  };
+</script>
