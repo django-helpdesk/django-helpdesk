@@ -81,3 +81,20 @@ class DashboardSortingTestCase(TestCase):
     def test_default_sort_when_no_parameter_given(self):
         response = self.get_dashboard()
         self.assertEqual(response.context["unassigned_tickets_sort"], "-created")
+
+    def test_invalid_and_out_of_range_pages_fall_back_safely(self):
+        page_params = (
+            ("ut_page", "user_tickets"),
+            ("utcr_page", "user_tickets_closed_resolved"),
+            ("atrbcu_page", "all_tickets_reported_by_current_user"),
+            ("una_page", "unassigned_tickets"),
+        )
+
+        for param, context_var in page_params:
+            for invalid_page in ("invalid", "999999"):
+                with self.subTest(param=param, page=invalid_page):
+                    response = self.get_dashboard(**{param: invalid_page})
+
+                    self.assertEqual(response.status_code, 200)
+                    page = response.context[context_var]
+                    self.assertEqual(page.number, 1)

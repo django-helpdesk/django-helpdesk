@@ -35,7 +35,7 @@ class EditTicketFormSingleQueueTestCase(TestCase):
         ticket = Ticket.objects.create(
             title="Test ticket", submitter_email="test@example.com", queue=queue
         )
-        form = EditTicketForm(instance=ticket)
+        form = EditTicketForm(instance=ticket, user=get_staff_user())
         self.assertIsInstance(form.fields["queue"].widget, forms.HiddenInput)
         self.assertEqual(form.fields["queue"].initial, queue.pk)
 
@@ -45,7 +45,7 @@ class EditTicketFormSingleQueueTestCase(TestCase):
         ticket = Ticket.objects.create(
             title="Test ticket", submitter_email="test@example.com", queue=queue
         )
-        form = EditTicketForm(instance=ticket)
+        form = EditTicketForm(instance=ticket, user=get_staff_user())
         self.assertNotIsInstance(form.fields["queue"].widget, forms.HiddenInput)
 
 

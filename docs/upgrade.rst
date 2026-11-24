@@ -3,6 +3,20 @@ Upgrading
 
 Your ``django-helpdesk`` installation can be upgraded to the latest version using the release notes below.
 
+Follow-up comments in HTML e-mails are escaped
+-----------------------------------------------
+
+HTML in a follow-up comment is now escaped in the HTML part of e-mail
+notifications rather than rendered, so a submitter can no longer inject links
+or markup into e-mails sent to staff. If your staff formatted comments with
+HTML, the tags now appear as text in those e-mails.
+
+Template variables in a comment, such as ``{{ ticket.title }}``, are now stored
+as plain text instead of HTML-escaped, so a title like ``O'Brien & Sons`` no
+longer shows as ``O&#x27;Brien &amp; Sons``. If your own code or an API client
+displays ``FollowUp.comment`` as HTML, make sure it escapes it, as it already
+had to for the text staff type.
+
 Staff reports respect per-queue permissions
 -------------------------------------------
 

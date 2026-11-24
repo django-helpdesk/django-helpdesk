@@ -18,6 +18,7 @@ from typing import Any
 
 import factory
 import faker
+from django.db.models import ForeignKey
 from numpy.random import randint
 from PIL import Image
 
@@ -413,3 +414,11 @@ def generate_email_with_subject(
     msg["From"] = from_meta[0]
     msg["To"] = to_meta[0]
     return msg, from_meta, to_meta
+
+
+def get_foreign_key_fields(model_class):
+    return [
+        field.name
+        for field in model_class._meta.get_fields()
+        if isinstance(field, ForeignKey)
+    ]

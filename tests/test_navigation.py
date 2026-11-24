@@ -1,5 +1,5 @@
 import sys
-from importlib import reload
+from importlib import import_module, reload
 
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -8,7 +8,13 @@ from django.urls import reverse
 from helpdesk import settings as helpdesk_settings
 from helpdesk.models import Queue
 
-from .helpers import User, create_ticket, get_staff_user, reload_urlconf
+from .helpers import (
+    HELPDESK_URLCONF,
+    User,
+    create_ticket,
+    get_staff_user,
+    reload_urlconf,
+)
 
 
 class KBDisabledTestCase(TestCase):
@@ -22,6 +28,20 @@ class KBDisabledTestCase(TestCase):
         if self.HELPDESK_KB_ENABLED:
             helpdesk_settings.HELPDESK_KB_ENABLED = True
             reload_urlconf()
+
+    def test_urlconf_imports_without_kb(self):
+        """helpdesk.urls imports from scratch when the knowledge base is off.
+
+        reload_urlconf() reuses the module namespace, which can still hold the
+        kb module from an earlier import, so import a fresh copy here.
+        """
+        loaded = sys.modules.pop(HELPDESK_URLCONF, None)
+        try:
+            urls = import_module(HELPDESK_URLCONF)
+            self.assertFalse(hasattr(urls, "kb"))
+        finally:
+            if loaded is not None:
+                sys.modules[HELPDESK_URLCONF] = loaded
 
     def test_navigation(self):
         """Test proper rendering of navigation.html by accessing the dashboard"""

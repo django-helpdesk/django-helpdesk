@@ -1,0 +1,54 @@
+name: Compile translations
+
+# Transifex opens pull requests that only update the .po catalogs. Django reads
+# the compiled .mo files, so this workflow compiles the catalogs the pull
+# request changes and commits the result to its branch.
+on:
+  pull_request:
+    paths:
+      - "src/helpdesk/locale/*/LC_MESSAGES/django.po"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: compile-translations-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  compile:
+    # GITHUB_TOKEN can only push to branches of this repository, which is where
+    # the Transifex integration opens its pull requests.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.head_ref, 'translations_')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Install gettext
+        run: sudo apt-get update && sudo apt-get install -y gettext
+
+      - name: Compile the changed catalogs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git diff --name-only "origin/$BASE_REF...HEAD" -- 'src/helpdesk/locale/*/LC_MESSAGES/django.po' |
+          while read -r po; do
+            msgfmt --check-format -o "${po%.po}.mo" "$po"
+          done
+
+      - name: Commit the compiled catalogs
+        run: |
+          git add 'src/helpdesk/locale/*/LC_MESSAGES/django.mo'
+          if git diff --cached --quiet; then
+            echo "The compiled catalogs are up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(i18n): compile the translation catalogs"
+          git push

@@ -84,3 +84,123 @@ class EmailReopenTests(TestCase):
         self.assertEqual(self.ticket.status, Ticket.CLOSED_STATUS)
         self.assertIsNone(followup.new_status)
         self.assertEqual(followup.comment, "Still broken")
+
+    def test_reply_to_missing_ticket_id_creates_new_ticket(self):
+        message = EmailMessage()
+        message["To"] = "support@example.com"
+        message["Message-Id"] = "<missing-ticket@example.com>"
+
+        payload = {
+            "body": "Help with a new issue",
+            "full_body": "Help with a new issue",
+            "subject": "New support request",
+            "queue": self.queue,
+            "sender_email": "customer@example.com",
+            "priority": 3,
+        }
+
+        create_object_from_email_message(
+            message=message,
+            ticket_id=999999,
+            payload=payload,
+            files=[],
+            logger=logging.getLogger("helpdesk"),
+        )
+
+        self.assertEqual(
+            Ticket.objects.filter(title="New support request").count(),
+            1,
+        )
+
+    def test_reply_to_merged_ticket_uses_destination_ticket(self):
+        destination = Ticket.objects.create(
+            title="Destination ticket",
+            queue=self.queue,
+            submitter_email="customer@example.com",
+        )
+        self.ticket.merged_to = destination
+        self.ticket.save()
+
+        message = EmailMessage()
+        message["To"] = "support@example.com"
+        message["Message-Id"] = "<merged-reply@example.com>"
+
+        payload = {
+            "body": "Additional information",
+            "full_body": "Additional information",
+            "subject": "Printer on fire",
+            "queue": self.queue,
+            "sender_email": "customer@example.com",
+            "priority": 3,
+        }
+
+        create_object_from_email_message(
+            message=message,
+            ticket_id=self.ticket.id,
+            payload=payload,
+            files=[],
+            logger=logging.getLogger("helpdesk"),
+        )
+
+        self.assertTrue(
+            FollowUp.objects.filter(
+                ticket=destination,
+                comment="Additional information",
+            ).exists()
+        )
+        self.assertFalse(
+            FollowUp.objects.filter(
+                ticket=self.ticket,
+                comment="Additional information",
+            ).exists()
+        )
+
+    def test_attachment_validation_error_preserves_followup(self):
+        from django.core.exceptions import ValidationError
+
+        message = EmailMessage()
+        message["To"] = "support@example.com"
+        message["Message-Id"] = "<invalid-attachment@example.com>"
+
+        payload = {
+            "body": "Please check the attachment",
+            "full_body": "Please check the attachment",
+            "subject": "Printer on fire",
+            "queue": self.queue,
+            "sender_email": "customer@example.com",
+            "priority": 3,
+        }
+
+        logger = mock.Mock(spec=logging.Logger)
+
+        with (
+            mock.patch.object(helpdesk_settings, "HELPDESK_ENABLE_ATTACHMENTS", True),
+            mock.patch(
+                "helpdesk.email.process_attachments",
+                side_effect=ValidationError("Invalid attachment"),
+            ) as process_attachments,
+        ):
+            create_object_from_email_message(
+                message=message,
+                ticket_id=self.ticket.id,
+                payload=payload,
+                files=[],
+                logger=logger,
+            )
+
+        process_attachments.assert_called_once()
+        logger.error.assert_called_once()
+        self.assertIn("Invalid attachment", logger.error.call_args.args[0])
+        self.assertTrue(
+            FollowUp.objects.filter(
+                ticket=self.ticket,
+                comment="Please check the attachment",
+            ).exists()
+        )
+
+    def test_followup_created_when_attachments_disabled(self):
+        with mock.patch.object(helpdesk_settings, "HELPDESK_ENABLE_ATTACHMENTS", False):
+            followup = self.reply()
+
+        self.assertEqual(followup.comment, "Still broken")
+        self.assertEqual(followup.ticket_id, self.ticket.id)

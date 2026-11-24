@@ -1,6 +1,6 @@
 [project]
 name = "django-helpdesk"
-version = "2.6.1"
+version = "2.6.2"
 description = "Django-powered ticket tracker for your helpdesk"
 authors = [
     {name = "Ross Poulton", email = "ross@rossp.org"},
@@ -27,7 +27,7 @@ dependencies = [
     "markdown",
     "beautifulsoup4",
     "nh3",
-    "djangorestframework",
+    "djangorestframework>=3.18",
     "django-model-utils",
     "oauthlib",
     "requests-oauthlib",
@@ -45,7 +45,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -79,6 +78,11 @@ all = [
 ]
 
 [dependency-groups]
+dev = [
+    {include-group = "test"},
+    "django-stubs>=6.1.2",
+    "djangorestframework-stubs>=3.18.2",
+]
 docs = [
     "furo>=2025.12.19",
 ]

@@ -142,6 +142,13 @@ class FollowUpSerializer(serializers.ModelSerializer):
             time_spent=validated_data.get("time_spent", None),
         )
 
+    def update(self, instance, validated_data):
+        # Who wrote a follow-up, which ticket it belongs to and the email
+        # thread it answers are fixed once it exists.
+        for field in ("user", "ticket", "message_id"):
+            validated_data.pop(field, None)
+        return super().update(instance, validated_data)
+
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

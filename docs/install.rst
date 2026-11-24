@@ -14,7 +14,7 @@ Prerequisites
 
 Before getting started, ensure your system meets the following recommended dependencies:
 
-* Python 3.10+
+* Python 3.11+
 * Django 5.2+
 
 Ensure any extra Django modules you wish to use are compatible before continuing.

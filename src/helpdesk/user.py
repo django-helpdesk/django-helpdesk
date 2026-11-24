@@ -122,6 +122,19 @@ class HelpdeskUser:
                 and self.user.has_perm(queue.permission_name)
             )
 
+    def can_edit_followup(self, followup):
+        """Whether this user may edit ``followup``.
+
+        A follow-up with no author was not written by a staff member -- it was
+        received by e-mail, submitted from the public form or raised by the
+        helpdesk itself -- and editing those is not offered to anyone.
+        """
+        if not helpdesk_settings.HELPDESK_SHOW_EDIT_BUTTON_FOLLOW_UP:
+            return False
+        if not followup.user:
+            return False
+        return self.user == followup.user or self.user.is_superuser
+
     def can_access_ticket(self, ticket):
         """Check to see if the user has permission to access
         a ticket. If not then deny access."""

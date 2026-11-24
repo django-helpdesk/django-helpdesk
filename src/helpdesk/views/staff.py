@@ -83,7 +83,6 @@ from helpdesk.models import (
     FollowUpAttachment,
     IgnoreEmail,
     PreSetReply,
-    Queue,
     SavedSearch,
     Ticket,
     TicketCC,
@@ -370,6 +369,8 @@ def followup_edit(request, ticket_id, followup_id):
     # ids independently only proved access to the one in the URL, which let a
     # permitted ticket id be paired with a follow-up from any other queue.
     followup = get_object_or_404(FollowUp, id=followup_id, ticket=ticket)
+    if not HelpdeskUser(request.user).can_edit_followup(followup):
+        raise PermissionDenied()
 
     if request.method == "GET":
         form = EditFollowUpForm(
@@ -550,6 +551,8 @@ def view_ticket(request, ticket_id):
             ticket,
             owner=owner,
             comment=_("Accepted resolution and closed ticket"),
+            new_status=Ticket.CLOSED_STATUS,
+            public=True,
         )
         return return_to_ticket(request.user, ticket)
 
@@ -881,11 +884,9 @@ def mass_update(request):
             + "&".join([f"tickets={ticket_id}" for ticket_id in tickets])
         )
 
-    huser = HelpdeskUser(request.user)
-    for t in Ticket.objects.filter(id__in=tickets):
-        if not huser.can_access_queue(t.queue):
-            continue
-
+    # Same tickets ticket_perm_check() lets the user act on one by one,
+    # including those assigned to them outside their queues.
+    for t in HelpdeskUser(request.user).accessible_tickets().filter(id__in=tickets):
         if action == "assign" and t.assigned_to != user:
             t.assigned_to = user
             t.save()
@@ -1128,12 +1129,9 @@ def merge_tickets(request):
     )
     tickets = custom_fields = None
     if ticket_select_form.is_valid():
+        # No per-ticket check here: the form only accepts tickets from
+        # accessible_tickets(), the same rule ticket_perm_check() applies.
         tickets = ticket_select_form.cleaned_data.get("tickets")
-
-        huser = HelpdeskUser(request.user)
-        for t in tickets:
-            if not huser.can_access_queue(t.queue):
-                raise PermissionDenied()
 
         custom_fields = CustomField.objects.all()
 
@@ -1435,7 +1433,7 @@ def edit_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
 
-    form = EditTicketForm(request.POST or None, instance=ticket)
+    form = EditTicketForm(request.POST or None, instance=ticket, user=request.user)
     if form.is_valid():
         ticket = form.save()
         return redirect(ticket)
@@ -1621,7 +1619,8 @@ def unhold_ticket(request, ticket_id):
 
 @helpdesk_staff_member_required
 def rss_list(request):
-    return render(request, "helpdesk/rss_list.html", {"queues": Queue.objects.all()})
+    queues = HelpdeskUser(request.user).accessible_queues()
+    return render(request, "helpdesk/rss_list.html", {"queues": queues})
 
 
 @helpdesk_staff_member_required
@@ -2061,7 +2060,7 @@ def ticket_dependency_add(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, ticket)
     if request.method == "POST":
-        form = TicketDependencyForm(ticket, request.POST)
+        form = TicketDependencyForm(ticket, request.POST, user=request.user)
         if form.is_valid():
             ticketdependency = form.save(commit=False)
             ticketdependency.ticket = ticket
@@ -2069,7 +2068,7 @@ def ticket_dependency_add(request, ticket_id):
                 ticketdependency.save()
             return redirect(ticket.get_absolute_url())
     else:
-        form = TicketDependencyForm(ticket)
+        form = TicketDependencyForm(ticket, user=request.user)
     return render(
         request,
         "helpdesk/ticket_dependency_add.html",
@@ -2100,7 +2099,7 @@ def ticket_resolves_add(request, ticket_id):
     depends_on = get_object_or_404(Ticket, id=ticket_id)
     ticket_perm_check(request, depends_on)
     if request.method == "POST":
-        form = TicketResolvesForm(depends_on, request.POST)
+        form = TicketResolvesForm(depends_on, request.POST, user=request.user)
         if form.is_valid():
             ticketdependency = form.save(commit=False)
             ticketdependency.depends_on = depends_on
@@ -2108,7 +2107,7 @@ def ticket_resolves_add(request, ticket_id):
                 ticketdependency.save()
             return redirect(depends_on.get_absolute_url())
     else:
-        form = TicketResolvesForm(depends_on)
+        form = TicketResolvesForm(depends_on, user=request.user)
     return render(
         request,
         "helpdesk/ticket_resolves_add.html",
@@ -2372,8 +2371,7 @@ def kanban_board(request):
         "assigned_to__username",
     )
 
-    queue_ids = list(huser.get_queues().values_list("pk", flat=True))
-    tickets = base_qs.filter(queue_id__in=queue_ids)
+    tickets = base_qs.filter(huser.accessible_tickets_q())
 
     now = timezone.now()
     default_due_weeks = helpdesk_settings.HELPDESK_KANBAN_DEFAULT_DUE_WEEKS or 2

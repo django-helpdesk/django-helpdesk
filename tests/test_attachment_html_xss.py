@@ -63,6 +63,30 @@ class ExtensionAllowlistTestCase(TestCase):
             with self.subTest(name=name):
                 validate_file_extension(SimpleUploadedFile(name, b"x"))
 
+    def test_trailing_dots_and_spaces_do_not_hide_the_extension(self):
+        # Some web servers, Apache's mod_mime among them, take the type from
+        # every dot-separated part of the name, so these are served as HTML.
+        for name in (
+            "payload.html.",
+            "payload.html..",
+            "payload.HTML.",
+            "payload.html. ",
+        ):
+            with self.subTest(name=name), self.assertRaises(ValidationError):
+                validate_file_extension(SimpleUploadedFile(name, b"x"))
+
+    def test_names_without_an_extension_are_refused(self):
+        # With no extension the server may send no content type at all and
+        # leave it to the browser to guess from the content.
+        for name in ("payload", "payload.", "README"):
+            with self.subTest(name=name), self.assertRaises(ValidationError):
+                validate_file_extension(SimpleUploadedFile(name, b"x"))
+
+    def test_an_allowed_extension_after_another_dot_is_still_allowed(self):
+        for name in ("archive.2026.txt", "scan.v2.pdf"):
+            with self.subTest(name=name):
+                validate_file_extension(SimpleUploadedFile(name, b"x"))
+
 
 class PublicFormAttachmentTestCase(TestCase):
     """The public ticket form is the shortest path to a stored attachment: no
@@ -93,6 +117,12 @@ class PublicFormAttachmentTestCase(TestCase):
     def test_anonymous_user_cannot_attach_html(self):
         response = self.submit("payload.html")
         self.assertEqual(response.status_code, 200)  # form redisplayed, not a redirect
+        self.assertFalse(FollowUpAttachment.objects.exists())
+        self.assertFalse(Ticket.objects.exists())
+
+    def test_anonymous_user_cannot_attach_html_with_a_trailing_dot(self):
+        response = self.submit("payload.html.")
+        self.assertEqual(response.status_code, 200)
         self.assertFalse(FollowUpAttachment.objects.exists())
         self.assertFalse(Ticket.objects.exists())
 
@@ -155,4 +185,21 @@ class InboundEmailAttachmentTestCase(TestCase):
         self.assertNotIn("resume.html", stored)
         self.assertFalse(any(n.lower().endswith((".htm", ".html")) for n in stored))
         # The auto-generated body attachment is still there.
+        self.assertIn(HTML_EMAIL_ATTACHMENT_FILENAME, stored)
+
+    def test_trailing_dot_mime_attachment_is_dropped_but_ticket_survives(self):
+        extract_email_metadata(
+            build_email(
+                "attacker@example.com",
+                "helpdesk@example.com",
+                "Trailing dot attachment",
+                "<html><body>hello</body></html>",
+                attachment=("resume.html.", PAYLOAD, ("text", "html")),
+            ),
+            self.queue,
+            logger=logger,
+        )
+        self.assertEqual(Ticket.objects.count(), 1)
+        stored = {a.filename for a in FollowUpAttachment.objects.all()}
+        self.assertFalse(any(".htm" in n.lower() for n in stored))
         self.assertIn(HTML_EMAIL_ATTACHMENT_FILENAME, stored)

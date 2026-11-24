@@ -52,7 +52,9 @@ These settings can be used to change who can access the helpdesk.
 
 .. setting:: HELPDESK_STAFF_VIEW_PROTECTOR
 
-   Function that takes a request and can either return ``None`` granting access to to a staff view or a redirect denying access.
+   Function that takes a request and can either return ``None`` granting access to a staff view or a redirect denying access.
+
+   It runs on every staff and superuser view, after the user has passed the staff (or superuser) check, so it only sees users who would otherwise get the view. Use it to add a requirement on top of being staff, such as two-factor authentication.
 
 .. setting:: HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT
 
@@ -220,6 +222,12 @@ These changes are visible throughout django-helpdesk
 
    If ``True``, private follow-ups (marked with ``public=False``) will not trigger any email notifications to any recipients (submitters, assigned users, CC'd users, or queue notifications). This provides complete privacy for internal staff communications.
    Public follow-ups (``public=True``) continue to work normally. This setting overrides other notification settings like :setting:`HELPDESK_NOTIFY_SUBMITTER_FOR_ALL_TICKET_CHANGES` when the follow-up is private.
+
+.. setting:: HELPDESK_EMAIL_RENDER_MARKDOWN
+
+   *Default:* ``False``
+
+   If ``True``, the follow-up comment, resolution and ticket description in the HTML part of e-mail notifications are rendered as markdown, as they are on the ticket page. The plain-text part keeps the text as written. Images are left out of e-mails, so a submitter cannot use a remote image to see when staff open them. No change to the e-mail templates is needed.
 
 .. setting:: HELPDESK_EMAIL_FALLBACK_LOCALE
 

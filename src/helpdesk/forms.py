@@ -15,7 +15,9 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models import Q
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 
 from helpdesk import settings as helpdesk_settings
@@ -125,14 +127,18 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
             "resolution",
             "last_escalation",
             "assigned_to",
+            "secret_key",
         )
 
     class Media:
         js = ("helpdesk/js/init_due_date.js", "helpdesk/js/init_datetime_classes.js")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         """
         Add any custom fields that are defined to the form
+
+        The queue can be changed to one the user may create tickets in, or
+        left as it is. Without a user, only the current queue is offered.
         """
         super().__init__(*args, **kwargs)
 
@@ -159,7 +165,11 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
         # If there is only a single queue configured, there is nothing
         # meaningful to choose, so hide the field entirely.
         if "queue" in self.fields:
-            queues = Queue.objects.all()
+            allowed = Q(pk=self.instance.queue_id)
+            if user is not None:
+                allowed |= Q(pk__in=[q.pk for q in HelpdeskUser(user).get_queues()])
+            queues = Queue.objects.filter(allowed)
+            self.fields["queue"].queryset = queues
             if queues.count() == 1:
                 self.fields["queue"].initial = queues.first().pk
                 self.fields["queue"].widget = forms.HiddenInput()
@@ -243,18 +253,37 @@ class EditTicketCustomFieldForm(EditTicketForm):
                 ):
                     self.fields.pop(field, None)
 
+    @cached_property
+    def changed_data(self):
+        """Compare custom fields as Python objects, since stored values are strings."""
+        changed = [
+            name for name in super().changed_data if not name.startswith("custom_")
+        ]
+        for name, field in self.fields.items():
+            if not name.startswith("custom_"):
+                continue
+            try:
+                initial = field.to_python(field.initial)
+                value = field.to_python(self[name].data)
+            except ValidationError:
+                changed.append(name)
+                continue
+            if initial != value:
+                changed.append(name)
+        return changed
+
     def save(self, *args, **kwargs):
         # if form is saved in a ticket update, it is passed
         # a followup instance to trace custom fields changes
         if "followup" in kwargs:
             followup = kwargs.pop("followup", None)
 
-            for field, value in self.cleaned_data.items():
-                if field.startswith("custom_") and value != self.fields[field].initial:
+            for field in self.changed_data:
+                if field.startswith("custom_"):
                     followup.ticketchange_set.create(
                         field=field.replace("custom_", "", 1),
                         old_value=self.fields[field].initial,
-                        new_value=value,
+                        new_value=self.cleaned_data[field],
                     )
 
         super().save(*args, **kwargs)
@@ -737,12 +766,18 @@ class TicketDependencyForm(forms.ModelForm):
         model = TicketDependency
         fields = ("depends_on",)
 
-    def __init__(self, ticket, *args, **kwargs):
+    def __init__(self, ticket, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Only open tickets except myself, existing dependencies and parents
+        # Only open tickets the user may open, except myself, existing
+        # dependencies and parents
+        accessible = (
+            HelpdeskUser(user).accessible_tickets()
+            if user is not None
+            else Ticket.objects.none()
+        )
         self.fields["depends_on"].queryset = (
-            Ticket.objects.filter(status__in=Ticket.OPEN_STATUSES)
+            accessible.filter(status__in=Ticket.OPEN_STATUSES)
             .exclude(id=ticket.id)
             .exclude(depends_on__ticket=ticket)
             .exclude(ticketdependency__depends_on=ticket)
@@ -756,12 +791,18 @@ class TicketResolvesForm(forms.ModelForm):
         model = TicketDependency
         fields = ("ticket",)
 
-    def __init__(self, ticket, *args, **kwargs):
+    def __init__(self, ticket, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Only open tickets except myself, existing dependencies and parents
+        # Only open tickets the user may open, except myself, existing
+        # dependencies and parents
+        accessible = (
+            HelpdeskUser(user).accessible_tickets()
+            if user is not None
+            else Ticket.objects.none()
+        )
         self.fields["ticket"].queryset = (
-            Ticket.objects.filter(status__in=Ticket.OPEN_STATUSES)
+            accessible.filter(status__in=Ticket.OPEN_STATUSES)
             .exclude(id=ticket.id)
             .exclude(depends_on__ticket=ticket)
             .exclude(ticketdependency__depends_on=ticket)
@@ -778,10 +819,10 @@ class MultipleTicketSelectForm(forms.Form):
     def __init__(self, *args, user=None, **kwargs):
         """The choices are narrowed to what `user` may open.
 
-        merge_tickets() already refuses to merge a ticket from a queue the
-        caller cannot access, but the picker itself listed the id and title of
-        every unmerged ticket in the installation. Passing the user keeps the
-        two consistent: what cannot be merged is not offered either.
+        This queryset is the only permission check on the tickets being
+        merged: merge_tickets() trusts the validated selection and does not
+        re-check each ticket. Widening it would let users merge tickets they
+        cannot access.
         """
         super().__init__(*args, **kwargs)
         tickets = (
