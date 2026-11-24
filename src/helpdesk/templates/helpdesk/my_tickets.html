@@ -43,10 +43,12 @@
   <script src="{% static 'helpdesk/vendor/datatables/js/dataTables.buttons.min.js' %}"></script>
   <script src="{% static 'helpdesk/vendor/datatables/js/buttons.colVis.min.js' %}"></script>
   <script src="{% static 'helpdesk/js/relative_dates.js' %}"></script>
+  {% include 'helpdesk/include/datatables_language.html' %}
   <script>
 
     window.addEventListener('load', function() {
       const table = $('#ticketsTable').DataTable({
+        language: window.helpdeskDataTablesLanguage,
         paging: true,
         searching: true,
         ordering: true,

@@ -126,14 +126,14 @@
           <input type="text"
                  class="form-control"
                  value="{{ ticket.submitter_email }}"
-                 aria-label="Submitter email"
+                 aria-label="{% translate "Submitter email" %}"
                  readonly />
           {% if user.is_superuser %}
             {% if submitter_userprofile_url %}
               <a class="btn bg-body-tertiary border"
                  data-bs-toggle="tooltip"
                  href="{{ submitter_userprofile_url }}"
-                 title="{% translate "Edit " %}{{ ticket.submitter_email }}{% translate " user profile" %}">
+                 title="{% blocktranslate with email=ticket.submitter_email %}Edit the user profile of {{ email }}{% endblocktranslate %}">
                 <i class="fas fa-address-book"></i>
               </a>
             {% endif %}
