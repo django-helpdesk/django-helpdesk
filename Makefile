@@ -121,11 +121,18 @@ demo:
 rundemo: demo
 	uv run manage.py runserver 8080
 
-#: messages - Regenerate and compile the translation catalogs.
-# makemessages --all would look in the demo project's LOCALE_PATHS, so every
-# language in src/helpdesk/locale is passed explicitly.
+#: messages - Regenerate the English source catalog that Transifex reads.
+# The other catalogs are updated by the pull requests Transifex opens.
 .PHONY: messages
 messages:
+	cd src/helpdesk && DJANGO_SETTINGS_MODULE=demodesk.config.settings PYTHONPATH=..:../.. \
+		$(UV) run django-admin makemessages --no-obsolete -l en
+
+#: messages-all - Regenerate and compile every catalog.
+# makemessages --all would look in the demo project's LOCALE_PATHS, so every
+# language in src/helpdesk/locale is passed explicitly.
+.PHONY: messages-all
+messages-all:
 	cd src/helpdesk && for lang in $$(ls locale); do \
 		DJANGO_SETTINGS_MODULE=demodesk.config.settings PYTHONPATH=..:../.. \
 		$(UV) run django-admin makemessages --no-obsolete -l $$lang || exit 1; \
