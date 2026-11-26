@@ -233,10 +233,23 @@ def process_email_notifications_for_ticket_update(
             )
         )
 
+    dont_send_to = set(messages_sent_to)
+    if not public:
+        # A private follow-up only reaches the CCs who are staff with access
+        # to the ticket.
+        dont_send_to.update(
+            cc.email_address
+            for cc in ticket.ticketcc_set.select_related("user")
+            if not (
+                cc.user
+                and is_helpdesk_staff(cc.user)
+                and HelpdeskUser(cc.user).can_access_ticket(ticket)
+            )
+        )
     messages_sent_to.update(
         ticket.send(
             {"ticket_cc": (template_prefix + "cc", context)},
-            dont_send_to=messages_sent_to,
+            dont_send_to=dont_send_to,
             sent_to=sent_to,
             fail_silently=True,
             files=files,
