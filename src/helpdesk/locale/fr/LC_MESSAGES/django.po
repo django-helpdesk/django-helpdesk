@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 12:40+0000\n"
+"POT-Creation-Date: 2026-11-23 10:51+0000\n"
 "PO-Revision-Date: 2026-11-11 22:27+0000\n"
 "Last-Translator: Benbb96 <benbb96@gmail.com>, 2026\n"
 "Language-Team: French (https://app.transifex.com/django-helpdesk/teams/68090/fr/)\n"
@@ -54,15 +54,15 @@ msgstr "Commentaire depuis l'e-mail"
 msgid "Unknown Sender"
 msgstr "Expéditeur inconnu"
 
-#: forms.py:156
+#: forms.py:162
 msgid "This ticket is merged into the selected ticket."
 msgstr "Ce ticket est fusionné dans le ticket sélectionné."
 
-#: forms.py:273
+#: forms.py:302
 msgid "Copy instead of moving"
 msgstr "Copier au lieu de déplacer"
 
-#: forms.py:275
+#: forms.py:304
 msgid ""
 "Keep the original follow-up and copy the title, comment and attachments to "
 "the selected ticket. No email is sent; status changes and time spent are not"
@@ -73,11 +73,11 @@ msgstr ""
 "changements de statut et le temps passé ne sont pas copiés. Cochez Public "
 "avant de le partager avec l'émetteur du ticket de destination."
 
-#: forms.py:299
+#: forms.py:328
 msgid "Copying follow-ups is disabled."
 msgstr "La copie des suivis est désactivée."
 
-#: forms.py:311 models.py:392 models.py:525 models.py:1161
+#: forms.py:340 models.py:392 models.py:525 models.py:1161
 #: templates/helpdesk/filters/queue.html:9
 #: templates/helpdesk/filters/sorting.html:25
 #: templates/helpdesk/include/ticket_respond_form.html:145
@@ -95,25 +95,25 @@ msgstr "La copie des suivis est désactivée."
 #: templates/helpdesk/report_index.html:203
 #: templates/helpdesk/rss_list.html:45
 #: templates/helpdesk/ticket_desc_table.html:162
-#: templates/helpdesk/ticket_list.html:84 update_ticket.py:376
+#: templates/helpdesk/ticket_list.html:84 update_ticket.py:379
 #: views/staff.py:1822 views/staff.py:1829 views/staff.py:1836
 #: views/staff.py:1843
 msgid "Queue"
 msgstr "File"
 
-#: forms.py:320
+#: forms.py:349
 msgid "Summary of the problem"
 msgstr "Résumé du problème"
 
-#: forms.py:325
+#: forms.py:354
 msgid "Description of your issue"
 msgstr "Description de votre problème"
 
-#: forms.py:327
+#: forms.py:356
 msgid "Please be as descriptive as possible and include all details"
 msgstr "Soyez aussi précis que possible et renseignez chaque détails."
 
-#: forms.py:335 management/commands/escalate_tickets.py:115 models.py:586
+#: forms.py:364 management/commands/escalate_tickets.py:115 models.py:586
 #: templates/helpdesk/filters/priority.html:9
 #: templates/helpdesk/filters/sorting.html:30
 #: templates/helpdesk/include/ticket_respond_form.html:132
@@ -128,27 +128,27 @@ msgstr "Soyez aussi précis que possible et renseignez chaque détails."
 #: templates/helpdesk/include/unassigned.html:142
 #: templates/helpdesk/public_view_ticket.html:40
 #: templates/helpdesk/ticket_desc_table.html:77
-#: templates/helpdesk/ticket_list.html:83 update_ticket.py:368
+#: templates/helpdesk/ticket_list.html:83 update_ticket.py:371
 msgid "Priority"
 msgstr "Priorité"
 
-#: forms.py:336
+#: forms.py:365
 msgid "Please select a priority carefully. If unsure, leave it as '3'."
 msgstr ""
 "Veuillez choisir une priorité avec attention. En cas de doute, laisser sur "
 "'3'."
 
-#: forms.py:349 models.py:594
+#: forms.py:378 models.py:594
 #: templates/helpdesk/include/ticket_respond_form.html:158
-#: update_ticket.py:384 views/staff.py:984
+#: update_ticket.py:387 views/staff.py:986
 msgid "Due on"
 msgstr "Résolution souhaitée le "
 
-#: forms.py:356
+#: forms.py:385
 msgid "Attach File"
 msgstr "Joindre un fichier"
 
-#: forms.py:358
+#: forms.py:387
 msgid ""
 "You can attach a file to this ticket. Only file types such as plain text "
 "(.txt), a document (.pdf, .docx, or .odt), or screenshot (.png or .jpg) may "
@@ -158,15 +158,15 @@ msgstr ""
 "(.txt), documents (.pdf, .docx, ou .odt), ou capture d'écran (.png ou .jpg) "
 "peuvent être mis en ligne."
 
-#: forms.py:375
+#: forms.py:404
 msgid "Knowledge Base Item"
 msgstr "Article de la base de connaissances"
 
-#: forms.py:482
+#: forms.py:511
 msgid "Submitter E-Mail Address"
 msgstr "Adresse e-mail de l'émetteur"
 
-#: forms.py:485
+#: forms.py:514
 msgid ""
 "This e-mail address will receive copies of all public updates to this "
 "ticket."
@@ -174,11 +174,11 @@ msgstr ""
 "Cette adresse e-mail recevra des copies de toutes les mises à jour publiques"
 " de ce ticket."
 
-#: forms.py:496
+#: forms.py:525
 msgid "Case owner"
 msgstr "Propriétaire"
 
-#: forms.py:498
+#: forms.py:527
 msgid ""
 "If you select an owner other than yourself, they'll be e-mailed details of "
 "this ticket immediately."
@@ -186,50 +186,50 @@ msgstr ""
 "Si vous sélectionnez un autre propriétaire que vous-même, il lui sera "
 "immédiatement envoyé par courriel les détails de ce billet."
 
-#: forms.py:549
+#: forms.py:578
 #, python-format
 msgid "Ticket Opened & Assigned to %(name)s"
 msgstr "Billet ouvert et assigné à %(name)s"
 
-#: forms.py:550
+#: forms.py:579
 msgid "<invalid user>"
 msgstr "<utilisateur invalide>"
 
-#: forms.py:553
+#: forms.py:582
 msgid "Ticket Opened"
 msgstr "Billet ouvert"
 
-#: forms.py:582
+#: forms.py:611
 msgid "Your E-Mail Address"
 msgstr "Votre adresse e-mail"
 
-#: forms.py:583
+#: forms.py:612
 msgid "We will e-mail you when your ticket is updated."
 msgstr "Nous vous enverrons un e-mail dès que votre billet sera mis à jour."
 
-#: forms.py:654
+#: forms.py:683
 msgid "Ticket Opened Via Web"
 msgstr "Billet ouvert via le Web"
 
-#: forms.py:773
+#: forms.py:814
 msgid "Tickets to merge"
 msgstr "Billet à fusionner"
 
-#: forms.py:797
+#: forms.py:838
 msgid "Please choose at least 2 tickets."
 msgstr "Veuillez choisir au moins 2 tickets"
 
-#: forms.py:799
+#: forms.py:840
 msgid "Impossible to merge more than 4 tickets..."
 msgstr "Impossible de fusionner plus de 4 tickets..."
 
-#: forms.py:804
+#: forms.py:845
 msgid "All selected tickets must share the same queue in order to be merged."
 msgstr ""
 "Tous les tickets sélectionnés doivent partager la même file afin d'être "
 "fusionnés"
 
-#: forms.py:839
+#: forms.py:880
 msgid "Template"
 msgstr "Template"
 
@@ -260,7 +260,7 @@ msgstr "Ticket escaladé après %(nb)s jours"
 #: models.py:106 models.py:523 models.py:997 models.py:1587
 #: templates/helpdesk/filters/sorting.html:24
 #: templates/helpdesk/include/ticket_respond_form.html:119
-#: templates/helpdesk/my_tickets.html:29 update_ticket.py:346
+#: templates/helpdesk/my_tickets.html:29 update_ticket.py:349
 msgid "Title"
 msgstr "Titre"
 
@@ -644,12 +644,12 @@ msgstr "Assigné à"
 #: templates/helpdesk/my_tickets.html:31
 #: templates/helpdesk/public_view_ticket.html:44
 #: templates/helpdesk/ticket_desc_table.html:81
-#: templates/helpdesk/ticket_list.html:85 update_ticket.py:354
-#: views/staff.py:985
+#: templates/helpdesk/ticket_list.html:85 update_ticket.py:357
+#: views/staff.py:987
 msgid "Status"
 msgstr "État"
 
-#: models.py:565 models.py:806 views/staff.py:1608
+#: models.py:565 models.py:806 views/staff.py:1607
 msgid "On Hold"
 msgstr "En attente"
 
@@ -661,7 +661,7 @@ msgstr ""
 
 #: models.py:572 models.py:1547 models.py:2306
 #: templates/helpdesk/checklist_form.html:67
-#: templates/helpdesk/checklist_templates.html:85 views/staff.py:988
+#: templates/helpdesk/checklist_templates.html:85 views/staff.py:990
 msgid "Description"
 msgstr "Description"
 
@@ -670,7 +670,7 @@ msgid "The content of the customers query."
 msgstr "Contenu de la requête des clients."
 
 #: models.py:579 templates/helpdesk/public_view_ticket.html:16
-#: templates/helpdesk/ticket_desc_table.html:51 views/staff.py:989
+#: templates/helpdesk/ticket_desc_table.html:51 views/staff.py:991
 msgid "Resolution"
 msgstr "Solution"
 
@@ -747,8 +747,8 @@ msgstr "Tickets"
 #: models.py:762 templates/helpdesk/filters/owner.html:20
 #: templates/helpdesk/filters/queue.html:20
 #: templates/helpdesk/include/ticket_respond_form.html:125
-#: templates/helpdesk/ticket_desc_table.html:99 update_ticket.py:337
-#: update_ticket.py:363 views/feeds.py:102 views/feeds.py:126
+#: templates/helpdesk/ticket_desc_table.html:99 update_ticket.py:340
+#: update_ticket.py:366 views/feeds.py:102 views/feeds.py:126
 #: views/feeds.py:185
 msgid "Unassigned"
 msgstr "Non assigné"
@@ -773,7 +773,7 @@ msgstr "Commentaire"
 msgid "Public"
 msgstr "Public"
 
-#: models.py:1014
+#: models.py:1014 templates/helpdesk/followup_edit.html:56
 msgid ""
 "Public tickets are viewable by the submitter and all staff, but non-public "
 "tickets can only be seen by staff."
@@ -791,7 +791,7 @@ msgstr "Utilisateur"
 msgid "New Status"
 msgstr "Nouvel état"
 
-#: models.py:1032
+#: models.py:1032 templates/helpdesk/followup_edit.html:59
 msgid "If the status was changed, what was it changed to?"
 msgstr "Si l'état a été modifié, en quoi l'a-t-il été?"
 
@@ -1222,7 +1222,7 @@ msgstr ""
 msgid "User Setting"
 msgstr "Paramètre utilisateur"
 
-#: models.py:1832 templates/helpdesk/navigation-header.html:134
+#: models.py:1832 templates/helpdesk/navigation-header.html:137
 #: templates/helpdesk/user_settings.html:15
 msgid "User Settings"
 msgstr "Paramètres Utilisateurs"
@@ -1683,7 +1683,7 @@ msgstr "Supprimer le modèle de checklist"
 #: templates/helpdesk/checklist_template_confirm_delete.html:9
 #: templates/helpdesk/checklist_templates.html:11
 #: templates/helpdesk/email_ignore_list.html:11
-#: templates/helpdesk/navigation-header.html:147
+#: templates/helpdesk/navigation-header.html:150
 #: templates/helpdesk/system_settings.html:14
 #: templates/helpdesk/system_settings.html:18
 msgid "System Settings"
@@ -1769,7 +1769,7 @@ msgid "Create Ticket"
 msgstr "Créer un ticket"
 
 #: templates/helpdesk/create_ticket.html:18
-#: templates/helpdesk/navigation-header.html:178
+#: templates/helpdesk/navigation-header.html:181
 #: templates/helpdesk/public_create_ticket.html:15
 msgid "Submit a Ticket"
 msgstr "Soumettre un Ticket"
@@ -2061,8 +2061,8 @@ msgstr ""
 #: templates/helpdesk/filters/owner.html:9
 #: templates/helpdesk/filters/sorting.html:33
 #: templates/helpdesk/include/ticket_respond_form.html:123
-#: templates/helpdesk/ticket_list.html:88 update_ticket.py:361
-#: views/staff.py:987
+#: templates/helpdesk/ticket_list.html:88 update_ticket.py:364
+#: views/staff.py:989
 msgid "Owner"
 msgstr "Propriétaire"
 
@@ -2115,6 +2115,22 @@ msgstr "Titre :"
 #: templates/helpdesk/followup_edit.html:49
 msgid "Comment:"
 msgstr "Commentaire :"
+
+#: templates/helpdesk/followup_edit.html:54
+msgid "Public:"
+msgstr "Public :"
+
+#: templates/helpdesk/followup_edit.html:57
+msgid "New Status:"
+msgstr "Nouvel état :"
+
+#: templates/helpdesk/followup_edit.html:61
+msgid "Time spent:"
+msgstr "Temps passé :"
+
+#: templates/helpdesk/followup_edit.html:66
+msgid "Submit"
+msgstr "Envoyer"
 
 #: templates/helpdesk/help_context.html:6
 msgid "Context Reference"
@@ -2322,6 +2338,104 @@ msgstr "Il y a des erreurs dans le formulaire"
 #: templates/helpdesk/include/attachment_list_item.html:10
 msgid "View formatted"
 msgstr "Voir la version mise en forme"
+
+#: templates/helpdesk/include/datatables_language.html:6
+msgctxt "datatables"
+msgid ": Activate to sort"
+msgstr " : activer pour trier"
+
+#: templates/helpdesk/include/datatables_language.html:7
+msgctxt "datatables"
+msgid ": Activate to remove sorting"
+msgstr " : activer pour supprimer le tri"
+
+#: templates/helpdesk/include/datatables_language.html:8
+msgctxt "datatables"
+msgid ": Activate to invert sorting"
+msgstr " : activer pour inverser le tri"
+
+#: templates/helpdesk/include/datatables_language.html:10
+msgctxt "datatables"
+msgid "First"
+msgstr "Première"
+
+#: templates/helpdesk/include/datatables_language.html:11
+msgctxt "datatables"
+msgid "Last"
+msgstr "Dernière"
+
+#: templates/helpdesk/include/datatables_language.html:12
+msgctxt "datatables"
+msgid "Next"
+msgstr "Suivante"
+
+#: templates/helpdesk/include/datatables_language.html:13
+msgctxt "datatables"
+msgid "Previous"
+msgstr "Précédente"
+
+#: templates/helpdesk/include/datatables_language.html:16
+msgctxt "datatables"
+msgid "No data available in table"
+msgstr "Aucune donnée disponible dans le tableau"
+
+#. Translators: plural noun shown in place of _ENTRIES_ and _ENTRIES-TOTAL_.
+#: templates/helpdesk/include/datatables_language.html:19
+msgctxt "datatables"
+msgid "entries"
+msgstr "entrées"
+
+#. Translators: singular noun shown when there is exactly one entry.
+#: templates/helpdesk/include/datatables_language.html:21
+msgctxt "datatables"
+msgid "entry"
+msgstr "entrée"
+
+#. Translators: keep the _START_, _END_, _TOTAL_ and _ENTRIES-TOTAL_
+#. placeholders.
+#: templates/helpdesk/include/datatables_language.html:24
+msgctxt "datatables"
+msgid "Showing _START_ to _END_ of _TOTAL_ _ENTRIES-TOTAL_"
+msgstr "Affichage de _START_ à _END_ sur _TOTAL_ _ENTRIES-TOTAL_"
+
+#. Translators: keep the _ENTRIES-TOTAL_ placeholder.
+#: templates/helpdesk/include/datatables_language.html:26
+msgctxt "datatables"
+msgid "Showing 0 to 0 of 0 _ENTRIES-TOTAL_"
+msgstr "Affichage de 0 à 0 sur 0 _ENTRIES-TOTAL_"
+
+#. Translators: keep the _MAX_ and _ENTRIES-MAX_ placeholders.
+#: templates/helpdesk/include/datatables_language.html:28
+msgctxt "datatables"
+msgid "(filtered from _MAX_ total _ENTRIES-MAX_)"
+msgstr "(filtrées parmi _MAX_ _ENTRIES-MAX_ au total)"
+
+#: templates/helpdesk/include/datatables_language.html:30
+msgctxt "datatables"
+msgid "All"
+msgstr "Tout"
+
+#. Translators: _MENU_ is the page size selector; keep it and the _ENTRIES_
+#. placeholder.
+#: templates/helpdesk/include/datatables_language.html:33
+msgctxt "datatables"
+msgid "_MENU_ _ENTRIES_ per page"
+msgstr "_MENU_ _ENTRIES_ par page"
+
+#: templates/helpdesk/include/datatables_language.html:34
+msgctxt "datatables"
+msgid "Loading..."
+msgstr "Chargement..."
+
+#: templates/helpdesk/include/datatables_language.html:35
+msgctxt "datatables"
+msgid "Search:"
+msgstr "Rechercher :"
+
+#: templates/helpdesk/include/datatables_language.html:36
+msgctxt "datatables"
+msgid "No matching records found"
+msgstr "Aucun résultat trouvé"
 
 #: templates/helpdesk/include/stats.html:15
 msgid "View Tickets"
@@ -2707,57 +2821,57 @@ msgstr ""
 "Entrez un mot clé ou un numéro de ticket pour aller directement à ce ticket."
 
 #: templates/helpdesk/navigation-header.html:42
-#: templates/helpdesk/navigation-header.html:74
+#: templates/helpdesk/navigation-header.html:76
 #: templates/helpdesk/public_change_language.html:36
 #: templates/helpdesk/ticket_list.html:154
 msgid "Go"
 msgstr "Go"
 
-#: templates/helpdesk/navigation-header.html:54
-#: templates/helpdesk/navigation-header.html:62
+#: templates/helpdesk/navigation-header.html:56
+#: templates/helpdesk/navigation-header.html:64
 #: templates/helpdesk/public_change_language.html:18
 #: templates/helpdesk/public_change_language.html:25
 msgid "Change language"
 msgstr "Changer de langue"
 
-#: templates/helpdesk/navigation-header.html:89
+#: templates/helpdesk/navigation-header.html:92
 msgid "Toggle Theme"
 msgstr "Changer de thème"
 
-#: templates/helpdesk/navigation-header.html:97
+#: templates/helpdesk/navigation-header.html:100
 msgid "Light"
 msgstr "Clair"
 
-#: templates/helpdesk/navigation-header.html:105
+#: templates/helpdesk/navigation-header.html:108
 msgid "Dark"
 msgstr "Sombre"
 
-#: templates/helpdesk/navigation-header.html:113
+#: templates/helpdesk/navigation-header.html:116
 msgid "Auto"
 msgstr "Auto"
 
-#: templates/helpdesk/navigation-header.html:137
+#: templates/helpdesk/navigation-header.html:140
 #: templates/helpdesk/rss_list.html:4 templates/helpdesk/rss_list.html:16
 msgid "RSS Feeds"
 msgstr "Flux RSS"
 
-#: templates/helpdesk/navigation-header.html:141
+#: templates/helpdesk/navigation-header.html:144
 #: templates/helpdesk/registration/change_password.html:6
 #: templates/helpdesk/registration/change_password_done.html:6
 msgid "Change password"
 msgstr "Changer le mot de passe"
 
-#: templates/helpdesk/navigation-header.html:154
-#: templates/helpdesk/navigation-header.html:191
+#: templates/helpdesk/navigation-header.html:157
+#: templates/helpdesk/navigation-header.html:194
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: templates/helpdesk/navigation-header.html:168
+#: templates/helpdesk/navigation-header.html:171
 #: templates/helpdesk/navigation-sidebar.html:9
 msgid "Dashboard"
 msgstr "Tableau de bord"
 
-#: templates/helpdesk/navigation-header.html:197
+#: templates/helpdesk/navigation-header.html:200
 #: templates/helpdesk/registration/logged_out.html:22
 msgid "Log In"
 msgstr "Connexion"
@@ -3704,13 +3818,14 @@ msgstr "Enregistrer l'assignation du ticket"
 msgid "Assign this ticket to "
 msgstr "Affecter ce ticket à "
 
-#: templates/helpdesk/ticket_desc_table.html:136
-msgid "Edit "
-msgstr "Editer le profil de "
+#: templates/helpdesk/ticket_desc_table.html:129 views/staff.py:988
+msgid "Submitter email"
+msgstr "Email de l’Émetteur"
 
 #: templates/helpdesk/ticket_desc_table.html:136
-msgid " user profile"
-msgstr " "
+#, python-format
+msgid "Edit the user profile of %(email)s"
+msgstr "Modifier le profil utilisateur de %(email)s"
 
 #: templates/helpdesk/ticket_desc_table.html:143
 msgid "Display tickets filtered for "
@@ -3938,7 +4053,7 @@ msgstr "Choisir une requête"
 msgid "Run Query"
 msgstr "Exécuter la requête"
 
-#: templates/helpdesk/ticket_list.html:359
+#: templates/helpdesk/ticket_list.html:360
 msgid ""
 "Error fetching tickets occured, please contact the system administrators of "
 "this server providing the message below:\\n    "
@@ -3947,13 +4062,17 @@ msgstr ""
 "administrateurs de ce serveur en leur transmettant le message ci-dessous "
 ":\\n    "
 
-#: templates/helpdesk/ticket_list.html:363
+#: templates/helpdesk/ticket_list.html:364
 msgid "No Tickets Match Your Selection"
 msgstr "Aucun ticket correspondant à votre sélection"
 
-#: templates/helpdesk/ticket_list.html:393
+#: templates/helpdesk/ticket_list.html:394
 msgid "Search any ticket by id or title..."
 msgstr "Rechercher un ticket par identifiant ou titre..."
+
+#: templates/helpdesk/ticket_list.html:400
+msgid "Columns"
+msgstr "Colonnes"
 
 #: templates/helpdesk/ticket_merge.html:5
 #: templates/helpdesk/ticket_merge.html:16
@@ -4062,20 +4181,24 @@ msgstr ""
 msgid "Updated"
 msgstr "Mis à jour"
 
-#: update_ticket.py:330
+#: update_ticket.py:333
 #, python-format
 msgid "Assigned to %(username)s"
 msgstr "Assigné à %(username)s "
 
-#: update_ticket.py:415 update_ticket.py:416
+#: update_ticket.py:418 update_ticket.py:419
 msgid "To do"
 msgstr "A faire"
 
-#: update_ticket.py:415 update_ticket.py:416
+#: update_ticket.py:418 update_ticket.py:419
 msgid "Completed"
 msgstr "Terminée"
 
-#: validators.py:31
+#: validators.py:28
+msgid "Attachments must have a file extension."
+msgstr "Les pièces jointes doivent avoir une extension de fichier."
+
+#: validators.py:30
 msgid "Unsupported file extension: "
 msgstr "Extension de fichier non supportée : "
 
@@ -4146,58 +4269,54 @@ msgstr "Ticket ID ou adresse e-mail invalide. Veuillez essayer de nouveau."
 msgid "Submitter accepted resolution and closed ticket"
 msgstr "L'émetteur a accepté la solution et fermé le ticket."
 
-#: views/staff.py:434
+#: views/staff.py:436
 msgid "Choose another ticket for the copy."
 msgstr "Choisissez un autre ticket pour la copie."
 
-#: views/staff.py:447
+#: views/staff.py:449
 msgid "Unable to copy the attachments. No copy was created."
 msgstr "Impossible de copier les pièces jointes. Aucune copie n'a été créée."
 
-#: views/staff.py:522
+#: views/staff.py:524
 #, python-format
 msgid "You don't have permission to view ticket %(ticket_id)s."
 msgstr "Vous n'avez pas la permission de voir le ticket %(ticket_id)s."
 
-#: views/staff.py:552
+#: views/staff.py:554
 msgid "Accepted resolution and closed ticket"
 msgstr "Solution acceptée et ticket fermé"
 
-#: views/staff.py:894
+#: views/staff.py:896
 #, python-brace-format
 msgid "Assigned to {username} in bulk update"
 msgstr "Assigné à {username} lors d'une modification groupée"
 
-#: views/staff.py:905
+#: views/staff.py:907
 msgid "Unassigned in bulk update"
 msgstr "Non assigné en mise à jour en masse"
 
-#: views/staff.py:914
+#: views/staff.py:916
 msgid "KBItem set in bulk update"
 msgstr "Article BC défini lors d'une modification groupée"
 
-#: views/staff.py:924 views/staff.py:935
+#: views/staff.py:926 views/staff.py:937
 msgid "Closed in bulk update"
 msgstr "Fermé pendant mise à jour en masse"
 
-#: views/staff.py:983
+#: views/staff.py:985
 msgid "Created date"
 msgstr "Date de création"
 
-#: views/staff.py:986
-msgid "Submitter email"
-msgstr "Email de l’Émetteur"
-
-#: views/staff.py:1102
+#: views/staff.py:1104
 #, python-format
 msgid "[Merged from #%(id)d] %(title)s"
 msgstr "[Fusionné depuis #%(id)d] %(title)s"
 
-#: views/staff.py:1150
+#: views/staff.py:1149
 msgid "Please choose a ticket in which the others will be merged into."
 msgstr "Veuillez choisir un ticket dans lequel les autres seront fusionnés"
 
-#: views/staff.py:1346
+#: views/staff.py:1345
 msgid ""
 "<p><strong>Note:</strong> Your keyword search is case sensitive because of "
 "your database. This means the search will <strong>not</strong> be accurate. "
@@ -4215,11 +4334,11 @@ msgstr ""
 "matching\">documentation de Django sur la recherche de chaîne avec "
 "SQLite</a> ."
 
-#: views/staff.py:1591
+#: views/staff.py:1590
 msgid "Ticket taken off hold"
 msgstr "Ticket repris"
 
-#: views/staff.py:1594
+#: views/staff.py:1593
 msgid "Ticket placed on hold"
 msgstr "Ticket mis en pause"
 
