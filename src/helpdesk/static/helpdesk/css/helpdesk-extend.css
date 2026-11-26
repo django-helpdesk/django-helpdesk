@@ -140,3 +140,20 @@ table .tickettitle {
 [data-bs-theme="dark"] .dt-button-collection .dt-button:hover {
   background-color: var(--bs-tertiary-bg);
 }
+
+/* Improve form control border visibility in both color modes. */
+.form-control,
+.form-select,
+.form-check-input {
+  --bs-border-color: #6c757d;
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .form-check-input {
+  --bs-border-color: #9aa3ab;
+}
+
+.form-check-input {
+  border-width: 1.5px;
+}
