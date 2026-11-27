@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django-helpdesk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 10:51+0000\n"
+"POT-Creation-Date: 2026-11-27 12:16+0500\n"
 "PO-Revision-Date: 2013-11-20 11:07+0000\n"
 "Last-Translator: Ross Poulton <ross@rossp.org>\n"
 "Language-Team: English (http://www.transifex.com/projects/p/django-helpdesk/"
@@ -196,23 +196,23 @@ msgstr ""
 msgid "Ticket Opened Via Web"
 msgstr ""
 
-#: forms.py:814
+#: forms.py:822
 msgid "Tickets to merge"
 msgstr ""
 
-#: forms.py:838
+#: forms.py:846
 msgid "Please choose at least 2 tickets."
 msgstr ""
 
-#: forms.py:840
+#: forms.py:848
 msgid "Impossible to merge more than 4 tickets..."
 msgstr ""
 
-#: forms.py:845
+#: forms.py:853
 msgid "All selected tickets must share the same queue in order to be merged."
 msgstr ""
 
-#: forms.py:880
+#: forms.py:888
 msgid "Template"
 msgstr ""
 
@@ -649,14 +649,18 @@ msgstr ""
 #: templates/helpdesk/edit_ticket.html:9
 #: templates/helpdesk/email_ignore_add.html:11
 #: templates/helpdesk/email_ignore_del.html:11
-#: templates/helpdesk/followup_edit.html:16 templates/helpdesk/rss_list.html:8
+#: templates/helpdesk/followup_edit.html:16
+#: templates/helpdesk/rss_list.html:8
 #: templates/helpdesk/saved_searches_list.html:10
-#: templates/helpdesk/ticket.html:12 templates/helpdesk/ticket_cc_add.html:9
+#: templates/helpdesk/ticket.html:12
+#: templates/helpdesk/ticket_cc_add.html:9
 #: templates/helpdesk/ticket_cc_del.html:7
+#: templates/helpdesk/ticket_cc_edit.html:9
 #: templates/helpdesk/ticket_cc_list.html:9
 #: templates/helpdesk/ticket_dependency_add.html:7
 #: templates/helpdesk/ticket_dependency_del.html:7
-#: templates/helpdesk/ticket_list.html:6 templates/helpdesk/ticket_list.html:29
+#: templates/helpdesk/ticket_list.html:6
+#: templates/helpdesk/ticket_list.html:29
 #: templates/helpdesk/ticket_merge.html:14
 #: templates/helpdesk/ticket_resolves_add.html:7
 msgid "Tickets"
@@ -1488,8 +1492,8 @@ msgstr ""
 #: templates/helpdesk/include/ticket_followup_list.html:56
 #: templates/helpdesk/include/unassigned.html:85
 #: templates/helpdesk/include/unassigned.html:157
-#: templates/helpdesk/ticket_cc_list.html:40
-#: templates/helpdesk/ticket_cc_list.html:64
+#: templates/helpdesk/ticket_cc_list.html:41
+#: templates/helpdesk/ticket_cc_list.html:70
 #: templates/helpdesk/ticket_desc_table.html:41
 #: templates/helpdesk/ticket_list.html:132
 msgid "Delete"
@@ -1522,6 +1526,7 @@ msgstr ""
 #: templates/helpdesk/public_view_form.html:27
 #: templates/helpdesk/ticket_cc_add.html:71
 #: templates/helpdesk/ticket_cc_add.html:95
+#: templates/helpdesk/ticket_cc_edit.html:50
 #: templates/helpdesk/ticket_list.html:224
 #: templates/helpdesk/ticket_list.html:292
 #: templates/helpdesk/ticket_list.html:318
@@ -1568,6 +1573,8 @@ msgstr ""
 
 #: templates/helpdesk/checklist_templates.html:40
 #: templates/helpdesk/include/ticket_followup_list.html:47
+#: templates/helpdesk/ticket_cc_list.html:40
+#: templates/helpdesk/ticket_cc_list.html:64
 #: templates/helpdesk/ticket_desc_table.html:16
 msgid "Edit"
 msgstr ""
@@ -3333,6 +3340,7 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_add.html:15
 #: templates/helpdesk/ticket_cc_del.html:13
+#: templates/helpdesk/ticket_cc_edit.html:15
 #: templates/helpdesk/ticket_cc_list.html:14
 msgid "CC Settings"
 msgstr ""
@@ -3357,6 +3365,7 @@ msgstr ""
 
 #: templates/helpdesk/ticket_cc_add.html:69
 #: templates/helpdesk/ticket_cc_add.html:93
+#: templates/helpdesk/ticket_cc_edit.html:48
 msgid "Save Ticket CC"
 msgstr ""
 
@@ -3387,6 +3396,15 @@ msgstr ""
 msgid "Yes I Understand - Delete"
 msgstr ""
 
+#: templates/helpdesk/ticket_cc_edit.html:5
+#: templates/helpdesk/ticket_cc_edit.html:21
+msgid "Edit Ticket CC"
+msgstr ""
+
+#: templates/helpdesk/ticket_cc_edit.html:17
+msgid "Edit CC"
+msgstr ""
+
 #: templates/helpdesk/ticket_cc_list.html:5
 msgid "Ticket CC Settings"
 msgstr ""
@@ -3397,12 +3415,12 @@ msgid ""
 "\n"
 "<h2>Ticket CC Settings</h2>\n"
 "\n"
-"<p>The following people will receive an e-mail whenever <em><a "
-"href='../'>%(ticket_title)s</a></em> is updated. Some people can also view "
-"or edit the ticket via the public ticket views.</p>\n"
+"<p>The following people will receive an e-mail whenever <em><a href='../'>"
+"%(ticket_title)s</a></em> is updated. Some people can also view or edit the "
+"ticket via the public ticket views.</p>\n"
 "\n"
-"<p>You can add a new recipient to the list or delete any of the items below "
-"as required.</p>"
+"<p>You can add a new recipient to the list, edit their permissions or delete "
+"any of the items below as required.</p>"
 msgstr ""
 
 #: templates/helpdesk/ticket_cc_list.html:28
@@ -3425,7 +3443,7 @@ msgstr ""
 msgid "Update?"
 msgstr ""
 
-#: templates/helpdesk/ticket_cc_list.html:86
+#: templates/helpdesk/ticket_cc_list.html:92
 #, python-format
 msgid "Return to <em>%(ticket_title)s</em>"
 msgstr ""

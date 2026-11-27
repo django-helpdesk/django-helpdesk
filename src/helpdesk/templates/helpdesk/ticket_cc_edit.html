@@ -1,0 +1,55 @@
+{% extends "helpdesk/base.html" %}
+
+{% load i18n %}
+
+{% block helpdesk_title %}{% translate "Edit Ticket CC" %}{% endblock %}
+
+{% block helpdesk_breadcrumb %}
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:list' %}">{% translate "Tickets" %}</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:view' ticket.id %}">{{ ticket.queue.slug }}-{{ ticket.id }}</a>
+    </li>
+    <li class="breadcrumb-item">
+        <a href="{% url 'helpdesk:ticket_cc' ticket.id %}">{% translate "CC Settings" %}</a>
+    </li>
+    <li class="breadcrumb-item active">{% translate "Edit CC" %}</li>
+{% endblock %}
+
+{% block helpdesk_body %}
+    <h2>{% translate "Edit Ticket CC" %}</h2>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            {{ cc.display }}
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% if form.errors %}
+                    {% include 'helpdesk/include/alert_form_errors.html' %}
+                {% endif %}
+                {{ form.non_field_errors }}
+                <fieldset>
+                    <dl>
+                        {% for field in form %}
+                            <dt>{{ field.label_tag }}</dt>
+                            <dd>{{ field }}</dd>
+                            {% if field.errors %}
+                                <dd class="error">{{ field.errors }}</dd>
+                            {% endif %}
+                            {% if field.help_text %}
+                                <dd class="form_help_text">{{ field.help_text }}</dd>
+                            {% endif %}
+                        {% endfor %}
+                    </dl>
+                </fieldset>
+                <button class="btn btn-primary" type="submit">{% translate "Save Ticket CC" %}</button>
+                <a href="{% url 'helpdesk:ticket_cc' ticket.id %}" class="btn btn-secondary">
+                    {% translate "Cancel" %}
+                </a>
+            </form>
+        </div>
+    </div>
+{% endblock %}
