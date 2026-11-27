@@ -30,6 +30,18 @@ develop:
 	$(UV) tool install pre-commit --with pre-commit-uv --force-reinstall
 	pre-commit install
 
+#: e2e_env - Install development utilities including end-to-end testing libraries
+.PHONY: e2e_env
+e2e_env:
+	$(UV) venv
+	$(UV) sync --dev --group test --group e2e
+	$(UV) tool install pre-commit --with pre-commit-uv --force-reinstall
+	pre-commit install
+	$(UV) run --group e2e playwright install --with-deps chromium
+	corepack enable
+	yarn install --immutable
+	make static-vendor
+
 #: sync - Synchronize the environment with the project configuration
 .PHONY: sync
 sync:
@@ -67,6 +79,12 @@ maintainer-clean: distclean
 .PHONY: test
 test:
 	$(UV) run quicktest.py
+
+#: test_e2e - Run test suites for the end-to-end testing.
+.PHONY: test_e2e
+test_e2e:
+	$(UV) run --group e2e --no-sync quicktest.py  -v 2  tests/e2e
+
 
 
 #: format - Run the PEP8 formatter.
