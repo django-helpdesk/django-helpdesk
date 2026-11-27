@@ -728,6 +728,14 @@ class TicketCCForm(forms.ModelForm):
         )
 
 
+class TicketCCEditForm(forms.ModelForm):
+    """Edit permissions for an existing ticket CC."""
+
+    class Meta:
+        model = TicketCC
+        fields = ("can_view", "can_update")
+
+
 class TicketCCUserForm(forms.ModelForm):
     """Adds a helpdesk user as a CC on a Ticket"""
 

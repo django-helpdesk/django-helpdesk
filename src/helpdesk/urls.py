@@ -94,6 +94,11 @@ if helpdesk_settings.HELPDESK_UI_ENABLED:
             "tickets/<int:ticket_id>/cc/add/", staff.ticket_cc_add, name="ticket_cc_add"
         ),
         path(
+            "tickets/<int:ticket_id>/cc/edit/<int:cc_id>/",
+            staff.ticket_cc_edit,
+            name="ticket_cc_edit",
+        ),
+        path(
             "tickets/<int:ticket_id>/cc/delete/<int:cc_id>/",
             staff.ticket_cc_del,
             name="ticket_cc_del",

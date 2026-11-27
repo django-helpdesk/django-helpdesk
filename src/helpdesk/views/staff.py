@@ -61,6 +61,7 @@ from helpdesk.forms import (
     EmailIgnoreForm,
     FormControlDeleteFormSet,
     MultipleTicketSelectForm,
+    TicketCCEditForm,
     TicketCCEmailForm,
     TicketCCForm,
     TicketCCUserForm,
@@ -2037,6 +2038,30 @@ def ticket_cc_add(request, ticket_id):
             "form_email": TicketCCEmailForm(),
             "form_user": TicketCCUserForm(),
         },
+    )
+
+
+@helpdesk_staff_member_required
+def ticket_cc_edit(request, ticket_id, cc_id):
+    ticket = get_object_or_404(Ticket, id=ticket_id)
+    ticket_perm_check(request, ticket)
+    cc = get_object_or_404(TicketCC, ticket__id=ticket_id, id=cc_id)
+
+    if request.method == "POST":
+        form = TicketCCEditForm(request.POST, instance=cc)
+        if form.is_valid():
+            cc = form.save(commit=False)
+            cc.save(update_fields=["can_view", "can_update"])
+            return HttpResponseRedirect(
+                reverse("helpdesk:ticket_cc", kwargs={"ticket_id": ticket.id})
+            )
+    else:
+        form = TicketCCEditForm(instance=cc)
+
+    return render(
+        request,
+        "helpdesk/ticket_cc_edit.html",
+        {"ticket": ticket, "cc": cc, "form": form},
     )
 
 
