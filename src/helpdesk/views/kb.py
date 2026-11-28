@@ -56,8 +56,8 @@ def category(request: HttpRequest, slug: str, iframe=False) -> HttpResponse:
 
     try:
         selected_item = int(selected_item)
-    except TypeError:
-        pass
+    except (TypeError, ValueError):
+        selected_item = None
 
     qparams = request.GET.copy()
     qparams.pop("kbitem", None)
