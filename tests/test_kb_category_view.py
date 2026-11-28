@@ -122,3 +122,11 @@ class KBCategoryViewTests(TestCase):
         self.assertContains(r, self.kb_category.title)
         self.assertContains(r, self.kb_category.description)
         self.assertContains(r, "Contact a human")
+
+    def test_invalid_kbitem_parameter(self):
+        for url in (self.url, self.iframe_url):
+            for value in ("invalid", ""):
+                with self.subTest(url=url, value=value):
+                    response = self.client.get(url, {"kbitem": value})
+                    self.assertEqual(response.status_code, HTTPStatus.OK)
+                    self.assertIsNone(response.context["selected_item"])
